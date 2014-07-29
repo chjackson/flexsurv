@@ -1,5 +1,0 @@
-
-dgomp <- function(mu, gamma, t) {
-    logdens <- log(lam) + gamma*t - lam/gamma*(exp(gamma*t) - 1)
-    exp(logdens)
-}
