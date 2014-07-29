@@ -1,0 +1,40 @@
+\name{model.frame.flexsurvreg}
+\alias{model.frame.flexsurvreg}
+\alias{model.matrix.flexsurvreg}
+\title{Extract original data from \code{flexsurvreg} objects.}
+\description{
+Extract the data from a model fitted with \code{flexsurvreg}.
+}
+\usage{
+\method{model.frame}{flexsurvreg}(formula, \dots)
+\method{model.matrix}{flexsurvreg}(object, par=NULL, state=1, \dots)
+}
+\arguments{
+  \item{formula}{A fitted model object, as returned by
+    \code{\link{flexsurvreg}}.}
+  \item{object}{A fitted model object, as returned by
+    \code{\link{flexsurvreg}}.}
+  \item{par}{String naming the parameter whose linear model matrix is
+    desired.
+
+    The default value of \code{par=NULL} returns a matrix consisting of
+    the model matrices for all models in the object \code{cbind}ed
+    together, with the intercepts excluded.  This is not really a
+    ``model matrix'' in the usual sense, however, the columns directly
+    correspond to the covariate coefficients in the matrix of estimates
+    from the fitted model.} 
+  \item{...}{Further arguments (not used).}
+}
+\value{
+  \code{model.frame} returns a data frame with all the original
+  variables used for the model fit. 
+  
+  \code{model.matrix} returns a design matrix for a part of the
+  model that includes covariates.  The required part is indicated by the
+  \code{"par"} argument (see above).
+}
+\seealso{
+  \code{\link{flexsurvreg}}, \code{\link{model.frame}}, \code{\link{model.matrix}}.
+}
+\author{C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}}
+\keyword{models}

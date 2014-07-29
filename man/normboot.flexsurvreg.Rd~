@@ -1,0 +1,99 @@
+\name{normboot.flexsurvreg}
+\alias{normboot.flexsurvreg}
+\title{
+  Simulate from the asymptotic normal distribution of parameter estimates.
+}
+\description{
+  Produce a matrix of alternative parameter estimates under sampling
+  uncertainty.  The matrix has \code{B} rows and one column for each
+  named parameter of the survival distribution.   The parameters are
+  adjusted using covariate values supplied by the user
+  Used by \code{\link{summary.flexsurvreg}} for obtaining
+  confidence intervals around functions of parameters.
+}
+\usage{
+normboot.flexsurvreg(x, B, newdata = NULL, X = NULL, transform = FALSE)
+}
+
+\arguments{
+  \item{x}{
+    A fitted model from \code{\link{flexsurvreg}}.
+  }
+  \item{B}{
+    Number of samples.
+  }
+  \item{newdata}{
+    Data frame with one row, or a list, containing covariate values to
+    supply to the model.   IF there are covariates in the model, at
+    least one of \code{newdata} or \code{X} must be 
+  }
+  \item{X}{
+    Alternative format for covariate values: a "model matrix" style
+    matrix with one level for each factor contrasts
+  }
+  \item{transform}{
+   \code{TRUE} if the results should be transformed to the real-line
+   scale, typically by log if the parameter is defined as positive.  The
+   default \code{FALSE} returns parameters on the natural scale.
+  }
+}
+\details{
+%%  ~~ If necessary, more details than the description above ~~
+}
+\value{
+%%  ~Describe the value returned
+%%  If it is a LIST, use
+%%  \item{comp1 }{Description of 'comp1'}
+%%  \item{comp2 }{Description of 'comp2'}
+%% ...
+}
+\references{
+%% ~put references to the literature/web site here ~
+}
+\author{
+%%  ~~who you are~~
+}
+\note{
+%%  ~~further notes~~
+}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\seealso{
+%% ~~objects to See Also as \code{\link{help}}, ~~~
+}
+\examples{
+##---- Should be DIRECTLY executable !! ----
+##-- ==>  Define data, use random,
+##--	or do  help(data=index)  for the standard data sets.
+
+## The function is currently defined as
+function (x, B, newdata = NULL, X = NULL, transform = FALSE) 
+{
+    if (is.null(X)) {
+        if (is.null(newdata)) 
+            stop("neither \"newdata\" nor \"X\" supplied")
+        X <- form.model.matrix(x, newdata)
+    }
+    sim <- matrix(nrow = B, ncol = nrow(x$res))
+    colnames(sim) <- rownames(x$res)
+    sim[, x$optpars] <- rmvnorm(B, x$opt$par, x$cov)
+    sim[, x$fixedpars] <- rep(x$res.t[x$fixedpars, "est"], each = B)
+    beta <- sim[, x$covpars]
+    for (j in seq(along = x$dlist$pars)) {
+        covinds <- x$mx[[x$dlist$pars[j]]]
+        if (length(covinds) > 0) {
+            sim[, x$dlist$pars[j]] <- sim[, x$dlist$pars[j]] + 
+                beta[, covinds] \%*\% t(X[, covinds, drop = FALSE])
+        }
+        if (!transform) 
+            sim[, x$dlist$pars[j]] <- x$dlist$inv.transforms[[j]](sim[, 
+                x$dlist$pars[j]])
+    }
+    sim[, x$dlist$pars]
+  }
+}
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{ ~kwd1 }
+\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

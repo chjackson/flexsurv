@@ -1,0 +1,3 @@
+dpolyhaz <- function(base, ncause, pars) {
+    ## which pars vary between causes? 
+}

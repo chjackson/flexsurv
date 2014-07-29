@@ -1,0 +1,71 @@
+export(
+dgenf,
+dgenf.orig,
+dgengamma,
+dgengamma.orig,
+dgompertz,
+dsurvspline,
+flexsurvreg,
+flexsurvspline,
+hexp,
+Hexp,
+hgamma,
+Hgamma,    
+hgenf,
+Hgenf,
+hgenf.orig,
+Hgenf.orig,
+hgengamma,
+Hgengamma,
+hgengamma.orig,
+Hgengamma.orig,
+hgompertz,
+Hgompertz,
+hlnorm,    
+Hlnorm,    
+hsurvspline,
+Hsurvspline,
+hweibull,    
+Hweibull,    
+lines.flexsurvreg,
+msfit,    
+normboot.flexsurvreg,
+pgenf,
+pgenf.orig,
+pgengamma,
+pgengamma.orig,
+pgompertz,
+psurvspline,
+plot.flexsurvreg,
+qgeneric,
+qgenf,
+qgenf.orig,
+qgengamma,
+qgengamma.orig,
+qgompertz,
+qsurvspline,
+rgenf,
+rgenf.orig,
+rgengamma,
+rgengamma.orig,
+rgompertz,
+summary.flexsurvreg,
+unroll.function
+)
+
+importFrom(graphics, plot)
+importFrom(survival, Surv)
+importFrom(survival, survfit)
+importFrom(muhaz, muhaz)
+importFrom(mvtnorm, rmvnorm)
+
+S3method(print, flexsurvreg)
+S3method(plot, flexsurvreg)
+S3method(lines, flexsurvreg)
+S3method(summary, flexsurvreg)
+S3method(vcov, flexsurvreg)
+S3method(logLik, flexsurvreg)
+S3method(model.frame, flexsurvreg)
+S3method(model.matrix, flexsurvreg)
+S3method(msfit, default)
+S3method(msfit, flexsurvreg)

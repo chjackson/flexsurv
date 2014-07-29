@@ -1,0 +1,5 @@
+test_that("normboot.flexsurvreg",{
+    fite <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="exp")
+    set.seed(1);  normboot.flexsurvreg(fite, B=10, newdata=list(age=50))
+    set.seed(1);  normboot.flexsurvreg(fite, B=10, X=matrix(50,nrow=1))
+})

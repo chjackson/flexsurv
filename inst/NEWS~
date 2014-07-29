@@ -1,0 +1,231 @@
+-*- text -*-
+
+Version 0.4 (2014-08-15)
+-----------
+
+* Major rewrite of flexsurvspline.  This now works by calling
+  flexsurvreg with a custom distribution written dynamically.  Models
+  can now include covariate effects that vary as spline functions of
+  time, by including covariates on "gamma1" or on any further
+  parameters.
+
+* New "msfit.flexsurvreg" method giving cumulative incidences for
+  parametric multi-state models in the format of the "mstate" package.
+
+* New argument "anc" to flexsurvreg, as an alternative and preferred
+  way of modelling covariates on ancillary parameters.
+
+* Custom distributions can be defined through the hazard function.
+  This can be optionally supplemented with the cumulative hazard
+  function, otherwise this is obtained by numerical integration.
+
+* In custom distributions specified by the density, the cumulative
+  distribution can now be omitted, and it will be calculated by
+  numerical integration.
+
+* New arguments "dfns" and "aux" to flexsurvreg, which can be used to
+  supply custom distribution functions and arguments to pass to them.
+
+* New general utility "unroll.function" which converts a function with
+  matrix arguments to the equivalent function with vector arguments.
+  The new flexsurvspline works by unrolling "dsurvspline".
+
+* New "newdata" argument to summary.flexsurvreg and plot.flexsurvreg
+  for an easier way of supplying covariate values.
+
+* summary.flexsurvreg can be called with ci=FALSE to omit confidence
+  intervals.
+
+* "start" argument defaults to 0 for all prediction times in
+  summary.flexsurvreg. 
+
+* Bug fix in summary.flexsurvreg for left-truncated models, which was
+  returning probabilities > 1 before the truncation time.
+
+* model.frame and model.matrix methods to extract the data from fitted
+  flexsurvreg objects.
+
+* Quantile, random number, hazard and cumulative hazard functions for
+  spline distribution.
+
+* Bug fix in rgengamma for Q=0 (log-normal) and sigma not equal to 1.
+
+* Use format() not signif() for printing flexsurvreg objects, to avoid
+  spurious zero significant figures. Thanks to Kenneth Chen.
+
+* Standard errors included in printed output of flexsurvreg, but only
+  for parameters optimised on natural or log scales (which includes
+  all built-in distributions)
+
+* Document that density functions for custom distributions need "log"
+  argument.
+
+* Documented how to supply derivatives of custom distributions for use
+  in optimisation.
+
+* Autogeneration of initial values for flexsurvspline now accounts for
+  left-truncation. Thanks to Ana Borges for the report.
+
+* Accept vector X in summary.flexsurvreg, and give informative error
+  if X in wrong format.  Thanks to Mark Danese.
+
+* Don't warn for shape parameters being exactly zero in generalized
+  gamma and F, just give NaN.
+
+
+Version 0.3.1 (2014-02-14)
+--------------------------
+
+* R-forge only release.
+
+* Distribution functions tidied up, making special value handling and
+  vectorisation consistent. Hazard and cumulative hazard functions for
+  all supported distributions.
+
+* Vectors of different col, lwd and lty can be passed to
+  plot.flexsurvreg for multiple fitted lines.  Thanks to Julia
+  Sandberg for the report.
+
+
+Version 0.3 (2014-01-19)
+------------------------
+
+* CRAN release. Includes changes from 0.2.1 to 0.2.3.
+
+
+Version 0.2.3 (2013-10-09)
+-------------------------
+
+* R-forge only release.
+
+* Parameters other than the location parameter can now have covariates
+  on them in flexsurvreg.  Thanks to Milan Bouchet-Valat for help with
+  this.
+
+* subset and na.action arguments in flexsurvreg and flexsurvspline.
+
+* coef, vcov and confint methods for all fitted model objects.
+
+* Distribution functions for generalized gamma, generalized F, and
+  Gompertz, now allow all parameters to be vectorised.
+
+* Bug fix in analytic derivatives for Weibull.
+
+* Restored print output introduced in 0.1.2 which had been
+  accidentally removed in 0.1.5.
+
+
+Version 0.2.2 (2013-07-26)
+-------------------------
+
+* R-forge only release.
+
+* Case weights supported in flexsurvreg and flexsurvspline.
+
+
+Version 0.2.1 (2013-07-03)
+-------------------------
+
+* R-forge only release.
+
+* Default left truncation times were being set wrongly for
+  user-supplied times in summary.flexsurvreg, giving wrong confidence
+  intervals.  These now default to 0.
+
+* Confidence intervals set to 1 for t=0 under spline models. Thanks to
+  Paul Pynsent.
+
+* dgompertz,dgengamma,dgengamma.orig,dgenf,dgenf.orig fixed to return
+  -Inf instead of 0 when density is zero and log=TRUE.  Thanks to Gao
+  Zheng.
+
+
+Version 0.2 (2013-05-13)
+-------------------------
+
+* New summary() method for fitted flexsurvreg and flexsurvspline model
+  objects gives fitted survival, cumulative hazard or hazard curves,
+  with confidence intervals mosly computed by a simulation method.
+
+* This allows plot.flexsurvreg to plot confidence intervals for the
+  fitted survival, hazard or cumulative hazard.
+
+* Left-truncated survival observations are supported in flexsurvreg
+  and flexsurvspline.
+
+* New psurvspline and dsurvspline functions giving distribution and
+  density function for the spline model.
+
+* Analytic derivatives used in optimisation for spline (odds and
+  hazard scale, not normal), exponential, Weibull and Gompertz models.
+
+* Default to BFGS optimisation method, which uses derivatives where
+  available and should be much faster, instead of Nelder-Mead.
+
+* Work around NaN warnings from spline models presumably due to
+  parameters violating implicit constraints.
+
+* If "knots" specified, boundary knots set to min/max of uncensored
+  times, not all times, to match results when "k" is specified.
+  Thanks to Paul Pynsent.
+
+
+Version 0.1.5 (2012-08-29)
+-------------------------
+
+* Data are now stored in fitted flexsurvreg and flexsurvspline model
+  objects, avoiding environment search errors and allowing package
+  functions to be called within other functions.  Thanks to Hanna
+  Daniel for the report.
+
+* Gompertz documentation clarified for the case when there is a chance
+  of living forever.  qgompertz and rgompertz now return Inf in these
+  cases, with no warning, instead of NaN.  Thanks to Michael Sweeting.
+
+
+Version 0.1.4 (2012-03-22)
+--------------------------
+
+* maxt argument in plot.flexsurvreg.
+
+* Plots no longer complain if data named "dat".
+
+* Corrected wrong bug fix from Version 0.1.3 for transforming
+  parameter estimates in output when fixedpars=TRUE.
+
+* AIC penalty corrected for models with some fixed parameters.
+
+* qgengamma corrected for parameter Q<0.  Thanks to Benn Ackley.
+
+
+Version 0.1.3 (2012-01-17)
+--------------------------
+
+* No longer complains about invalid initial values when there are zero
+  survival times.
+
+* Don't transform parameter estimates in output when fixedpars=TRUE.
+
+* Checking functions for distribution utilities don't complain about
+  vectorised parameter values.
+
+
+Version 0.1.2 (2011-11-08)
+--------------------------
+
+* Initial CRAN release.
+
+* More features in print output for flexsurvreg and flexsurvspline
+  models.
+
+
+Version 0.1.1 (2011-04-19)
+--------------------------
+
+* Fix of drop=FALSE bug in flexsurvspline.inits which caused
+  flexsurvspline to fail with single covariates.
+
+
+Version 0.1 (2011-03-14)
+------------------------
+Initial release

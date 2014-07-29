@@ -1,0 +1,52 @@
+# in the future:
+#  \pkg{flexsurv} makes the \code{msfit} function generic, defines
+#  the default method to be \code{\link[mstate]{msfit}} from \pkg{mstate},
+#  and adds this new method for flexsurvreg objects.
+#S3method(msfit, default)
+#S3method(msfit, flexsurvreg)
+#msfit <- function(object, ...) UseMethod("msfit")
+#msfit.default <- function(object, ...) mstate::msfit(object, ...)
+
+msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="strata(trans)",
+                              trans, B=1000){
+    tr <- sort(unique(na.omit(as.vector(trans))))
+    ntr <- length(tr)
+    mfo <- model.frame(object)
+    if (!(tvar %in% colnames(mfo))){
+        if (missing(tvar))
+            stop("\"tvar\" not supplied and variable \"", tvar, "\" not in model")
+        else stop("\"variable \"", tvar, "\" not in model")
+    }
+    trobs <- unique(mfo[,tvar])
+    if (!all(trobs %in% tr)) stop("\"tvar\" contains elements not in the transition indicator matrix \"trans\"")
+    if(is.null(newdata)){
+        newdata <- data.frame(trans=trobs); names(newdata) <- tvar
+    } else newdata[,tvar] <- trobs
+    X <- form.model.matrix(object, newdata)
+    Haz <- summary(object, type="cumhaz", t=t, X=X, ci=FALSE)
+    Haz <- do.call("rbind",Haz[seq_along(tr)])
+    Haz$trans <- rep(seq_along(tr), each=length(t))
+    names(Haz)[names(Haz)=="est"] <- "Haz"
+    res <- list(Haz=Haz, trans=trans)
+    if (variance & !is.na(object$cov[1])){
+        boot <- array(dim=c(B, length(t), ntr))
+        for (i in seq_along(tr))
+            boot[,,i] <- normboot.flexsurvreg(object, t=t, start=0, X=X[i,],
+                                              type="cumhaz", B=B)
+        ntr2 <- 0.5*ntr*(ntr+1)
+        nt <- length(t)
+        mat <- matrix(nrow=ntr, ncol=ntr)
+        trans1 <- rep(t(row(mat))[!t(lower.tri(mat))], each=nt)
+        trans2 <- rep(t(col(mat))[!t(lower.tri(mat))], each=nt)
+        res$varHaz <- data.frame(time=rep(t, ntr2),  varHaz=numeric(ntr2*nt),
+                                 trans1=trans1, trans2=trans2)
+        for (i in 1:ntr){
+            for (j in i:ntr){
+                res$varHaz$varHaz[trans1==i & trans2==j] <-
+                    mapply(cov, split(t(boot[,,i]),seq_along(t)), split(t(boot[,,j]),seq_along(t)))
+            }            
+        }        
+    } 
+    class(res) <- "msfit"
+    res
+}
