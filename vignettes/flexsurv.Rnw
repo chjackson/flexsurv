@@ -1,0 +1,313 @@
+%\VignetteIndexEntry{flexsurv user guide}
+
+%% TODO 
+%% Search JSS and other journals for survival software.  JSS has been going for very long
+%% survival task view
+%% What examples of custom dist? llogis? tobit example in help(survreg)?  Walter's model
+%% spline with haz as fn of time
+%% fractional polynomials
+
+
+\documentclass[nojss,nofooter]{jss}
+\usepackage{bm}
+
+\author{Christopher H. Jackson \\ MRC Biostatistics Unit, Cambridge, UK \\ \email{chris.jackson@mrc-bsu.cam.ac.uk}}
+\title{flexsurv: flexible parametric survival modelling in R}
+
+\Abstract{ \pkg{flexsurv} is an R package for fully-parametric modelling of 
+  survival data.  Any parametric time-to-event distribution
+  may be fitted if the user supplies at minimum a probability density
+  or hazard function.  Many standard survival distributions are built
+  in, and also the three and four-parameter generalized gamma and F
+  models.  Any parameter of the distribution can be modelled as a
+  linear or log-linear function of covariates.  Another built-in model
+  is the spline model of Royston and Parmar, in which both baseline
+  survival and covariate effects can be arbitrarily flexible
+  parametric functions of time.
+  
+  \pkg{flexsurv} is intended to be similar to \pkg{survival}:
+  right-censoring or left-truncation are specified in \code{Surv}
+  objects, and the main model-fitting function, \code{flexsurvreg},
+  uses the familiar syntax of \code{survreg}.  \pkg{flexsurv} also
+  enhances the \pkg{mstate} package (Putter et al) by providing
+  cumulative incidences for fully-parametric multi-state models. 
+}
+%\Keywords{survival}
+
+\begin{document}
+
+\section{Package motivation and design}
+
+adv of parametric over cox. examples in HE
+ref stata
+based on survival.  right cens, left trunc,
+
+The \code{survreg} function in \pkg{survival} only supports
+two-parameter (location/scale) distributions, though users can supply
+their own distributions.
+
+Stata has a nice \code{streg}.  the \code{stpm2} spline model
+More generally \code{stgenreg} has general.   ours can avoid num integ
+The \code{flexsurv} is similar in spirit
+
+review other packages in survival view: many model-specific packages
+
+\section{Generic parametric survival models}
+
+\subsection{Definitions} 
+
+The general model that \pkg{flexsurv} fits has probability density function
+\begin{equation}
+  \label{eq:model}
+  f(t | \mu(\mathbf{z}), \bm{\alpha}(\mathbf{z})), \quad t \geq 0  
+\end{equation}
+
+$\mu=\alpha_0$ is the parameter of primary interest,
+which usually governs the mean or location of the distribution.  Other
+parameters $\mathbf{\alpha} = \alpha_1, \ldots, \alpha_R$ are called
+``ancillary'' and determine the variance, shape or higher moments.
+All parameters may depend on a vector of covariates $\mathbf{z}$
+through link-transformed linear models $g_0(\mu) = \bm{\gamma}_0^{'}
+\mathbf{z}$ and $g_r(\alpha_r) = \bm{\gamma}_r^{'} \mathbf{z}$. $g(a)$ will
+typically be $\log(a)$ if $a$ is defined to be positive, or $g(a)=a$
+if $a$ is unrestricted.
+
+We also define (suppressing the conditioning for clarity) the
+cumulative distribution function $F(t)$, survivor function $S(t) = 1 -
+F(t)$, cumulative hazard $H(t) = -\log S(t)$ and hazard $h(t) =
+f(t)/S(t)$.
+
+Let $t_i: i=1,\ldots n$ be a sample of times from individuals $i$.
+Let $c_i=1$ if $t_i$ is an observed death time, or $c_i=0$ if $t_i$ is
+a right-censoring time, thus the true death time is known only to be
+greater than $t_i$.  Also let $s_i$ be corresponding left-truncation
+times, meaning that individual $i$ is only observed conditionally on
+survival up to $s_i$, thus $s_i=0$ if there is no left-truncation.
+
+The likelihood for the parameters in model (\ref{eq:model}), given the corresponding data vectors, is 
+\begin{equation}
+  \label{eq:lik}
+  l(\mu,\bm{\alpha} | \mathbf{t},\mathbf{c},\mathbf{s}) = \left\{ \prod_{i:\ c_i=1} f_i(t_i) \prod_{i:\ c_i=0} S_i(t_i) \right\} / \prod_i S_i(s_i)  
+\end{equation}
+
+EXAMPLE DATASET HERE. 
+bc?  not oral or franc.  ask unit, rita3? latimer?
+
+
+\subsection{Other software} 
+
+\subsection{Model fitting syntax} 
+
+The main model-fitting function is called \code{flexsurvreg}.  Its
+first argument is an R \emph{formula} object.  The left hand side of
+the formula is defined by a \code{Surv} function from the
+\pkg{survival} package.  This indicates here that the response
+variable is \code{recyrs}, and that these are observed death and
+censoring times when the variable \code{censrec} is 1 or 0
+respectively.  If we also had left-truncation times in a variable
+called \code{start}, the response would be
+\code{Surv(start,recyrs,censrec)}.  All of these variables are in the
+data frame called \code{bc}.
+
+In order to fit a model, needs to know at least its probability density function. 
+<<>>=
+library(flexsurv)
+flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+@ 
+
+
+\subsection{Built-in survival distributions}
+%% survreg also has normal, logistic, t for log time 
+
+If the argument \code{dist} is a string, this denotes a built-in
+survival distribution.  The currently built-in distributions are
+listed in Table \ref{tab:dists}.  In each case, the probability
+density $f()$ and parameters used in the fitted model is taken from an
+existing R function of the same name but beginning with the letter
+\code{d}.  For example if \code{dist="weibull"}, the density function
+is \code{dweibull}.
+
+For the Weibull, exponential (\code{dexp}), gamma (\code{dgamma}) and
+log-normal (\code{dlnorm}), the density functions are provided with
+standard installations of R.  \pkg{flexsurv} provides some additional
+survival distributions including the Gompertz distribution with
+unrestricted shape parameter (\code{dist="gompertz"}), and two more
+flexible families:
+
+\paragraph{Generalised gamma} This three-parameter distribution
+includes the Weibull, gamma and log-normal as special cases.  The
+parameterisation from \citet{stacy:gengamma} is available as
+\code{dist="gengamma.orig"}, however the newer parameterisation
+\citet{prentice:loggamma} is preferred for modelling since the
+log-normal is not at the boundary of the parameter space, and includes
+a further class of mdoels with negative $Q$.
+
+See \code{help(GenGamma)} and \code{help(GenGamma.orig} for the exact
+definitions of these distributions and which parameter values
+correspond to the Weibull, gamma or log-normal. WRITE OUT IN STATA
+DEFINITION?
+
+\paragraph{Generalized F} This four-parameter distribution includes
+the generalized gamma, and also the log-logistic, as special cases.
+The variety of hazard shapes that can be represented is discussed by
+\citet{ccox:genf}.  It is provided here in alternative ``original''
+(\code{dist="genf.orig"}) and ``stable'' parameterisations
+(\code{dist="genf"}) as discussed by \citet{prentice:genf}.  Again,
+see \code{help(GenF)} and \code{help(GenF.orig} for the exact
+definitions.
+
+For all built-in distributions, \pkg{flexsurv} also defines functions
+beginning \code{h} giving the hazard, and \code{H} for cumulative
+hazard.
+
+\begin{table}
+  \begin{tabular}{lll}
+\hline
+    &  Parameters &  Density function \\
+\hline
+    Exponential & rate             & dexp   \\
+    Weibull     & shape, scale     & dweibull \\
+    Gamma       & shape, rate      & dgamma\\
+    Log-normal  & meanlog, sdlog   & dlnorm\\
+    Gompertz    & shape, rate      & dgompertz \\
+    Generalized gamma (Prentice)   & & dgengamma \\
+    Generalized gamma (Stacy 1962) & & dgengamma.orig \\
+    Generalized F     (Prentice)   & & dgenf \\
+    Generalized F                  & & dgenf.orig \\
+\hline
+  \end{tabular}
+  \caption{Built-in parametric survival distributions in \pkg{flexsurv}}
+  \label{tab:dists}
+\end{table}
+
+
+\subsection{Supplying own distributions}
+
+\pkg{flexsurv} is not limited to its built-in distributions.  Any
+survival model of the form (\ref{eq:model}--\ref{eq:lik}) can be
+fitted if we can provide either the density function or the hazard
+
+\begin{enumerate}
+
+\item Many contributed R packages contain density and cumulative
+  distribution functions for positive distributions (ref eha, VGAM,
+  ActuDistns)
+
+\item Survival models are naturally specified through their hazard
+  as a function of time, representing the changing risk of death. 
+  For example BATHTUB
+
+\item A model might be available but in an inconvenient
+  parameterisation (talk about Weibull prop haz model, GG PH)
+
+\end{enumerate}
+
+
+In Section \ref{sec:gdim} 
+
+Distribution exists in another package, but may be parameterised 
+Example: Gompertz-Makeham
+
+Functions need to be vectorised 
+
+\subsection{Computation}
+
+The likelihood is maximised using the optimisation methods available
+through the standard R \code{optim} function.  By default, this is the
+\code{"BFGS"} method (\citep{nash}) which can use the analytic
+derivatives of the likelihood with respect to the model parameters, if
+these are available, to improve the speed of convergence to the
+maximum.
+
+For custom distributions, the user can optionally supply functions
+with names beginning \code{"DLd"} and \code{"DLS"} respectively
+(e.g. \code{DLdweibull,DLSweibull}) to calculate the derivatives of
+the log density and log survivor functions with respect to the
+transformed parameters $\gamma$.
+
+Initial values are difficult: ideally two would come from moments of
+the distribution, then defaults that reduce to simpler distributions.
+example
+
+Integration
+
+Demo on at least one dataset: stgenreg uses bc example i think
+
+
+
+
+\subsection{Output functions}
+
+\code{summary.flexsurvreg} calculates the estimated survival, hazard
+or cumulative hazard at a series of times and for specified covariate
+values. Confidence intervals are produced by simulating a large sample
+from the asymptotic normal distribution of the maximum likelihood
+estimates $\gamma$ OR WHATEVER, via the function
+\code{normboot.flexsurvreg}.  The default \code{plot} method for
+\code{flexsurvreg} objects graphs these fitted trajectories against
+non-parametric estimates based on Kaplan-Meier or kernel estimation
+(REF muhaz), while the \code{lines} method adds lines to an existing
+plot.  REFER TO EXAMPLE FIGURE
+
+Any user-defined function of the basic model parameters $\gamma$ OR
+WHATEVER and time can also be summarised in the same way.  For
+example, in a non-proportional hazards model, the hazard ratio between
+two groups of interest varies through time.  To plot this trajectory,
+and confidence intervals.   EXAMPLE FROM SPLINE. 
+
+Restricted mean survival: say of interest. ref royston + parmar
+
+
+\section{Spline models}
+
+parameters are vectors, different design
+
+relation to fractional polynomials 
+(see \pkg{mfp} for continuous covariates, slightly diff)
+
+stgenreg has demo of spline modelling on the log hazard scale.  Can we do this using a generic distribution? 
+(advantage: when there are multiple time dependent effects, the
+interpretation of the time-dependent hazard ratios is simplified as
+they do not depend on values of other covariates, which is the case
+when modelling on the cumulative hazard scale (Royston and Lambert
+2011).
+
+Demo on at least one dataset 
+
+\subsection{General-dimension models}
+\label{sec:gdim}
+
+The spline model above is an example of a model where the general
+parametric form can be written explicitly as in model \ref{eq:model},
+but the length of alpha is arbitrary.  semi-parametric 
+
+\pkg{flexsurv} has the tools to deal with any 
+
+where are vectors
+
+fractional polynomials? 
+specified by number M and set of powers p1,...pM
+chosen from c(-2,-1,-0.5,0,0.5,1,2,3), including repeats, where x^0 = log(x)
+with repeated powers, each repeat multiplied by a power of log(x)
+
+
+\section{Multi-state models}
+
+enhances mstate
+
+% cif in comp risks planned for stgenreg 
+\section{Potential extensions}
+
+relative survival
+interval censoring
+frailty 
+what else does survival do 
+
+
+\appendix
+\section{Acknowledgements}
+Thanks to Milan Bouchet-Valat.
+
+\bibliography{flexsurv}
+
+\end{document}
