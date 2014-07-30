@@ -24,28 +24,7 @@ form.dp <- function(dlist, dfns, integ.opts){
                 if (exists(pname)) p <- get(pname)
                 else {
                     message("Forming cumulative distribution function...")
-                    p <- function(q, ...){
-                        args <- list(...)
-                        pars <- as.list(dlist$pars)
-                        for (i in seq(along=dlist$pars))
-                            pars[[i]] <- if(any(names(args)==dlist$pars[i])) args[[dlist$pars[i]]] else args[[i]]
-                        ## TODO do we pass through any other arguments.  if so, easiest to name them beforehand and treat in above line like extra dlist$pars
-                        n <- max(sapply(c(list(q),pars), length))
-                        q <- rep(q, length=n)
-                        for (i in seq_along(pars)) pars[[i]] <- rep(pars[[i]], length=n)
-                        ret <- numeric(n)                       
-                        du <- function(u, ...)d(u,...)
-                        for (i in 1:n){
-                            parsi <- lapply(pars, function(x)x[i])
-                            int.args <- c(list(f=du, lower=0, upper=q[i]), parsi, integ.opts)
-                            int <- do.call("integrate", int.args)
-                            ret[i] <- int$value
-                        }
-                        ret
-###                        int.args <- c(list(f=du, lower=0, upper=q), integ.opts, list(...))
-###                        do.call("integrate", int.args)$value
-                    }
-###                    p <- Vectorize(p)
+                    p <- integrate.dh(d, dlist, integ.opts, what="density")
                 }
             }
             h <- function(x, ...){
@@ -63,27 +42,7 @@ form.dp <- function(dlist, dfns, integ.opts){
                 }
             } else {
                 message("Forming integrated hazard function...")
-                H <- function(x, ...)
-                {
-                    args <- list(...)
-                    pars <- as.list(dlist$pars)
-                    for (i in seq(along=dlist$pars))
-                        pars[[i]] <- if(any(names(args)==dlist$pars[i])) args[[dlist$pars[i]]] else args[[i]]
-                    ## TODO do we pass through any other arguments.  if so, easiest to name them beforehand and treat in above line like extra dlist$pars
-                    n <- max(sapply(c(list(x),pars), length))
-                    x <- rep(x, length=n)
-                    for (i in seq_along(pars)) pars[[i]] <- rep(pars[[i]], length=n)
-                    ret <- numeric(n)
-                    hu <- function(u, ...)h(u,...)
-                    for (i in 1:n){
-                        parsi <- lapply(pars, function(x)x[i])
-                        int.args <- c(list(f=hu, lower=0, upper=x[i]), parsi, integ.opts)
-                        int <- do.call("integrate", int.args)
-                        ret[i] <- int$value
-                    }
-                    ret
-                }
-                ## could copy same code to get p from d
+                H <- integrate.dh(h, dlist, integ.opts, what="hazard") 
             }
         }
     }
@@ -91,7 +50,11 @@ form.dp <- function(dlist, dfns, integ.opts){
         if (exists(pname)) p <- get(pname)
         else {
             p <- function(q, ...) {
-                1 - exp(-H(q, ...))
+                ret <- 1 - exp(-H(q, ...))
+#                ret[q==Inf] <- 1 # should have been handled already in cum.fn
+#                ret[q==0] <- 0
+                ret
+### TODO special values in other functions
             }
         }
     }
@@ -117,4 +80,54 @@ form.dp <- function(dlist, dfns, integ.opts){
 
     list(p=p, d=d, h=h, H=H, DLd=DLd, DLS=DLS,
          deriv = !is.null(DLd) && !is.null(DLS))
+}
+
+
+## Produce cumulative version of hazard function or density function
+## by numerical integration
+
+integrate.dh <- function(fn, dlist, integ.opts, what="dens"){
+
+    cum.fn <- function(q, ...){
+        args <- list(...)
+        pars <- as.list(dlist$pars)
+        names(pars) <- dlist$pars
+        args.done <- numeric()
+        ## if argument is unnamed, assume it is supplied in the default order
+        for (i in seq(along=dlist$pars)){
+            if(any(names(args)==dlist$pars[i])) {
+                pars[[i]] <- args[[dlist$pars[i]]]
+                args.done <- c(args.done, match(dlist$pars[i], names(args)))
+            } else {
+                pars[[i]] <- args[[i]]
+                args.done <- c(args.done, i)
+            }
+        }
+        ## any auxiliary arguments not in main distribution parameters
+        rest <- args[setdiff(seq_along(args), args.done)] 
+        ## replicate all arguments to have the length of the longest one (=n)
+        n <- max(sapply(c(list(q),pars), length))
+        q <- rep(q, length=n)
+        for (i in seq_along(pars)) pars[[i]] <- rep(pars[[i]], length=n)
+        ret <- numeric(n)                       
+        du <- function(u, ...)fn(u,...)
+        ## then return a vector of length n
+        for (i in 1:n){
+            parsi <- lapply(pars, function(x)x[i])
+            int.args <- c(list(f=du, lower=0, upper=q[i]), parsi, rest, integ.opts)
+            if (q[i]==0) ret[i] <- 0
+            else if (q[i]==Inf) {
+                if (what=="density") ret[i] <- 1
+                else if (what=="hazard") ret[i] <- Inf
+            }
+            else {
+                int <- try(do.call("integrate", int.args))
+                if (inherits(int, "try-error")) browser()
+                ret[i] <- int$value
+            }
+        }
+        ret
+    }
+
+    cum.fn
 }

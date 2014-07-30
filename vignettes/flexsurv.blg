@@ -1,54 +1,55 @@
 This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
 The top-level auxiliary file: flexsurv.aux
 The style file: jss.bst
-Database file #1: survival.bib
+Database file #1: flexsurv.bib
 Warning--string name "sim" is undefined
---line 56 of file survival.bib
+--line 98 of file flexsurv.bib
 Warning--string name "sim" is undefined
---line 70 of file survival.bib
-Warning--I didn't find a database entry for "stacy:gengamma"
+--line 133 of file flexsurv.bib
+Warning--I didn't find a database entry for "prentice:genf"
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Warning--empty journal in ccox:genf
-Warning--empty journal in ccox:taxonomy:hazards
-You've used 4 entries,
+Warning--empty journal in royston:parmar
+Warning--there's a number but no volume in stacy:gengamma
+You've used 12 entries,
             3140 wiz_defined-function locations,
-            653 strings with 5546 characters,
-and the built_in function-call counts, 3009 in all, are:
-= -- 235
-> -- 65
-< -- 3
-+ -- 27
-- -- 21
-* -- 230
-:= -- 413
-add.period$ -- 16
-call.type$ -- 4
-change.case$ -- 23
-chr.to.int$ -- 4
-cite$ -- 6
-duplicate$ -- 269
-empty$ -- 288
-format.name$ -- 27
-if$ -- 606
+            708 strings with 6761 characters,
+and the built_in function-call counts, 8451 in all, are:
+= -- 692
+> -- 165
+< -- 14
++ -- 71
+- -- 51
+* -- 607
+:= -- 1145
+add.period$ -- 46
+call.type$ -- 12
+change.case$ -- 66
+chr.to.int$ -- 12
+cite$ -- 15
+duplicate$ -- 775
+empty$ -- 802
+format.name$ -- 83
+if$ -- 1728
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 47
-newline$ -- 31
-num.names$ -- 16
-pop$ -- 98
+missing$ -- 129
+newline$ -- 71
+num.names$ -- 48
+pop$ -- 288
 preamble$ -- 1
-purify$ -- 23
+purify$ -- 65
 quote$ -- 0
-skip$ -- 72
+skip$ -- 243
 stack$ -- 0
-substring$ -- 258
-swap$ -- 102
-text.length$ -- 0
+substring$ -- 677
+swap$ -- 299
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 36
-warning$ -- 2
-while$ -- 24
+type$ -- 105
+warning$ -- 3
+while$ -- 71
 width$ -- 0
-write$ -- 60
-(There were 5 warnings)
+write$ -- 163
+(There were 6 warnings)

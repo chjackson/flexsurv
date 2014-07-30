@@ -5,8 +5,6 @@ OPTIONAL
 
 Generic (restricted) mean of distributions, integration if necessary
 
-document normboot.pars.   should this have covs in, or newdata
-
 inits and fixedpars named
 
 anova / LR test method, like anova.survreg, anova.survreglist, using
@@ -15,20 +13,11 @@ could loglik component simply be used for these
 
 cluster standard errors as in survreg
 
-orthogonalised spline basis
-
 plot two groups for a numeric 0/1 variable
 
 hHsurvspline: vectorise as dp
 
 
-
-LIBRARY OF MODELS
-Log-logistic
-Weibull proportional hazards
-Spline for log haz
-GG prop haz
-Gompertz-Makeham
 
 relate my gg pars to stata
 gamma is q

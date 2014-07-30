@@ -8,7 +8,7 @@
 }
 \usage{
 \method{plot}{flexsurvreg}(x, newdata=NULL, X=NULL, type="survival",
-        t=NULL, start=NULL,
+        fn=NULL, t=NULL, start=NULL,
         est=TRUE, ci=NULL, B=1000, cl=0.95,
         col.obs="black", lty.obs=1, lwd.obs=1,
         col="red", lty=1, lwd=2,
@@ -39,6 +39,12 @@
     roughly indicate the shape of the hazards through time.  The \code{min.time} and \code{max.time}
     options to \code{\link[muhaz]{muhaz}} may sometimes need to be
     passed as arguments to \code{\link{plot.flexsurvreg}} to avoid an error here.
+  }
+  \item{fn}{
+    Custom function of the parameters to summarise against time.  The first two arguments
+    of the function must be \code{t} representing time, and \code{start}
+    representing left-truncation points,  and there must be a {\dots}
+    argument representing the parameters of the distribution.   
   }
   \item{t}{ Vector of times to plot fitted values for, see \code{\link{summary.flexsurvreg}}. }
   \item{start}{ Left-truncation points, see \code{\link{summary.flexsurvreg}}. }

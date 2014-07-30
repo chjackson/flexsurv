@@ -63,8 +63,7 @@
     Custom function of the parameters to summarise against time.  The first two arguments
     of the function must be \code{t} representing time, and \code{start}
     representing left-truncation points,  and there must be a {\dots}
-    argument representing the parameters of the distribution.
-    
+    argument representing the parameters of the distribution.   
   }
   \item{t}{ Times to calculate fitted values for. By default, these are the
     sorted unique observation (including censoring) times in the

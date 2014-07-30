@@ -85,6 +85,8 @@ psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     eta <- rowSums(basis(knots, log(q)) * gamma) + as.numeric(X %*% beta) + offset
     surv <- Slink(scale)(eta)
     ret[ind] <- as.numeric(1 - surv)
+    ret[ind][q==0] <- 0
+    ret[ind][q==Inf] <- 1
     if (!lower.tail) ret <- 1 - ret
     if (log.p) ret <- log(ret)
     ret

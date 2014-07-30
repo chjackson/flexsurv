@@ -56,8 +56,9 @@ flexsurv.dists <- list(
                        transforms=c(log, log),
                        inv.transforms=c(exp, exp),
                        inits = function(t){
+## TODO regress log CH on log time as in splineinits. gets cov effs as well
                            lt <- log(t[t>0])
-                           c(1, exp(mean(lt) + 0.572))
+                           c(1, exp(median(lt)) / log(2))
                        }
                        ),
                        lnorm = list(
@@ -103,27 +104,28 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, dlist, inits,
         for (i in dlist$pars)
             pars[[i]] <- pars[[i]] + X[,mx[[i]],drop=FALSE] %*% beta[mx[[i]]]
     }
-    pcall <- list(q=Y[,"stop"])
-    dcall <- list(x=Y[,"stop"])
-    tcall <- list(q=Y[,"start"])
+    pcall <- list()
     for (i in 1:nbpars){
-        pcall[[names(pars)[i]]] <- dcall[[names(pars)[i]]] <-
-            tcall[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars[[i]])
-#        if (any(is.infinite(dlist$inv.transforms[[i]](pars[[i]]))))
-#            return(Inf)
+        pcall[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars[[i]])
     }
     for (i in seq_along(aux)){
         if (!(names(aux)[i] %in% dlist$pars))
-            pcall[[names(aux)[i]]] <- dcall[[names(aux)[i]]] <-
-                tcall[[names(aux)[i]]] <- aux[[i]]
+            pcall[[names(aux)[i]]] <- aux[[i]]
     }
+    pmaxcall <- dcall <- tcall <- pcall
+    pcall$q <- Y[,"time1"]
+    pmaxcall$q <- Y[,"time2"] # Inf if right-censored, giving pmax=1
+    dcall$x <- Y[,"time1"]
+    tcall$q <- Y[,"start"]  
     dcall$log <- TRUE
     ## Generic survival model likelihood
     dead <- Y[,"status"]==1
     logdens <- (do.call(dfns$d, dcall)*weights)[dead]
-    prob <- (do.call(dfns$p, pcall))[!dead]
+    pmax <- (do.call(dfns$p, pmaxcall))[!dead]
+    pmin <- (do.call(dfns$p, pcall))[!dead]
     pobs <- 1 - do.call(dfns$p, tcall) # prob of being observed = 1 unless left-truncated
-    - ( sum(logdens) + sum(log(1 - prob)*weights[!dead]) - sum(log(pobs)*weights))
+    ret <- - ( sum(logdens) + sum(log(pmax - pmin)*weights[!dead]) - sum(log(pobs)*weights))
+    ret
 }
 
 check.dlist <- function(dlist){
@@ -136,8 +138,10 @@ check.dlist <- function(dlist){
     if (is.null(dlist$location)) stop("location parameter not given in custom distribution list")
     if (!(dlist$location %in% dlist$pars)) stop("location parameter \"",dlist$location,"\" not in list of parameters")
     if (is.null(dlist$transforms)) stop("transforms not given in custom distribution list")
+    if (is.null(dlist$inv.transforms)) stop("inverse transforms not given in custom distribution list")
+    if (!is.list(dlist$transforms)) stop("\"transforms\" must be a list of functions")
+    if (!is.list(dlist$inv.transforms)) stop("\"inv.transforms\" must be a list of functions")
     if (length(dlist$transforms) != npars) stop("transforms vector of length ",length(dlist$transforms),", parameter names of length ",npars)
-    if (is.null(dlist$inv.transforms)) stop("inverse transformations not given in custom distribution list")
     if (length(dlist$inv.transforms) != npars) stop("inverse transforms vector of length ",length(dlist$transforms),", parameter names of length ",npars) #
     for (i in 1:npars){
         if (is.character(dlist$transforms[[i]])) dlist$transforms[[i]] <- get(dlist$transforms[[i]])
@@ -218,11 +222,15 @@ expand.inits.args <- function(inits){
 check.flexsurv.response <- function(Y){
     if (!inherits(Y, "Surv"))
         stop("Response must be a survival object")
-    if (!(attr(Y, "type")  %in% c("right","counting")))
-        stop("Survival object type \"", attr(Y, "type"), "\"", " not supported")
+### convert Y from Surv object to numeric matrix
+### though "time" only used for initial values, printed time at risk, empirical hazard
     if (attr(Y, "type") == "counting")
-        Y <- cbind(Y, time=Y[,"stop"] - Y[,"start"]) # converts Y from Surv object to numeric matrix
-    else Y <- cbind(Y, start=0, stop=Y[,"time"])
+        Y <- cbind(Y, time=Y[,"stop"] - Y[,"start"], time1=Y[,"stop"], time2=Inf)
+    else if (attr(Y, "type") == "interval")
+        Y <- cbind(Y, start=0, stop=Y[,"time1"], time=Y[,"time1"])  
+    else if (attr(Y, "type") == "right")
+        Y <- cbind(Y, start=0, stop=Y[,"time"], time1=Y[,"time"], time2=Inf)
+    else stop("Survival object type \"", attr(Y, "type"), "\"", " not supported")
     Y
 }
 
@@ -357,11 +365,13 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, subset, na.action, dis
         optpars <- inits[setdiff(1:npars, fixedpars)]
         optim.args <- list(...)
         if (is.null(optim.args$method)){
-            if (dlist$name=="weibull"){
-                optim.args$method <- "L-BFGS-B"
-                optim.args$lower <- -1e+16
-            }
-            else optim.args$method <- "BFGS"
+            ## L-BFGS-B breaks if lik goes to 0 for finite pars, but BFGS carries on (with warning) if pars zero
+            ## if (dlist$name=="weibull"){            
+            ##     optim.args$method <- "L-BFGS-B"
+            ##     optim.args$lower <- -1e+16
+            ## }
+            ## else
+                optim.args$method <- "BFGS"
         }
         gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
         optim.args <- c(optim.args, list(par=optpars, fn=minusloglik.flexsurv, gr=gr,
@@ -476,9 +486,9 @@ form.model.matrix <- function(object, newdata){
     X
 }
 
-summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
+summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                                 t=NULL, start=0, ci=TRUE, B=1000, cl=0.95,
-                                fn=NULL, ...)
+                                ...)
 {
     x <- object
     dat <- x$data
@@ -516,26 +526,9 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
         stop("length of \"start\" is ",length(start)," should be 1, or length of \"t\" which is ",length(t))
 
     if (is.null(fn)) {
-        fn <- switch(type,   # TODO warn for clashing arguments in dfns
-                     "survival" = function(t,start,...) {
-                         ret <- (1 - x$dfns$p(t,...))/(1 - x$dfns$p(start,...))
-                         ret[t<start] <- 1 # prob[t<start] was previously 0
-                         ret
-                     },
-                     "hazard" = function(t,start,...) {
-                         ret <- x$dfns$h(t,...) * (1 - x$dfns$p(start,...))
-                         ret[t<start] <- 0
-                         ret
-                     },
-                     "cumhaz" = function(t,start,...) {
-                         ret <- x$dfns$H(t,...) - x$dfns$H(start,...)
-                         ret[t<start] <- 0
-                         ret                         
-                     })
+        fn <- summary.fns(x, type)
     }
     fncall <- list(t,start)
-
-    pcall <- list(q=t)
     beta <- if (ncovs==0) 0 else x$res[setdiff(rownames(x$res), x$dlist$pars),"est"]
     if (ncol(X) != length(beta)){
         isare <- if(length(beta)==1) "is" else "are"
@@ -571,6 +564,25 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
     ret
 }
 
+summary.fns <- function(x, type){
+    switch(type,   # TODO warn for clashing arguments in dfns
+           "survival" = function(t,start,...) {
+               ret <- (1 - x$dfns$p(t,...))/(1 - x$dfns$p(start,...))
+               ret[t<start] <- 1 # prob[t<start] was previously 0
+               ret
+           },
+           "hazard" = function(t,start,...) {
+               ret <- x$dfns$h(t,...) * (1 - x$dfns$p(start,...))
+               ret[t<start] <- 0
+               ret
+           },
+           "cumhaz" = function(t,start,...) {
+               ret <- x$dfns$H(t,...) - x$dfns$H(start,...)
+               ret[t<start] <- 0
+               ret                         
+           })
+}
+
 ## Draw B samples from multivariate normal distribution of baseline
 ## parameter estimators, for given covariate values
 
@@ -599,23 +611,25 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE){
 ### times t and covariates X, using random sample of size B from the
 ### assumed MVN distribution of MLEs.
 
-cisumm.flexsurvreg <- function(x, t, start, X, fn=NULL, boot=NULL, B=1000, cl=0.95) {
-    if (any(is.na(x$res[,2])) || (B==0)) {
-        ret <- array(NA, dim=c(length(t), 2, 3))
+normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B){
+    ret <- array(NA_real_, dim=c(B, length(t)))           
+    sim <- normboot.flexsurvreg(x, B, X=X)
+    for (i in seq(length=B)) {
+        fncall <- list(t,start)
+        for (j in seq(along=x$dlist$pars))
+            fncall[[x$dlist$pars[j]]] <- sim[i,j]
+        for (j in seq_along(x$aux))
+            fncall[[names(x$aux)[j]]] <- x$aux[[j]]
+        ret[i,] <- do.call(fn, fncall)
     }
+    ret
+}
+
+cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
+    if (any(is.na(x$res[,2])) || (B==0))
+        ret <- array(NA, dim=c(length(t), 2))
     else {
-        if (is.null(boot)){
-            ret <- array(NA_real_, dim=c(B, length(t)))
-            sim <- normboot.flexsurvreg(x, B, X=X)
-            for (i in seq(length=B)) {
-                fncall <- list(t,start)
-                for (j in seq(along=x$dlist$pars))
-                    fncall[[x$dlist$pars[j]]] <- sim[i,j]
-                for (j in seq_along(x$aux))
-                    fncall[[names(x$aux)[j]]] <- x$aux[[j]]
-                ret[i,] <- do.call(fn, fncall)
-            }
-        }
+        ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
         ret <- t(apply(ret, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE)))
     }
     ret
@@ -657,6 +671,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
         }
         else if (type=="hazard") {
             if (!all(dat$Y[,"start"]==0)) warning("Left-truncated data not supported by muhaz: ignoring truncation point when plotting observed hazard")
+            if (any(dat$Y[,"status"] > 1)) stop("Interval-censored data not supported by muhaz")
             if (!all(isfac))
                 plot(muhaz(dat$Y[,"stop"], dat$Y[,"status"], ...),
                      col=col.obs, lty=lty.obs, lwd=lwd.obs)

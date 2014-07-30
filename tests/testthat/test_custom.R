@@ -38,6 +38,11 @@ test_that("Custom distributions: hazard only",{
     hbar <- Vectorize(hbar)
     custom.bar <- list(name="bar", pars=c("rate"), location="rate", transforms=c(log), inv.transforms=c(exp), inits=function(t)1/mean(t))
     fitf <- flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.bar, dfns=list(h=hbar))
+
+### FIXME q is Inf.  is it Surv object bug?  time2 being used
+### it's trying to get p from exp(-H(t)) with t = Inf, should get 
+
+
     fite <- flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist="exp")
     expect_equal(fitf$loglik, fite$loglik)
 
@@ -101,5 +106,5 @@ test_that("Errors in custom distributions",{
                  "transforms not given")
     custom.foo <- list(name="foo", pars=c("rate"), transforms=log, inv.transforms=exp, location="rate")
     expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
-                 "transforms not given")
+                 "\"transforms\" must be a list")
 })

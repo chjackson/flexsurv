@@ -31,8 +31,8 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="stra
     if (variance & !is.na(object$cov[1])){
         boot <- array(dim=c(B, length(t), ntr))
         for (i in seq_along(tr))
-            boot[,,i] <- normboot.flexsurvreg(object, t=t, start=0, X=X[i,],
-                                              type="cumhaz", B=B)
+            boot[,,i] <- normbootfn.flexsurvreg(object, t=t, start=0, X=X[i,,drop=FALSE], B=B,
+                                                fn=summary.fns(object,"cumhaz"))
         ntr2 <- 0.5*ntr*(ntr+1)
         nt <- length(t)
         mat <- matrix(nrow=ntr, ncol=ntr)

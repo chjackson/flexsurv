@@ -11,7 +11,7 @@
 }
 \usage{
 flexsurvreg(formula, anc=NULL, data, weights, subset, na.action, dist, inits,
-            fixedpars=NULL, dfns=NULL, aux=NULL, integ.opts, cl=0.95,...)
+            fixedpars=NULL, dfns=NULL, aux=NULL, cl=0.95, integ.opts, ...)
 }
 \arguments{
   \item{formula}{
@@ -22,9 +22,9 @@ flexsurvreg(formula, anc=NULL, data, weights, subset, na.action, dist, inits,
 
     \code{Surv(time, dead) ~ age + sex}
 
-    Only \code{Surv} objects
-    of \code{type="right"} or \code{type="counting"}, corresponding to
-    right-censored and/or left-truncated observations, are supported.
+    \code{Surv} objects of \code{type="right"},\code{"counting"},
+    \code{"interval1"} or \code{"interval2"} are supported, corresponding to
+    right-censored, left-truncated or interval-censored observations.
 
     If there are no covariates, specify \code{1} on the right hand side,
     for example \code{Surv(time, dead) ~ 1}.

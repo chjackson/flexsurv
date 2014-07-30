@@ -3,17 +3,35 @@
 Version 0.4 (2014-08-15)
 -----------
 
+Spline models and ancillary covariates:
+
 * Major rewrite of flexsurvspline.  This now works by calling
   flexsurvreg with a custom distribution written dynamically.  Models
   can now include covariate effects that vary as spline functions of
   time, by including covariates on "gamma1" or on any further
   parameters.
 
+* New argument "anc" to flexsurvreg, as an alternative and preferred
+  way of modelling covariates on ancillary parameters.
+
+* New general utility "unroll.function" which converts a function with
+  matrix arguments to the equivalent function with vector arguments.
+  The new flexsurvspline works by unrolling "dsurvspline".
+
+* Quantile, random number, hazard and cumulative hazard functions for
+  spline distribution.
+
+* Autogeneration of initial values for flexsurvspline now accounts for
+  left-truncation. Thanks to Ana Borges for the report.
+
+Other new modelling features:
+
+* Interval censoring supported in the response.
+
 * New "msfit.flexsurvreg" method giving cumulative incidences for
   parametric multi-state models in the format of the "mstate" package.
 
-* New argument "anc" to flexsurvreg, as an alternative and preferred
-  way of modelling covariates on ancillary parameters.
+Custom distributions:
 
 * Custom distributions can be defined through the hazard function.
   This can be optionally supplemented with the cumulative hazard
@@ -26,15 +44,23 @@ Version 0.4 (2014-08-15)
 * New arguments "dfns" and "aux" to flexsurvreg, which can be used to
   supply custom distribution functions and arguments to pass to them.
 
-* New general utility "unroll.function" which converts a function with
-  matrix arguments to the equivalent function with vector arguments.
-  The new flexsurvspline works by unrolling "dsurvspline".
+* Document that density functions for custom distributions need "log"
+  argument.
+
+* Documented how to supply derivatives of custom distributions for use
+  in optimisation.
+
+Output functions:
 
 * New "newdata" argument to summary.flexsurvreg and plot.flexsurvreg
   for an easier way of supplying covariate values.
 
 * User-defined summary functions can be used in summary.flexsurvreg,
   as an alternative to survival, hazard or cumulative hazard.
+
+* New function "normboot.flexsurvreg" to simulate parameters from the
+  asymptotic normal distribution of their estimates.  Used for
+  representing uncertainty in any function of the parameters.
 
 * summary.flexsurvreg can be called with ci=FALSE to omit confidence
   intervals.
@@ -45,32 +71,24 @@ Version 0.4 (2014-08-15)
 * Bug fix in summary.flexsurvreg for left-truncated models, which was
   returning probabilities > 1 before the truncation time.
 
-* model.frame and model.matrix methods to extract the data from fitted
-  flexsurvreg objects.
+* New model.frame and model.matrix methods to extract the data from
+  fitted flexsurvreg objects.
 
-* Quantile, random number, hazard and cumulative hazard functions for
-  spline distribution.
+* Accept vector X in summary.flexsurvreg, and give informative error
+  if X in wrong format.  Thanks to Mark Danese.
 
-* Bug fix in rgengamma for Q=0 (log-normal) and sigma not equal to 1.
+Printed output: 
 
 * Use format() not signif() for printing flexsurvreg objects, to avoid
   spurious zero significant figures. Thanks to Kenneth Chen.
 
 * Standard errors included in printed output of flexsurvreg, but only
   for parameters optimised on natural or log scales (which includes
-  all built-in distributions)
+  all built-in distributions).
 
-* Document that density functions for custom distributions need "log"
-  argument.
+Distribution functions: 
 
-* Documented how to supply derivatives of custom distributions for use
-  in optimisation.
-
-* Autogeneration of initial values for flexsurvspline now accounts for
-  left-truncation. Thanks to Ana Borges for the report.
-
-* Accept vector X in summary.flexsurvreg, and give informative error
-  if X in wrong format.  Thanks to Mark Danese.
+* Bug fix in rgengamma for Q=0 (log-normal) and sigma not equal to 1.
 
 * Don't warn for shape parameters being exactly zero in generalized
   gamma and F, just give NaN.
