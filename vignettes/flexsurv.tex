@@ -6,57 +6,9 @@
 %% fractional polynomials
 
 
-\documentclass[nojss,nofooter]{jss}\usepackage[]{graphicx}\usepackage[]{color}
-%% maxwidth is the original width if it is less than linewidth
-%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
-\def\maxwidth{ %
-  \ifdim\Gin@nat@width>\linewidth
-    \linewidth
-  \else
-    \Gin@nat@width
-  \fi
-}
-\makeatother
-
-\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
-\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
-\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
-\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
-\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
-\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
-\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
-\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
-\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
-\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
-
-\usepackage{framed}
-\makeatletter
-\newenvironment{kframe}{%
- \def\at@end@of@kframe{}%
- \ifinner\ifhmode%
-  \def\at@end@of@kframe{\end{minipage}}%
-  \begin{minipage}{\columnwidth}%
- \fi\fi%
- \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
- \colorbox{shadecolor}{##1}\hskip-\fboxsep
-     % There is no \\@totalrightmargin, so:
-     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
- \MakeFramed {\advance\hsize-\width
-   \@totalleftmargin\z@ \linewidth\hsize
-   \@setminipage}}%
- {\par\unskip\endMakeFramed%
- \at@end@of@kframe}
-\makeatother
-
-\definecolor{shadecolor}{rgb}{.97, .97, .97}
-\definecolor{messagecolor}{rgb}{0, 0, 0}
-\definecolor{warningcolor}{rgb}{1, 0, 1}
-\definecolor{errorcolor}{rgb}{1, 0, 0}
-\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
-
-\usepackage{alltt}
+\documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
+\usepackage{tabularx}
 
 \author{Christopher H. Jackson \\ MRC Biostatistics Unit, Cambridge, UK \\ \email{chris.jackson@mrc-bsu.cam.ac.uk}}
 \title{flexsurv: flexible parametric survival modelling in R}
@@ -81,7 +33,8 @@
   package (Putter et al) by providing cumulative incidences for
   fully-parametric multi-state models.  }
 %\Keywords{survival}
-\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+
+\usepackage{Sweave}
 \begin{document}
 
 \section{Motivation and design}
@@ -155,10 +108,12 @@ which usually governs the mean or location of the distribution.  Other
 parameters $\bm{\alpha} = \alpha_1, \ldots, \alpha_R$ are called
 ``ancillary'' and determine the shape, variance or higher moments.
 All parameters may depend on a vector of covariates $\mathbf{z}$
-through link-transformed linear models $g_0(\mu) = \bm{\gamma}_0^{'}
-\mathbf{z}$ and $g_r(\alpha_r) = \bm{\gamma}_r^{'} \mathbf{z}$. $g(x)$ will
+through link-transformed linear models $g_0(\mu) = \bm{\beta}_0^{'}
+\mathbf{z}$ and $g_r(\alpha_r) = \bm{\beta}_r^{'} \mathbf{z}$. $g(x)$ will
 typically be $\log(x)$ if $x$ is defined to be positive, or $g(x)=x$
-if $x$ is unrestricted.
+if $x$ is unrestricted.  In all models, $\bm{\beta}$ includes at 
+least an intercept, so that the full set of parameters is given by 
+$\{\bm{\beta}_r: r=1,\ldots,R$.
 PROPORTIONAL HAZARDS / ACCELERATED FAILURE TIME
 
 We also define (suppressing the conditioning for clarity) the
@@ -177,11 +132,11 @@ times.  If there is no left-censoring then these are infinite, so that
 $S(t^{max}_i)=0$; or if the $i$th death time is interval-censored then
 $c_i=0$ and $t^{max}_i$ is finite.
 
-The likelihood for the full set of parameters $\bm{\gamma}$ in model
+The likelihood for the parameters $\bm{\beta}$ in model
 (\ref{eq:model}), given the corresponding data vectors, is
 \begin{equation}
   \label{eq:lik}
-  l(\bm{\gamma} | \mathbf{t},\mathbf{c},\mathbf{s},\mathbf{t}^{max}) = \left\{ \prod_{i:\ c_i=1} f_i(t_i) \prod_{i:\ c_i=0} \left(S_i(t_i) - S_i(t^{max}_i)\right)\right\} / \prod_i S_i(s_i)  
+  l(\{\bm{\beta}_r\} | \mathbf{t},\mathbf{c},\mathbf{s},\mathbf{t}^{max}) = \left\{ \prod_{i:\ c_i=1} f_i(t_i) \prod_{i:\ c_i=0} \left(S_i(t_i) - S_i(t^{max}_i)\right)\right\} / \prod_i S_i(s_i)  
 \end{equation}
 
 Note that the individuals are independent, so that \pkg{flexsurv} does not
@@ -201,20 +156,20 @@ the response variable is \code{recyrs}, and that these are observed
 death and censoring times when the variable \code{censrec} is 1 or 0
 respectively.  All of these variables are in the data frame called
 \code{bc}.  
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{library}\hlstd{(flexsurv)}
-\hlkwd{flexsurvreg}\hlstd{(}\hlkwd{Surv}\hlstd{(recyrs, censrec)} \hlopt{~} \hlstd{group,} \hlkwc{data}\hlstd{=bc,} \hlkwc{dist}\hlstd{=}\hlstr{"weibull"}\hlstd{)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
+\begin{Schunk}
+\begin{Sinput}
+> library(flexsurv)
+> flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+> survreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+\end{Sinput}
+\end{Schunk}
 
 If we also had left-truncation times in a variable called
 \code{start}, the response would be \\ \code{Surv(start,recyrs,censrec)}.
 Or if all responses were interval-censored between lower and upper
 bounds \code{tmin} and \code{tmax}, then we would write
 \code{Surv(tmin,tmax,type="interval2")}.
+
 
 
 \subsection{Using a built-in survival model}
@@ -229,51 +184,62 @@ is \code{dweibull}.
 
 For the Weibull, exponential (\code{dexp}), gamma (\code{dgamma}) and
 log-normal (\code{dlnorm}), the density functions are provided with
-standard installations of R.  \pkg{flexsurv} provides some additional
-survival distributions including the Gompertz distribution with
-unrestricted shape parameter (\code{dist="gompertz"}), and two more
-flexible families:
+standard installations of R.  For all built-in distributions,
+\pkg{flexsurv} also defines functions beginning \code{h} giving the
+hazard, and \code{H} for cumulative hazard.
 
-\paragraph{Generalised gamma} This three-parameter distribution
+Illustrate survreg and flexsurvreg, par ests come from dweibull.
+
+\pkg{flexsurv} provides some additional survival distributions
+including the Gompertz distribution with unrestricted shape parameter
+(\code{dist="gompertz"}), and two more flexible families:
+
+\paragraph{Generalized gamma} This three-parameter distribution
 includes the Weibull, gamma and log-normal as special cases.  The
-parameterisation from \citet{stacy:gengamma} is available as
+original parameterisation from \citet{stacy:gengamma} is available as\\
 \code{dist="gengamma.orig"}, however the newer parameterisation
-\citet{prentice:loggamma} is preferred for modelling since the
-log-normal is not at the boundary of the parameter space, and includes
-a further class of mdoels with negative $Q$.
+\citep{prentice:loggamma} is preferred: \code{dist="gengamma"}.  This has
+parameters ($\mu$,$\sigma$,$q$), and survivor function
+\[
+\begin{array}{ll}
+1 - I(\gamma,u)   & (q > 0)\\
+1 - \Phi(z)  & (q = 0)\\
+\end{array}
+\]
+where $I(a,x) = \int_0^x x^{a-1}\exp(-x)/\Gamma(a)$ is the incomplete gamma function (the cumulative gamma distribution with shape $a$ and scale 1), $\Phi$ is the standard normal cumulative distribution,  $u = \gamma \exp(|q|z)$, $z=(\log(t) - \mu)/\sigma$, and $\gamma=q^{-2}$.   The \citet{prentice:loggamma} parameterisation extends the original one to include a further class of models with negative $q$, and survivor function $I(\gamma,u)$, where $z$ is replaced by $-z$.   This stabilises estimation when the distribution is close to log-normal, since $q=0$ is no longer near the boundary of the parameter space.    In R notation, \footnote{The parameter called $q$ here and in previous literature is called $Q$ in \code{dgengamma} and related functions, since the first argument of a cumulative distribution function is conventionally named \code{q}, for quantile, in R.} the parameter values corresponding to the three special cases are
 
-See \code{help(GenGamma)} and \code{help(GenGamma.orig} for the exact
-definitions of these distributions and which parameter values
-correspond to the Weibull, gamma or log-normal. WRITE OUT IN STATA
-DEFINITION?
+\begin{Code}
+dgengamma(x, mu, sigma, Q=0)     ==  dlnorm(x, mu, sigma)                                
+dgengamma(x, mu, sigma, Q=1)     ==  dweibull(x, shape=1/sigma, scale=exp(mu))           
+dgengamma(x, mu, sigma, Q=sigma) ==  dgamma(x, shape=1/sigma^2, 
+                                               rate=exp(-mu) / sigma^2)  
+\end{Code}
+
 
 \paragraph{Generalized F} This four-parameter distribution includes
 the generalized gamma, and also the log-logistic, as special cases.
 The variety of hazard shapes that can be represented is discussed by
 \citet{ccox:genf}.  It is provided here in alternative ``original''
 (\code{dist="genf.orig"}) and ``stable'' parameterisations
-(\code{dist="genf"}) as discussed by \citet{prentice:genf}.  Again,
-see \code{help(GenF)} and \code{help(GenF.orig} for the exact
-definitions.
+(\code{dist="genf"}) as presented by \citet{prentice:genf}. 
+See \code{help(GenF)} and \code{help(GenF.orig)} in the package documentation 
+for the exact definitions.
 
-For all built-in distributions, \pkg{flexsurv} also defines functions
-beginning \code{h} giving the hazard, and \code{H} for cumulative
-hazard.
 
 \begin{table}
   \begin{tabular}{llll}
 \hline
     &  Parameters &  Density R function & \code{dist}\\
 \hline
-    Exponential & rate             & dexp   & \code{exp} \\
-    Weibull     & shape, scale     & dweibull & \code{weibull} \\
-    Gamma       & shape, rate      & dgamma & \code{gamma}\\
-    Log-normal  & meanlog, sdlog   & dlnorm & \code{lnorm}\\
-    Gompertz    & shape, rate      & dgompertz & \code{gompertz} \\
-    Generalized gamma (Prentice 1975)   & & dgengamma & \code{gengamma} \\
-    Generalized gamma (Stacy 1962)& & dgengamma & \code{gengamma.orig} \\
-    Generalized F     (stable)    & & dgenf & \code{genf} \\
-    Generalized F     (original)  & & dgenf & \code{genf.orig} \\
+    Exponential & rate             & dexp   & \code{"exp"} \\
+    Weibull     & shape, scale     & dweibull & \code{"weibull"} \\
+    Gamma       & shape, rate      & dgamma & \code{"gamma"}\\
+    Log-normal  & meanlog, sdlog   & dlnorm & \code{"lnorm"}\\
+    Gompertz    & shape, rate      & dgompertz & \code{"gompertz"} \\
+    Generalized gamma (Prentice 1975)   & & dgengamma & \code{"gengamma"} \\
+    Generalized gamma (Stacy 1962)& & dgengamma & \code{"gengamma.orig"} \\
+    Generalized F     (stable)    & & dgenf & \code{"genf"} \\
+    Generalized F     (original)  & & dgenf & \code{"genf.orig"} \\
 \hline
   \end{tabular}
   \caption{Built-in parametric survival distributions in \pkg{flexsurv}}
@@ -284,7 +250,7 @@ hazard.
 %% what do we want to show for outputs? 
 %% covariate effects, on more than one parameter. 
 %% plot methods, but no need to show output from summary
-%% using the generalised gamma, eff on 2 but not 3
+%% using the generalized gamma, eff on 2 but not 3
 
 \subsection{Supplying own distributions}
 
@@ -310,6 +276,7 @@ Functions need to be vectorised
 \paragraph{Example: Changing the parameterisation of a distribution}
 
 (talk about Weibull prop haz model, GG PH)
+refer back to Weibull model presentation
 refer back to GG presentation 
 
 \paragraph{Example: Omitting the cumulative distribution or hazard}
@@ -372,12 +339,89 @@ and confidence intervals.   EXAMPLE FROM SPLINE.
 Restricted mean survival: say of interest. ref royston + parmar
 
 
-\section{Spline models}
+\section{Any-dimension models}
 
-parameters are vectors, different design
+\pkg{flexsurv} also supports models where the number of parameters is
+arbitrary.  In the models discussed previously, the number of
+parameters in the model family is fixed (e.g. three for the
+generalized gamma).  Here the model complexity can be chosen by the
+user.  We may want to represent more irregular hazard
+curves by more flexible functions, or use bigger models if a bigger
+sample size makes it feasible to estimate more parameters.
 
-relation to fractional polynomials 
-(see \pkg{mfp} for continuous covariates, slightly diff)
+
+\subsection{Royston and Parmar spline model}
+
+In the spline-based survival model of \citet{royston:parmar}, a
+transformation $g(S(t,z))$ of the survival function is modelled as a
+natural cubic spline function of log time, $x = \log(t)$, plus linear
+effects of covariates $z$.  This is available here as the function
+\code{flexsurvspline},  and is also available in the Stata package
+\code{stpm2} \citep{stpm2} (and historically \code{stpm}, \citet{stpm:orig,stpm:update}).
+
+  \[g(S(t,z)) = s(x, \bm{\gamma})\]
+
+Typically we use $g(S(t,\mathbf{z}) = \log(-\log(S(t,\mathbf{z}))) =
+\log(H(t,\mathbf{z}))$, the log cumulative hazard, giving a
+proportional hazards model.    
+
+\paragraph{Spline parameterisation}
+The complexity of the model, thus the dimension of $\bm{\gamma}$, is
+governed by the number of \emph{knots} $m$ in the spline function
+$s()$.  Natural cubic splines are piecewise cubic polynomials defined
+to be continuous, with continuous first and second derivatives at the
+knots, and also constrained to be linear beyond boundary knots
+$k_{min},k_{max}$.  As well as the boundary knots there may be up to
+$m\geq 0$ \emph{internal} knots $k_1,\ldots k_m$.  Various spline
+parameterisations exist --- the one used here is from
+\citet{royston:parmar}.
+\[ s(x,\bm{\gamma}) = \gamma_0 + \gamma_1 x + \gamma_2 v_1(x) + \ldots +
+\gamma_{m+1} v_m(x) \]
+
+where $v_j(x)$ is the $j$th \emph{basis} function
+
+\[v_j(x) = (x - k_j)^3_+ - \lambda_j(x - k_{min})^3_+ - (1 - \lambda_j) (x - k_{max})^3_+, 
+\qquad
+\lambda_j = \frac{k_{max} - k_j}{k_{max} - k_{min}} \] 
+
+and $(x - a)_+ = max(0, x - a)$.  If $m=0$ then there are only two
+parameters $\gamma_0,\gamma_1$ --- in fact if $g()$ is the log
+cumulative hazard, this is equivalent to a Weibull model (PARAMETERS /
+DPQR STATEMENT).  Table \ref{tab:spline} explains two alternative
+choices of $g()$.
+  
+  \begin{table}
+  \begin{tabularx}{\textwidth}{lXll}
+\hline
+    Model &  $g(S(t,\mathbf{z}))$ & In \code{flexsurvspline} & With $m=0$ \\
+\hline
+    Proportional hazards & $\log(-\log(S(t,\mathbf{z})))$ \newline {\footnotesize (log cumulative hazard)}  & \code{scale="hazard"} & Weibull\\
+    Proportional odds    & $\log(S(t,\mathbf{z})^{-1} - 1)$ \newline {\footnotesize (log cumulative odds)}   & \code{scale="odds"} & Log-logistic\\
+    Normal / probit      & $\Phi^{-1}(S(t,\mathbf{z}))$  \newline   {\footnotesize (inverse normal CDF, \code{qnorm})}    & \code{scale="normal"} & Log-normal \\  
+\hline
+  \end{tabularx}    
+    \caption{Alternative modelling scales for \code{flexsurvspline}}
+    \label{tab:spline}
+\end{table}
+
+\paragraph{Covariates on spline parameters}
+Covariates can be placed on any parameter $\gamma$ through a linear
+model (with identity link function).  Most straightforwardly we can
+let the intercept $\gamma_0$ vary with covariates $\mathbf{z}$, giving
+a proportional hazards or odds model (depending on $g()$).
+
+\[g(S(t,z)) = s(x, \bm{\gamma}) + \bm{\beta}^T \mathbf{z} \]
+
+The spline coefficients $\gamma_j: j=1, 2 \ldots$, the "ancillary parameters",
+may also be modelled as linear functions of covariates $\mathbf{z}$, as
+
+\[\gamma_j(\mathbf{z}) = \gamma_{j0} + \gamma_{j1}z_1 + \gamma_{j2}z_2 + \ldots\]
+
+giving a model where the effects of covariates are arbitrarily flexible
+functions of time: a non-proportional hazards or odds model.
+
+
+
 
 stgenreg has demo of spline modelling on the log hazard scale.  Can we do this using a generic distribution? 
 (advantage: when there are multiple time dependent effects, the
@@ -390,6 +434,13 @@ Demo on at least one dataset
 
 \subsection{General-dimension models}
 \label{sec:gdim}
+
+
+parameters are vectors, different design
+
+relation to fractional polynomials 
+(see \pkg{mfp} for continuous covariates, slightly diff)
+
 
 The spline model above is an example of a model where the general
 parametric form can be written explicitly as in model \ref{eq:model},
@@ -414,7 +465,6 @@ enhances mstate
 
 relative survival
 frailty 
-what else does survival do 
 many extensions may come from user-contributed models
 
 

@@ -377,3 +377,25 @@ test_that("Gompertz hazards",{
     expect_equal(Hgompertz(c(2,4), c(0,0), c(2,2)), Hexp(c(2,4), c(2,2)))
 })
 
+
+
+test_that("Generalized gamma definition in Stata manual",{
+    Sgg <- function(t, mu, sigma, kappa){
+        IGF <- function(a, x){ pgamma(x, a) } # incomplete gamma function   
+        gamma <- 1 / kappa^2
+        z <- (log(t) - mu)/sigma
+        z[kappa<0] <- -z[kappa<0] # Stata manual using sign(0) = 1
+        u <- gamma*exp(abs(kappa)*z)
+        ifelse(kappa > 0,
+               1 - IGF(gamma, u),
+               ifelse(kappa==0,
+                      1 - pnorm(z),
+                      IGF(gamma, u)))
+    }
+    expect_equal(
+        Sgg(c(1,2,3),c(-1,2,0.2),c(1,2,1),c(-1, 0, 1)),
+        pgengamma(c(1,2,3),c(-1,2,0.2),c(1,2,1),c(-1, 0, 1), lower.tail=FALSE)
+        )
+})
+
+## IGF definition: (log(t) - mu)/sigma
