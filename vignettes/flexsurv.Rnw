@@ -79,7 +79,7 @@ Many other contributed R packages can fit survival models,
 e.g. \pkg{eha} \citep{eha}, \pkg{VGAM} \citep{yee:wild}, though these
 are either limited to specific distribution families not specifically
 designed for survival analysis, or (\pkg{ActuDistns},
-\citet{ActuDistns}) contain only the definitions of distribution
+\citet{actudistns}) contain only the definitions of distribution
 functions.  \pkg{flexsurv} enables distribution functions provided by
 such packages to be employed in models.  An advantage over
 \pkg{stgenreg} is that numerical integration can be avoided if the
@@ -102,10 +102,18 @@ The general model that \pkg{flexsurv} fits has probability density function
   f(t | \mu(\mathbf{z}), \bm{\alpha}(\mathbf{z})), \quad t \geq 0  
 \end{equation}
 
+We also define (suppressing the conditioning for clarity) the
+cumulative distribution function $F(t)$, survivor function $S(t) = 1 -
+F(t)$, cumulative hazard $H(t) = -\log S(t)$ and hazard $h(t) =
+f(t)/S(t)$.
+
 $\mu=\alpha_0$ is the parameter of primary interest,
 which usually governs the mean or location of the distribution.  Other
 parameters $\bm{\alpha} = \alpha_1, \ldots, \alpha_R$ are called
 ``ancillary'' and determine the shape, variance or higher moments.
+
+\paragraph{Covariates} 
+
 All parameters may depend on a vector of covariates $\mathbf{z}$
 through link-transformed linear models $g_0(\mu) = \bm{\beta}_0^{'}
 \mathbf{z}$ and $g_r(\alpha_r) = \bm{\beta}_r^{'} \mathbf{z}$. $g(x)$ will
@@ -113,12 +121,21 @@ typically be $\log(x)$ if $x$ is defined to be positive, or $g(x)=x$
 if $x$ is unrestricted.  In all models, $\bm{\beta}$ includes at 
 least an intercept, so that the full set of parameters is given by 
 $\{\bm{\beta}_r: r=1,\ldots,R$.
-PROPORTIONAL HAZARDS / ACCELERATED FAILURE TIME
 
-We also define (suppressing the conditioning for clarity) the
-cumulative distribution function $F(t)$, survivor function $S(t) = 1 -
-F(t)$, cumulative hazard $H(t) = -\log S(t)$ and hazard $h(t) =
-f(t)/S(t)$.
+Suppose that the location but not the ancillary parameters depend on
+covariates.  If the hazard function factorises as $h(t | \alpha,
+\mu(\mathbf{z})) = \mu(\mathbf{z}) h_0(t | \alpha)$, then this is a
+\emph{proportional hazards} model, so that the hazard ratio between
+two groups (defined by different values of $\mathbf{z}$ is constant
+over time.  Alternatively, if $S(t | \mu(\mathbf{z}), \alpha) =
+S(\mu(\mathbf{z}) t | \alpha)$ then we have an \emph{accelerated
+  failure time} model, so that the effect of covariates is to speed or
+slow the passage of time. For example if there is one covariate with
+coefficient $\beta=\log(2)$, then doubling the covariate value would
+give half the expected survival time.
+
+
+\paragraph{Data and likelihood} 
 
 Let $t_i: i=1,\ldots, n$ be a sample of times from individuals $i$.
 Let $c_i=1$ if $t_i$ is an observed death time, or $c_i=0$ if $t_i$ is
@@ -438,18 +455,40 @@ The spline model above is an example of the general parametric form
 (\ref{eq:model}), but the number of parameters ($R+1$ in
 (\ref{eq:model}), $m+2$ in (\ref{eq:spline})) is arbitrary.
 \pkg{flexsurv} has the tools to deal with any model of this form.
+\code{flexsurvspline} works internally by building a custom
+distribution and then calling \code{flexsurvreg}.  Similar models may
+in principle be built by users using the same method.  This relies on
+a functional programming trick.
+
+\paragraph{Creating distribution functions dynamically}
 
 The R distribution functions supplied to custom models are expected to
-have a fixed number of arguments, one for each scalar parameter.  The
-distribution functions for the spline model have an argument
-\code{gamma} representing the vector of parameters $\gamma$.
+have a fixed number of arguments, one for each scalar parameter.
+However, the distribution functions for the spline model
+(e.g. dsurvspline) have an argument \code{gamma} representing the
+vector of parameters $\gamma$.  
+
+
+To convert it into the correct form, \pkg{flexsurv} provides the
+utility \code{unroll.function}.  This converts a function with one (or
+more) vector parameters (matrix arguments) to a function with an
+arbitrary number of scalar parameters (vector arguments).
+
+Note the scalar \emph{parameters} can be supplied to the function as
+correspond to vector \emph{arguments}, and vector parameters supplied
+as \emph{matrix} arguments.
+
+That is, \code{x},\code{shape} and \code{scale} in
+\code{dweibull(x,shape,scale)} could actually be vectors representing
+alternative values for the \code{x} or the parameters.  Similary
+\code{gamma} in \code{dsurvspline(x, gamma,...)} could be a matrix,
+  whose rows represent alternative sets of values for $\gamma$.
 
 Due to vectorisation:  EXAMPLE
 
-utility \code{unroll.function} which creates
 
 
-\paragraph{Splines on alternative scales}
+\paragraph{Example: splines on alternative scales}
 
 stgenreg has demo of spline modelling on the log hazard scale.  Can we do this using a generic distribution? 
 (advantage: when there are multiple time dependent effects, the
@@ -458,7 +497,7 @@ they do not depend on values of other covariates, which is the case
 when modelling on the cumulative hazard scale (Royston and Lambert
 2011).
 
-\paragraph{Fractional polynomials}
+\paragraph{Example: fractional polynomials}
 
 %fractional polynomials? 
 %specified by number M and set of powers p1,...pM
@@ -471,7 +510,84 @@ relation to fractional polynomials
 
 \section{Multi-state models}
 
-enhances mstate
+A \emph{multi-state model} represents how an individual moves between
+multiple states through time.  Survival analysis is a special case of
+multi-state modelling with two states ``alive'' and ``dead''. Suppose
+an individual is in state $S(t)$ at time $t$.  The next state to which
+the individual moves, and the time of the change, are governed by a
+set of \emph{transition intensities} $q_{rs}(t)$ for states $r, s =
+1,\dots,R$, which for a survival model are equivalent to the hazard
+$h(t)$.  The intensity represents the instantaneous risk of moving
+from state $r$ to state $s$.
+
+Suppose our data consist of a series of event times $t_{1},\dots,
+t_{n}$, the last of these may be an observed event or censoring.  Any
+software to fit survival models can also fit multi-state models to
+this kind of data, provided it can deal with left-truncation or
+\emph{counting process} data.
+
+For more discussion of the theory see \citet{putter:mstate}. ref also
+Andersen for CP data
+
+\paragraph{Counting process data}
+For each permitted $r \rightarrow s$ transition in the multi-state
+model (ILLUSTRATION) there is a corresponding \emph{time-to-event
+  model}, with cause-specific hazard rates defined by $q_{rs}(t)$. To
+enable estimation of these hazards, the data are expressed as a series
+of times to events which are potentially censored: $dt_{j} = t_{j+1} -
+t_{j}: j = 1,\ldots,n-1$. For a patient who moves into state $s$ at
+time $t_{j}$, their next event at $t_{j+1}$ is defined by the model
+structure (Figure~\ref{fig:cMSMfigure}) to be one of a set of
+competing events $s^*_1,\ldots,s^*_{n_s}$.
+
+For example, in state EXAMPLE, the next state must either be EXAMPLE
+or EXAMPLE so $n_s=EG$.  The time of the event which actually occurs
+at $t_{j+1}$ is \emph{observed}, and the times of the \emph{competing}
+events from this set (which have not occurred by this time) are
+\emph{censored}.  Each $dt_{j}$ contributes an \emph{observed} time to
+one of the EG transition-specific models, and a \emph{censored} time
+to each of the models for the competing events.
+
+FLEXSURVREG EXAMPLE
+
+The \pkg{mstate} R package \citep{mstate:cmpb,mstate:jss} has a
+utility \code{msprep} to produce data of this form from
+``wide-format'' datasets where rows represent individuals, and times
+of different events appear in different columns, and \pkg{mstate} has
+a utility \code{msm2Surv} for 
+
+illustrates Cox models
+flexible parametric multi-state models 
+
+\paragraph{Prediction from multi-state models}
+
+Define cumulative incidence functions
+
+The \code{mstate} package is designed to work with 
+piecewise-constant cumulative incidence functions
+baseline hazards are estimated non-parametrically 
+\citep{mstate:cmpb,mstate:jss} 
+
+function \code{msfit} that produces the cumulative incidences for each transition and a given covariate category, and their covariances, given a Cox model fitted using \code{coxph} from the \pkg{survival} package. 
+
+Aalen-Johansen estimator,  simulation
+
+contrast Markov and semi-Markov models
+
+\paragraph{Multi-state models for panel data}
+
+Note the contrast with multi-state models for \emph{panel data}, that is,
+observations of the state of the process at a series of times
+\citep{kalbfleisch:lawless}.  In panel data, we do not necessarily
+know know the time of each transition, or even whether a transitions
+of a certain type have occurred at all between a pair of observations.
+Such models can be fitted with the \pkg{msm} package for R, but are
+restricted to (piecewise) exponentially-distributed event times.
+
+
+
+\code{survSplit} function in \pkg{survival} 
+
 
 % cif in comp risks planned for stgenreg 
 \section{Potential extensions}

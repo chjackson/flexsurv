@@ -2,3 +2,8 @@ TODO
 \.Rhistory
 \.Rprofile
 \.git
+\.aux
+\.bbl
+\.blg
+\.log
+\.out
