@@ -23,15 +23,18 @@
   is the spline model of Royston and Parmar, in which both baseline
   survival and covariate effects can be arbitrarily flexible
   parametric functions of time.
-
-  Any output function
-  
+ 
   The main model-fitting function, \code{flexsurvreg}, uses the
   familiar syntax of \code{survreg} from the standard \pkg{survival}
   package --- censoring or left-truncation are specified in
-  \code{Surv} objects.  \pkg{flexsurv} also enhances the \pkg{mstate}
-  package (Putter et al) by providing cumulative incidences for
-  fully-parametric multi-state models.  }
+  \code{Surv} objects.  Any function of the model parameters can be
+  summarised in the output, including uncertainty.  \pkg{flexsurv}
+  also enhances the \pkg{mstate} package (Putter et al) by providing
+  cumulative incidences for fully-parametric multi-state models.  
+
+  This article explains the methods and design principles of the
+  package, giving several worked examples of its use.
+}
 %\Keywords{survival}
 
 \usepackage{Sweave}
@@ -103,37 +106,38 @@ The general model that \pkg{flexsurv} fits has probability density function
   f(t | \mu(\mathbf{z}), \bm{\alpha}(\mathbf{z})), \quad t \geq 0  
 \end{equation}
 
-We also define (suppressing the conditioning for clarity) the
-cumulative distribution function $F(t)$, survivor function $S(t) = 1 -
-F(t)$, cumulative hazard $H(t) = -\log S(t)$ and hazard $h(t) =
-f(t)/S(t)$.
+We also define the cumulative distribution function $F(t)$, survivor
+function $S(t) = 1 - F(t)$, cumulative hazard $H(t) = -\log S(t)$ and
+hazard $h(t) = f(t)/S(t)$ (suppressing the conditioning for clarity).
 
 $\mu=\alpha_0$ is the parameter of primary interest,
 which usually governs the mean or location of the distribution.  Other
 parameters $\bm{\alpha} = \alpha_1, \ldots, \alpha_R$ are called
 ``ancillary'' and determine the shape, variance or higher moments.
 
+%%% Covariates may be time-dependent, but this notation generalizes to left-truncation, ref msm section 
+
 \paragraph{Covariates} 
 
 All parameters may depend on a vector of covariates $\mathbf{z}$
 through link-transformed linear models $g_0(\mu) = \bm{\beta}_0^{'}
-\mathbf{z}$ and $g_r(\alpha_r) = \bm{\beta}_r^{'} \mathbf{z}$. $g(x)$ will
-typically be $\log(x)$ if $x$ is defined to be positive, or $g(x)=x$
-if $x$ is unrestricted.  In all models, $\bm{\beta}$ includes at 
-least an intercept, so that the full set of parameters is given by 
-$\{\bm{\beta}_r: r=1,\ldots,R$.
+\mathbf{z}$ and $g_r(\alpha_r) = \bm{\beta}_r^{'} \mathbf{z}$. $g()$
+will typically be $\log()$ if the parameter is defined to be positive,
+or the identity function if the parameter is unrestricted.  In all
+models, $\bm{\beta}$ includes at least an intercept, so that the full
+set of parameters is given by $\{\bm{\beta}_r: r=0,\ldots,R$\}.
 
-Suppose that the location but not the ancillary parameters depend on
-covariates.  If the hazard function factorises as $h(t | \alpha,
+Suppose that the location, but not the ancillary parameters, depends
+on covariates.  If the hazard function factorises as $h(t | \alpha,
 \mu(\mathbf{z})) = \mu(\mathbf{z}) h_0(t | \alpha)$, then this is a
 \emph{proportional hazards} model, so that the hazard ratio between
-two groups (defined by different values of $\mathbf{z}$ is constant
+two groups (defined by different values of $\mathbf{z}$) is constant
 over time.  Alternatively, if $S(t | \mu(\mathbf{z}), \alpha) =
 S(\mu(\mathbf{z}) t | \alpha)$ then we have an \emph{accelerated
   failure time} model, so that the effect of covariates is to speed or
-slow the passage of time. For example if there is one covariate with
-coefficient $\beta=\log(2)$, then doubling the covariate value would
-give half the expected survival time.
+slow the passage of time. For example, doubling the value of a
+covariate with coefficient $\beta=\log(2)$ would give half the
+expected survival time.
 
 
 \paragraph{Data and likelihood} 
@@ -283,6 +287,13 @@ example, for survival following major surgery we may want a
 operation, which then decreases, but increases naturally as survivors
 grow older.
 
+To supply a custom distribution, the \code{dist} argument to
+\code{flexsurvreg} is defined to be a list with the following elements.
+
+\begin{description}
+\item[\code{name}] Name
+\item[\code{transforms}] Name
+\end{description}
     
 \paragraph{Example: Using functions from a contributed package}
 

@@ -23,15 +23,18 @@
   is the spline model of Royston and Parmar, in which both baseline
   survival and covariate effects can be arbitrarily flexible
   parametric functions of time.
-
-  Any output function
-  
+ 
   The main model-fitting function, \code{flexsurvreg}, uses the
   familiar syntax of \code{survreg} from the standard \pkg{survival}
   package --- censoring or left-truncation are specified in
-  \code{Surv} objects.  \pkg{flexsurv} also enhances the \pkg{mstate}
-  package (Putter et al) by providing cumulative incidences for
-  fully-parametric multi-state models.  }
+  \code{Surv} objects.  Any function of the model parameters can be
+  summarised in the output, including uncertainty.  \pkg{flexsurv}
+  also enhances the \pkg{mstate} package (Putter et al) by providing
+  cumulative incidences for fully-parametric multi-state models.  
+
+  This article explains the methods and design principles of the
+  package, giving several worked examples of its use.
+}
 %\Keywords{survival}
 
 \begin{document}
@@ -102,37 +105,38 @@ The general model that \pkg{flexsurv} fits has probability density function
   f(t | \mu(\mathbf{z}), \bm{\alpha}(\mathbf{z})), \quad t \geq 0  
 \end{equation}
 
-We also define (suppressing the conditioning for clarity) the
-cumulative distribution function $F(t)$, survivor function $S(t) = 1 -
-F(t)$, cumulative hazard $H(t) = -\log S(t)$ and hazard $h(t) =
-f(t)/S(t)$.
+We also define the cumulative distribution function $F(t)$, survivor
+function $S(t) = 1 - F(t)$, cumulative hazard $H(t) = -\log S(t)$ and
+hazard $h(t) = f(t)/S(t)$ (suppressing the conditioning for clarity).
 
 $\mu=\alpha_0$ is the parameter of primary interest,
 which usually governs the mean or location of the distribution.  Other
 parameters $\bm{\alpha} = \alpha_1, \ldots, \alpha_R$ are called
 ``ancillary'' and determine the shape, variance or higher moments.
 
+%%% Covariates may be time-dependent, but this notation generalizes to left-truncation, ref msm section 
+
 \paragraph{Covariates} 
 
 All parameters may depend on a vector of covariates $\mathbf{z}$
 through link-transformed linear models $g_0(\mu) = \bm{\beta}_0^{'}
-\mathbf{z}$ and $g_r(\alpha_r) = \bm{\beta}_r^{'} \mathbf{z}$. $g(x)$ will
-typically be $\log(x)$ if $x$ is defined to be positive, or $g(x)=x$
-if $x$ is unrestricted.  In all models, $\bm{\beta}$ includes at 
-least an intercept, so that the full set of parameters is given by 
-$\{\bm{\beta}_r: r=1,\ldots,R$.
+\mathbf{z}$ and $g_r(\alpha_r) = \bm{\beta}_r^{'} \mathbf{z}$. $g()$
+will typically be $\log()$ if the parameter is defined to be positive,
+or the identity function if the parameter is unrestricted.  In all
+models, $\bm{\beta}$ includes at least an intercept, so that the full
+set of parameters is given by $\{\bm{\beta}_r: r=0,\ldots,R$\}.
 
-Suppose that the location but not the ancillary parameters depend on
-covariates.  If the hazard function factorises as $h(t | \alpha,
+Suppose that the location, but not the ancillary parameters, depends
+on covariates.  If the hazard function factorises as $h(t | \alpha,
 \mu(\mathbf{z})) = \mu(\mathbf{z}) h_0(t | \alpha)$, then this is a
 \emph{proportional hazards} model, so that the hazard ratio between
-two groups (defined by different values of $\mathbf{z}$ is constant
+two groups (defined by different values of $\mathbf{z}$) is constant
 over time.  Alternatively, if $S(t | \mu(\mathbf{z}), \alpha) =
 S(\mu(\mathbf{z}) t | \alpha)$ then we have an \emph{accelerated
   failure time} model, so that the effect of covariates is to speed or
-slow the passage of time. For example if there is one covariate with
-coefficient $\beta=\log(2)$, then doubling the covariate value would
-give half the expected survival time.
+slow the passage of time. For example, doubling the value of a
+covariate with coefficient $\beta=\log(2)$ would give half the
+expected survival time.
 
 
 \paragraph{Data and likelihood} 
@@ -158,8 +162,11 @@ The likelihood for the parameters $\bm{\beta}$ in model
 Note that the individuals are independent, so that \pkg{flexsurv} does not
 currently support frailty, clustered or random effects models.
 
-EXAMPLE DATASET HERE.  bc?  ovarian, lung, cancer, aml, tobin, cgd,
-heart, kidney, logan, nwtco, pbc, rats in survival
+An example dataset used throughout this paper is from 686 patients
+with primary node positive breast cancer, available in the package as
+\code{bc}. This was originally provided with \code{stpm} \citet{stpm},
+and analysed in much more detail by \citet{royston:parmar} and
+\citet{sauerbrei1999building}.
 
 
 \section{Model fitting syntax} 
@@ -170,13 +177,15 @@ the formula gives the response as a survival object using \code{Surv}
 function from the \pkg{survival} package.  Here, this indicates that
 the response variable is \code{recyrs}, and that these are observed
 death and censoring times when the variable \code{censrec} is 1 or 0
-respectively.  All of these variables are in the data frame called
+respectively.  The covariate \code{group} is a factor representing
+prognostic score, with three levels \code{``Good''} (the baseline), \code{``Medium''} and \code{``Poor''}. All of these variables are in the data frame called 
 \code{bc}.  
 <<eval=FALSE>>=
 library(flexsurv)
-flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
-survreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
 @ 
+
+TODO get rid of the NaNs
 
 If we also had left-truncation times in a variable called
 \code{start}, the response would be \\ \code{Surv(start,recyrs,censrec)}.
@@ -204,7 +213,19 @@ hazard, and \code{H} for cumulative hazard.
 
 Illustrate survreg and flexsurvreg, par ests come from dweibull.
 <<>>=
+sr1 <- survreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+
+sr1$loglik[2]
+fs1$loglik
+
+exp(coef(sr1)[1])
+fs1["scale","est"]
+
+1/sr1$scale
+fs1["shape","est"]
+plot(fs1)
 @ 
+effects of the covariates are the same: AFT coeffs
 
 \pkg{flexsurv} provides some additional survival distributions
 including the Gompertz distribution with unrestricted shape parameter
@@ -230,7 +251,12 @@ dgengamma(x, mu, sigma, Q=1)     ==  dweibull(x, shape=1/sigma, scale=exp(mu))
 dgengamma(x, mu, sigma, Q=sigma) ==  dgamma(x, shape=1/sigma^2, 
                                                rate=exp(-mu) / sigma^2)  
 \end{Code}
-
+<<>>=
+fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="gengamma")
+lines(fs2, col="blue")
+fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group + sigma(group), data=bc, dist="gengamma")
+lines(fs3, col="green")
+@ 
 
 \paragraph{Generalized F} This four-parameter distribution includes
 the generalized gamma, and also the log-logistic, as special cases.
@@ -282,6 +308,19 @@ example, for survival following major surgery we may want a
 operation, which then decreases, but increases naturally as survivors
 grow older.
 
+To supply a custom distribution, the \code{dist} argument to
+\code{flexsurvreg} is defined to be an R list object with the
+following elements.   ILLUSTRATE FOR LOG LOGISTIC
+
+\begin{description}
+\item[\code{name}] Name of the distribution.  For example, if this is ?? then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given}, or \code{H} for the cumulative hazard (to complement \code{h}).
+  These functions must be \emph{vectorised}.   EXAMPLE
+\item[\code{pars}] Character vector naming the parameters of the distribution $\mu,\alpha_1,...,\alpha_R$.
+\item[\code{location}] Quoted name of the location parameter $\mu$.
+\item[\code{transforms}] A list of functions $g()$ which transform the parameter from its natural range to the real line, for example, \code{c(log,identity)} \footnote{Note this is a \emph{list}, not an \emph{atomic vector} of functions, so if the distribution only has one parameter, we shoudl write \code{transforms=c(log)} or \code{transforms=list(log)}, not \code{transforms=log}}
+\item[\code{inv.transforms}] List of corresponding inverse functions.
+\item[\code{inits}] A function which returns initial values of the parameters for maximum likelihood estimation.    TRICKY
+\end{description}
     
 \paragraph{Example: Using functions from a contributed package}
 
@@ -504,9 +543,20 @@ when modelling on the cumulative hazard scale (Royston and Lambert
 %chosen from c(-2,-1,-0.5,0,0.5,1,2,3), including repeats, where x^0 = log(x)
 %with repeated powers, each repeat multiplied by a power of log(x)
 
-relation to fractional polynomials 
-(see \pkg{mfp} for continuous covariates, slightly diff)
+relation to fractional polynomials \citep{royston1994regression}
 
+Note that both splines and fractional polynomials have only been used
+here to express how risk changes through time --- they can also be
+used for expressing non-linear effects of any continuous predictor,
+see e.g. \citet{sauerbrei2007selection}, and several other
+publications by the same authors, for a discussion and comparison.
+This may be achieved here by using a suitable basis function of the
+covariate EXAMPLE in the model formula.
+
+Polyhazard models \citep{polyhazard} are another potential application
+of this technique.  These express an overall hazard as a sum of latent
+cause-specific hazards, although they may suffer from lack of
+identifiability.  cite nikos, me
 
 \section{Multi-state models}
 
