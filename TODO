@@ -17,11 +17,6 @@ plot two groups for a numeric 0/1 variable
 
 hHsurvspline: vectorise as dp
 
-
-
-relate my gg pars to stata
-gamma is q
-
 intervals in Surv are open on left, closed on right
 
-other types of status: interval,interval2 or mstate
+other types of status: mstate
