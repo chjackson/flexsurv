@@ -105,6 +105,9 @@ DLSweibull <- function(t, shape, scale){
     res
 }
 
+DLdweibull.quiet <- DLdweibull
+DLSweibull.quiet <- DLSweibull
+
 ## Gompertz
 
 DLdgompertz <- function(t, shape, rate){

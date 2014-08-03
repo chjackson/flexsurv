@@ -1,6 +1,18 @@
 
 ### LIBRARY OF NEW MODELS
 
+## Logistic: as in manual
+
+library(eha)
+custom.llogis <- list(name="llogis",  pars=c("shape","scale"), location="scale",
+                      transforms=c(log, log), inv.transforms=c(exp, exp),
+                      inits=function(t){ c(1, median(t)) })
+fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.llogis)
+plot(fs1)
+fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+lines(fs2, col="blue")
+## Log-logistic / proportional odds model fits better
+
 
 ## Gompertz-Makeham: wrapping an existing distribution
 ## Need proper vectorisation to work for covariates
@@ -26,10 +38,12 @@ custom.makeham <- list(name="makeham3",
 
 x <- rnorm(1000); beta <- 0.1
 msim <- rmakeham(1000, shape=c(0.01, 0.02), scale=10*exp(beta*x))
-fit <- flexsurvreg(formula = Surv(msim, rep(1, 1000)) ~ x, dist=custom.makeham)
+fit <- flexsurvreg(Surv(msim, rep(1, 1000)) ~ x, dist=custom.makeham)
 fit # This one needs tight initial values to converge
 
-
+flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.makeham)
+## shape2 and scale parameters appear to be not identifiable
+flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="gompertz")
 
 ## Weibull proportional hazards parameterisation
 

@@ -7,6 +7,7 @@ logh <- function(x)((x^2 - 1)/(2*x))
 
 flexsurv.dists <- list(
                        genf = list(
+                       name="genf",
                        pars=c("mu","sigma","Q","P"),
                        location="mu",
                        transforms=c(identity, log, identity, log),
@@ -17,6 +18,7 @@ flexsurv.dists <- list(
                        }
                        ),
                        genf.orig = list(
+                       name="genf.orig",
                        pars=c("mu","sigma","s1","s2"),
                        location="mu",
                        transforms=c(identity, log, log, log),
@@ -27,6 +29,7 @@ flexsurv.dists <- list(
                        }
                        ),
                        gengamma = list(
+                       name="gengamma",
                        pars=c("mu","sigma","Q"),
                        location="mu",
                        transforms=c(identity, log, identity),
@@ -37,6 +40,7 @@ flexsurv.dists <- list(
                        }
                        ),
                        gengamma.orig = list(
+                       name="gengamma.orig",
                        pars=c("shape","scale","k"),
                        location="scale",
                        transforms=c(log, log, log),
@@ -44,6 +48,7 @@ flexsurv.dists <- list(
                        inits=function(t){c(1, mean(t), 1)}
                        ),
                        exp = list(
+                       name="exp",
                        pars=c("rate"),
                        location="rate",
                        transforms=c(log),
@@ -51,6 +56,7 @@ flexsurv.dists <- list(
                        inits=function(t){1 / mean(t)}
                        ),
                        weibull = list(
+                       name = "weibull.quiet",
                        pars=c("shape","scale"),
                        location="scale",
                        transforms=c(log, log),
@@ -62,6 +68,7 @@ flexsurv.dists <- list(
                        }
                        ),
                        lnorm = list(
+                       name="lnorm",
                        pars=c("meanlog","sdlog"),
                        location="meanlog",
                        transforms=c(identity, log),
@@ -72,6 +79,7 @@ flexsurv.dists <- list(
                        }
                        ),
                        gamma = list(
+                       name="gamma",
                        pars=c("shape","rate"),
                        location="rate",
                        transforms=c(log, log),
@@ -82,6 +90,7 @@ flexsurv.dists <- list(
                        }
                        ),
                        gompertz = list(
+                       name="gompertz",
                        pars=c("shape","rate"),
                        location="rate",
                        transforms=c(identity, log),
@@ -89,8 +98,6 @@ flexsurv.dists <- list(
                        inits=function(t){c(0.001,1 / mean(t))}
                        )
                        )
-for (i in seq_along(flexsurv.dists))
-    flexsurv.dists[[i]]$name <- names(flexsurv.dists)[i]
 
 minusloglik.flexsurv <- function(optpars, Y, X=0, weights, dlist, inits,
                                  dfns, aux, mx, fixedpars=NULL) {

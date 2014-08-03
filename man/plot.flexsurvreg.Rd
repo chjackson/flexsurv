@@ -22,6 +22,19 @@
 
   \item{newdata}{Data frame containing covariate values to produce
     fitted values for.  See \code{\link{summary.flexsurvreg}}.
+
+    If there are only factor covariates in the model, then Kaplan-Meier
+    (or nonparametric hazard...)
+    curves are plotted for all distinct groups, and by default, fitted
+    curves are also plotted for these groups.   To plot Kaplan-Meier and
+    fitted curves for only a subset of groups, use \code{plot(survfit())}
+    followed by \code{lines.flexsurvreg()}.
+
+    If there are any continuous covariates, then a single population
+    Kaplan-Meier curve is drawn. By default, a single fitted curve
+    is drawn with the covariates set to their mean values in the data -
+    for categorical covariates, the means of the 0/1 indicator
+    variables are taken.   
   }  
   \item{X}{ Alternative way to supply covariate values, as a model
     matrix.   See \code{\link{summary.flexsurvreg}}.  \code{newdata} is

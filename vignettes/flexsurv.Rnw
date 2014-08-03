@@ -180,12 +180,10 @@ death and censoring times when the variable \code{censrec} is 1 or 0
 respectively.  The covariate \code{group} is a factor representing
 prognostic score, with three levels \code{``Good''} (the baseline), \code{``Medium''} and \code{``Poor''}. All of these variables are in the data frame called 
 \code{bc}.  
-<<eval=FALSE>>=
+<<>>=
 library(flexsurv)
 fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
 @ 
-
-TODO get rid of the NaNs
 
 If we also had left-truncation times in a variable called
 \code{start}, the response would be \\ \code{Surv(start,recyrs,censrec)}.
@@ -223,7 +221,6 @@ fs1["scale","est"]
 
 1/sr1$scale
 fs1["shape","est"]
-plot(fs1)
 @ 
 effects of the covariates are the same: AFT coeffs
 
@@ -253,9 +250,7 @@ dgengamma(x, mu, sigma, Q=sigma) ==  dgamma(x, shape=1/sigma^2,
 \end{Code}
 <<>>=
 fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="gengamma")
-lines(fs2, col="blue")
 fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group + sigma(group), data=bc, dist="gengamma")
-lines(fs3, col="green")
 @ 
 
 \paragraph{Generalized F} This four-parameter distribution includes
@@ -288,7 +283,31 @@ for the exact definitions.
   \label{tab:dists}
 \end{table}
 
+\subsection{Plotting outputs}
 
+The \code{plot()} method for \code{flexsurvreg} objects is used as a
+quick check of model fit.  By default (e.g. \code{plot(fs1,
+  scale="survival")}), this draws a Kaplan-Meier estimate of the
+survivor function $S(t)$, one for each combination of categorical
+covariates, or just a single curve if there are no categorical
+covariates.  The corresponding estimates from the fitted model are
+overlaid.  \code{scale="hazard"} can be used to plot hazards from the
+parametric model against kernel density estimates (obtained from
+\pkg{muhaz}; citet{muhaz,mueller:wang}), while \code{scale="cumhaz"}
+plots cumulative hazards. HAZ EXAMPLE.  In fact any function of the
+parameters can be plotted, see EXAMPLE.
+
+Fitted values from further models can be added with the \code{lines()}
+method.  For more customisable plots, it is advised to set up the axes
+beforehand, and use the \code{lines()} method.  Or for even more
+flexibility, the data underlying the plots is available from the
+\code{summary.flexsurvreg()} method.
+
+<<>>=
+plot(fs1)
+lines(fs2, col="blue")
+lines(fs3, col="green")
+@ 
 %% what do we want to show for outputs? 
 %% covariate effects, on more than one parameter. 
 %% plot methods, but no need to show output from summary
@@ -310,7 +329,7 @@ grow older.
 
 To supply a custom distribution, the \code{dist} argument to
 \code{flexsurvreg} is defined to be an R list object with the
-following elements.   ILLUSTRATE FOR LOG LOGISTIC
+following elements.   
 
 \begin{description}
 \item[\code{name}] Name of the distribution.  For example, if this is ?? then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given}, or \code{H} for the cumulative hazard (to complement \code{h}).
@@ -324,9 +343,43 @@ following elements.   ILLUSTRATE FOR LOG LOGISTIC
     
 \paragraph{Example: Using functions from a contributed package}
 
+The following custom model uses the log-logistic distribution function
+(\code{dllogis} and \code{pllogis}) available in the package
+\pkg{eha}.   This has two parameters DISCUSS.   INITIAL VALUES?
+<<>>=
+library(eha)
+custom.llogis <- list(name="llogis",  pars=c("shape","scale"), location="scale",
+                      transforms=c(log, log), inv.transforms=c(exp, exp),
+                      inits=function(t){ c(1, median(t)) })
+fs4 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.llogis)
+@ 
+
+Discuss fit --- similar to generalized gamma.  AFT parameterisation
+better than PH here.
+
 Distribution exists in another package, but may be parameterised 
-Example: Gompertz-Makeham
+Example: Gompertz-Makeham -- say it doesn't converge, the parameters aren't identifiable 
+
+\paragraph{Example: Wrapping functions from a contributed package}
+
+<<>>=
+dmakeham3 <- function(x, shape1, shape2, scale, ...)  {
+    dmakeham(x, shape=c(shape1, shape2), scale=scale, ...)
+}
+dmakeham3 <- Vectorize(dmakeham3) 
+
+pmakeham3 <- function(q, shape1, shape2, scale, ...)  {
+    pmakeham(q, shape=c(shape1, shape2), scale=scale, ...)
+}
+pmakeham3 <- Vectorize(pmakeham3)
+@ 
+\begin{Rcode}
+custom.makeham <- list(name="makeham3",
+                       pars=c("shape1","shape2","scale"),
+\end{Rcode}
+
 Functions need to be vectorised 
+density functions need a log argument
 
 \paragraph{Example: Changing the parameterisation of a distribution}
 

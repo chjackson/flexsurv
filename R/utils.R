@@ -232,5 +232,19 @@ var.lnorm <- function(meanlog=0, sdlog=1){
     exp(2*meanlog + sdlog^2)*(exp(sdlog^2) - 1)
 }
 
+## Don't warn about NaNs when NaNs are produced.  This happens for
+## extreme parameter values during optimisation.
+
+dweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
+    ret <- suppressWarnings(dweibull(x=x, shape=shape, scale=scale, log=log))
+    ret
+}
+
+pweibull.quiet <- function(q, shape, scale = 1, lower.tail = TRUE, log.p = FALSE) {
+    ret <- suppressWarnings(pweibull(q=q, shape=shape, scale=scale, lower.tail=lower.tail, log.p=log.p))
+    ret
+}
+
 ## suppresses NOTE from checker about variables created with "assign"
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
+
