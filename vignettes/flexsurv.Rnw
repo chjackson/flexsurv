@@ -9,6 +9,7 @@
 \documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
 \usepackage{tabularx}
+\usepackage{graphics}
 
 \author{Christopher H. Jackson \\ MRC Biostatistics Unit, Cambridge, UK \\ \email{chris.jackson@mrc-bsu.cam.ac.uk}}
 \title{flexsurv: flexible parametric survival modelling in R}
@@ -27,23 +28,24 @@
   The main model-fitting function, \code{flexsurvreg}, uses the
   familiar syntax of \code{survreg} from the standard \pkg{survival}
   package --- censoring or left-truncation are specified in
-  \code{Surv} objects.  Any function of the model parameters can be
-  summarised in the output, including uncertainty.  \pkg{flexsurv}
-  also enhances the \pkg{mstate} package (Putter et al) by providing
-  cumulative incidences for fully-parametric multi-state models.  
+  \code{Surv} objects.  Estimates and confidence intervals for any
+  function of the model parameters can be printed or plotted.
+  \pkg{flexsurv} also enhances the \pkg{mstate} package (Putter et al)
+  by providing cumulative incidences for fully-parametric multi-state
+  models.
 
   This article explains the methods and design principles of the
   package, giving several worked examples of its use.
 }
-%\Keywords{survival}
+\Keywords{survival}
 
 \begin{document}
 
 \section{Motivation and design}
 
-The Cox model is ubiquitous in medical research, since the effects of
-predictors of survival can be estimated without needing to supply a
-baseline survival distribution that might be wrong.  However,
+The Cox model for survival data is ubiquitous in medical research, since the effects of
+predictors can be estimated without needing to supply a
+baseline survival distribution that might be inaccurate.  However,
 fully-parametric models have many advantages, and even the originator
 of the Cox model has expressed a preference for parametric modelling
 \citep{reid:cox:conversation}.  Fully-specified models help to
@@ -75,22 +77,22 @@ modelling in R.  It is similar in spirit to the Stata packages
 \pkg{stpm2} \citep{stpm2} for spline-based survival modelling, and
 \pkg{stgenreg} \citep{stgenreg} for fitting survival models with
 user-defined hazard functions using numerical integration. The
-\code{survreg} function in the R package \pkg{survival} only supports
-two-parameter (location/scale) distributions, though users can supply
-their own distributions if they can be parameterised in this form.
-Many other contributed R packages can fit survival models,
-e.g. \pkg{eha} \citep{eha}, \pkg{VGAM} \citep{yee:wild}, though these
-are either limited to specific distribution families not specifically
-designed for survival analysis, or (\pkg{ActuDistns},
-\citet{actudistns}) contain only the definitions of distribution
-functions.  \pkg{flexsurv} enables distribution functions provided by
-such packages to be employed in models.  An advantage over
-\pkg{stgenreg} is that numerical integration can be avoided if the
-analytic cumulative distribution or hazard can be supplied, and
-optimisation can also be speeded by supplying analytic derivatives.
-\pkg{flexsurv} also has features for multi-state modelling and
-interval censoring, and general output reporting.  It employs
-functional programming to work with user-defined or existing R
+\code{survreg} function in the R package \pkg{survival}
+\citep{therneau:survival} only supports two-parameter (location/scale)
+distributions, though users can supply their own distributions if they
+can be parameterised in this form.  Many other contributed R packages
+can fit survival models, e.g. \pkg{eha} \citep{eha}, \pkg{VGAM}
+\citep{yee:wild}, though these are either limited to specific
+distribution families, not specifically designed for survival analysis,
+or (\pkg{ActuDistns}, \citet{actudistns}) contain only the definitions
+of distribution functions.  \pkg{flexsurv} enables distribution
+functions provided by such packages to be employed in models.  An
+advantage over \pkg{stgenreg} is that numerical integration can be
+avoided if the analytic cumulative distribution or hazard can be
+supplied, and optimisation can also be speeded by supplying analytic
+derivatives.  \pkg{flexsurv} also has features for multi-state
+modelling and interval censoring, and general output reporting.  It
+employs functional programming to work with user-defined or existing R
 functions.
 
 
@@ -105,10 +107,9 @@ The general model that \pkg{flexsurv} fits has probability density function
   f(t | \mu(\mathbf{z}), \bm{\alpha}(\mathbf{z})), \quad t \geq 0  
 \end{equation}
 
-We also define the cumulative distribution function $F(t)$, survivor
+The cumulative distribution function $F(t)$, survivor
 function $S(t) = 1 - F(t)$, cumulative hazard $H(t) = -\log S(t)$ and
-hazard $h(t) = f(t)/S(t)$ (suppressing the conditioning for clarity).
-
+hazard $h(t) = f(t)/S(t)$ are also defined (suppressing the conditioning for clarity).
 $\mu=\alpha_0$ is the parameter of primary interest,
 which usually governs the mean or location of the distribution.  Other
 parameters $\bm{\alpha} = \alpha_1, \ldots, \alpha_R$ are called
@@ -129,11 +130,13 @@ set of parameters is given by $\{\bm{\beta}_r: r=0,\ldots,R$\}.
 Suppose that the location, but not the ancillary parameters, depends
 on covariates.  If the hazard function factorises as $h(t | \alpha,
 \mu(\mathbf{z})) = \mu(\mathbf{z}) h_0(t | \alpha)$, then this is a
-\emph{proportional hazards} model, so that the hazard ratio between
+\emph{proportional hazards} (PH) model, so that the hazard ratio between
 two groups (defined by different values of $\mathbf{z}$) is constant
-over time.  Alternatively, if $S(t | \mu(\mathbf{z}), \alpha) =
+over time.
+
+Alternatively, if $S(t | \mu(\mathbf{z}), \alpha) =
 S(\mu(\mathbf{z}) t | \alpha)$ then we have an \emph{accelerated
-  failure time} model, so that the effect of covariates is to speed or
+  failure time} (AFT) model, so that the effect of covariates is to speed or
 slow the passage of time. For example, doubling the value of a
 covariate with coefficient $\beta=\log(2)$ would give half the
 expected survival time.
@@ -164,7 +167,7 @@ currently support frailty, clustered or random effects models.
 
 An example dataset used throughout this paper is from 686 patients
 with primary node positive breast cancer, available in the package as
-\code{bc}. This was originally provided with \code{stpm} \citet{stpm},
+\code{bc}. This was originally provided with \code{stpm} \citet{stpm:orig},
 and analysed in much more detail by \citet{royston:parmar} and
 \citet{sauerbrei1999building}.
 
@@ -173,13 +176,15 @@ and analysed in much more detail by \citet{royston:parmar} and
 
 The main model-fitting function is called \code{flexsurvreg}.  Its
 first argument is an R \emph{formula} object.  The left hand side of
-the formula gives the response as a survival object using \code{Surv}
-function from the \pkg{survival} package.  Here, this indicates that
-the response variable is \code{recyrs}, and that these are observed
-death and censoring times when the variable \code{censrec} is 1 or 0
-respectively.  The covariate \code{group} is a factor representing
-prognostic score, with three levels \code{``Good''} (the baseline), \code{``Medium''} and \code{``Poor''}. All of these variables are in the data frame called 
-\code{bc}.  
+the formula gives the response as a survival object, using the
+\code{Surv} function from the \pkg{survival} package.  Here, this
+indicates that the response variable is \code{recyrs}, and that these
+are observed death and censoring times when the variable
+\code{censrec} is 1 or 0 respectively.  The covariate \code{group} is
+a factor representing prognostic score, with three levels
+\code{"Good"} (the baseline), \code{"Medium"} and
+\code{"Poor"}. All of these variables are in the data frame
+\code{bc}.
 <<>>=
 library(flexsurv)
 fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
@@ -191,42 +196,47 @@ Or if all responses were interval-censored between lower and upper
 bounds \code{tmin} and \code{tmax}, then we would write
 \code{Surv(tmin,tmax,type="interval2")}.
 
-
-
-\subsection{Using a built-in survival model}
-
 If the argument \code{dist} is a string, this denotes a built-in
-survival distribution.  The currently built-in distributions are
-listed in Table \ref{tab:dists}.  In each case, the probability
-density $f()$ and parameters used in the fitted model is taken from an
-existing R function of the same name but beginning with the letter
-\code{d}.  For example if \code{dist="weibull"}, the density function
-is \code{dweibull}.
-
-For the Weibull, exponential (\code{dexp}), gamma (\code{dgamma}) and
-log-normal (\code{dlnorm}), the density functions are provided with
-standard installations of R.  For all built-in distributions,
-\pkg{flexsurv} also defines functions beginning \code{h} giving the
-hazard, and \code{H} for cumulative hazard.
-
-Illustrate survreg and flexsurvreg, par ests come from dweibull.
+survival distribution, in this case the Weibull.   
+Printing the fitted model object gives estimates and confidence
+intervals for the model parameters and other useful information.  Note
+that these are the \emph{same parameters} as represented by
+the R distribution function
+\code{dweibull}: the \code{shape} $\alpha$ and the \code{scale} $\mu$ of the survivor function
+$S(t) = \exp(-(t/\mu)^\alpha)$.  
 <<>>=
-sr1 <- survreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
-
-sr1$loglik[2]
-fs1$loglik
-
-exp(coef(sr1)[1])
-fs1["scale","est"]
-
-1/sr1$scale
-fs1["shape","est"]
+fs1
 @ 
-effects of the covariates are the same: AFT coeffs
+The same model can be fitted using \code{survreg} in 
+\pkg{survival}:
+<<>>=
+survreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+@
+The maximised log-likelihoods are the same, however the
+parameterisation is different: the first coefficient
+\code{(Intercept)} reported by \code{survreg} is $\log(\mu)$, and
+\code{survreg}'s \code{"scale"} is \code{dweibull}'s (thus
+\code{flexsurvreg})'s 1 / \code{shape}. The covariate effects $\bm{\beta}$,
+however, have the same "accelerated failure time" interpretation, as
+linear effects on $\log(\mu)$.  The multiplicative effects $\exp(\bm{\beta})$
+are provided in the output as \code{exp{est}}.
 
-\pkg{flexsurv} provides some additional survival distributions
-including the Gompertz distribution with unrestricted shape parameter
-(\code{dist="gompertz"}), and two more flexible families:
+\subsection{Built-in survival models}
+
+\code{flexsurvreg}'s currently built-in distributions are listed in Table
+\ref{tab:dists}.  In each case, the probability density $f()$ and
+parameters used in the fitted model are taken from an existing R
+function of the same name but beginning with the letter \code{d}.  For
+the Weibull, exponential (\code{dexp}), gamma (\code{dgamma}) and
+log-normal (\code{dlnorm}), the density functions are provided with
+standard installations of R.  
+
+\pkg{flexsurv} provides some additional survival distributions,
+including a Gompertz distribution with unrestricted shape parameter
+(\code{dist="gompertz"}), and the three- and four-parameter families
+described below.  For all built-in distributions, \pkg{flexsurv} also
+defines functions beginning \code{h} giving the hazard, and \code{H}
+for cumulative hazard.
 
 \paragraph{Generalized gamma} This three-parameter distribution
 includes the Weibull, gamma and log-normal as special cases.  The
@@ -248,10 +258,20 @@ dgengamma(x, mu, sigma, Q=1)     ==  dweibull(x, shape=1/sigma, scale=exp(mu))
 dgengamma(x, mu, sigma, Q=sigma) ==  dgamma(x, shape=1/sigma^2, 
                                                rate=exp(-mu) / sigma^2)  
 \end{Code}
+
+The generalized gamma model is fitted to the breast cancer survival
+data. The first \code{fs2} is an AFT model, where only the parameter
+$\mu$ depends on the prognostic covariate \code{group}.  In a second
+model \code{fs3}, the first ancillary parameter \code{sigma} also
+depends on this covariate, giving a model with a time-dependent effect
+that is neither PH nor AFT.  The second ancillary parameter \code{Q}
+is still common between prognostic groups.
 <<>>=
 fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="gengamma")
-fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group + sigma(group), data=bc, dist="gengamma")
+fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group + sigma(group), 
+                   data=bc, dist="gengamma")
 @ 
+SHOW IT FITS BETTER, LIKS, AIC, PLOTS
 
 \paragraph{Generalized F} This four-parameter distribution includes
 the generalized gamma, and also the log-logistic, as special cases.
@@ -268,15 +288,15 @@ for the exact definitions.
 \hline
     &  Parameters &  Density R function & \code{dist}\\
 \hline
-    Exponential & rate             & dexp   & \code{"exp"} \\
-    Weibull     & shape, scale     & dweibull & \code{"weibull"} \\
-    Gamma       & shape, rate      & dgamma & \code{"gamma"}\\
-    Log-normal  & meanlog, sdlog   & dlnorm & \code{"lnorm"}\\
-    Gompertz    & shape, rate      & dgompertz & \code{"gompertz"} \\
-    Generalized gamma (Prentice 1975)   & & dgengamma & \code{"gengamma"} \\
-    Generalized gamma (Stacy 1962)& & dgengamma & \code{"gengamma.orig"} \\
-    Generalized F     (stable)    & & dgenf & \code{"genf"} \\
-    Generalized F     (original)  & & dgenf & \code{"genf.orig"} \\
+    Exponential & \code{rate}             & \code{dexp}   & \code{"exp"} \\
+    Weibull     & \code{shape, scale}     & \code{dweibull} & \code{"weibull"} \\
+    Gamma       & \code{shape, rate}      & \code{dgamma} & \code{"gamma"}\\
+    Log-normal  & \code{meanlog, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
+    Gompertz    & \code{shape, rate}      & \code{dgompertz} & \code{"gompertz"} \\
+    Generalized gamma (Prentice 1975)   & \code{mu, sigma, Q} & \code{dgengamma} & \code{"gengamma"} \\
+    Generalized gamma (Stacy 1962)& \code{shape, scale, k} & \code{dgengamma.orig} & \code{"gengamma.orig"} \\
+    Generalized F     (stable)    & \code{mu, sigma, Q, P} & \code{dgenf} & \code{"genf"} \\
+    Generalized F     (original)  & \code{mu, sigma, s1, s2} & \code{dgenf.orig} & \code{"genf.orig"} \\
 \hline
   \end{tabular}
   \caption{Built-in parametric survival distributions in \pkg{flexsurv}}
@@ -286,54 +306,83 @@ for the exact definitions.
 \subsection{Plotting outputs}
 
 The \code{plot()} method for \code{flexsurvreg} objects is used as a
-quick check of model fit.  By default (e.g. \code{plot(fs1,
-  scale="survival")}), this draws a Kaplan-Meier estimate of the
-survivor function $S(t)$, one for each combination of categorical
-covariates, or just a single curve if there are no categorical
-covariates.  The corresponding estimates from the fitted model are
-overlaid.  \code{scale="hazard"} can be used to plot hazards from the
-parametric model against kernel density estimates (obtained from
-\pkg{muhaz}; citet{muhaz,mueller:wang}), while \code{scale="cumhaz"}
-plots cumulative hazards. HAZ EXAMPLE.  In fact any function of the
-parameters can be plotted, see EXAMPLE.
+quick check of model fit.  By default, this draws a Kaplan-Meier
+estimate of the survivor function $S(t)$, one for each combination of
+categorical covariates, or just a single ``population average'' curve if there are no
+categorical covariates.  The corresponding estimates from the fitted
+model are overlaid.  Fitted values from further models can be added
+with the \code{lines()} method.  
+\begin{figure}
+  \centering
+<<fig=TRUE>>=
+plot(fs1, col="gray", lwd.obs=2)
+lines(fs2, col="red", lty=2)
+lines(fs3, col="red")
+@ 
+  \caption{Estimated survival from parametric models and Kaplan-Meier estimates.}
+  \label{fig:surv}
+\end{figure}
+\code{scale="hazard"} can be used to plot hazards from parametric
+models against kernel density estimates (obtained from \pkg{muhaz};
+citet{muhaz,mueller:wang}).  This shows more clearly why the Weibull
+model is inadequate: the hazard must be increasing or decreasing ---
+while the generalized gamma can represent the increase and subsequent
+decline in hazard seen in the data.
+\begin{figure}
+  \centering
+<<fig=TRUE>>=
+plot(fs1, type="hazard", col="gray", lwd.obs=2)
+lines(fs2, type="hazard", col="red", lty=2)
+lines(fs3, type="hazard", col="red")
+@ 
+  \caption{Estimated hazards from parametric models and kernel density estimates.}
+  \label{fig:surv}
+\end{figure}
 
-Fitted values from further models can be added with the \code{lines()}
-method.  For more customisable plots, it is advised to set up the axes
+Similarly, \code{scale="cumhaz"} plots cumulative hazards. In fact any
+function of the parameters can be plotted, see EXAMPLE.
+
+For more customisable plots, it is advised to set up the axes
 beforehand, and use the \code{lines()} method.  Or for even more
 flexibility, the data underlying the plots is available from the
 \code{summary.flexsurvreg()} method.
 
-<<>>=
-plot(fs1)
-lines(fs2, col="blue")
-lines(fs3, col="green")
-@ 
-%% what do we want to show for outputs? 
-%% covariate effects, on more than one parameter. 
-%% plot methods, but no need to show output from summary
-%% using the generalized gamma, eff on 2 but not 3
+In this example, there is only a single categorical covariate, and the
+\code{plot} and \code{summary} methods return one observed and fitted
+trajectory for each level of that covariate.  For more complicated
+models, users should specify exactly what covariate values they
+want summaries for, rather than relying on the default \footnote{If there are only factor covariates, all combinations are plotted.  If
+there are any continuous covariates, these methods by default return a ``population average''
+curve, with the linear model design matrix set to its average
+values, including the 0/1 contrasts defining factors, which doesn't
+represent a meaningful covariate combination.}.
+This is done by
 
-\subsection{Supplying own distributions}
+EXAMPLE 
+
+
+
+\subsection{Supplying custom distributions}
 
 \pkg{flexsurv} is not limited to its built-in distributions.  Any
 survival model of the form (\ref{eq:model}--\ref{eq:lik}) can be
-fitted if we can provide either the density function $f()$ or the hazard $h()$.
-Many contributed R packages provide probability density and cumulative
-distribution functions for positive distributions.  On the other hand,
-survival models are naturally specified by through their hazard
-function, representing the changing risk of death through time.  For
-example, for survival following major surgery we may want a
+fitted if we can provide either the density function $f()$ or the
+hazard $h()$.  Many contributed R packages provide probability density
+and cumulative distribution functions for positive distributions.  
+Though survival models may be more naturally characterised by their
+hazard function, representing the changing risk of death through time.
+For example, for survival following major surgery we may want a
 ``U-shaped'' hazard curve, representing a high risk soon after the
 operation, which then decreases, but increases naturally as survivors
 grow older.
 
 To supply a custom distribution, the \code{dist} argument to
-\code{flexsurvreg} is defined to be an R list object with the
-following elements.   
+\code{flexsurvreg} is defined to be an R list object, rather than a
+character string.  The list has the following elements.
 
 \begin{description}
-\item[\code{name}] Name of the distribution.  For example, if this is ?? then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given}, or \code{H} for the cumulative hazard (to complement \code{h}).
-  These functions must be \emph{vectorised}.   EXAMPLE
+\item[\code{name}] Name of the distribution.  For example, if this is \code{"llogis"} then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given}, or \code{H} for the cumulative hazard (to complement \code{h}).
+  These functions must be \emph{vectorised}.   SEE EXAMPLE BELOW
 \item[\code{pars}] Character vector naming the parameters of the distribution $\mu,\alpha_1,...,\alpha_R$.
 \item[\code{location}] Quoted name of the location parameter $\mu$.
 \item[\code{transforms}] A list of functions $g()$ which transform the parameter from its natural range to the real line, for example, \code{c(log,identity)} \footnote{Note this is a \emph{list}, not an \emph{atomic vector} of functions, so if the distribution only has one parameter, we shoudl write \code{transforms=c(log)} or \code{transforms=list(log)}, not \code{transforms=log}}
@@ -346,6 +395,10 @@ following elements.
 The following custom model uses the log-logistic distribution function
 (\code{dllogis} and \code{pllogis}) available in the package
 \pkg{eha}.   This has two parameters DISCUSS.   INITIAL VALUES?
+
+%% survivor function 1/ (1 + (x/b)^a)
+%% log(1/S(t) - 1) is linear function of log time.  proportional odds
+
 <<>>=
 library(eha)
 custom.llogis <- list(name="llogis",  pars=c("shape","scale"), location="scale",
@@ -354,29 +407,50 @@ custom.llogis <- list(name="llogis",  pars=c("shape","scale"), location="scale",
 fs4 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.llogis)
 @ 
 
-Discuss fit --- similar to generalized gamma.  AFT parameterisation
-better than PH here.
+This fits the breast cancer data better than the Weibull, since it can
+represent a peaked hazard, but less well than the generalized gamma.
+Proportional odds.  ANY SPACE FOR A HIGHLIGHTED PLOT
 
-Distribution exists in another package, but may be parameterised 
+
+The distribution exists in another package, but may be parameterised 
 Example: Gompertz-Makeham -- say it doesn't converge, the parameters aren't identifiable 
 
 \paragraph{Example: Wrapping functions from a contributed package}
 
+Sometimes there may be probability density and similar functions in a
+contributed package, but in a different format.  For example,
+\pkg{eha} also provides a three-parameter Gompertz-Makeham
+distribution with density \code{dmakeham}, whose shape parameters are
+provided to as a vector of length two.  However, \code{flexsurvreg}
+expects its distribution functions to have one argument for each
+parameter.  Therefore we write our own functions that wrap around 
+the third-party functions.
 <<>>=
 dmakeham3 <- function(x, shape1, shape2, scale, ...)  {
     dmakeham(x, shape=c(shape1, shape2), scale=scale, ...)
 }
-dmakeham3 <- Vectorize(dmakeham3) 
-
 pmakeham3 <- function(q, shape1, shape2, scale, ...)  {
     pmakeham(q, shape=c(shape1, shape2), scale=scale, ...)
 }
+@ 
+\code{flexsurvreg} also requires these functions to be
+\emph{vectorized}.  That is, we can supply a vector of alternative
+values for each argument and expect a vector of the same length to be
+returned.  The R base function \code{Vectorize} can be used 
+to do this here.
+<<>>=
+dmakeham3 <- Vectorize(dmakeham3) 
 pmakeham3 <- Vectorize(pmakeham3)
 @ 
-\begin{Rcode}
+and this allows us to write, for example, 
+<<>>=
+pmakeham3(c(0, 1, 1, Inf), c(1, 1, 2, 1), 1, 1)
+@ 
+Our functions 
+\begin{Scode}
 custom.makeham <- list(name="makeham3",
                        pars=c("shape1","shape2","scale"),
-\end{Rcode}
+\end{Scode}
 
 Functions need to be vectorised 
 density functions need a log argument
@@ -640,7 +714,7 @@ enable estimation of these hazards, the data are expressed as a series
 of times to events which are potentially censored: $dt_{j} = t_{j+1} -
 t_{j}: j = 1,\ldots,n-1$. For a patient who moves into state $s$ at
 time $t_{j}$, their next event at $t_{j+1}$ is defined by the model
-structure (Figure~\ref{fig:cMSMfigure}) to be one of a set of
+structure (FIGURE) to be one of a set of
 competing events $s^*_1,\ldots,s^*_{n_s}$.
 
 For example, in state EXAMPLE, the next state must either be EXAMPLE

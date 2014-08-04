@@ -1,3 +1,7 @@
+split muhaz args from plot.muhaz args in plot.flexsurvreg
+
+make plot/summary do baseline values of factor covs and mean of continuous
+
 Make sure all features have tests
 
 

@@ -681,7 +681,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
             if (any(dat$Y[,"status"] > 1)) stop("Interval-censored data not supported by muhaz")
             if (!all(isfac))
                 plot(muhaz(dat$Y[,"stop"], dat$Y[,"status"], ...),
-                     col=col.obs, lty=lty.obs, lwd=lwd.obs)
+                     col=col.obs, lty=lty.obs, lwd=lwd.obs, ...)
             else {
                 ## plot hazard for all groups defined by unique combinations of covariates
                 group <- if(ncovs>0) do.call("interaction", mm) else factor(rep(1,nrow(dat$Y)))
