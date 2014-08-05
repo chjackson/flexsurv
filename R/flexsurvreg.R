@@ -546,7 +546,10 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     }
     dlist <- x$dlist
     ret <- vector(nrow(X), mode="list")
-    names(ret) <- rownames(X)
+    if(!is.null(newdata))
+        covnames <- apply(as.data.frame(newdata), 1, function(x)paste0(names(newdata), "=", x, collapse=", "))
+    else covnames <- rownames(X)
+    names(ret) <- covnames
     for (i in 1:nrow(X)) {
         for (j in seq(along=dlist$pars)) {
             fncall[[dlist$pars[j]]] <- x$res[dlist$pars[j],"est"]
@@ -564,10 +567,11 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
             ly <- res.ci[,1]
             uy <-  res.ci[,2]
         }
-        ret[[i]] <- data.frame(time=t, est=y)
+        ret[[i]] <- data.frame(time=t, est=y, row.names=NULL)
         if (ci) { ret[[i]]$lcl <- ly; ret[[i]]$ucl <- uy}
     }
-    if (ncovs>0) ret$X <- X
+    if (ncovs>0) attr(ret,"X") <- X
+    class(ret) <- "summary.flexsurvreg"
     ret
 }
 
@@ -590,6 +594,14 @@ summary.fns <- function(x, type){
            })
 }
 
+print.summary.flexsurvreg <- function(x, ...){
+    for (i in seq_along(x)){
+        cat(names(x)[i], "\n")
+        print(x[[i]])
+        if (i<length(x)) cat("\n")
+    }
+}
+
 ## Draw B samples from multivariate normal distribution of baseline
 ## parameter estimators, for given covariate values
 
@@ -603,15 +615,31 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE){
     sim[,x$optpars] <- rmvnorm(B, x$opt$par, x$cov)
     sim[,x$fixedpars] <- rep(x$res.t[x$fixedpars,"est"],each=B)
     beta <- sim[, x$covpars, drop=FALSE]
-    for (j in seq(along=x$dlist$pars)){
-        covinds <- x$mx[[x$dlist$pars[j]]]
-        if (length(covinds) > 0){
-            sim[,x$dlist$pars[j]] <- sim[,x$dlist$pars[j]] + beta[,covinds] %*% t(X[,covinds,drop=FALSE])
+    if (nrow(X)==1){
+        res <- sim[,x$dlist$pars,drop=FALSE]
+        for (j in seq(along=x$dlist$pars)){
+            covinds <- x$mx[[x$dlist$pars[j]]]
+            if (length(covinds) > 0){
+                res[,j] <- res[,j] + beta[,covinds] %*% t(X[,covinds,drop=FALSE])
+            }
+            if (!transform)
+                res[,j] <- x$dlist$inv.transforms[[j]](res[,j])
         }
-        if (!transform)
-            sim[,x$dlist$pars[j]] <- x$dlist$inv.transforms[[j]](sim[,x$dlist$pars[j]])
+    }  else {
+        res <- vector(nrow(X), mode="list")
+        for (i in 1:nrow(X)) {
+            res[[i]] <- sim[,x$dlist$pars,drop=FALSE]
+            for (j in seq(along=x$dlist$pars)){
+                covinds <- x$mx[[x$dlist$pars[j]]]
+                if (length(covinds) > 0){
+                    res[[i]][,j] <- res[[i]][,j] + beta[,covinds] %*% t(X[i,covinds,drop=FALSE])
+                }
+                if (!transform)
+                    res[[i]][,j] <- x$dlist$inv.transforms[[j]](res[[i]][,j])
+            }
+        }
     }
-    sim[,x$dlist$pars,drop=FALSE]
+    res
 }
 
 ### Compute CIs for survival, cumulative hazard or hazard at supplied
@@ -656,7 +684,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
     if (!ci) B <- 0
     summ <- summary.flexsurvreg(x, newdata=newdata, X=X, type=type, fn=fn, t=t, ci=ci, B=B, cl=cl)
     t <- summ[[1]]$time
-    X <- if (is.null(summ$X)) as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1)) else summ$X
+    X <- if (is.null(attr(summ,"X"))) as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1)) else attr(summ,"X")
     if (is.null(col.ci)) col.ci <- col
     if (is.null(lwd.ci)) lwd.ci <- lwd
     dat <- x$data

@@ -21,8 +21,8 @@ normboot.flexsurvreg(x, B, newdata = NULL, X = NULL, transform = FALSE)
     Number of samples.
   }
   \item{newdata}{
-    Data frame with one row, or a list, containing the covariate values to
-    evaluate the parameters at.   IF there are covariates in the model, at
+    Data frame or list containing the covariate values to
+    evaluate the parameters at.   If there are covariates in the model, at
     least one of \code{newdata} or \code{X} must be supplied.
   }
   \item{X}{
@@ -39,8 +39,13 @@ normboot.flexsurvreg(x, B, newdata = NULL, X = NULL, transform = FALSE)
   }
 }
 \value{
-  A matrix with \code{B} rows, and one column for each
-  named parameter of the survival distribution.
+  If \code{newdata} includes only one covariate combination, a matrix will be
+  returned with \code{B} rows, and one column for each named parameter
+  of the survival distribution.
+
+  If more than one covariate combination is requested
+  (e.g. \code{newdata} is a data frame with more than one row), then a
+  list of matrices will be returned, one for each covariate combination.
 }
 \references{
   Mandel, M. (2013). "Simulation based confidence intervals for

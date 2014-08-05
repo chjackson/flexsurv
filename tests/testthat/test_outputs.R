@@ -4,4 +4,19 @@ test_that("normboot.flexsurvreg",{
     set.seed(1); b1 <- normboot.flexsurvreg(fite, B=10, newdata=list(age=50))
     set.seed(1); b2 <- normboot.flexsurvreg(fite, B=10, X=matrix(50,nrow=1))
     expect_equal(b1, b2)
+    set.seed(1); b1 <- normboot.flexsurvreg(fite, B=10, newdata=list(age=c(0,50)))
+    set.seed(1); b2 <- normboot.flexsurvreg(fite, B=10, X=matrix(c(0,50),nrow=2))
+    expect_equal(b1, b2)   
+})
+
+
+test_that("custom function in summary.flexsurvreg",{
+    fitw <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="weibull")     
+    median.weibull <- function(t, start, shape, scale) { qweibull(0.5, shape=shape, scale=scale) }
+    summ <- summary(fitw, newdata=list(age=50), fn=median.weibull, t=1, B=10)
+    expect_equal(summ[[1]][1,"est"], 1575.783637970475)
+
+    mean.weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }   
+    median.weibull <- function(t, start, shape, scale) { scale * log(2)^(1/shape) }
+
 })

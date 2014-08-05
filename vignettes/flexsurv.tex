@@ -431,8 +431,11 @@ To supply a custom distribution, the \code{dist} argument to
 character string.  The list has the following elements.
 
 \begin{description}
-\item[\code{name}] Name of the distribution.  For example, if this is \code{"llogis"} then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given), or \code{H} for the cumulative hazard (to complement \code{h}).
-  These functions must be \emph{vectorised}.   SEE EXAMPLE BELOW
+\item[\code{name}] Name of the distribution.  For example, if this is \code{"llogis"} then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given), or \code{H} for the cumulative hazard (to complement \code{h}).   
+  These functions must be \emph{vectorised}, and the density function
+  must also accept an argument \code{log}, which when \code{TRUE},
+  returns the log density.   See the examples below. 
+  
 \item[\code{pars}] Character vector naming the parameters of the distribution $\mu,\alpha_1,...,\alpha_R$.
 \item[\code{location}] Quoted name of the location parameter $\mu$.
 \item[\code{transforms}] A list of functions $g()$ which transform the parameter from its natural range to the real line, for example, \code{c(log,identity)} \footnote{Note this is a \emph{list}, not an \emph{atomic vector} of functions, so if the distribution only has one parameter, we shoudl write \code{transforms=c(log)} or \code{transforms=list(log)}, not \code{transforms=log}}
@@ -444,11 +447,8 @@ character string.  The list has the following elements.
 
 The following custom model uses the log-logistic distribution function
 (\code{dllogis} and \code{pllogis}) available in the package
-\pkg{eha}.   This has two parameters DISCUSS.   INITIAL VALUES?
-
-%% survivor function 1/ (1 + (x/b)^a)
-%% log(1/S(t) - 1) is linear function of log time.  proportional odds
-
+\pkg{eha}.   The survivor function is $S(t|\mu,alpha) = 1/(1 + (t/\mu)^\alpha)$,
+so that the odds $(1-S(t))/S(t)$ are a linear function of log time.
 \begin{Schunk}
 \begin{Sinput}
 > library(eha)
@@ -464,16 +464,16 @@ represent a peaked hazard, but less well than the generalized gamma.
 Proportional odds.  ANY SPACE FOR A HIGHLIGHTED PLOT
 
 
-The distribution exists in another package, but may be parameterised 
-Example: Gompertz-Makeham -- say it doesn't converge, the parameters aren't identifiable 
 
 \paragraph{Example: Wrapping functions from a contributed package}
 
 Sometimes there may be probability density and similar functions in a
 contributed package, but in a different format.  For example,
 \pkg{eha} also provides a three-parameter Gompertz-Makeham
-distribution with density \code{dmakeham}, whose shape parameters are
-provided to as a vector of length two.  However, \code{flexsurvreg}
+distribution with density \code{dmakeham}, and 
+hazard $h(t|\mu,\alpha_1,\alpha_2)= \alpha_2 + \alpha_1 \exp(t/\mu)$
+whose shape parameters ($(\alpha_1,\alpha_2)$) are
+provided as a vector of length two.  However, \code{flexsurvreg}
 expects its distribution functions to have one argument for each
 parameter.  Therefore we write our own functions that wrap around 
 the third-party functions.
@@ -488,10 +488,10 @@ the third-party functions.
 \end{Sinput}
 \end{Schunk}
 \code{flexsurvreg} also requires these functions to be
-\emph{vectorized}.  That is, we can supply a vector of alternative
-values for each argument and expect a vector of the same length to be
-returned.  The R base function \code{Vectorize} can be used 
-to do this here.
+\emph{vectorized}, as the standard distribution functions in R are.
+That is, we can supply a vector of alternative values for one or more
+arguments, and expect a vector of the same length to be returned.  The
+R base function \code{Vectorize} can be used to do this here.
 \begin{Schunk}
 \begin{Sinput}
 > dmakeham3 <- Vectorize(dmakeham3) 
@@ -501,26 +501,88 @@ to do this here.
 and this allows us to write, for example, 
 \begin{Schunk}
 \begin{Sinput}
-> pmakeham3(c(0, 1, 1, Inf), c(1, 1, 2, 1), 1, 1)
+> pmakeham3(c(0, 1, 1, Inf), 1, c(1, 1, 2, 1), 1)
 \end{Sinput}
 \begin{Soutput}
-[1] 0.0000000 0.9340120 0.9881635 1.0000000
+[1] 0.0000000 0.9340120 0.9757244 1.0000000
 \end{Soutput}
 \end{Schunk}
-Our functions 
-\begin{Scode}
-custom.makeham <- list(name="makeham3",
-                       pars=c("shape1","shape2","scale"),
-\end{Scode}
+We could then use \code{dist=list(name="makeham3", pars=c("shape1","shape2","scale"),...)}
+in a \code{flexsurvreg} model\footnote{though the second shape parameter appears to be not 
+  identifiable in the breast cancer example}. 
 
-Functions need to be vectorised 
-density functions need a log argument
 
 \paragraph{Example: Changing the parameterisation of a distribution}
 
-(talk about Weibull prop haz model, GG PH)
-refer back to Weibull model presentation
-refer back to GG presentation 
+We may want to parameterise the Weibull distribution as $S(t) =
+\exp(-\mu t^\alpha)$, so that the covariate effects reported in the
+printed \code{flexsurvreg} object can be interpreted as hazard ratios
+or log hazard ratios without any further transformation.
+Here instead of the density and cumulative distribution functions, we
+provide the hazard and cumulative hazard.\footnote{The \pkg{eha} package 
+needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s does}
+\begin{Schunk}
+\begin{Sinput}
+> detach("package:eha")
+> hweibullPH <- function(x, shape, scale = 1, log=FALSE){
++     hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
++ }
+> HweibullPH <- function(x, shape, scale=1, log=FALSE){
++     Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
++ }
+> custom.weibullPH <- list(name="weibullPH", pars=c("shape","scale"), location="scale",
++                          transforms=c(log, log), inv.transforms=c(exp, exp),
++                          inits = function(t){
++                              c(1, exp(median(log(t[t>0])) / log(2)))
++                          })
+> fs6 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH)
+> 1 / fs1$res["scale","est"]^fs1$res["shape","est"]
+\end{Sinput}
+\begin{Soutput}
+[1] 0.03472474
+\end{Soutput}
+\begin{Sinput}
+> 1 / exp(fs1$res["groupMedium","est"]) ^ fs1$res["shape","est"]
+\end{Sinput}
+\begin{Soutput}
+[1] 2.331564
+\end{Soutput}
+\end{Schunk}
+The fitted model is the same as \code{fs1}, therefore the maximised likelihood is the same,
+and the parameter estimates of \code{fs1} can be transformed to those of \code{fs6} as shown.
+
+\citet{stgenreg} discuss using the \code{stgenreg} Stata package to
+construct a proportional hazards parameterisation of the generalised
+gamma.  A similar trick can be used in \citet{flexsurvreg}.  A
+four-parameter custom distribution is created by defining its hazard
+(and cumulative hazard) functions.  These are obtained by multiplying
+the built-in functions \code{hgengamma} and \code{Hgengamma} by a
+dummy parameter, which is used as the location parameter of the new
+distribution.  The intercept of this parameter is fixed at 1, so that
+the new model is no more complex than the generalized gamma AFT model
+\code{fs3}, but covariate effects on the dummy parameter are now
+interpreted as hazard ratios.
+
+\begin{Schunk}
+\begin{Sinput}
+> hgengammaPH <- function(x, dummy, mu=0, sigma=1, Q){
++     dummy * hgengamma(x=x, mu=mu, sigma=sigma, Q=Q)
++ }
+> HgengammaPH <- function(x, dummy, mu=0, sigma=1, Q){
++     dummy * Hgengamma(x=x, mu=mu, sigma=sigma, Q=Q)
++ }
+> custom.gengammaPH <- list(name="gengammaPH", pars=c("dummy","mu","sigma","Q"), location="dummy",
++                           transforms=c(log, identity, log, identity),
++                           inv.transforms=c(exp, identity, exp, identity),
++                           inits=function(t){
++                               lt <- log(t[t>0])
++                               c(1, mean(lt), sd(lt), 0)
++                           })
+> fs7 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.gengammaPH, fixedpars=1)
+\end{Sinput}
+\end{Schunk}
+
+
 
 \paragraph{Example: Omitting the cumulative distribution or hazard}
 

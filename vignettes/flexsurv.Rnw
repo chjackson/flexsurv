@@ -1,11 +1,5 @@
 %\VignetteIndexEntry{flexsurv user guide}
 
-%% TODO 
-%% What examples of custom dist? llogis? tobit example in help(survreg)?  Walter's model
-%% spline with haz as fn of time
-%% fractional polynomials
-
-
 \documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
 \usepackage{tabularx}
@@ -338,9 +332,13 @@ lines(fs3, type="hazard", col="red")
   \caption{Estimated hazards from parametric models and kernel density estimates.}
   \label{fig:surv}
 \end{figure}
+Similarly, \code{scale="cumhaz"} plots cumulative hazards. 
 
-Similarly, \code{scale="cumhaz"} plots cumulative hazards. In fact any
-function of the parameters can be plotted, see EXAMPLE.
+Confidence intervals are produced by simulating a large sample from
+the asymptotic normal distribution of the maximum likelihood estimates
+of $\{\bm{\beta}_r: r=0,\ldots,R$, via the function
+\code{normboot.flexsurvreg}.
+
 
 For more customisable plots, it is advised to set up the axes
 beforehand, and use the \code{lines()} method.  Or for even more
@@ -360,6 +358,17 @@ This is done by
 
 EXAMPLE 
 
+\subsection{Custom model summaries}
+
+
+In fact any function of the parameters can be summarised or plotted.
+For example, the median of the Weibull can be summaries as follows
+<<>>=
+median.weibull <- function(t, start, shape, scale) { qweibull(0.5, shape=shape, scale=scale) }
+summary(fs1, fn=median.weibull, t=1, B=10000)
+@ 
+The median of the Weibull has an analytic form as $\mu \log(2)^{1/\alpha}$, though
+the form of the code given here generalises to other distributions.
 
 
 \subsection{Supplying custom distributions}
@@ -411,6 +420,8 @@ This fits the breast cancer data better than the Weibull, since it can
 represent a peaked hazard, but less well than the generalized gamma.
 Proportional odds.  ANY SPACE FOR A HIGHLIGHTED PLOT
 
+
+
 \paragraph{Example: Wrapping functions from a contributed package}
 
 Sometimes there may be probability density and similar functions in a
@@ -455,10 +466,33 @@ We may want to parameterise the Weibull distribution as $S(t) =
 \exp(-\mu t^\alpha)$, so that the covariate effects reported in the
 printed \code{flexsurvreg} object can be interpreted as hazard ratios
 or log hazard ratios without any further transformation.
+Here instead of the density and cumulative distribution functions, we
+provide the hazard and cumulative hazard.\footnote{The \pkg{eha} package 
+needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s does}
+<<>>=
+detach("package:eha")
+hweibullPH <- function(x, shape, scale = 1, log=FALSE){
+    hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
+}
+HweibullPH <- function(x, shape, scale=1, log=FALSE){
+    Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
+}
+custom.weibullPH <- list(name="weibullPH", 
+                         pars=c("shape","scale"), location="scale",
+                         transforms=c(log, log), inv.transforms=c(exp, exp),
+                         inits = function(t){
+                             c(1, exp(median(log(t[t>0])) / log(2)))
+                         })
+fs6 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH)
+1 / fs1$res["scale","est"]^fs1$res["shape","est"]
+1 / exp(fs1$res["groupMedium","est"]) ^ fs1$res["shape","est"]
+@ 
+The fitted model is the same as \code{fs1}, therefore the maximised likelihood is the same,
+and the parameter estimates of \code{fs1} can be transformed to those of \code{fs6} as shown.
 
-(talk about Weibull prop haz model, GG PH)
-refer back to Weibull model presentation
-refer back to GG presentation 
+A slightly more complicated example is given in the examples vignette
+of constructing a proportional hazards generalized gamma model.
+
 
 \paragraph{Example: Omitting the cumulative distribution or hazard}
 
@@ -478,11 +512,10 @@ In Section \ref{sec:gdim}
 
 The likelihood is maximised using the optimisation methods available
 through the standard R \code{optim} function.  By default, this is the
-\code{"BFGS"} method (\citep{nash}) which can use the analytic
-derivatives of the likelihood with respect to the model parameters, if
-these are available, to improve the speed of convergence to the
-maximum.
-
+\code{"BFGS"} method (\citep{nash}) using the analytic derivatives of
+the likelihood with respect to the model parameters, if these are
+available, to improve the speed of convergence to the maximum.  These
+are built-in for the exponential, Weibull and Gompertz.  %% and spline models
 For custom distributions, the user can optionally supply functions
 with names beginning \code{"DLd"} and \code{"DLS"} respectively
 (e.g. \code{DLdweibull,DLSweibull}) to calculate the derivatives of
@@ -493,23 +526,8 @@ Initial values are difficult: ideally two would come from moments of
 the distribution, then defaults that reduce to simpler distributions.
 example
 
-Demo on at least one dataset: stgenreg uses bc example i think
 
 
-
-
-\subsection{Output functions}
-
-\code{summary.flexsurvreg} calculates the estimated survival, hazard
-or cumulative hazard at a series of times and for specified covariate
-values. Confidence intervals are produced by simulating a large sample
-from the asymptotic normal distribution of the maximum likelihood
-estimates $\gamma$ OR WHATEVER, via the function
-\code{normboot.flexsurvreg}.  The default \code{plot} method for
-\code{flexsurvreg} objects graphs these fitted trajectories against
-non-parametric estimates based on Kaplan-Meier or kernel estimation
-(REF muhaz), while the \code{lines} method adds lines to an existing
-plot.  REFER TO EXAMPLE FIGURE
 
 Any user-defined function of the basic model parameters $\gamma$ OR
 WHATEVER and time can also be summarised in the same way.  For
