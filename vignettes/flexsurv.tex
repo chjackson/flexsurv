@@ -412,26 +412,26 @@ EXAMPLE
 
 
 
-\subsection{Supplying own distributions}
+\subsection{Supplying custom distributions}
 
 \pkg{flexsurv} is not limited to its built-in distributions.  Any
 survival model of the form (\ref{eq:model}--\ref{eq:lik}) can be
-fitted if we can provide either the density function $f()$ or the hazard $h()$.
-Many contributed R packages provide probability density and cumulative
-distribution functions for positive distributions.  On the other hand,
-survival models are naturally specified by through their hazard
-function, representing the changing risk of death through time.  For
-example, for survival following major surgery we may want a
+fitted if we can provide either the density function $f()$ or the
+hazard $h()$.  Many contributed R packages provide probability density
+and cumulative distribution functions for positive distributions.  
+Though survival models may be more naturally characterised by their
+hazard function, representing the changing risk of death through time.
+For example, for survival following major surgery we may want a
 ``U-shaped'' hazard curve, representing a high risk soon after the
 operation, which then decreases, but increases naturally as survivors
 grow older.
 
 To supply a custom distribution, the \code{dist} argument to
-\code{flexsurvreg} is defined to be an R list object with the
-following elements.   
+\code{flexsurvreg} is defined to be an R list object, rather than a
+character string.  The list has the following elements.
 
 \begin{description}
-\item[\code{name}] Name of the distribution.  For example, if this is ?? then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given}, or \code{H} for the cumulative hazard (to complement \code{h}).
+\item[\code{name}] Name of the distribution.  For example, if this is \code{"llogis"} then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given), or \code{H} for the cumulative hazard (to complement \code{h}).
   These functions must be \emph{vectorised}.   SEE EXAMPLE BELOW
 \item[\code{pars}] Character vector naming the parameters of the distribution $\mu,\alpha_1,...,\alpha_R$.
 \item[\code{location}] Quoted name of the location parameter $\mu$.
@@ -445,6 +445,10 @@ following elements.
 The following custom model uses the log-logistic distribution function
 (\code{dllogis} and \code{pllogis}) available in the package
 \pkg{eha}.   This has two parameters DISCUSS.   INITIAL VALUES?
+
+%% survivor function 1/ (1 + (x/b)^a)
+%% log(1/S(t) - 1) is linear function of log time.  proportional odds
+
 \begin{Schunk}
 \begin{Sinput}
 > library(eha)
@@ -455,26 +459,55 @@ The following custom model uses the log-logistic distribution function
 \end{Sinput}
 \end{Schunk}
 
-Discuss fit --- similar to generalized gamma.  AFT parameterisation
-better than PH here.
+This fits the breast cancer data better than the Weibull, since it can
+represent a peaked hazard, but less well than the generalized gamma.
+Proportional odds.  ANY SPACE FOR A HIGHLIGHTED PLOT
 
-Distribution exists in another package, but may be parameterised 
+
+The distribution exists in another package, but may be parameterised 
 Example: Gompertz-Makeham -- say it doesn't converge, the parameters aren't identifiable 
 
 \paragraph{Example: Wrapping functions from a contributed package}
 
+Sometimes there may be probability density and similar functions in a
+contributed package, but in a different format.  For example,
+\pkg{eha} also provides a three-parameter Gompertz-Makeham
+distribution with density \code{dmakeham}, whose shape parameters are
+provided to as a vector of length two.  However, \code{flexsurvreg}
+expects its distribution functions to have one argument for each
+parameter.  Therefore we write our own functions that wrap around 
+the third-party functions.
 \begin{Schunk}
 \begin{Sinput}
 > dmakeham3 <- function(x, shape1, shape2, scale, ...)  {
 +     dmakeham(x, shape=c(shape1, shape2), scale=scale, ...)
 + }
-> dmakeham3 <- Vectorize(dmakeham3) 
 > pmakeham3 <- function(q, shape1, shape2, scale, ...)  {
 +     pmakeham(q, shape=c(shape1, shape2), scale=scale, ...)
 + }
+\end{Sinput}
+\end{Schunk}
+\code{flexsurvreg} also requires these functions to be
+\emph{vectorized}.  That is, we can supply a vector of alternative
+values for each argument and expect a vector of the same length to be
+returned.  The R base function \code{Vectorize} can be used 
+to do this here.
+\begin{Schunk}
+\begin{Sinput}
+> dmakeham3 <- Vectorize(dmakeham3) 
 > pmakeham3 <- Vectorize(pmakeham3)
 \end{Sinput}
 \end{Schunk}
+and this allows us to write, for example, 
+\begin{Schunk}
+\begin{Sinput}
+> pmakeham3(c(0, 1, 1, Inf), c(1, 1, 2, 1), 1, 1)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.0000000 0.9340120 0.9881635 1.0000000
+\end{Soutput}
+\end{Schunk}
+Our functions 
 \begin{Scode}
 custom.makeham <- list(name="makeham3",
                        pars=c("shape1","shape2","scale"),
