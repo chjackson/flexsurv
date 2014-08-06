@@ -77,6 +77,9 @@ Output functions:
 * Accept vector X in summary.flexsurvreg, and give informative error
   if X in wrong format.  Thanks to Mark Danese.
 
+* Extra arguments can be passed to both muhaz and plot.muhaz in 
+  plot.flexsurvreg(...,type="hazard",...)
+
 Printed output: 
 
 * Use format() not signif() for printing flexsurvreg objects, to avoid

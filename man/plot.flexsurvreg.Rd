@@ -12,7 +12,7 @@
         est=TRUE, ci=NULL, B=1000, cl=0.95,
         col.obs="black", lty.obs=1, lwd.obs=1,
         col="red", lty=1, lwd=2,
-        col.ci=NULL, lty.ci=2, lwd.ci=1,
+        col.ci=NULL, lty.ci=2, lwd.ci=1, ylim=NULL,
         add=FALSE,...)
 }
 \arguments{
@@ -83,7 +83,7 @@
   as for the fitted curve. }
   \item{lty.ci}{ Line type of the fitted confidence limits. }
   \item{lwd.ci}{ Line width of the fitted confidence limits. }
-
+  \item{ylim}{y-axis limits: vector of two elements.}
   \item{add}{If \code{TRUE}, add lines to an existing plot,
     otherwise new axes are drawn.}
 
