@@ -674,7 +674,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                              est=TRUE, ci=NULL, B=1000, cl=0.95,
                              col.obs="black", lty.obs=1, lwd.obs=1,
                              col="red",lty=1,lwd=2,
-                             col.ci=NULL,lty.ci=2,lwd.ci=1,
+                             col.ci=NULL,lty.ci=2,lwd.ci=1,ylim=ylim,
                              add=FALSE,...)
 {
     ## don't calculate or plot CIs by default if all covs are categorical -> multiple curves
@@ -705,10 +705,11 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
             plot(survfit(form, data=mm), fun="cumhaz", col=col.obs, lty=lty.obs, lwd=lwd.obs, ...)
         }
         else if (type=="hazard") {
+            muhaz.args <- list(...)[names(list(...)) %in% names(formals(muhaz))]
             if (!all(dat$Y[,"start"]==0)) warning("Left-truncated data not supported by muhaz: ignoring truncation point when plotting observed hazard")
             if (any(dat$Y[,"status"] > 1)) stop("Interval-censored data not supported by muhaz")
             if (!all(isfac))
-                plot(muhaz(dat$Y[,"stop"], dat$Y[,"status"], ...),
+                plot(do.call("muhaz", c(list(times=dat$Y[,"stop"], delta=dat$Y[,"status"]), muhaz.args)),
                      col=col.obs, lty=lty.obs, lwd=lwd.obs, ...)
             else {
                 ## plot hazard for all groups defined by unique combinations of covariates
@@ -716,10 +717,12 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                 haz <- list()
                 for (i in 1:nrow(X)) {
                     subset <- (group == unique(group)[i])
-                    haz[[i]] <- muhaz(dat$Y[,"time"], dat$Y[,"status"], subset=subset, ...)
+                    haz[[i]] <- do.call("muhaz", c(list(times=dat$Y[,"time"], delta=dat$Y[,"status"], subset=subset), muhaz.args))
                 }
-                plot(haz[[1]], col=col.obs, lty=lty.obs, lwd=lwd.obs,
-                     ylim=range(sapply(haz, function(x)range(x$haz.est))), ...)
+                if (missing(ylim))
+                    ylim <- range(sapply(haz, function(x)range(x$haz.est)))
+                plot(haz[[1]], col=col.obs, lty=lty.obs, lwd=lwd.obs, 
+                     ylim=ylim, ...)
                 if (nrow(X)>1) {
                     for (i in 1:nrow(X)) {
                         lines(haz[[i]], col=col.obs, lty=lty.obs, lwd=lwd.obs)

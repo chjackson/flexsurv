@@ -1,18 +1,12 @@
 %\VignetteIndexEntry{flexsurv user guide}
 
-%% TODO 
-%% What examples of custom dist? llogis? tobit example in help(survreg)?  Walter's model
-%% spline with haz as fn of time
-%% fractional polynomials
-
-
 \documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
 \usepackage{tabularx}
 \usepackage{graphics}
 
 \author{Christopher H. Jackson \\ MRC Biostatistics Unit, Cambridge, UK \\ \email{chris.jackson@mrc-bsu.cam.ac.uk}}
-\title{flexsurv: flexible parametric survival modelling in R}
+\title{flexsurv: a platform for parametric survival modelling in R}
 
 \Abstract{ \pkg{flexsurv} is an R package for fully-parametric modelling of 
   survival data.  Any parametric time-to-event distribution
@@ -49,7 +43,7 @@ predictors can be estimated without needing to supply a
 baseline survival distribution that might be inaccurate.  However,
 fully-parametric models have many advantages, and even the originator
 of the Cox model has expressed a preference for parametric modelling
-\citep{reid:cox:conversation}.  Fully-specified models help to
+\citep[see][]{reid:cox:conversation}.  Fully-specified models help to
 understand the change in hazard through time, and help with prediction
 and extrapolation. For example, the mean survival $E(T) =
 \int_0^{\infty}S(t)$, used in health economic
@@ -74,27 +68,28 @@ be modelled in terms of covariates, and any function of the parameters
 may be printed or plotted in model summaries.
 
 \pkg{flexsurv} is intended as a general platform for survival
-modelling in R.  It is similar in spirit to the Stata packages
-\pkg{stpm2} \citep{stpm2} for spline-based survival modelling, and
-\pkg{stgenreg} \citep{stgenreg} for fitting survival models with
-user-defined hazard functions using numerical integration. The
-\code{survreg} function in the R package \pkg{survival}
-\citep{therneau:survival} only supports two-parameter (location/scale)
-distributions, though users can supply their own distributions if they
-can be parameterised in this form.  Many other contributed R packages
-can fit survival models, e.g. \pkg{eha} \citep{eha}, \pkg{VGAM}
-\citep{yee:wild}, though these are either limited to specific
-distribution families, not specifically designed for survival analysis,
-or (\pkg{ActuDistns}, \citet{actudistns}) contain only the definitions
-of distribution functions.  \pkg{flexsurv} enables distribution
-functions provided by such packages to be employed in models.  An
-advantage over \pkg{stgenreg} is that numerical integration can be
-avoided if the analytic cumulative distribution or hazard can be
-supplied, and optimisation can also be speeded by supplying analytic
-derivatives.  \pkg{flexsurv} also has features for multi-state
-modelling and interval censoring, and general output reporting.  It
-employs functional programming to work with user-defined or existing R
-functions.
+modelling in R.  The \code{survreg} function in the R package
+\pkg{survival} \citep{therneau:survival} only supports two-parameter
+(location/scale) distributions, though users can supply their own
+distributions if they can be parameterised in this form.  Many other
+contributed R packages can fit survival models, e.g. \pkg{eha}
+\citep{eha}, \pkg{VGAM} \citep{yee:wild}, though these are either
+limited to specific distribution families, not specifically designed
+for survival analysis, or \citep[\pkg{ActuDistns}][]{actudistns}
+contain only the definitions of distribution functions.
+\pkg{flexsurv} enables distribution functions provided by such
+packages to be used as survival models.
+
+It is similar in spirit to the Stata packages \pkg{stpm2}
+\citep{stpm2} for spline-based survival modelling, and \pkg{stgenreg}
+\citep{stgenreg} for fitting survival models with user-defined hazard
+functions using numerical integration.  Though in \pkg{flexsurv},
+numerical integration can be avoided if the analytic cumulative
+distribution or hazard can be supplied, and optimisation can also be
+speeded by supplying analytic derivatives.  \pkg{flexsurv} also has
+features for multi-state modelling and interval censoring, and general
+output reporting.  It employs functional programming to work with
+user-defined or existing R functions.
 
 
 
@@ -127,6 +122,8 @@ will typically be $\log()$ if the parameter is defined to be positive,
 or the identity function if the parameter is unrestricted.  In all
 models, $\bm{\beta}$ includes at least an intercept, so that the full
 set of parameters is given by $\{\bm{\beta}_r: r=0,\ldots,R$\}.
+
+%% TODO use gamma for the intercept?
 
 Suppose that the location, but not the ancillary parameters, depends
 on covariates.  If the hazard function factorises as $h(t | \alpha,
@@ -168,7 +165,7 @@ currently support frailty, clustered or random effects models.
 
 An example dataset used throughout this paper is from 686 patients
 with primary node positive breast cancer, available in the package as
-\code{bc}. This was originally provided with \code{stpm} \citet{stpm:orig},
+\code{bc}. This was originally provided with \code{stpm} \citep{stpm:orig},
 and analysed in much more detail by \citet{royston:parmar} and
 \citet{sauerbrei1999building}.
 
@@ -179,10 +176,10 @@ The main model-fitting function is called \code{flexsurvreg}.  Its
 first argument is an R \emph{formula} object.  The left hand side of
 the formula gives the response as a survival object, using the
 \code{Surv} function from the \pkg{survival} package.  Here, this
-indicates that the response variable is \code{recyrs}, and that these
-are observed death and censoring times when the variable
+indicates that the response variable is \code{recyrs}, which represents
+observed death or censoring times when the variable
 \code{censrec} is 1 or 0 respectively.  The covariate \code{group} is
-a factor representing prognostic score, with three levels
+a factor representing a prognostic score, with three levels
 \code{"Good"} (the baseline), \code{"Medium"} and
 \code{"Poor"}. All of these variables are in the data frame
 \code{bc}.
@@ -200,13 +197,14 @@ bounds \code{tmin} and \code{tmax}, then we would write
 \code{Surv(tmin,tmax,type="interval2")}.
 
 If the argument \code{dist} is a string, this denotes a built-in
-survival distribution, in this case the Weibull.   
+survival distribution.  In this case we fit a Weibull survival model.
 Printing the fitted model object gives estimates and confidence
 intervals for the model parameters and other useful information.  Note
-that these are the \emph{same parameters} as represented by
-the R distribution function
-\code{dweibull}: the \code{shape} $\alpha$ and the \code{scale} $\mu$ of the survivor function
-$S(t) = \exp(-(t/\mu)^\alpha)$.  
+that these are the \emph{same parameters} as represented by the R
+distribution function \code{dweibull}: the \code{shape} $\alpha$ and
+the \code{scale} $\mu$ of the survivor function $S(t) =
+\exp(-(t/\mu)^\alpha)$, and \code{group} has a linear effect on
+$\log(\mu)$.
 \begin{Schunk}
 \begin{Sinput}
 > fs1
@@ -258,20 +256,24 @@ The maximised log-likelihoods are the same, however the
 parameterisation is different: the first coefficient
 \code{(Intercept)} reported by \code{survreg} is $\log(\mu)$, and
 \code{survreg}'s \code{"scale"} is \code{dweibull}'s (thus
-\code{flexsurvreg})'s 1 / \code{shape}. The covariate effects $\bm{\beta}$,
-however, have the same "accelerated failure time" interpretation, as
-linear effects on $\log(\mu)$.  The multiplicative effects $\exp(\bm{\beta})$
-are provided in the output as \code{exp{est}}.
+\code{flexsurvreg})'s 1 / \code{shape}. The covariate effects
+$\bm{\beta}$, however, have the same "accelerated failure time"
+interpretation, as linear effects on $\log(\mu)$.  The multiplicative
+effects $\exp(\bm{\beta})$ are printed in the output as
+\code{exp(est)}.
 
 \subsection{Built-in survival models}
 
-\code{flexsurvreg}'s currently built-in distributions are listed in Table
-\ref{tab:dists}.  In each case, the probability density $f()$ and
-parameters used in the fitted model are taken from an existing R
+\code{flexsurvreg}'s currently built-in distributions are listed in
+Table \ref{tab:dists}.  In each case, the probability density $f()$
+and parameters of the fitted model are taken from an existing R
 function of the same name but beginning with the letter \code{d}.  For
 the Weibull, exponential (\code{dexp}), gamma (\code{dgamma}) and
 log-normal (\code{dlnorm}), the density functions are provided with
-standard installations of R.  
+standard installations of R.  These density functions, and the
+corresponding cumulative distribution function (with the first letter
+\code{d} replaced by \code{p}) are used internally in
+\code{flexsurvreg} to compute the likelihood.
 
 \pkg{flexsurv} provides some additional survival distributions,
 including a Gompertz distribution with unrestricted shape parameter
@@ -302,9 +304,9 @@ dgengamma(x, mu, sigma, Q=sigma) ==  dgamma(x, shape=1/sigma^2,
 \end{Code}
 
 The generalized gamma model is fitted to the breast cancer survival
-data. The first \code{fs2} is an AFT model, where only the parameter
+data. \code{fs2} is an AFT model, where only the parameter
 $\mu$ depends on the prognostic covariate \code{group}.  In a second
-model \code{fs3}, the first ancillary parameter \code{sigma} also
+model \code{fs3}, the first ancillary parameter \code{sigma} ($\alpha_1$) also
 depends on this covariate, giving a model with a time-dependent effect
 that is neither PH nor AFT.  The second ancillary parameter \code{Q}
 is still common between prognostic groups.
@@ -356,7 +358,7 @@ categorical covariates, or just a single ``population average'' curve if there a
 categorical covariates.  The corresponding estimates from the fitted
 model are overlaid.  Fitted values from further models can be added
 with the \code{lines()} method.  
-\begin{figure}
+\begin{figure}[h]
   \centering
 \begin{Schunk}
 \begin{Sinput}
@@ -369,13 +371,14 @@ with the \code{lines()} method.
   \caption{Estimated survival from parametric models and Kaplan-Meier estimates.}
   \label{fig:surv}
 \end{figure}
+
 \code{scale="hazard"} can be used to plot hazards from parametric
-models against kernel density estimates (obtained from \pkg{muhaz};
-citet{muhaz,mueller:wang}).  This shows more clearly why the Weibull
+models against kernel density estimates 
+\citep[obtained from \pkg{muhaz},][]{muhaz,mueller:wang}.  This shows more clearly why the Weibull
 model is inadequate: the hazard must be increasing or decreasing ---
 while the generalized gamma can represent the increase and subsequent
 decline in hazard seen in the data.
-\begin{figure}
+\begin{figure}[h]
   \centering
 \begin{Schunk}
 \begin{Sinput}
@@ -389,13 +392,11 @@ decline in hazard seen in the data.
   \label{fig:surv}
 \end{figure}
 
-Similarly, \code{scale="cumhaz"} plots cumulative hazards. In fact any
-function of the parameters can be plotted, see EXAMPLE.
-
-For more customisable plots, it is advised to set up the axes
-beforehand, and use the \code{lines()} method.  Or for even more
-flexibility, the data underlying the plots is available from the
-\code{summary.flexsurvreg()} method.
+Similarly, \code{scale="cumhaz"} plots cumulative hazards. 
+Confidence intervals are produced by simulating a large sample from
+the asymptotic normal distribution of the maximum likelihood estimates
+of $\{\bm{\beta}_r: r=0,\ldots,R$, via the function
+\code{normboot.flexsurvreg}.
 
 In this example, there is only a single categorical covariate, and the
 \code{plot} and \code{summary} methods return one observed and fitted
@@ -406,13 +407,81 @@ there are any continuous covariates, these methods by default return a ``populat
 curve, with the linear model design matrix set to its average
 values, including the 0/1 contrasts defining factors, which doesn't
 represent a meaningful covariate combination.}.
-This is done by
+This is done by supplying the \code{newdata} argument, a 
+data frame or list containing covariate values, just as
+in standard R functions like \code{predict.lm}.
 
-EXAMPLE 
+For more than casual plots, it is advised to set up the axes
+beforehand, and use the \code{lines()} method.  Or for even more
+flexibility, the data underlying the plots is available from the
+\code{summary.flexsurvreg()} method.
 
 
+\subsection{Custom model summaries}
 
-\subsection{Supplying custom distributions}
+Any function of the parameters of a fitted model can be summarised or plotted by
+supplying the argument \code{fn} to \code{summary.flexsurvreg} or
+\code{plot.flexsurvreg}.  This should be an R function, with mandatory
+first two arguments \code{t} representing time, and \code{start}
+representing a left-truncation point (so that the result is
+conditional on survival up to that time). The remaining arguments must
+be the parameters of the survival distribution.  For example, median 
+survival under the Weibull model \code{fs1} can be summarised as follows
+\begin{Schunk}
+\begin{Sinput}
+> median.weibull <- function(t, start, shape, scale) { 
++     qweibull(0.5, shape=shape, scale=scale) 
++ }
+> summary(fs1, fn=median.weibull, t=1, B=10000)
+\end{Sinput}
+\begin{Soutput}
+group=Good 
+  time     est      lcl      ucl
+1    1 8.75794 7.076969 10.78961
+
+group=Medium 
+  time      est      lcl      ucl
+1    1 4.741585 4.121897 5.459531
+
+group=Poor 
+  time      est      lcl      ucl
+1    1 2.605819 2.311678 2.929477
+\end{Soutput}
+\end{Schunk}
+Although the median of the Weibull has an analytic form as $\mu
+\log(2)^{1/\alpha}$, the form of the code given here generalises to
+other distributions.
+The argument \code{t} is not used in \code{median.weibull}, because
+the median is a time-constant function of the parameters, unlike the
+survival or hazard.  \code{10000} random samples are drawn to produce
+a slightly more precise confidence interval than the default --- users
+should adjust this until the desired level of precision is obtained.
+A useful future extension of the package would be to allow users to 
+supply derivatives of their custom summary function, so that the 
+delta method can be used to obtain approximate confidence intervals 
+without simulation.
+
+
+\subsection{Computation}
+
+The likelihood is maximised in \code{flexsurvreg} using the
+optimisation methods available through the standard R \code{optim}
+function.  By default, this is the \code{"BFGS"} method (\citep{nash})
+using the analytic derivatives of the likelihood with respect to the
+model parameters, if these are available, to improve the speed of
+convergence to the maximum.  These are built-in for the exponential,
+Weibull and Gompertz.  %% and spline models
+For custom distributions, the user can optionally supply functions
+with names beginning \code{"DLd"} and \code{"DLS"} respectively
+(e.g. \code{DLdweibull,DLSweibull}) to calculate the derivatives of
+the log density and log survivor functions with respect to the
+transformed parameters $\gamma$.
+
+Initial values are difficult: ideally two would come from moments of
+the distribution, then defaults that reduce to simpler distributions.
+example
+
+\subsection{Custom survival distributions}
 
 \pkg{flexsurv} is not limited to its built-in distributions.  Any
 survival model of the form (\ref{eq:model}--\ref{eq:lik}) can be
@@ -431,24 +500,65 @@ To supply a custom distribution, the \code{dist} argument to
 character string.  The list has the following elements.
 
 \begin{description}
-\item[\code{name}] Name of the distribution.  For example, if this is \code{"llogis"} then there are assumed to be at least either a function called \code{d} to compute the probability density or \code{h} to compute the hazard.  Ideally there will also be a function called \code{p} for the cumulative distribution (if \code{d} is given), or \code{H} for the cumulative hazard (to complement \code{h}).   
+\item[\code{name}] Name of the distribution.  For example, if this is \code{"llogis"} then there is assumed to be at least either 
+  
+  \begin{itemize}
+  \item  a function called \code{dllogis} to compute the probability density, or 
+  \item \code{hllogis} to compute the hazard.  
+  \end{itemize}
+  
+  Ideally there will also be a function called \code{pllogis} for the
+  cumulative distribution (if \code{d} is given), or \code{H} for the
+  cumulative hazard (to complement \code{h}).
+  
   These functions must be \emph{vectorised}, and the density function
   must also accept an argument \code{log}, which when \code{TRUE},
-  returns the log density.   See the examples below. 
+  returns the log density.  See the examples below.
   
-\item[\code{pars}] Character vector naming the parameters of the distribution $\mu,\alpha_1,...,\alpha_R$.
-\item[\code{location}] Quoted name of the location parameter $\mu$.
-\item[\code{transforms}] A list of functions $g()$ which transform the parameter from its natural range to the real line, for example, \code{c(log,identity)} \footnote{Note this is a \emph{list}, not an \emph{atomic vector} of functions, so if the distribution only has one parameter, we shoudl write \code{transforms=c(log)} or \code{transforms=list(log)}, not \code{transforms=log}}
+\item[\code{pars}] Character vector naming the parameters of the
+  distribution $\mu,\alpha_1,...,\alpha_R$.  These must match the
+  arguments of the R distribution function or functions.
+  
+\item[\code{location}] Character: quoted name of the location parameter $\mu$.
+  Note that the location parameter will not necessarily be the first one, e.g. 
+  in \code{dweibull} the \code{scale} comes after the \code{shape}.
+  
+\item[\code{transforms}] A list of functions $g()$ which transform the parameter from its natural range to the real line, for example, \code{c(log,identity)} \footnote{Note this is a \emph{list}, not an \emph{atomic vector} of functions, so if the distribution only has one parameter, we should write \code{transforms=c(log)} or \code{transforms=list(log)}, not \code{transforms=log}}
+
 \item[\code{inv.transforms}] List of corresponding inverse functions.
-\item[\code{inits}] A function which returns initial values of the parameters for maximum likelihood estimation.    TRICKY
+
+\item[\code{inits}] A function which provides plausible initial values
+  of the parameters for maximum likelihood estimation.  This is
+  optional, but if not provided, then each call to \code{flexsurvreg}
+  must have an \code{inits} argument containing a vector of initial
+  values, which is inconvenient.
+  
+  Each distribution will ideally have a heuristic for initialising
+  parameters from summaries of the data.  For example, the median of
+  the Weibull is $\mu \log(2)^{1/\alpha}$, a sensible estimate of
+  $\mu$ will commonly be the median log uncensored survival time
+  divided by $\log(2)$, with $\alpha=1$, assuming that in practice the
+  true value of $\alpha$ is not too far from 1.  Then we define the
+  function, of one argument \code{t} assumed to be the uncensored
+  survival times, returning the initial values for the Weibull
+  \code{shape} and \code{scale} respectively.
+
+\code{inits = function(t){ c(1, median(t[t>0]) / log(2))) }
+  
+  More complicated initial value functions may use other data such
+  as the covariate values and censored observations: for an example,
+  see the function \code{flexsurv.splineinits} in the package source
+  that computes initial values for spline models
+  (\S\ref{sec:spline}).
+
 \end{description}
     
 \paragraph{Example: Using functions from a contributed package}
 
-The following custom model uses the log-logistic distribution function
+The following custom model uses the log-logistic distribution functions
 (\code{dllogis} and \code{pllogis}) available in the package
-\pkg{eha}.   The survivor function is $S(t|\mu,alpha) = 1/(1 + (t/\mu)^\alpha)$,
-so that the odds $(1-S(t))/S(t)$ are a linear function of log time.
+\pkg{eha}.   The survivor function is $S(t|\mu,\alpha) = 1/(1 + (t/\mu)^\alpha)$,
+so that the odds $(1-S(t))/S(t)$ of having died are a linear function of log time.
 \begin{Schunk}
 \begin{Sinput}
 > library(eha)
@@ -514,7 +624,7 @@ in a \code{flexsurvreg} model\footnote{though the second shape parameter appears
 
 \paragraph{Example: Changing the parameterisation of a distribution}
 
-We may want to parameterise the Weibull distribution as $S(t) =
+We may want to fit a Weibull model like \code{fs1}, but parameterised as $S(t) =
 \exp(-\mu t^\alpha)$, so that the covariate effects reported in the
 printed \code{flexsurvreg} object can be interpreted as hazard ratios
 or log hazard ratios without any further transformation.
@@ -530,10 +640,11 @@ needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is 
 > HweibullPH <- function(x, shape, scale=1, log=FALSE){
 +     Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
 + }
-> custom.weibullPH <- list(name="weibullPH", pars=c("shape","scale"), location="scale",
+> custom.weibullPH <- list(name="weibullPH", 
++                          pars=c("shape","scale"), location="scale",
 +                          transforms=c(log, log), inv.transforms=c(exp, exp),
 +                          inits = function(t){
-+                              c(1, exp(median(log(t[t>0])) / log(2)))
++                              c(1, median(t[t>0]) / log(2))
 +                          })
 > fs6 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH)
 > 1 / fs1$res["scale","est"]^fs1$res["shape","est"]
@@ -551,37 +662,8 @@ needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is 
 The fitted model is the same as \code{fs1}, therefore the maximised likelihood is the same,
 and the parameter estimates of \code{fs1} can be transformed to those of \code{fs6} as shown.
 
-\citet{stgenreg} discuss using the \code{stgenreg} Stata package to
-construct a proportional hazards parameterisation of the generalised
-gamma.  A similar trick can be used in \citet{flexsurvreg}.  A
-four-parameter custom distribution is created by defining its hazard
-(and cumulative hazard) functions.  These are obtained by multiplying
-the built-in functions \code{hgengamma} and \code{Hgengamma} by a
-dummy parameter, which is used as the location parameter of the new
-distribution.  The intercept of this parameter is fixed at 1, so that
-the new model is no more complex than the generalized gamma AFT model
-\code{fs3}, but covariate effects on the dummy parameter are now
-interpreted as hazard ratios.
-
-\begin{Schunk}
-\begin{Sinput}
-> hgengammaPH <- function(x, dummy, mu=0, sigma=1, Q){
-+     dummy * hgengamma(x=x, mu=mu, sigma=sigma, Q=Q)
-+ }
-> HgengammaPH <- function(x, dummy, mu=0, sigma=1, Q){
-+     dummy * Hgengamma(x=x, mu=mu, sigma=sigma, Q=Q)
-+ }
-> custom.gengammaPH <- list(name="gengammaPH", pars=c("dummy","mu","sigma","Q"), location="dummy",
-+                           transforms=c(log, identity, log, identity),
-+                           inv.transforms=c(exp, identity, exp, identity),
-+                           inits=function(t){
-+                               lt <- log(t[t>0])
-+                               c(1, mean(lt), sd(lt), 0)
-+                           })
-> fs7 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.gengammaPH, fixedpars=1)
-\end{Sinput}
-\end{Schunk}
-
+A slightly more complicated example is given in the examples vignette
+of constructing a proportional hazards generalized gamma model.
 
 
 \paragraph{Example: Omitting the cumulative distribution or hazard}
@@ -594,54 +676,9 @@ built-in R routine \code{integrate} for adaptive quadrature are used,
 though these may be changed using the \code{integ.opts} argument to
 \code{flexsurvreg}.
 
-
-In Section \ref{sec:gdim} 
-
-
-\subsection{Computation}
-
-The likelihood is maximised using the optimisation methods available
-through the standard R \code{optim} function.  By default, this is the
-\code{"BFGS"} method (\citep{nash}) which can use the analytic
-derivatives of the likelihood with respect to the model parameters, if
-these are available, to improve the speed of convergence to the
-maximum.
-
-For custom distributions, the user can optionally supply functions
-with names beginning \code{"DLd"} and \code{"DLS"} respectively
-(e.g. \code{DLdweibull,DLSweibull}) to calculate the derivatives of
-the log density and log survivor functions with respect to the
-transformed parameters $\gamma$.
-
-Initial values are difficult: ideally two would come from moments of
-the distribution, then defaults that reduce to simpler distributions.
-example
-
-Demo on at least one dataset: stgenreg uses bc example i think
+EXAMPLE IN SECTION \ref{sec:gdim} 
 
 
-
-
-\subsection{Output functions}
-
-\code{summary.flexsurvreg} calculates the estimated survival, hazard
-or cumulative hazard at a series of times and for specified covariate
-values. Confidence intervals are produced by simulating a large sample
-from the asymptotic normal distribution of the maximum likelihood
-estimates $\gamma$ OR WHATEVER, via the function
-\code{normboot.flexsurvreg}.  The default \code{plot} method for
-\code{flexsurvreg} objects graphs these fitted trajectories against
-non-parametric estimates based on Kaplan-Meier or kernel estimation
-(REF muhaz), while the \code{lines} method adds lines to an existing
-plot.  REFER TO EXAMPLE FIGURE
-
-Any user-defined function of the basic model parameters $\gamma$ OR
-WHATEVER and time can also be summarised in the same way.  For
-example, in a non-proportional hazards model, the hazard ratio between
-two groups of interest varies through time.  To plot this trajectory,
-and confidence intervals.   EXAMPLE FROM SPLINE. 
-
-Restricted mean survival: say of interest. ref royston + parmar
 
 
 \section{Any-dimension models}
@@ -649,13 +686,15 @@ Restricted mean survival: say of interest. ref royston + parmar
 \pkg{flexsurv} also supports models where the number of parameters is
 arbitrary.  In the models discussed previously, the number of
 parameters in the model family is fixed (e.g. three for the
-generalized gamma).  Here the model complexity can be chosen by the
-user.  We may want to represent more irregular hazard
-curves by more flexible functions, or use bigger models if a bigger
-sample size makes it feasible to estimate more parameters.
+generalized gamma).  In this section, the model complexity can be
+chosen by the user, given the model family.  We may want to represent
+more irregular hazard curves by more flexible functions, or use bigger
+models if a bigger sample size makes it feasible to estimate more
+parameters.
 
 
 \subsection{Royston and Parmar spline model}
+\label{sec:spline}
 
 In the spline-based survival model of \citet{royston:parmar}, a
 transformation $g(S(t,z))$ of the survival function is modelled as a
@@ -684,8 +723,6 @@ parameterisations exist --- the one used here is from
   \label{eq:spline}
   s(x,\bm{\gamma}) = \gamma_0 + \gamma_1 x + \gamma_2 v_1(x) + \ldots + \gamma_{m+1} v_m(x)   
 \end{equation}
-
-
 where $v_j(x)$ is the $j$th \emph{basis} function
 
 \[v_j(x) = (x - k_j)^3_+ - \lambda_j(x - k_{min})^3_+ - (1 - \lambda_j) (x - k_{max})^3_+, 
@@ -720,7 +757,6 @@ a proportional hazards or odds model (depending on $g()$).
 
 \[g(S(t,z)) = s(x, \bm{\gamma}) + \bm{\beta}^T \mathbf{z} \]
 
-FLEXSURVSPLINE COMMAND
 
 The spline coefficients $\gamma_j: j=1, 2 \ldots$, the "ancillary parameters",
 may also be modelled as linear functions of covariates $\mathbf{z}$, as
@@ -730,9 +766,50 @@ may also be modelled as linear functions of covariates $\mathbf{z}$, as
 giving a model where the effects of covariates are arbitrarily flexible
 functions of time: a non-proportional hazards or odds model.
 
-FLEXSURVSPLINE COMMAND
+\paragraph{Spline models in \pkg{flexsurv}}
 
-Demo on at least one dataset 
+The package provides the function \code{flexsurvspline} to fit this general 
+model. 
+For example, the best-fitting model investigated by \citet{royston:parmar},
+a proportional odds model with one internal spline knot, can be fitted 
+as follows.
+\begin{Schunk}
+\begin{Sinput}
+> sp1 <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, 
++                       scale="odds")
+\end{Sinput}
+\end{Schunk}
+A further model where the first ancillary parameter also depends on the prognostic
+group, giving a time-varying odds ratio, is fitted as
+\begin{Schunk}
+\begin{Sinput}
+> sp2 <- flexsurvspline(Surv(recyrs, censrec) ~ group + gamma1(group),
++                       data=bc, k=1, scale="odds")
+\end{Sinput}
+\end{Schunk}
+These models give qualitatively similar results to the generalized gamma
+in this dataset (Figure \ref{fig:spline:haz}).   AIC REF AIC TABLE TODO
+\begin{figure}[h]
+  \centering
+\begin{Schunk}
+\begin{Sinput}
+> plot(sp1, type="hazard", ylim=c(0, 0.5), xlab="Years since")
+> lines(sp2, type="hazard", col="red", lty.fit=2)
+> lines(fs2, type="hazard", col="blue")
+\end{Sinput}
+\end{Schunk}
+\includegraphics{flexsurv-015}
+  \caption{Comparison of spline and generalized gamma fitted hazards}
+  \label{fig:spline:haz}
+\end{figure}
+
+Though in general, an advantage of spline models is that extra
+flexibility is available where necessary.  The internal knots are
+chosen by default from quantiles of the log uncensored death times,
+however users can supply their own knot locations in the \code{knots}
+argument to \code{flexsurvspline}.
+
+The function \code{dsurvspline} is provided by 
 
 DPQR STATEMENTS
 
@@ -752,29 +829,42 @@ a functional programming trick.
 \paragraph{Creating distribution functions dynamically}
 
 The R distribution functions supplied to custom models are expected to
-have a fixed number of arguments, one for each scalar parameter.
-However, the distribution functions for the spline model
-(e.g. dsurvspline) have an argument \code{gamma} representing the
-vector of parameters $\gamma$.  
+have a fixed number of arguments, including one for each scalar
+parameter.  However, the distribution functions for the spline model
+(e.g. \code{dsurvspline}) have an argument \code{gamma} representing
+the vector of parameters $\gamma$, whose length is determined by the
+user through the choice of the number of knots.  Note also that the
+\emph{scalar parameters} of conventional distribution functions can be
+supplied as \emph{vector arguments}, and the vector parameters of
+spline-like distribution functions can be supplied as \emph{matrix
+  arguments}, representing alternative parameter values (REF BACK).
 
-
-To convert it into the correct form, \pkg{flexsurv} provides the
-utility \code{unroll.function}.  This converts a function with one (or
-more) vector parameters (matrix arguments) to a function with an
-arbitrary number of scalar parameters (vector arguments).
-
-Note the scalar \emph{parameters} can be supplied to the function as
-correspond to vector \emph{arguments}, and vector parameters supplied
-as \emph{matrix} arguments.
-
-That is, \code{x},\code{shape} and \code{scale} in
-\code{dweibull(x,shape,scale)} could actually be vectors representing
-alternative values for the \code{x} or the parameters.  Similary
-\code{gamma} in \code{dsurvspline(x, gamma,...)} could be a matrix,
-  whose rows represent alternative sets of values for $\gamma$.
-
-Due to vectorisation:  EXAMPLE
-
+To convert a spline-like distribution function into the correct form,
+\pkg{flexsurv} provides the utility \code{unroll.function}.  This
+converts a function with one (or more) vector parameters (matrix
+arguments) to a function with an arbitrary number of scalar parameters
+(vector arguments).  For example, this shows two alternative ways of 
+computing the 5-year survival probability for the baseline group 
+under the model \code{sp1}. We tell \code{unroll.function} that the 
+vector parameter \code{gamma} should be provided instead as three scalar parameters
+named \code{gamma0},\code{gamma1},\code{gamma2}.  The resulting function \code{pfn}
+is in the correct form for a custom \code{flexsurvreg} distribution.
+\begin{Schunk}
+\begin{Sinput}
+> gamma <- sp1$res[c("gamma0","gamma1","gamma2"),"est"]
+> 1 - psurvspline(5, gamma=gamma, knots=sp1$knots)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.6896969
+\end{Soutput}
+\begin{Sinput}
+> pfn <- unroll.function(psurvspline, gamma=0:2)
+> 1 - pfn(5, gamma0=gamma[1], gamma1=gamma[2], gamma2=gamma[3], knots=sp1$knots)
+\end{Sinput}
+\begin{Soutput}
+[1] 0.6896969
+\end{Soutput}
+\end{Schunk}
 
 
 \paragraph{Example: splines on alternative scales}
