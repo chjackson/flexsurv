@@ -243,7 +243,9 @@ unroll.function <- function(mat.fn, ...){
                             sep="\n")
                             )))
     ## thanks to http://adv-r.had.co.nz/Expressions.html#pairlists for this
-    eval(call("function", args, body), envir=parent.frame())   
+    res <- eval(call("function", args, body), envir=parent.frame())
+    environment(res) <- environment(mat.fn)
+    res
 }
 
 flexsurv.splineinits <- function(t=NULL, mf, mml, aux)

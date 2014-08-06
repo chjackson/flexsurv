@@ -113,7 +113,6 @@ hsurvspline.lh <- function(x, gamma, knots=c(-10,10)){
     nret <- max(length(x), lg)
     gamma <- apply(gamma, 2, function(x)rep(x,length=nret))
     x <- rep(x, length=nret)
-    browser()
     loghaz <- rowSums(basis(knots, log(x)) * gamma)
     exp(loghaz)
 }
@@ -127,8 +126,9 @@ custom.hsurvspline.lh3 <- list(
     transforms = rep(c(identity), 3), inv.transforms=rep(c(identity), 3)
     )
 
-kmin <- min(log(bc$recyrs)[bc$censrec==1])
-kmax <- max(log(bc$recyrs)[bc$censrec==1])
+dtime <- log(bc$recyrs)[bc$censrec==1]
+kmin <- min(dtime)
+kmax <- max(dtime)
 ak <- list(knots=c(kmin,0,kmax))
 
 ### Exponential, constant log hazard
@@ -140,15 +140,91 @@ flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibull")
 fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=ak,
             inits=c(log(0.14), 0, 0), dist=custom.hsurvspline.lh3, fixedpars=3)
 
-fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, aux=ak,
-                   inits=c(0, 1, 0,0,0), dist=custom.hsurvspline.lh3, method0="L-BFGS-B",
+system.time(
+fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=ak,
+                   inits=c(log(0.14), 0, 0), dist=custom.hsurvspline.lh3, method="L-BFGS-B",
                    lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5), control=list(trace=1,REPORT=1))
+) # 146 sec 
+
+system.time(
+fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, aux=ak,
+                   inits=c(0, 1, 0.3, 0, 0), dist=custom.hsurvspline.lh3, method="L-BFGS-B",
+                   lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5), control=list(trace=1,REPORT=1))
+)
+
+### without constraint, gammas get too low (-7,-7,-1) and integral diverges 
 ### log hazards shoot off to minus infinity. get massive values for gamma, both pos and neg
 ### Runs if constrain parameters: mle of gamma2:  0.2918  (0.1877, 0.3958)
+### though takes 5 minutes to run 
+fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, aux=ak,
+                   inits=c(0, 1, 0.3, 0, 0), dist=custom.hsurvspline.lh3, method="L-BFGS-B",
+                   lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5), control=list(trace=1,REPORT=1))
+
+plot(sp1, type="hazard")
+lines(fs3, type="hazard", col="blue")
+
+
+### any chance of more knots?
+
+hsurvspline.lh5 <- unroll.function(hsurvspline.lh, gamma=0:4)
+
+custom.hsurvspline.lh5 <- list(
+    name = "survspline.lh5",
+    pars = c(paste0("gamma",0:4)),
+    location = c("gamma0"),
+    transforms = rep(c(identity), 5), inv.transforms=rep(c(identity), 5)
+    )
+
+ak <- list(knots=c(kmin,quantile(dtime, c(0.25, 0.5, 0.75)), kmax))
+
+system.time(
+fs5 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=ak,
+                   inits=c(log(0.14), 0, 0, 0, 0), dist=custom.hsurvspline.lh5,
+                   method="L-BFGS-B", lower=c(-Inf,-Inf,-0.5,-0.5,-0.5), upper=c(Inf,Inf,0.5,0.5, 0.5),
+                   control=list(trace=1,REPORT=1))
+) # no SEs at convergence.   model probably not much better anyway
+
+plot(fs5, type="hazard")
+sp6 <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=6, scale="odds")
+## Can we show that models with loads of knots can be made to fit arbitrarily well
+plot(sp6, type="cumhaz") # cum haz plot shows well.  bandwidth choice hard in haz plots 
+plot(sp6, type="hazard", ylim=c(0,0.5))
+
+
+### What about log hazard as spline function of (not log) time
+
+hsurvspline.lh <- function(x, gamma, knots=c(-10,10)){
+    if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
+    lg <- nrow(gamma)
+    nret <- max(length(x), lg)
+    gamma <- apply(gamma, 2, function(x)rep(x,length=nret))
+    x <- rep(x, length=nret)
+    loghaz <- rowSums(basis(knots, x) * gamma)
+    exp(loghaz)
+}
+
+hsurvspline.lh3 <- unroll.function(hsurvspline.lh, gamma=0:2)
+
+custom.hsurvspline.lh3 <- list(
+    name = "survspline.lh3",
+    pars = c(paste0("gamma",0:2)),
+    location = c("gamma0"),
+    transforms = rep(c(identity), 3), inv.transforms=rep(c(identity), 3)
+    )
+
+dtime <- bc$recyrs[bc$censrec==1]
+kmin <- min(dtime); kmax <- max(dtime)
+ak <- list(knots=c(kmin,median(dtime),kmax))
+
+fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=ak,
+                   inits=c(0, 0, 0), dist=custom.hsurvspline.lh3,
+                   method="L-BFGS-B", lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5),
+                   )
+## still breaks, even with constraints
 
 
 
-## Log hazard as fractional polynomial function of log time
+## Log hazard as fractional polynomial function of (not log) time
 
 hfp.lh <- function(x, gamma, powers){
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
@@ -156,7 +232,7 @@ hfp.lh <- function(x, gamma, powers){
     nret <- max(length(x), lg)
     gamma <- apply(gamma, 2, function(x)rep(x,length=nret))
     x <- rep(x, length=nret)
-    basis <- cbind(1, bfp(log(x), powers))
+    basis <- cbind(1, bfp(x, powers))
     loghaz <- rowSums(basis * gamma)
     exp(loghaz)
 }
@@ -170,18 +246,14 @@ custom.hfp.lh3 <- list(
     transforms = rep(c(identity), 3), inv.transforms=rep(c(identity), 3)
     )
 
-aux <- list(powers=c(1,0))
-## null model: constant hazard
+aux <- list(powers=c(0,1)) # a log and a linear term
 fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=aux,
-                   inits=c(-2, 0, 0), dist=custom.hfp.lh3, fixedpars=2:3)
-## just a linear term
-flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=aux,
-                   inits=c(-2, 0, 0), dist=custom.hfp.lh3, fixedpars=TRUE)
-## ?? should be same as weibull model above
-## but get non-finite value in integral
+                   inits=c(-2, 0, 0), dist=custom.hfp.lh3)
+plot(fs1, type="hazard", ylim=c(0,0.3))  # plot.survival method too slow, but this one seems to fit.
+## todo is an extra term worth it?
 
 
-## Log cumulative hazard as fractional polynomial function of log time
+## Log cumulative hazard as fractional polynomial function of (not log) time
 ## This can be differentiated, but hazard can't be integrated
 
 Hfp.lh <- function(x, gamma, powers){
@@ -190,7 +262,7 @@ Hfp.lh <- function(x, gamma, powers){
     nret <- max(length(x), lg)
     gamma <- apply(gamma, 2, function(x)rep(x,length=nret))
     x <- rep(x, length=nret)
-    basis <- cbind(1, bfp(log(x), powers))
+    basis <- cbind(1, bfp(x, powers))
     logch <- rowSums(basis * gamma)
     exp(logch)
 }
@@ -201,14 +273,11 @@ hfp.lh <- function(x, gamma, powers){
     nret <- max(length(x), lg)
     gamma <- apply(gamma, 2, function(x)rep(x,length=nret))
     x <- rep(x, length=nret)
-    basis <- cbind(1, bfp(log(x), powers))
-    dbasis <- cbind(0, dbfp(log(x), powers))
+    basis <- cbind(1, bfp(x, powers))
+    dbasis <- cbind(0, dbfp(x, powers))
     loghaz <- rowSums(basis * gamma)
     dloghaz <- rowSums(dbasis * gamma)
-    browser()
-    ### TODO wrong for constant haz
-    ## also nans in second basis var where log(x) is negative, trying to take log of it
-    ret <- ifelse(dloghaz <= 0, 0, 1 / x * dloghaz * exp(loghaz))
+    ret <- ifelse(dloghaz <= 0, 0, dloghaz * exp(loghaz))
     ret
 }
 
@@ -225,5 +294,5 @@ custom.hfp.lh3 <- list(
 aux <- list(powers=c(1,0))
 ## null model: constant hazard:  dloghaz=0
 fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=aux,
-                   inits=c(-2, 0, 0), dist=custom.hfp.lh3, fixedpars=2:3)
-## TODO
+                   inits=c(-2, 0.1, 0.01), dist=custom.hfp.lh3)
+## non-finite finite difference error

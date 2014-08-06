@@ -10,7 +10,9 @@
 
 \title{flexsurv: flexible parametric survival modelling in R.   Supplementary examples}
 
-This supplements the main user guide.
+\begin{document} 
+
+This vignette of examples supplements the main user guide.
 
 \section{Examples of custom distributions}
 
@@ -29,6 +31,8 @@ the new model is no more complex than the generalized gamma AFT model
 interpreted as hazard ratios.
 
 <<>>=
+library(flexsurv)
+
 hgengammaPH <- function(x, dummy, mu=0, sigma=1, Q){
     dummy * hgengamma(x=x, mu=mu, sigma=sigma, Q=Q)
 }
@@ -113,3 +117,8 @@ lines(t, hrPH.est, col="darkgray", lwd=2)
 legend("topright", lwd=c(2,2), col=c("red","darkgray"), bty="n",
        c("Generalized gamma: standard AFT", "Generalized gamma: proportional hazards"))
 @ 
+
+
+\bibliography{flexsurv}
+
+\end{document} 

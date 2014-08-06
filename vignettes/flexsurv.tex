@@ -160,7 +160,7 @@ The likelihood for the parameters $\bm{\beta}$ in model
   l(\{\bm{\beta}_r\} | \mathbf{t},\mathbf{c},\mathbf{s},\mathbf{t}^{max}) = \left\{ \prod_{i:\ c_i=1} f_i(t_i) \prod_{i:\ c_i=0} \left(S_i(t_i) - S_i(t^{max}_i)\right)\right\} / \prod_i S_i(s_i)  
 \end{equation}
 
-Note that the individuals are independent, so that \pkg{flexsurv} does not
+The individuals are independent, so that \pkg{flexsurv} does not
 currently support frailty, clustered or random effects models.
 
 An example dataset used throughout this paper is from 686 patients
@@ -437,15 +437,15 @@ survival under the Weibull model \code{fs1} can be summarised as follows
 \begin{Soutput}
 group=Good 
   time     est      lcl      ucl
-1    1 8.75794 7.076969 10.78961
+1    1 8.75794 7.097578 10.78023
 
 group=Medium 
-  time      est      lcl      ucl
-1    1 4.741585 4.121897 5.459531
+  time      est     lcl      ucl
+1    1 4.741585 4.11607 5.448299
 
 group=Poor 
-  time      est      lcl      ucl
-1    1 2.605819 2.311678 2.929477
+  time      est     lcl      ucl
+1    1 2.605819 2.31089 2.931663
 \end{Soutput}
 \end{Schunk}
 Although the median of the Weibull has an analytic form as $\mu
@@ -520,10 +520,10 @@ character string.  The list has the following elements.
   arguments of the R distribution function or functions.
   
 \item[\code{location}] Character: quoted name of the location parameter $\mu$.
-  Note that the location parameter will not necessarily be the first one, e.g. 
+  The location parameter will not necessarily be the first one, e.g. 
   in \code{dweibull} the \code{scale} comes after the \code{shape}.
   
-\item[\code{transforms}] A list of functions $g()$ which transform the parameter from its natural range to the real line, for example, \code{c(log,identity)} \footnote{Note this is a \emph{list}, not an \emph{atomic vector} of functions, so if the distribution only has one parameter, we should write \code{transforms=c(log)} or \code{transforms=list(log)}, not \code{transforms=log}}
+\item[\code{transforms}] A list of functions $g()$ which transform the parameter from its natural range to the real line, for example, \code{c(log,identity)} \footnote{This is a \emph{list}, not an \emph{atomic vector} of functions, so if the distribution only has one parameter, we should write \code{transforms=c(log)} or \code{transforms=list(log)}, not \code{transforms=log}}
 
 \item[\code{inv.transforms}] List of corresponding inverse functions.
 
@@ -531,17 +531,19 @@ character string.  The list has the following elements.
   of the parameters for maximum likelihood estimation.  This is
   optional, but if not provided, then each call to \code{flexsurvreg}
   must have an \code{inits} argument containing a vector of initial
-  values, which is inconvenient.
+  values, which is inconvenient.  Implausible initial values may
+  produce a likelihood of zero, and a fatal error message from the
+  optimiser.  SAY IT.
   
   Each distribution will ideally have a heuristic for initialising
-  parameters from summaries of the data.  For example, the median of
-  the Weibull is $\mu \log(2)^{1/\alpha}$, a sensible estimate of
-  $\mu$ will commonly be the median log uncensored survival time
-  divided by $\log(2)$, with $\alpha=1$, assuming that in practice the
-  true value of $\alpha$ is not too far from 1.  Then we define the
-  function, of one argument \code{t} assumed to be the uncensored
-  survival times, returning the initial values for the Weibull
-  \code{shape} and \code{scale} respectively.
+  parameters from summaries of the data.  For example, since the
+  median of the Weibull is $\mu \log(2)^{1/\alpha}$, a sensible
+  estimate of $\mu$ will commonly be the median log uncensored
+  survival time divided by $\log(2)$, with $\alpha=1$, assuming that
+  in practice the true value of $\alpha$ is not often far from 1.  Then
+  we define the function, of one argument \code{t} assumed to be the
+  uncensored survival times, returning the initial values for the
+  Weibull \code{shape} and \code{scale} respectively.
 
 \code{inits = function(t){ c(1, median(t[t>0]) / log(2))) }
   
@@ -808,6 +810,9 @@ flexibility is available where necessary.  The internal knots are
 chosen by default from quantiles of the log uncensored death times,
 however users can supply their own knot locations in the \code{knots}
 argument to \code{flexsurvspline}.
+
+Initial values for numerical likelihood maximisation are chosen
+using the method described by \citet{royston:parmar}.
 
 The function \code{dsurvspline} is provided by 
 

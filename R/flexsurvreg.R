@@ -674,7 +674,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                              est=TRUE, ci=NULL, B=1000, cl=0.95,
                              col.obs="black", lty.obs=1, lwd.obs=1,
                              col="red",lty=1,lwd=2,
-                             col.ci=NULL,lty.ci=2,lwd.ci=1,ylim=ylim,
+                             col.ci=NULL,lty.ci=2,lwd.ci=1,ylim=NULL,
                              add=FALSE,...)
 {
     ## don't calculate or plot CIs by default if all covs are categorical -> multiple curves
@@ -706,11 +706,13 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
         }
         else if (type=="hazard") {
             muhaz.args <- list(...)[names(list(...)) %in% names(formals(muhaz))]
+            plot.args <- list(...)[!names(list(...)) %in% names(formals(muhaz))]
             if (!all(dat$Y[,"start"]==0)) warning("Left-truncated data not supported by muhaz: ignoring truncation point when plotting observed hazard")
             if (any(dat$Y[,"status"] > 1)) stop("Interval-censored data not supported by muhaz")
-            if (!all(isfac))
-                plot(do.call("muhaz", c(list(times=dat$Y[,"stop"], delta=dat$Y[,"status"]), muhaz.args)),
-                     col=col.obs, lty=lty.obs, lwd=lwd.obs, ...)
+            if (!all(isfac)){
+                haz <- do.call("muhaz", c(list(times=dat$Y[,"stop"], delta=dat$Y[,"status"]), muhaz.args))
+                do.call("plot", c(list(haz), list(col=col.obs, lty=lty.obs, lwd=lwd.obs), plot.args))
+            }
             else {
                 ## plot hazard for all groups defined by unique combinations of covariates
                 group <- if(ncovs>0) do.call("interaction", mm) else factor(rep(1,nrow(dat$Y)))
@@ -721,8 +723,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                 }
                 if (missing(ylim))
                     ylim <- range(sapply(haz, function(x)range(x$haz.est)))
-                plot(haz[[1]], col=col.obs, lty=lty.obs, lwd=lwd.obs, 
-                     ylim=ylim, ...)
+                do.call("plot", c(list(haz[[1]]), list(col=col.obs, lty=lty.obs, lwd=lwd.obs, ylim=ylim), plot.args))
                 if (nrow(X)>1) {
                     for (i in 1:nrow(X)) {
                         lines(haz[[i]], col=col.obs, lty=lty.obs, lwd=lwd.obs)

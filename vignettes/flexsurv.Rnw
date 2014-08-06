@@ -467,8 +467,9 @@ character string.  The list has the following elements.
   optional, but if not provided, then each call to \code{flexsurvreg}
   must have an \code{inits} argument containing a vector of initial
   values, which is inconvenient.  Implausible initial values may
-  produce a likelihood of zero, and a fatal error message from the
-  optimiser.  SAY IT.
+  produce a likelihood of zero, and a fatal error message
+  (\texttt{initial value in 'vmmin' is not finite}) from the
+  optimiser.
   
   Each distribution will ideally have a heuristic for initialising
   parameters from summaries of the data.  For example, since the
@@ -480,7 +481,7 @@ character string.  The list has the following elements.
   uncensored survival times, returning the initial values for the
   Weibull \code{shape} and \code{scale} respectively.
 
-\code{inits = function(t){ c(1, median(t[t>0]) / log(2))) }
+  \code{inits = function(t){ c(1, median(t[t>0]) / log(2)) } }
   
   More complicated initial value functions may use other data such
   as the covariate values and censored observations: for an example,
