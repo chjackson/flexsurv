@@ -444,15 +444,15 @@ survival under the Weibull model \code{fs1} can be summarised as follows
 \begin{Soutput}
 group=Good 
   time     est      lcl      ucl
-1    1 8.75794 7.083501 10.78606
+1    1 8.75794 7.106009 10.78504
 
 group=Medium 
   time      est      lcl      ucl
-1    1 4.741585 4.117224 5.455804
+1    1 4.741585 4.114637 5.456919
 
 group=Poor 
   time      est      lcl      ucl
-1    1 2.605819 2.309959 2.930753
+1    1 2.605819 2.308561 2.931716
 \end{Soutput}
 \end{Schunk}
 Although the median of the Weibull has an analytic form as $\mu
@@ -815,22 +815,20 @@ gamma in this dataset (Figure \ref{fig:spline:haz}), and have similar
 predictive ability as measured by AIC (Table \ref{tab:aic}). Though in
 general, an advantage of spline models is that extra flexibility is
 available where necessary.
-\begin{figure}[h]
-  \centering
-\begin{Schunk}
-\begin{Sinput}
-> plot(sp1, type="hazard", ylim=c(0, 0.5), xlab="Years since")
-> lines(sp2, type="hazard", col="red", lty.fit=2)
-> lines(fs2, type="hazard", col="blue")
-\end{Sinput}
-\end{Schunk}
-\includegraphics{flexsurv-015}
-  \caption{Comparison of spline and generalized gamma fitted hazards}
-  \label{fig:spline:haz}
-\end{figure}
+
+%\begin{figure}[h]
+%  \centering
+%%<<fig=TRUE>>=
+%#plot(sp1, type="hazard", ylim=c(0, 0.5), xlab="Years since")
+%#lines(sp2, type="hazard", col="red", lty.fit=2)
+%#lines(fs2, type="hazard", col="blue")
+%@   
+%  \caption{Comparison of spline and generalized gamma fitted hazards}
+%  \label{fig:spline:haz}
+%\end{figure}
 
 
-\subsection{General-dimension models}
+\subsection{Implementing general-dimension models}
 \label{sec:gdim}
 
 The spline model above is an example of the general parametric form
@@ -910,15 +908,15 @@ A potential application is to fractional polynomials
 \citep{royston1994regression}. These are of the form $\sum_{m=1}^M
 \alpha_m x^{p_m} log(x)^n$ where the power $p_m$ is in the standard
 set $\{2,-1,-0.5,0,0.5,1,2,3\}$ (except that $log(x)$ is used instead
-of $x^0$, and $n$ is a non-negative integer. They are similar to
+of $x^0$), and $n$ is a non-negative integer. They are similar to
 splines in that they can give arbitrarily close approximations to a
 nonlinear function, such as a hazard curve, and are particularly
 useful for modelling the effects of continuous predictors in
 regression models.  See e.g. \citet{sauerbrei2007selection}, and
-several other publications by the same authors, for discussion of
-their advantages over splines.  The R package \pkg{gamlss} CITE has a
-function to construct a fractional polynomial basis that may be
-employed in \pkg{flexsurv} models.
+several other publications by the same authors, for applications and
+discussion of their advantages over splines.  The R package
+\pkg{gamlss} CITE has a function to construct a fractional polynomial
+basis that may be employed in \pkg{flexsurv} models.
 
 Polyhazard models \citep{polyhazard} are another potential use of this
 technique.  These express an overall hazard as a sum of latent
@@ -968,43 +966,76 @@ Spline (time-varying effects)                     1574.848          7 1588.848
 
 A \emph{multi-state model} represents how an individual moves between
 multiple states through time.  Survival analysis is a special case
-with two states, ``alive'' and ``dead''. Suppose an individual is in
-state $S(t)$ at time $t$.  The next state to which the individual
-moves, and the time of the change, are governed by a set of
-\emph{transition intensities} $q_{rs}(t)$ for states $r, s =
+with two states, ``alive'' and ``dead''.  \emph{Competing risks} are a
+further special case where there are multiple causes of death, that
+is, multiple possible destination states for the same starting
+state.  
+
+Instead of a single event time for each individual, we may now have a
+series of event times $t_{1},\dots, t_{n}$.  The last of these may be
+an observed event or censoring.  Given that an individual is in state
+$S(t)$ at time $t$, the next state to which they move, and the time of
+the change, are governed by a set of \emph{transition intensities}
+$q_{rs}(t,\mathbf{z}(t),\mathcal{H}_t) = \lim_{\delta t \rightarrow 0}
+P(S(t+\delta t) = s | S(t) = r) / \delta t$ for states $r, s =
 1,\dots,R$, which for a survival model are equivalent to the hazard
 $h(t)$.  The intensity represents the instantaneous risk of moving
-from state $r$ to state $s$.
+from state $r$ to state $s$.  It may depend on the time $t$ since the
+start of the process, patient characteristics $\mathbf{z}(t)$, and
+possibly also the ``history'' of the process up to that time,
+$\mathcal{H}_t$, the states previously visited or the length of time
+spent in them.
 
-Suppose the data are a series of event times $t_{1},\dots, t_{n}$.
-The last of these may be an observed event or censoring.  Any software
-to fit survival models can also fit multi-state models to this kind of
-data, provided it can deal with left-truncation or \emph{counting
-  process} data.
+\paragraph{Alternative time scales} 
 
-For more discussion of the theory see \citet{putter:mstate}. ref also
-Andersen for CP data
+In semi-Markov (clock-reset) models, $q_{rs}(t)$ depends on the time
+$t$ since entry into the current state, but otherwise, time since the
+beginning of the process is forgotten.  Any software to fit survival
+models can also fit this kind of model.  
 
-\paragraph{Counting process data}
-For each permitted $r \rightarrow s$ transition in the multi-state
-model (ILLUSTRATION) there is a corresponding \emph{time-to-event
-  model}, with cause-specific hazard rates defined by $q_{rs}(t)$. To
-enable estimation of these hazards, the data are expressed as a series
-of times to events which are potentially censored: $dt_{j} = t_{j+1} -
-t_{j}: j = 1,\ldots,n-1$. For a patient who moves into state $s$ at
-time $t_{j}$, their next event at $t_{j+1}$ is defined by the model
-structure (FIGURE) to be one of a set of competing events
-$s^*_1,\ldots,s^*_{n_s}$.
+In an inhomogeneous Markov (clock-forward) model, $q_{rs}(t)$ is
+depends on the time $t$ since the beginning of the process, but not
+otherwise on $\mathcal{H}_t$.  The transition intensity out of state
+$r$.  Again any survival modelling software can be used, with the
+additional requirement that it can deal with left-truncation or
+\emph{counting process} data.
 
-For example, in state EXAMPLE, the next state must either be EXAMPLE
-or EXAMPLE so $n_s=EG$.  The time of the event which actually occurs
-at $t_{j+1}$ is \emph{observed}, and the times of the \emph{competing}
-events from this set (which have not occurred by this time) are
-\emph{censored}.  Each $dt_{j}$ contributes an \emph{observed} time to
-one of the EG transition-specific models, and a \emph{censored} time
-to each of the models for the competing events.
+\paragraph{Implementing multi-state models as multiple survival models}
+
+\citet{putter:mstate} discuss how to implement multi-state models
+using standard survival modelling software.  For each permitted $r
+\rightarrow s$ transition in the multi-state model (ILLUSTRATION)
+there is a corresponding survival model, with hazard rates defined by
+$q_{rs}(t)$.
+
+For a patient who moves into state $s$ at time $t_{j}$, their next
+event at $t_{j+1}$ is defined by the model structure (FIGURE) to be
+one of a set of competing events $s^*_1,\ldots,s^*_{n_s}$.  Therefore
+there are $N$ survival models, where $N$ is the number of distinct
+permitted transitions from states $r$ to a different state $s$ in the
+multi-state model structure.
+
+At time $t_j$, a series of $n_s$ observations are constructed.  Each
+has an indicator for whether the transition to the corresponding state
+$s^*_1,\ldots,s^*_{n_s}$ is observed or censored at $t_{j+1}$, coupled
+with:
+\begin{itemize}
+\item (for a semi-Markov model) the time elapsed $dt_{j} = t_{j+1} -
+  t_{j}$ from state $r$ entry to state $s$ entry.  This data informs
+  the ``survival'' model for the $r \rightarrow s$ transition.
+  
+\item (for an inhomogeneous Markov model) the start and stop time
+  $(t_j,t_{j+1})$.  The $r \rightarrow s$ model is fitted to the
+  right-censored time $t_{j+1}$ from the \emph{start of the process},
+  but is conditional on not experiencing the $r \rightarrow$
+  transition until after the state $r$ entry time.  In other words,
+  the $r \rightarrow s$ transition model is \emph{left-truncated} at
+  the state $r$ entry time.
+\end{itemize}
 
 FLEXSURVREG EXAMPLE
+
+\paragraph{mstate}
 
 The \pkg{mstate} R package \citep{mstate:cmpb,mstate:jss} has a
 utility \code{msprep} to produce data of this form from
@@ -1032,13 +1063,15 @@ contrast Markov and semi-Markov models
 
 \paragraph{Multi-state models for panel data}
 
-Note the contrast with multi-state models for \emph{panel data}, that is,
-observations of the state of the process at a series of times
+Note the contrast with multi-state models for \emph{panel data}, that
+is, observations of the state of the process at a series of times
 \citep{kalbfleisch:lawless}.  In panel data, we do not necessarily
-know know the time of each transition, or even whether a transitions
-of a certain type have occurred at all between a pair of observations.
-Such models can be fitted with the \pkg{msm} package for R, but are
-restricted to (piecewise) exponentially-distributed event times.
+know know the time of each transition, or even whether transitions of
+a certain type have occurred at all between a pair of observations.
+Multi-state models for this type of data (and also for the exact event
+time data discussed above) can be fitted with the \pkg{msm} package
+for R, but are restricted to (piecewise) exponentially-distributed
+event times.
 
 
 
