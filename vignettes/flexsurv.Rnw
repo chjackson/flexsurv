@@ -1,5 +1,7 @@
 %\VignetteIndexEntry{flexsurv user guide}
 
+%% TODO: run streg gen gamma on bc
+
 \documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
 \usepackage{tabularx}
@@ -273,7 +275,12 @@ fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="gengamma")
 fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group + sigma(group), 
                    data=bc, dist="gengamma")
 @ 
-SHOW IT FITS BETTER, LIKS, AIC, PLOTS
+Table~\ref{tab:aic} compares all the models fitted to the breast
+cancer data, showing absolute fit to the data as measured by the
+maximised -2$\times$ log likelihood $-2LL$, number of parameters $p$,
+and Akaike's information criterion $-2LL + 2p$ which estimates
+predictive ability.
+
 
 \paragraph{Generalized F} This four-parameter distribution includes
 the generalized gamma, and also the log-logistic, as special cases.
@@ -417,6 +424,7 @@ the distribution, then defaults that reduce to simpler distributions.
 example
 
 \subsection{Custom survival distributions}
+\label{sec:custom}
 
 \pkg{flexsurv} is not limited to its built-in distributions.  Any
 survival model of the form (\ref{eq:model}--\ref{eq:lik}) can be
@@ -468,7 +476,7 @@ character string.  The list has the following elements.
   must have an \code{inits} argument containing a vector of initial
   values, which is inconvenient.  Implausible initial values may
   produce a likelihood of zero, and a fatal error message
-  (\texttt{initial value in 'vmmin' is not finite}) from the
+  (\texttt{initial value in `vmmin' is not finite}) from the
   optimiser.
   
   Each distribution will ideally have a heuristic for initialising
@@ -506,9 +514,7 @@ fs4 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.llogis)
 @ 
 
 This fits the breast cancer data better than the Weibull, since it can
-represent a peaked hazard, but less well than the generalized gamma.
-Proportional odds.  ANY SPACE FOR A HIGHLIGHTED PLOT
-
+represent a peaked hazard, but less well than the generalized gamma (Table \ref{tab:aic}).
 
 
 \paragraph{Example: Wrapping functions from a contributed package}
@@ -516,11 +522,10 @@ Proportional odds.  ANY SPACE FOR A HIGHLIGHTED PLOT
 Sometimes there may be probability density and similar functions in a
 contributed package, but in a different format.  For example,
 \pkg{eha} also provides a three-parameter Gompertz-Makeham
-distribution with density \code{dmakeham}, and 
-hazard $h(t|\mu,\alpha_1,\alpha_2)= \alpha_2 + \alpha_1 \exp(t/\mu)$
-whose shape parameters ($(\alpha_1,\alpha_2)$) are
-provided as a vector of length two.  However, \code{flexsurvreg}
-expects its distribution functions to have one argument for each
+distribution with hazard $h(t|\mu,\alpha_1,\alpha_2)= \alpha_2 + \alpha_1 \exp(t/\mu)$.
+The shape parameters $\alpha_1,\alpha_2$ are provided to 
+\code{dmakeham} as a vector argument of length two.  However, \code{flexsurvreg}
+expects distribution functions to have one argument for each
 parameter.  Therefore we write our own functions that wrap around 
 the third-party functions.
 <<>>=
@@ -545,8 +550,8 @@ and this allows us to write, for example,
 pmakeham3(c(0, 1, 1, Inf), 1, c(1, 1, 2, 1), 1)
 @ 
 We could then use \code{dist=list(name="makeham3", pars=c("shape1","shape2","scale"),...)}
-in a \code{flexsurvreg} model\footnote{though the second shape parameter appears to be not 
-  identifiable in the breast cancer example}. 
+in a \code{flexsurvreg} model, though in the breast cancer example,
+the second shape parameter is poorly identifiable.
 
 
 \paragraph{Example: Changing the parameterisation of a distribution}
@@ -557,7 +562,7 @@ printed \code{flexsurvreg} object can be interpreted as hazard ratios
 or log hazard ratios without any further transformation.
 Here instead of the density and cumulative distribution functions, we
 provide the hazard and cumulative hazard.\footnote{The \pkg{eha} package 
-needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s does}
+needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s does.}
 <<>>=
 detach("package:eha")
 hweibullPH <- function(x, shape, scale = 1, log=FALSE){
@@ -587,11 +592,12 @@ of constructing a proportional hazards generalized gamma model.
 
 If there is no analytic form for $F(t)$ or $H(t)$ as the integral of
 the density or hazard respectively, then \pkg{flexsurv} can compute
-these internally by numerical integration, though this will
-substantially slow down the computation.  The default options of the
-built-in R routine \code{integrate} for adaptive quadrature are used,
-though these may be changed using the \code{integ.opts} argument to
-\code{flexsurvreg}.
+these internally by numerical integration, as in \pkg{stgenreg}
+\citep{stgenreg}.  The default options of the built-in R routine
+\code{integrate} for adaptive quadrature are used, though these may be
+changed using the \code{integ.opts} argument to \code{flexsurvreg}.
+Models specified this way will take much longer to fit, by an order of
+magnitude.
 
 EXAMPLE IN SECTION \ref{sec:gdim} 
 
@@ -647,10 +653,16 @@ where $v_j(x)$ is the $j$th \emph{basis} function
 \lambda_j = \frac{k_{max} - k_j}{k_{max} - k_{min}} \] 
 
 and $(x - a)_+ = max(0, x - a)$.  If $m=0$ then there are only two
-parameters $\gamma_0,\gamma_1$ --- in fact if $g()$ is the log
-cumulative hazard, this is equivalent to a Weibull model (PARAMETERS /
-DPQR STATEMENT).  Table \ref{tab:spline} explains two alternative
-choices of $g()$.
+parameters $\gamma_0,\gamma_1$.  In fact if $g()$ is the log
+cumulative hazard, this is equivalent to a Weibull model.  Table
+\ref{tab:spline} explains two further choices of $g()$, and the
+parameter values and distributions they simplify to for $m=0$.  
+The probability density and cumulative distribution functions
+for this model are available as \code{dsurvspline} and \code{psurvspline}
+
+\begin{Scode}
+  
+\end{Scode}
   
   \begin{table}
   \begin{tabularx}{\textwidth}{lXll}
@@ -658,17 +670,20 @@ choices of $g()$.
     Model &  $g(S(t,\mathbf{z}))$ & In \code{flexsurvspline} & With $m=0$ \\
 \hline
     Proportional hazards & $\log(-\log(S(t,\mathbf{z})))$ \newline {\footnotesize (log cumulative hazard)}  & \code{scale="hazard"} & Weibull\\
+\multicolumn{4}{l}{{\footnotesize\code{pweibull(t, shape=a, scale=b) == psurvspline(t, gamma=c(log(1 / b^a), a))}}}\\
     Proportional odds    & $\log(S(t,\mathbf{z})^{-1} - 1)$ \newline {\footnotesize (log cumulative odds)}   & \code{scale="odds"} & Log-logistic\\
+\multicolumn{4}{l}{{\footnotesize\code{eha::pllogis(t, shape=a, scale=b) == psurvspline(t, gamma=c(-a*log(b), a), scale="odds")}}}\\
     Normal / probit      & $\Phi^{-1}(S(t,\mathbf{z}))$  \newline   {\footnotesize (inverse normal CDF, \code{qnorm})}    & \code{scale="normal"} & Log-normal \\  
+\multicolumn{4}{l}{{\footnotesize\code{plnorm(t, meanlog=a, sdlog=b) == psurvspline(t, gamma=c(-a/b, 1/b), scale="normal")}}}\\
 \hline
   \end{tabularx}    
-    \caption{Alternative modelling scales for \code{flexsurvspline}}
+    \caption{Alternative modelling scales for \code{flexsurvspline}, and equivalent distribution families and parameter values for $m=0$ explained in R notation.}
     \label{tab:spline}
 \end{table}
 
 \paragraph{Covariates on spline parameters}
 Covariates can be placed on any parameter $\gamma$ through a linear
-model (with identity link function).  Most straightforwardly we can
+model (with identity link function).  Most straightforwardly, we can
 let the intercept $\gamma_0$ vary with covariates $\mathbf{z}$, giving
 a proportional hazards or odds model (depending on $g()$).
 
@@ -685,11 +700,16 @@ functions of time: a non-proportional hazards or odds model.
 
 \paragraph{Spline models in \pkg{flexsurv}}
 
-The package provides the function \code{flexsurvspline} to fit this general 
-model. 
-For example, the best-fitting model investigated by \citet{royston:parmar},
-a proportional odds model with one internal spline knot, can be fitted 
-as follows.
+The package provides the function \code{flexsurvspline} to fit this
+general model. Internal knots are chosen by default from quantiles of
+the log uncensored death times, however users can supply their own
+knot locations in the \code{knots} argument to \code{flexsurvspline}.
+Initial values for numerical likelihood maximisation are chosen using
+the method described by \citet{royston:parmar} of Cox regression
+combined with transforming an empirical survival estimate.
+
+For example, the best-fitting model for the breast cancer dataset identified in \citet{royston:parmar},
+a proportional odds model with one internal spline knot, is
 <<>>=
 sp1 <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, 
                       scale="odds")
@@ -700,34 +720,25 @@ group, giving a time-varying odds ratio, is fitted as
 sp2 <- flexsurvspline(Surv(recyrs, censrec) ~ group + gamma1(group),
                       data=bc, k=1, scale="odds")
 @ 
-These models give qualitatively similar results to the generalized gamma
-in this dataset (Figure \ref{fig:spline:haz}).   AIC REF AIC TABLE TODO
-\begin{figure}[h]
-  \centering
-<<fig=TRUE>>=
-plot(sp1, type="hazard", ylim=c(0, 0.5), xlab="Years since")
-lines(sp2, type="hazard", col="red", lty.fit=2)
-lines(fs2, type="hazard", col="blue")
-@   
-  \caption{Comparison of spline and generalized gamma fitted hazards}
-  \label{fig:spline:haz}
-\end{figure}
+These models give qualitatively similar results to the generalized
+gamma in this dataset (Figure \ref{fig:spline:haz}), and have similar
+predictive ability as measured by AIC (Table \ref{tab:aic}). Though in
+general, an advantage of spline models is that extra flexibility is
+available where necessary.
 
-Though in general, an advantage of spline models is that extra
-flexibility is available where necessary.  The internal knots are
-chosen by default from quantiles of the log uncensored death times,
-however users can supply their own knot locations in the \code{knots}
-argument to \code{flexsurvspline}.
-
-Initial values for numerical likelihood maximisation are chosen
-using the method described by \citet{royston:parmar}.
-
-The function \code{dsurvspline} is provided by 
-
-DPQR STATEMENTS
+%\begin{figure}[h]
+%  \centering
+%%<<fig=TRUE>>=
+%#plot(sp1, type="hazard", ylim=c(0, 0.5), xlab="Years since")
+%#lines(sp2, type="hazard", col="red", lty.fit=2)
+%#lines(fs2, type="hazard", col="blue")
+%@   
+%  \caption{Comparison of spline and generalized gamma fitted hazards}
+%  \label{fig:spline:haz}
+%\end{figure}
 
 
-\subsection{General-dimension models}
+\subsection{Implementing general-dimension models}
 \label{sec:gdim}
 
 The spline model above is an example of the general parametric form
@@ -746,28 +757,40 @@ have a fixed number of arguments, including one for each scalar
 parameter.  However, the distribution functions for the spline model
 (e.g. \code{dsurvspline}) have an argument \code{gamma} representing
 the vector of parameters $\gamma$, whose length is determined by the
-user through the choice of the number of knots.  Note also that the
+user through the choice of the number of knots.  Just as the
 \emph{scalar parameters} of conventional distribution functions can be
-supplied as \emph{vector arguments}, and the vector parameters of
-spline-like distribution functions can be supplied as \emph{matrix
-  arguments}, representing alternative parameter values (REF BACK).
+supplied as \emph{vector arguments} (as explained in
+\S\ref{sec:custom}), similarly, the vector parameters of spline-like
+distribution functions can be supplied as \emph{matrix arguments},
+representing alternative parameter values.
 
 To convert a spline-like distribution function into the correct form,
 \pkg{flexsurv} provides the utility \code{unroll.function}.  This
 converts a function with one (or more) vector parameters (matrix
 arguments) to a function with an arbitrary number of scalar parameters
-(vector arguments).  For example, this shows two alternative ways of 
-computing the 5-year survival probability for the baseline group 
-under the model \code{sp1}. We tell \code{unroll.function} that the 
+(vector arguments).  For example, the 5-year survival probability for the baseline group 
+under the model \code{sp1} is
+<<>>=
+gamma <- sp1$res[c("gamma0","gamma1","gamma2"),"est"]
+1 - psurvspline(5, gamma=gamma, knots=sp1$knots)
+@ 
+An alternative function to compute this can be built by \code{unroll.function}.  We tell it that the 
 vector parameter \code{gamma} should be provided instead as three scalar parameters
 named \code{gamma0},\code{gamma1},\code{gamma2}.  The resulting function \code{pfn}
 is in the correct form for a custom \code{flexsurvreg} distribution.
 <<>>=
-gamma <- sp1$res[c("gamma0","gamma1","gamma2"),"est"]
-1 - psurvspline(5, gamma=gamma, knots=sp1$knots)
 pfn <- unroll.function(psurvspline, gamma=0:2)
 1 - pfn(5, gamma0=gamma[1], gamma1=gamma[2], gamma2=gamma[3], knots=sp1$knots)
 @ 
+
+Users wishing to fit a new spline-like model with a known number of
+parameters could just as easily write distribution functions specific
+to that number of parameters, and use the methods in
+\S\ref{sec:custom}.  However the \code{unroll.function} method is
+intended to simplify the process of extending the \pkg{flexsurv}
+package to new classes of models.  The intention is that wrappers
+similar to \code{flexsurvspline} could be included in the package in
+the future for useful classes of models.
 
 
 \paragraph{Example: splines on alternative scales}
@@ -779,75 +802,150 @@ they do not depend on values of other covariates, which is the case
 when modelling on the cumulative hazard scale (Royston and Lambert
 2011).
 
-\paragraph{Example: fractional polynomials}
+\paragraph{Other arbitrary-dimension models}
 
-%fractional polynomials? 
-%specified by number M and set of powers p1,...pM
-%chosen from c(-2,-1,-0.5,0,0.5,1,2,3), including repeats, where x^0 = log(x)
-%with repeated powers, each repeat multiplied by a power of log(x)
+A potential application is to fractional polynomials
+\citep{royston1994regression}. These are of the form $\sum_{m=1}^M
+\alpha_m x^{p_m} log(x)^n$ where the power $p_m$ is in the standard
+set $\{2,-1,-0.5,0,0.5,1,2,3\}$ (except that $log(x)$ is used instead
+of $x^0$), and $n$ is a non-negative integer. They are similar to
+splines in that they can give arbitrarily close approximations to a
+nonlinear function, such as a hazard curve, and are particularly
+useful for modelling the effects of continuous predictors in
+regression models.  See e.g. \citet{sauerbrei2007selection}, and
+several other publications by the same authors, for applications and
+discussion of their advantages over splines.  The R package
+\pkg{gamlss} CITE has a function to construct a fractional polynomial
+basis that may be employed in \pkg{flexsurv} models.
 
-relation to fractional polynomials \citep{royston1994regression}
+Polyhazard models \citep{polyhazard} are another potential use of this
+technique.  These express an overall hazard as a sum of latent
+cause-specific hazards, each one typically from the same class of
+distribution, e.g. a \emph{poly-Weibull} model if they are all
+Weibull.  For example, a U-shaped hazard curve following surgery may
+be the sum of early hazards from surgical mortality and later deaths
+from natural causes.  However, such models may not always be
+identifiable without external information to fix or constrain the
+parameters of particular hazards \citep{demiris2011survival}.
 
-Note that both splines and fractional polynomials have only been used
-here to express how risk changes through time --- they can also be
-used for expressing non-linear effects of any continuous predictor,
-see e.g. \citet{sauerbrei2007selection}, and several other
-publications by the same authors, for a discussion and comparison.
-This may be achieved here by using a suitable basis function of the
-covariate EXAMPLE in the model formula.
+<<>>=
+res <- t(sapply(list(fs1, fs2, fs3, fs4, sp1, sp2), 
+                function(x)rbind(-2*x$loglik, x$npars, x$AIC)))
+rownames(res) <- c("Weibull","Generalized gamma","Generalized gamma (time-varying effects)","Log-logistic",
+                   "Spline", "Spline (time-varying effects)")
+colnames(res) <- c("-2 log likelihood","Parameters","AIC")
+@ 
+\begin{table}[h]
+<<>>=
+res
+@ 
+%  \begin{tabular}{p{1in}lll}
+%    \hline
+%    & -2$\times$log likelihood & Parameters & AIC \\
+%    
+%  \end{tabular}
+  \caption{Summary of all models fitted to the breast cancer data}
+  \label{tab:aic}
+\end{table}
 
-Polyhazard models \citep{polyhazard} are another potential application
-of this technique.  These express an overall hazard as a sum of latent
-cause-specific hazards, although they may suffer from lack of
-identifiability.  cite nikos, me
 
 \section{Multi-state models}
 
 A \emph{multi-state model} represents how an individual moves between
-multiple states through time.  Survival analysis is a special case of
-multi-state modelling with two states ``alive'' and ``dead''. Suppose
-an individual is in state $S(t)$ at time $t$.  The next state to which
-the individual moves, and the time of the change, are governed by a
-set of \emph{transition intensities} $q_{rs}(t)$ for states $r, s =
+multiple states through time.  Survival analysis is a special case
+with two states, ``alive'' and ``dead''.  \emph{Competing risks} are a
+further special case where there are multiple causes of death, that
+is, multiple possible destination states for the same starting
+state.  
+
+Instead of a single event time for each individual, we may now have a
+series of event times $t_{1},\dots, t_{n}$.  The last of these may be
+an observed event or censoring.  Given that an individual is in state
+$S(t)$ at time $t$, the next state to which they move, and the time of
+the change, are governed by a set of \emph{transition intensities}
+$q_{rs}(t,\mathbf{z}(t),\mathcal{H}_t) = \lim_{\delta t \rightarrow 0}
+P(S(t+\delta t) = s | S(t) = r) / \delta t$ for states $r, s =
 1,\dots,R$, which for a survival model are equivalent to the hazard
 $h(t)$.  The intensity represents the instantaneous risk of moving
-from state $r$ to state $s$.
+from state $r$ to state $s$.  It may depend on the time $t$ since the
+start of the process, patient characteristics $\mathbf{z}(t)$, and
+possibly also the ``history'' of the process up to that time,
+$\mathcal{H}_t$, the states previously visited or the length of time
+spent in them.
 
-Suppose our data consist of a series of event times $t_{1},\dots,
-t_{n}$, the last of these may be an observed event or censoring.  Any
-software to fit survival models can also fit multi-state models to
-this kind of data, provided it can deal with left-truncation or
-\emph{counting process} data.
+For illustration, consider a very simple three-state example,
+previously studied by \citep{heng:paper}. Recipients of lung
+transplants are are risk of bronchiolitis obliterans syndrome (BOS), a
+chronic decline in lung function.  This was defined as a decrease in
+lung function to below 80\% of a baseline value defined in the six
+months following transplant.  A three-state ``illness-death'' model
+represents the risk of developing BOS, the risk of dying before
+developing BOS, and the risk of death after BOS.  BOS is assumed to be
+irreversible, so there are only three allowed transitions (Figure).
 
-For more discussion of the theory see \citet{putter:mstate}. ref also
-Andersen for CP data
 
-\paragraph{Counting process data}
-For each permitted $r \rightarrow s$ transition in the multi-state
-model (ILLUSTRATION) there is a corresponding \emph{time-to-event
-  model}, with cause-specific hazard rates defined by $q_{rs}(t)$. To
-enable estimation of these hazards, the data are expressed as a series
-of times to events which are potentially censored: $dt_{j} = t_{j+1} -
-t_{j}: j = 1,\ldots,n-1$. For a patient who moves into state $s$ at
-time $t_{j}$, their next event at $t_{j+1}$ is defined by the model
-structure (FIGURE) to be one of a set of
-competing events $s^*_1,\ldots,s^*_{n_s}$.
+\paragraph{Alternative time scales} 
 
-For example, in state EXAMPLE, the next state must either be EXAMPLE
-or EXAMPLE so $n_s=EG$.  The time of the event which actually occurs
-at $t_{j+1}$ is \emph{observed}, and the times of the \emph{competing}
-events from this set (which have not occurred by this time) are
-\emph{censored}.  Each $dt_{j}$ contributes an \emph{observed} time to
-one of the EG transition-specific models, and a \emph{censored} time
-to each of the models for the competing events.
+In semi-Markov (clock-reset) models, $q_{rs}(t)$ depends on the time
+$t$ since entry into the current state, but otherwise, time since the
+beginning of the process is forgotten.  Any software to fit survival
+models can also fit this kind of model.
+
+In an inhomogeneous Markov (clock-forward) model, $q_{rs}(t)$ is
+depends on the time $t$ since the beginning of the process, but not
+otherwise on $\mathcal{H}_t$.  Again any survival modelling software
+can be used, with the additional requirement that it can deal with
+left-truncation or \emph{counting process} data.
+
+Competing risks models can be fitted as semi-Markov models, since
+there is at most one transition for each individual, so that the time
+since the beginning of the process equals the time spent in the
+current state, therefore no left-truncation is necessary.
+
+\paragraph{Implementing multi-state models as multiple survival models}
+
+\citet{putter:mstate} discuss how to implement multi-state models
+using standard survival modelling software.  For each permitted $r
+\rightarrow s$ transition in the multi-state model (ILLUSTRATION)
+there is a corresponding survival model, with hazard rates defined by
+$q_{rs}(t)$.
+
+For a patient who moves into state $r$ at time $t_{j}$, their next
+event at $t_{j+1}$ is defined by the model structure (FIGURE) to be
+one of a set of competing events $s_1,\ldots,s_{n_s}$.  Therefore
+there are $N$ survival models, where $N$ is the number of distinct
+permitted transitions from states $r$ to a different state $s$ in the
+multi-state model structure.
+
+At time $t_j$, a series of $n_s$ observations are constructed.  Each
+has an indicator for whether the transition to the corresponding state
+$s_1,\ldots,s_{n_s}$ is observed or censored at $t_{j+1}$, coupled
+with:
+\begin{itemize}
+\item (for a semi-Markov model) the time elapsed $dt_{j} = t_{j+1} -
+  t_{j}$ from state $r$ entry to state $s$ entry.  This data informs
+  the ``survival'' model for the $r \rightarrow s$ transition.
+  
+\item (for an inhomogeneous Markov model) the start and stop time
+  $(t_j,t_{j+1})$.  The $r \rightarrow s$ model is fitted to the
+  right-censored time $t_{j+1}$ from the \emph{start of the process},
+  but is conditional on not experiencing the $r \rightarrow$
+  transition until after the state $r$ entry time.  In other words,
+  the $r \rightarrow s$ transition model is \emph{left-truncated} at
+  the state $r$ entry time.
+\end{itemize}
 
 FLEXSURVREG EXAMPLE
+BOS, Weibull/exp,  plot cum haz for all three trans. semi-Markov
+
+\paragraph{mstate}
 
 The \pkg{mstate} R package \citep{mstate:cmpb,mstate:jss} has a
 utility \code{msprep} to produce data of this form from
 ``wide-format'' datasets where rows represent individuals, and times
 of different events appear in different columns, and \pkg{mstate} has
-a utility \code{msm2Surv} for 
+a similar utility \code{msm2Surv} for producing the required form
+given longitudinal data where rows represent state observations.
 
 illustrates Cox models
 flexible parametric multi-state models 
@@ -869,13 +967,15 @@ contrast Markov and semi-Markov models
 
 \paragraph{Multi-state models for panel data}
 
-Note the contrast with multi-state models for \emph{panel data}, that is,
-observations of the state of the process at a series of times
+Note the contrast with multi-state models for \emph{panel data}, that
+is, observations of the state of the process at a series of times
 \citep{kalbfleisch:lawless}.  In panel data, we do not necessarily
-know know the time of each transition, or even whether a transitions
-of a certain type have occurred at all between a pair of observations.
-Such models can be fitted with the \pkg{msm} package for R, but are
-restricted to (piecewise) exponentially-distributed event times.
+know know the time of each transition, or even whether transitions of
+a certain type have occurred at all between a pair of observations.
+Multi-state models for this type of data (and also for the exact event
+time data discussed above) can be fitted with the \pkg{msm} package
+for R, but are restricted to (piecewise) exponentially-distributed
+event times.
 
 
 
