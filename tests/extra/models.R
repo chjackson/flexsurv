@@ -217,10 +217,10 @@ kmin <- min(dtime); kmax <- max(dtime)
 ak <- list(knots=c(kmin,median(dtime),kmax))
 
 fs2 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=ak,
-                   inits=c(0, 0, 0), dist=custom.hsurvspline.lh3,
+                   inits=c(0, 0, 0), dist=custom.hsurvspline.lh3, fixedpars=3,
                    method="L-BFGS-B", lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5),
                    )
-## still breaks, even with constraints
+
 
 
 
