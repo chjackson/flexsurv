@@ -9,17 +9,15 @@ require(mstate) # masks flexsurv's generic msfit, so call as msfit.flexsurvreg b
 #load(file="~/work/flexsurv/flexsurv/data/bosms3.rda")
 #detach("package:flexsurv")
 
-bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
-bexp2 <- flexsurvreg(Surv(time, status) ~ trans, data=bosms3, dist="exp") 
+bexp <- flexsurvreg(Surv(time, status) ~ trans, data=bosms3, dist="exp") 
+bexp2 <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 mexp <- msfit.flexsurvreg(bexp, t=seq(0,150,1), trans=tmat, tvar="trans")
 
 bcox <- coxph(Surv(time, status) ~ strata(trans), data=bosms3)
 mcox <- mstate::msfit(bcox, trans=tmat)
 
-bwei <- flexsurvreg(Surv(time, status) ~ trans + shape(trans), data=bosms3, dist="weibull", control=list(reltol=1e-16))
-## NOTE NaN warnings: from zero shape or scale being visited by optimiser
-## Is there a more sensible transform than log to optimise these on? 
+bwei <- flexsurvreg(Surv(time, status) ~ trans + shape(trans), data=bosms3, dist="weibull")
 mwei <- msfit.flexsurvreg(bwei, t=seq(0,150,1), trans=tmat, tvar="trans")
 
 bgg <- flexsurvreg(Surv(time, status) ~ trans + sigma(trans) + Q(trans), data=bosms3, dist="gengamma")

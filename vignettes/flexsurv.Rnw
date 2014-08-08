@@ -670,11 +670,11 @@ for this model are available as \code{dsurvspline} and \code{psurvspline}
     Model &  $g(S(t,\mathbf{z}))$ & In \code{flexsurvspline} & With $m=0$ \\
 \hline
     Proportional hazards & $\log(-\log(S(t,\mathbf{z})))$ \newline {\footnotesize (log cumulative hazard)}  & \code{scale="hazard"} & Weibull\\
-\multicolumn{4}{l}{{\footnotesize\code{pweibull(t, shape=a, scale=b) == psurvspline(t, gamma=c(log(1 / b^a), a))}}}\\
+%\multicolumn{4}{l}{{\footnotesize\code{pweibull(t, shape=a, scale=b) == psurvspline(t, gamma=c(log(1 / b^a), a))}}}\\
     Proportional odds    & $\log(S(t,\mathbf{z})^{-1} - 1)$ \newline {\footnotesize (log cumulative odds)}   & \code{scale="odds"} & Log-logistic\\
-\multicolumn{4}{l}{{\footnotesize\code{eha::pllogis(t, shape=a, scale=b) == psurvspline(t, gamma=c(-a*log(b), a), scale="odds")}}}\\
+%\multicolumn{4}{l}{{\footnotesize\code{eha::pllogis(t, shape=a, scale=b) == psurvspline(t, gamma=c(-a*log(b), a), scale="odds")}}}\\
     Normal / probit      & $\Phi^{-1}(S(t,\mathbf{z}))$  \newline   {\footnotesize (inverse normal CDF, \code{qnorm})}    & \code{scale="normal"} & Log-normal \\  
-\multicolumn{4}{l}{{\footnotesize\code{plnorm(t, meanlog=a, sdlog=b) == psurvspline(t, gamma=c(-a/b, 1/b), scale="normal")}}}\\
+%\multicolumn{4}{l}{{\footnotesize\code{plnorm(t, meanlog=a, sdlog=b) == psurvspline(t, gamma=c(-a/b, 1/b), scale="normal")}}}\\
 \hline
   \end{tabularx}    
     \caption{Alternative modelling scales for \code{flexsurvspline}, and equivalent distribution families and parameter values for $m=0$ explained in R notation.}
@@ -726,6 +726,14 @@ predictive ability as measured by AIC (Table \ref{tab:aic}). Though in
 general, an advantage of spline models is that extra flexibility is
 available where necessary.
 
+Note that the log hazard ratios under the proportional hazards spline
+model are practically the same as under a standard Cox model.
+<<>>=
+sp3 <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="hazard")
+sp3$res[c("groupMedium","groupPoor"),c("est","se")]
+cox3 <- coxph(Surv(recyrs, censrec) ~ group, data=bc) ## show that est/SE practically the same
+coef(summary(  cox3))[,c("coef","se(coef)")]
+@ 
 %\begin{figure}[h]
 %  \centering
 %%<<fig=TRUE>>=
@@ -854,34 +862,34 @@ res
 A \emph{multi-state model} represents how an individual moves between
 multiple states through time.  Survival analysis is a special case
 with two states, ``alive'' and ``dead''.  \emph{Competing risks} are a
-further special case where there are multiple causes of death, that
+further special case, where there are multiple causes of death, that
 is, multiple possible destination states for the same starting
 state.  
 
-Instead of a single event time for each individual, we may now have a
-series of event times $t_{1},\dots, t_{n}$.  The last of these may be
-an observed event or censoring.  Given that an individual is in state
-$S(t)$ at time $t$, the next state to which they move, and the time of
-the change, are governed by a set of \emph{transition intensities}
-$q_{rs}(t,\mathbf{z}(t),\mathcal{H}_t) = \lim_{\delta t \rightarrow 0}
-P(S(t+\delta t) = s | S(t) = r) / \delta t$ for states $r, s =
-1,\dots,R$, which for a survival model are equivalent to the hazard
-$h(t)$.  The intensity represents the instantaneous risk of moving
-from state $r$ to state $s$.  It may depend on the time $t$ since the
-start of the process, patient characteristics $\mathbf{z}(t)$, and
-possibly also the ``history'' of the process up to that time,
-$\mathcal{H}_t$, the states previously visited or the length of time
-spent in them.
+Instead of a single event time, there may now be a series of event
+times $t_{1},\dots, t_{n}$ for an individual.  The last of these may
+be an observed or right-censored event time.  Given that an individual
+is in state $S(t)$ at time $t$, their next state, and the time of the
+change, are governed by a set of \emph{transition intensities}
+$q_{rs}(t,\mathbf{z}(t),\mathcal{F}_t) = \lim_{\delta t \rightarrow 0}
+P(S(t+\delta t) = s | S(t) = r, \mathbf{z}(t), \mathcal{F}_t, ) /
+\delta t$ for states $r, s = 1,\dots,R$, which for a survival model
+are equivalent to the hazard $h(t)$.  The intensity represents the
+instantaneous risk of moving from state $r$ to state $s$.  It may
+depend on the time $t$ since the start of the process, patient
+characteristics $\mathbf{z}(t)$, and possibly also the ``history'' of
+the process up to that time, $\mathcal{H}_t$, the states previously
+visited or the length of time spent in them.
 
 For illustration, consider a very simple three-state example,
-previously studied by \citep{heng:paper}. Recipients of lung
-transplants are are risk of bronchiolitis obliterans syndrome (BOS), a
-chronic decline in lung function.  This was defined as a decrease in
-lung function to below 80\% of a baseline value defined in the six
-months following transplant.  A three-state ``illness-death'' model
-represents the risk of developing BOS, the risk of dying before
-developing BOS, and the risk of death after BOS.  BOS is assumed to be
-irreversible, so there are only three allowed transitions (Figure).
+previously studied by \citet{heng:paper}. Recipients of lung
+transplants are are risk of bronchiolitis obliterans syndrome (BOS).
+This was defined as a decrease in lung function to below 80\% of a
+baseline value defined in the six months following transplant.  A
+three-state ``illness-death'' model represents the risk of developing
+BOS, the risk of dying before developing BOS, and the risk of death
+after BOS.  BOS is assumed to be irreversible, so there are only three
+allowed transitions (FIGURE).
 
 
 \paragraph{Alternative time scales} 
@@ -902,25 +910,22 @@ there is at most one transition for each individual, so that the time
 since the beginning of the process equals the time spent in the
 current state, therefore no left-truncation is necessary.
 
-\paragraph{Implementing multi-state models as multiple survival models}
+\subsection{Implementing multi-state models as multiple survival models}
 
 \citet{putter:mstate} discuss how to implement multi-state models
 using standard survival modelling software.  For each permitted $r
 \rightarrow s$ transition in the multi-state model (ILLUSTRATION)
-there is a corresponding survival model, with hazard rates defined by
-$q_{rs}(t)$.
+there is a corresponding ``survival'' (time-to-event) model, with
+hazard rates defined by $q_{rs}(t)$.  For a patient who moves into
+state $r$ at time $t_{j}$, their next event at $t_{j+1}$ is defined by
+the model structure (FIGURE) to be one of a set of competing events
+$s_1,\ldots,s_{n_r}$.  This implies there are $n_r$ corresponding
+survival models for this state $r$, and $\sum_r n_r$ time-to-event
+models over all states $r$.
 
-For a patient who moves into state $r$ at time $t_{j}$, their next
-event at $t_{j+1}$ is defined by the model structure (FIGURE) to be
-one of a set of competing events $s_1,\ldots,s_{n_s}$.  Therefore
-there are $N$ survival models, where $N$ is the number of distinct
-permitted transitions from states $r$ to a different state $s$ in the
-multi-state model structure.
-
-At time $t_j$, a series of $n_s$ observations are constructed.  Each
-has an indicator for whether the transition to the corresponding state
-$s_1,\ldots,s_{n_s}$ is observed or censored at $t_{j+1}$, coupled
-with:
+The data to inform the $n_r$ models consists of an indicator for
+whether the transition to the corresponding state $s_1,\ldots,s_{n_r}$
+is observed or censored at $t_{j+1}$, coupled with:
 \begin{itemize}
 \item (for a semi-Markov model) the time elapsed $dt_{j} = t_{j+1} -
   t_{j}$ from state $r$ entry to state $s$ entry.  This data informs
@@ -935,11 +940,6 @@ with:
   the state $r$ entry time.
 \end{itemize}
 
-FLEXSURVREG EXAMPLE
-BOS, Weibull/exp,  plot cum haz for all three trans. semi-Markov
-
-\paragraph{mstate}
-
 The \pkg{mstate} R package \citep{mstate:cmpb,mstate:jss} has a
 utility \code{msprep} to produce data of this form from
 ``wide-format'' datasets where rows represent individuals, and times
@@ -947,8 +947,40 @@ of different events appear in different columns, and \pkg{mstate} has
 a similar utility \code{msm2Surv} for producing the required form
 given longitudinal data where rows represent state observations.
 
-illustrates Cox models
-flexible parametric multi-state models 
+The outcomes of two patients in the BOS data are given by
+<<>>=
+bosms3[18:22,]
+@
+
+Each row represents an observed (\code{status=1}) or censored
+(\code{status=0}) transition time for one of three time-to-event
+models indicated by the categorical variable \code{trans} (defined as
+a factor).  Times are expressed in days, with time 0 representing six
+months after transplant.  Values of \code{trans} of 1, 2, 3 correspond
+to no BOS$\rightarrow$BOS, no BOS$\rightarrow$death and
+BOS$\rightarrow$death respectively.  The first row indicates that the
+patient (\code{id} 7) moved from state 1 (no BOS) to state 2 (BOS) at
+62 days, but (second row) that this is also interpreted as a censored
+time from state 1 to state 3, potential death before BOS onset.  This
+patient then died, given bu the third row with \code{status} 1 for
+\code{trans} 3.  Patient 8 died before BOS onset, therefore at day
+2981 their potential BOS onset is censored (fourth row), but their
+death before BOS is observed (fifth row).
+
+Two semi-Markov multi-state models are fitted using
+\code{flexsurvreg}. The first is a simple time-homogeneous Markov
+model where all transition intensities are constant through time,
+equivalent to exponential times to the next event, but with a
+different intensity $q_{rs}$ for each transition type \code{trans}.
+In the second, the time to the next transition has a Weibull
+distribution, with a different shape and scale for each transition
+type.
+<<>>=
+bexp <- flexsurvreg(Surv(time, status) ~ trans, data=bosms3, dist="exp")
+bwei <- flexsurvreg(Surv(time, status) ~ trans + shape(trans), data=bosms3, 
+                    dist="weibull")
+@ 
+
 
 \paragraph{Prediction from multi-state models}
 
@@ -985,9 +1017,19 @@ event times.
 % cif in comp risks planned for stgenreg 
 \section{Potential extensions}
 
-relative survival
-frailty 
+a platform for 
+
+users will specify custom models, and these may be implemented very
+easily as built-in distributions.
+modular design of the package, 
+
 many extensions may come from user-contributed models
+
+relative survival
+Frailty models are a clear extension.  
+Though doing these in generality 
+amenable to Bayesian modelling language such as BUGS or Stan
+
 
 
 \appendix
