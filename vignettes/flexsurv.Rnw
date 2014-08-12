@@ -1030,6 +1030,9 @@ Frailty models are a clear extension.
 Though doing these in generality 
 amenable to Bayesian modelling language such as BUGS or Stan
 
+behaviour of new classes of models -- initial values, interpreting the params, 
+sensible defaults
+
 
 
 \appendix
