@@ -2,6 +2,8 @@
 
 %% TODO: run streg gen gamma on bc
 
+%% mention time dependent covs, \code{survSplit} function in \pkg{survival} 
+
 \documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
 \usepackage{tabularx}
@@ -313,6 +315,7 @@ for the exact definitions.
 \end{table}
 
 \subsection{Plotting outputs}
+\label{sec:plots}
 
 The \code{plot()} method for \code{flexsurvreg} objects is used as a
 quick check of model fit.  By default, this draws a Kaplan-Meier
@@ -967,6 +970,8 @@ patient then died, given bu the third row with \code{status} 1 for
 2981 their potential BOS onset is censored (fourth row), but their
 death before BOS is observed (fifth row).
 
+\subsection{Fitting parametric multi-state models using \code{flexsurvreg}}
+
 Two semi-Markov multi-state models are fitted using
 \code{flexsurvreg}. The first is a simple time-homogeneous Markov
 model where all transition intensities are constant through time,
@@ -974,28 +979,125 @@ equivalent to exponential times to the next event, but with a
 different intensity $q_{rs}$ for each transition type \code{trans}.
 In the second, the time to the next transition has a Weibull
 distribution, with a different shape and scale for each transition
-type.
+type.  
 <<>>=
 bexp <- flexsurvreg(Surv(time, status) ~ trans, data=bosms3, dist="exp")
 bwei <- flexsurvreg(Surv(time, status) ~ trans + shape(trans), data=bosms3, 
                     dist="weibull")
 @ 
+%% The Weibull model has a lower AIC
+
+The equivalent semi-parametric Cox model is also fitted using
+\code{coxph} from the \pkg{survival} package.  This specifies a
+different baseline hazard for each transition type through a function
+\code{strata} in the formula, so since there are no other covariates,
+it is essentially non-parametric.  Note that a \code{strata} function
+is not currently understood by \code{flexsurvreg} --- the user must be
+explicit about what parameters, if any, vary with the transition type,
+as in \code{bwei}.
+<<>>=
+bcox <- coxph(Surv(time, status) ~ strata(trans), data=bosms3)
+@ 
+In all cases, if there were other covariates, they could simply be
+included in the model formula.  Typically covariate effects will vary
+with the transition type, so that an interaction term with
+\code{trans} would be included.
 
 
-\paragraph{Prediction from multi-state models}
+\subsection{Obtaining cumulative transition-specific hazards}
 
-Define cumulative incidence functions
+The \code{mstate} package enables \emph{semi-parametric} multi-state
+modelling.  Like the example \code{bcox}, models must be fitted with
+\code{coxph}, which also provides a semi-parametric estimates of each
+transition-specific baseline hazard \citep{mstate:cmpb,mstate:jss}.
+These imply piecewise-constant estimates of each cumulative $r
+\rightarrow s$ transition-specific hazard function $H_{rs}(t) =
+\int_0^t q_{rs}(u) du$.  These estimates, and their covariances, are
+provided by \pkg{mstate}'s function \code{msfit}, and form the basis
+of prediction from the model.  In this case,
+<<>>=
+library(mstate)
+tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
+mcox <- msfit(bcox, trans=tmat)
+@
+\code{tmat} describes the transition structure.  This is a matrix of
+integers whose $r,s$ entry is $i$ if the $i$th transition type is
+$r,s$, and has \code{NA}s on the diagonal and where the $r,s$
+transition is disallowed.
 
-The \code{mstate} package is designed to work with 
-piecewise-constant cumulative incidence functions
-baseline hazards are estimated non-parametrically 
-\citep{mstate:cmpb,mstate:jss} 
+\pkg{flexsurv} provides an analogous function \code{msfit.flexsurvreg}
+to produce cumulative hazards from \emph{fully-parametric} multi-state
+models in the same format.  This is simply a wrapper around
+\code{summary.flexsurvreg(...,type="cumhaz")}, as previously mentioned
+in \S\ref{sec:plots}.  The difference from \pkg{mstate}'s method is
+that hazard estimates can be produced for any grid of times \code{t},
+at any level of detail and even beyond the range of the data, since
+the model is fully parametric. The argument \code{newdata} can be used
+in the same way to specify a desired covariate category, though in
+this example there are no covariates in addition to the transition
+type.  The name of the (factor) covariate indicating the transition
+type can also be supplied through the \code{tvar} argument, in this
+case it is the default, \code{"trans"}.
+<<>>=
+mexp <- msfit.flexsurvreg(bexp, t=seq(0,150,1), trans=tmat)
+mwei <- msfit.flexsurvreg(bwei, t=seq(0,150,1), trans=tmat)
+@
+These can be plotted as follows to show the fit of the parametric
+models compared to the non-parametric estimates.  Both models appear
+to fit adequately, though give diverging extrapolations after around 6
+years when the data become sparse.  The Weibull model has an improved
+AIC of \Sexpr{bwei$AIC}, compared to \Sexpr{bexp$AIC} for the
+exponential model.
+<<>>=
+plot(mcox, xlab="Years after baseline", lwd=3, xlim=c(0,14))
+cols <- c("black","red","green")
+for (i in 1:3){
+    lines(mexp$Haz$time[mexp$Haz$trans==i], mexp$Haz$Haz[mexp$Haz$trans==i],
+          type="s", col=cols[i], lty=2, lwd=2)
+    lines(mwei$Haz$time[mwei$Haz$trans==i], mwei$Haz$Haz[mwei$Haz$trans==i],
+          type="s", col=cols[i], lty=3, lwd=2)
+}
+legend("topleft", inset=c(0,0.2), c("Non-parametric","Exponential","Weibull"),
+       lty=c(1,2,3), lwd=c(3,2,2), bty="n")
+@ 
 
-function \code{msfit} that produces the cumulative incidences for each transition and a given covariate category, and their covariances, given a Cox model fitted using \code{coxph} from the \pkg{survival} package. 
 
-Aalen-Johansen estimator,  simulation
+\subsection{Prediction from multi-state models}
 
-contrast Markov and semi-Markov models
+Since \code{msfit.flexsurvreg} returns transition hazards in the same
+format as \pkg{mstate}'s \code{msfit} method, the functions of
+\pkg{mstate} for prediction can then be used.  For example, the
+\emph{transition probabilities} of the multi-state model are the
+probabilities of occupying each state $s$ at time $t > t_0$, given
+that the individual is in state $r$ at time $t_0$.
+\[ P(t_0, t) = P(S(t) = s | S(t_0) = r) \]
+For an inhomogeneous Markov model, these are related to the transition
+intensities via the Kolmogorov forward equation
+\[ \frac{d P(t_0,t)}{dt} = P(t_0,t) Q(t) \]   
+with initial condition $P() = I$, as reviewed e.g. by \citet{titman:nonhomog}.
+An approximate solution of these is given by a product integral
+\[ P(t_0, t) = \prod_{i=0}^{m-1} (I + Q(t_i) du) \]
+where a fine grid of times $t_0,t_1,\ldots,t_m=t$ is chosen to span the 
+prediction interval, and $Q(t_i) du$ is the increment in the cumulative
+hazard matrix between times $t_i$ and $t_{i+1}$ (which may depend on other 
+covariates known in ad.   
+
+In \pkg{mstate} these can be specified with the \code{probtrans}
+function, applied to the cumulative hazards returned by \code{msfit}.
+For the semi-parametric models by \pkg{mstate}, the time grid is based
+on the observed survival times, giving the Aalen-Johansen estimator.
+For parametric models, using a discrete-time approximation like this
+was suggested by \citet{cook:lawless}, and can be made more accurate
+by choosing a finer time grid.  An alternative approach would be to
+solve the Kolmogorov forward equation numerically, the approach taken
+by \citet{titman:nonhomog}.
+
+For semi-Markov models, these equations do not apply since the
+transition intensity matrix $Q(t)$ is not known in advance at time
+$t$, but depends on when the transitions occur between time $t_0$ and
+$t$.  $P(t_0, t)$ can then be estimated by simulation.
+
+
 
 \paragraph{Multi-state models for panel data}
 
@@ -1007,31 +1109,47 @@ a certain type have occurred at all between a pair of observations.
 Multi-state models for this type of data (and also for the exact event
 time data discussed above) can be fitted with the \pkg{msm} package
 for R, but are restricted to (piecewise) exponentially-distributed
-event times.
+event times, and are not discussed here.
+
+doesn't do Fine and Gray regression, for discussion see, e.g. Putter
+et al.
 
 
 
-\code{survSplit} function in \pkg{survival} 
 
 
 % cif in comp risks planned for stgenreg 
 \section{Potential extensions}
 
-a platform for 
+\pkg{flexsurv} currently relative survival, used in cancer.  REF 
+can this be done with offsets?  see email
 
-users will specify custom models, and these may be implemented very
-easily as built-in distributions.
-modular design of the package, 
+Frailty models, \citep{hougaard1995frailty} where multiple survival
+times are assumed to be correlated within groups, would be a useful
+extension.  See, e.g. \citep{crowther2014multilevel} for a recent
+application based on parametric survival models.  This may be done by
+exploiting tractability for specific distributions, such as gamma
+random effects in Weibull and related models, or by adjusting standard
+errors to account for clustering, as implemented in \code{survreg}.
+However, implementing substantial model-specific code might conflict
+with \pkg{flexsurv}'s aim of generality.  More complex models would
+require numerical integration, and \citep{crowther2014multilevel}
+provide Stata software based on Gauss-Hermite
+quadrature. Alternatively, a probabilistic modelling language such as
+Stan \citep{stan-manual:2014} or BUGS \citep{bugs:book} would be
+naturally suited to complex extensions such as random effects on
+multiple parameters or multiple hierarchical levels.
 
-many extensions may come from user-contributed models
+\pkg{flexsurv} is intended as a platform for parametric survival
+modelling.  Extensions of the software to deal with different models
+may be written by users themselves, through the facilities described
+in \S\ref{sec:custom} and \S\ref{sec:gdim}.  These might then be
+included in the package as built-in distributions, or at least shown
+in a gallery of examples, which already exists as a short vignette.
+NAME IT.
 
-relative survival
-Frailty models are a clear extension.  
-Though doing these in generality 
-amenable to Bayesian modelling language such as BUGS or Stan
-
-behaviour of new classes of models -- initial values, interpreting the params, 
-sensible defaults
+behaviour of new classes of models -- initial values, interpreting the
+params, sensible defaults
 
 
 
