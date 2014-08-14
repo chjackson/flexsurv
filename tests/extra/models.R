@@ -107,7 +107,7 @@ exp(bc.ggph$res["groupPoor","est"])
 ## Log hazard as spline function of log time 
 ## User supplies knots and inits
 
-hsurvspline.lh <- function(x, gamma, knots=c(-10,10)){
+hsurvspline.lh <- function(x, gamma, knots){
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
     lg <- nrow(gamma)
     nret <- max(length(x), lg)
@@ -127,9 +127,7 @@ custom.hsurvspline.lh3 <- list(
     )
 
 dtime <- log(bc$recyrs)[bc$censrec==1]
-kmin <- min(dtime)
-kmax <- max(dtime)
-ak <- list(knots=c(kmin,0,kmax))
+ak <- list(knots=quantile(dtime, c(0, 0.5, 1)))
 
 ### Exponential, constant log hazard
 flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, inits=0.14, dist="exp") # rate 0.14
@@ -148,7 +146,7 @@ fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=ak,
 
 system.time(
 fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, aux=ak,
-                   inits=c(0, 1, 0.3, 0, 0), dist=custom.hsurvspline.lh3, method="L-BFGS-B",
+                   inits=c(0, 0, 0, 0, 0), dist=custom.hsurvspline.lh3, method="L-BFGS-B",
                    lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5), control=list(trace=1,REPORT=1))
 )
 
@@ -157,8 +155,9 @@ fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, aux=ak,
 ### Runs if constrain parameters: mle of gamma2:  0.2918  (0.1877, 0.3958)
 ### though takes 5 minutes to run 
 fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, aux=ak,
-                   inits=c(0, 1, 0.3, 0, 0), dist=custom.hsurvspline.lh3, method="L-BFGS-B",
-                   lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5), control=list(trace=1,REPORT=1))
+                   inits=c(0, 1, 0.3, 0, 0), dist=custom.hsurvspline.lh3,
+##                   method="L-BFGS-B", lower=c(-Inf,-Inf,-0.5), upper=c(Inf,Inf,0.5),
+                   control=list(trace=1,REPORT=1))
 
 plot(sp1, type="hazard")
 lines(fs3, type="hazard", col="blue")
@@ -296,3 +295,9 @@ aux <- list(powers=c(1,0))
 fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, aux=aux,
                    inits=c(-2, 0.1, 0.01), dist=custom.hfp.lh3)
 ## non-finite finite difference error
+
+
+
+### Compare generalized gamma with Stata
+fs <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="gengamma")
+fs$loglik  +  sum(log(bc$recyrs[bc$censrec==1]))

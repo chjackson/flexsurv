@@ -310,6 +310,24 @@ test_that("Spline distribution functions",{
     p1 <- plnorm(1, meanlog, sdlog)
     p2 <- psurvspline(1, gamma = c(-meanlog/sdlog, 1/sdlog), scale="normal")
     expect_equal(p1, p2)
+
+    ## other way round 
+    gamma <- c(0.1, 0.2)
+    d1 <- dweibull(1, shape=gamma[2], scale= exp(-gamma[1]/gamma[2]))
+    d2 <- dsurvspline(1, gamma=gamma)
+    expect_equal(d1, d2)
+
+    d1 <- eha::dllogis(1, shape=gamma[2], scale= exp(-gamma[1]/gamma[2]))
+    d2 <- dsurvspline(1, gamma=gamma, scale="odds")
+    expect_equal(d1, d2)
+
+    d1 <- dlnorm(1, meanlog=-gamma[1]/gamma[2], sdlog=1/gamma[2])
+    d2 <- dsurvspline(1, gamma=gamma, scale="normal")
+    expect_equal(d1, d2)
+
+    %\multicolumn{4}{l}{{\footnotesize\code{plnorm(t, meanlog=a, sdlog=b) == psurvspline(t, gamma=c(-a/b, 1/b), scale="normal")}}}\\
+
+    
                                         # TODO document 
                                         #H1 <- Hlnorm(1, meanlog, sdlog)
                                         #H2 <- Hsurvspline(1, gamma = c(-meanlog/sdlog, 1/sdlog), scale="normal")

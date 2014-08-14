@@ -56,9 +56,9 @@ pt <- probtrans(mgg, predt=0, direction="forward")
 par(new=TRUE)
 plot(pt, xlim=c(0,150),ylim=c(0,1), col=rep("purple",3))
 
+## 
 
 ## With covariates
-
 bosms3$x <- rnorm(nrow(bosms3))
 bosms3$x2 <- factor(sample(0:2, size=nrow(bosms3), replace=TRUE))
 bexp2 <- flexsurvreg(Surv(time, status) ~ trans + x + x2, data=bosms3, dist="exp")
