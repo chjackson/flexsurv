@@ -357,7 +357,7 @@ lines(fs3, col="red")
 legend("bottomleft", col=c("black","gray","red","red"), 
        lty=c(1,1,2,1), bty="n", lwd=rep(2,4),
        c("Kaplan-Meier","Weibull","Generalized gamma (AFT)",
-         "Generalized gamma (time-varying"))
+         "Generalized gamma (time-varying)"))
 @ 
   \caption{Estimated survival from parametric models and Kaplan-Meier estimates.}
   \label{fig:surv}
