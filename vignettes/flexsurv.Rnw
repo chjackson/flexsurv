@@ -1109,7 +1109,7 @@ different baseline hazard for each transition type through a function
 they are essentially non-parametric.  Note that the \code{strata} function
 is not currently understood by \code{flexsurvreg} --- the user must say
 explicitly what parameters, if any, vary with the transition type,
-as in \code{bwei}.
+as in \code{crwei}.
 <<>>=
 crcox <- coxph(Surv(years, status) ~ strata(trans), data=bosms3)
 cfcox <- coxph(Surv(Tstart, Tstop, status) ~ strata(trans), data=bosms3)
@@ -1170,8 +1170,8 @@ These can be plotted (Figure \ref{fig:bos:cumhaz}) to show the fit of
 the parametric models compared to the non-parametric estimates.  Both
 models appear to fit adequately, though give diverging extrapolations
 after around 6 years when the data become sparse.  The Weibull
-clock-reset model has an improved AIC of \Sexpr{round(bwei$AIC)}, compared to
-\Sexpr{round(bexp$AIC)} for the exponential model.  For the 2--3 transition,
+clock-reset model has an improved AIC of \Sexpr{round(crwei$AIC)}, compared to
+\Sexpr{round(crexp$AIC)} for the exponential model.  For the 2--3 transition,
 this shows that the clock forward and clock-reset models give slightly
 different hazard trajectories.
 \begin{figure}
