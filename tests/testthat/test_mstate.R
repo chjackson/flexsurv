@@ -9,18 +9,18 @@ require(mstate) # masks flexsurv's generic msfit, so call as msfit.flexsurvreg b
 #load(file="~/work/flexsurv/flexsurv/data/bosms3.rda")
 #detach("package:flexsurv")
 
-bexp <- flexsurvreg(Surv(time, status) ~ trans, data=bosms3, dist="exp") 
+bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp") 
 bexp2 <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 mexp <- msfit.flexsurvreg(bexp, t=seq(0,150,1), trans=tmat, tvar="trans")
 
-bcox <- coxph(Surv(time, status) ~ strata(trans), data=bosms3)
+bcox <- coxph(Surv(years, status) ~ strata(trans), data=bosms3)
 mcox <- mstate::msfit(bcox, trans=tmat)
 
-bwei <- flexsurvreg(Surv(time, status) ~ trans + shape(trans), data=bosms3, dist="weibull")
+bwei <- flexsurvreg(Surv(years, status) ~ trans + shape(trans), data=bosms3, dist="weibull")
 mwei <- msfit.flexsurvreg(bwei, t=seq(0,150,1), trans=tmat, tvar="trans")
 
-bgg <- flexsurvreg(Surv(time, status) ~ trans + sigma(trans) + Q(trans), data=bosms3, dist="gengamma")
+bgg <- flexsurvreg(Surv(years, status) ~ trans + sigma(trans) + Q(trans), data=bosms3, dist="gengamma")
 mgg <- msfit.flexsurvreg(bgg, t=seq(0,150,1), trans=tmat, tvar="trans")
 
 ## how to constrain to exponential for 1-2 trans:  first shape par=1
@@ -28,7 +28,7 @@ bweifix <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + shape(trans), data=
 mweifix <- msfit.flexsurvreg(bweifix, t=seq(0,150,1), trans=tmat, tvar="trans")
 
 ## Spline
-bspl <- flexsurvspline(Surv(time, status) ~ trans + gamma1(trans), data=bosms3, k=3)
+bspl <- flexsurvspline(Surv(years, status) ~ trans + gamma1(trans), data=bosms3, k=3)
 plot(bspl)
 mspl <- msfit.flexsurvreg(bspl, t=seq(0,150,1), trans=tmat, tvar="trans")
 

@@ -843,15 +843,13 @@ is in the correct form for a custom \code{flexsurvreg} distribution.
 pfn <- unroll.function(psurvspline, gamma=0:2)
 1 - pfn(5, gamma0=gamma[1], gamma1=gamma[2], gamma2=gamma[3], knots=sp1$knots)
 @ 
-
 Users wishing to fit a new spline-like model with a known number of
 parameters could just as easily write distribution functions specific
 to that number of parameters, and use the methods in
 \S\ref{sec:custom}.  However the \code{unroll.function} method is
 intended to simplify the process of extending the \pkg{flexsurv}
-package to new classes of models.  The intention is that wrappers
-similar to \code{flexsurvspline} could be included in the package in
-the future for useful classes of models.
+package to new classes of models.  New wrappers similar to
+\code{flexsurvspline} could be included in the package in the future.
 
 
 \paragraph{Example: splines on alternative scales}

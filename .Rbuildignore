@@ -8,3 +8,14 @@ TODO
 \.log
 \.out
 \.gitattributes
+vignettes/auto
+vignettes/.+\.aux
+vignettes/.+\.log
+vignettes/.+\.toc
+vignettes/.+\.bbl
+vignettes/.+\.blg
+vignettes/flexsurv-.+\.pdf
+vignettes/bosmsm.+
+inst/doc/flexsurv.Rnw
+inst/doc/flexsurv-examples.Rnw
+vignettes/flexsurv.bib
