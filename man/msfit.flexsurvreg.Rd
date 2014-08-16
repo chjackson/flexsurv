@@ -12,7 +12,7 @@
 }
 \usage{
 msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
-                 tvar="strata(trans)", trans, B=1000)
+                 tvar="trans", trans, B=1000)
 }
 \arguments{
   \item{object}{
@@ -83,26 +83,26 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
 bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans,
                     data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
-mexp <- msfit.flexsurvreg(bexp, t=seq(0,170,1), trans=tmat, tvar="trans")
+mexp <- msfit.flexsurvreg(bexp, t=seq(0,12,by=0.1), trans=tmat, tvar="trans")
 
 ## Cox semi-parametric model within each transition
-bcox <- coxph(Surv(time, status) ~ strata(trans), data=bosms3)
+bcox <- coxph(Surv(years, status) ~ strata(trans), data=bosms3)
 require(mstate)
 mcox <- mstate::msfit(bcox, trans=tmat)
 
 ## Flexible parametric spline-based model 
-bspl <- flexsurvspline(Surv(time, status) ~ trans + gamma1(trans),
+bspl <- flexsurvspline(Surv(years, status) ~ trans + gamma1(trans),
                        data=bosms3, k=3)
-mspl <- msfit.flexsurvreg(bspl, t=seq(0,170,1), trans=tmat, tvar="trans")
+mspl <- msfit.flexsurvreg(bspl, t=seq(0,12,by=0.1), trans=tmat, tvar="trans")
 
 ## Compare fit: exponential model is OK but the spline is better
-plot(mcox, lwd=1, xlim=c(0, 170), ylim=c(0,4))
+plot(mcox, lwd=1, xlim=c(0, 12), ylim=c(0,4))
 cols <- c("black","red","green")
 for (i in 1:3){
     lines(mexp$Haz$time[mexp$Haz$trans==i], mexp$Haz$Haz[mexp$Haz$trans==i],
-             type="s", col=cols[i], lwd=2, lty=2)
+             col=cols[i], lwd=2, lty=2)
     lines(mspl$Haz$time[mspl$Haz$trans==i], mspl$Haz$Haz[mspl$Haz$trans==i],
-             type="s", col=cols[i], lwd=3)
+             col=cols[i], lwd=3)
 }
 legend("topright", lwd=c(1,2,3), lty=c(1,2,1),
    c("Cox", "Exponential", "Flexible parametric"), bty="n")

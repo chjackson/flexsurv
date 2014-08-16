@@ -7,7 +7,7 @@
 #msfit <- function(object, ...) UseMethod("msfit")
 #msfit.default <- function(object, ...) mstate::msfit(object, ...)
 
-msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="strata(trans)",
+msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="trans",
                               trans, B=1000){
     tr <- sort(unique(na.omit(as.vector(trans))))
     ntr <- length(tr)
