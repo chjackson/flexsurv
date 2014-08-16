@@ -325,9 +325,6 @@ test_that("Spline distribution functions",{
     d2 <- dsurvspline(1, gamma=gamma, scale="normal")
     expect_equal(d1, d2)
 
-    %\multicolumn{4}{l}{{\footnotesize\code{plnorm(t, meanlog=a, sdlog=b) == psurvspline(t, gamma=c(-a/b, 1/b), scale="normal")}}}\\
-
-    
                                         # TODO document 
                                         #H1 <- Hlnorm(1, meanlog, sdlog)
                                         #H2 <- Hsurvspline(1, gamma = c(-meanlog/sdlog, 1/sdlog), scale="normal")

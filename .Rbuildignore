@@ -15,7 +15,7 @@ vignettes/.+\.toc
 vignettes/.+\.bbl
 vignettes/.+\.blg
 vignettes/flexsurv-.+\.pdf
-vignettes/bosmsm.+
+vignettes/.+.odg
 inst/doc/flexsurv.Rnw
 inst/doc/flexsurv-examples.Rnw
-vignettes/flexsurv.bib
+

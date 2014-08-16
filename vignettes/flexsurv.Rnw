@@ -15,22 +15,22 @@
 \Abstract{ \pkg{flexsurv} is an R package for fully-parametric
   modelling of survival data.  Any parametric time-to-event
   distribution may be fitted if the user supplies at minimum a
-  probability density or hazard function.  Many survival distributions
-  are built in, including standard models models and the three and
-  four-parameter generalized gamma and F distributions.  Any parameter
-  of the distribution can be modelled as a linear or log-linear
-  function of covariates.  Another built-in model is the spline model
-  of Royston and Parmar, in which both baseline survival and covariate
-  effects can be arbitrarily flexible parametric functions of time.
-  The main model-fitting function, \code{flexsurvreg}, uses the
-  familiar syntax of \code{survreg} from the standard \pkg{survival}
-  package.  Censoring or left-truncation are specified in \code{Surv}
-  objects.  Estimates and confidence intervals for any function of the
-  model parameters can be printed or plotted.  \pkg{flexsurv} also
-  enhances the \pkg{mstate} package \citep{mstate:jss} by providing
-  cumulative hazards for fully-parametric multi-state models.  This
-  article explains the methods and design principles of the package,
-  giving several worked examples of its use.  } 
+  probability density or hazard function.  Standard survival
+  distributions are built in, including the three and four-parameter
+  generalized gamma and F distributions.  Any parameter of any
+  distribution can be modelled as a linear or log-linear function of
+  covariates.  The package also includes the spline model of Royston
+  and Parmar, in which both baseline survival and covariate effects
+  can be arbitrarily flexible parametric functions of time.  The main
+  model-fitting function, \code{flexsurvreg}, uses the familiar syntax
+  of \code{survreg} from the standard \pkg{survival} package.
+  Censoring or left-truncation are specified in \code{Surv} objects.
+  Estimates and confidence intervals for any function of the model
+  parameters can be printed or plotted.  \pkg{flexsurv} also enhances
+  the \pkg{mstate} package \citep{mstate:jss} by providing cumulative
+  hazards for fully-parametric multi-state models.  This article
+  explains the methods and design principles of the package, giving
+  several worked examples of its use.  }
 
 \Keywords{survival}
 
@@ -132,14 +132,14 @@ will typically be $\log()$ if the parameter is defined to be positive,
 or the identity function if the parameter is unrestricted.  
 
 Suppose that the location parameter, but not the ancillary parameters, depends
-on covariates.  If the hazard function factorises as $h(t | \alpha,
-\mu(\mathbf{z})) = \mu(\mathbf{z}) h_0(t | \alpha)$, then this is a
+on covariates.  If the hazard function factorises as $h(t | \bm{\alpha},
+\mu(\mathbf{z})) = \mu(\mathbf{z}) h_0(t | \bm{\alpha})$, then this is a
 \emph{proportional hazards} (PH) model, so that the hazard ratio between
 two groups (defined by two different values of $\mathbf{z}$) is constant
 over time.
 
-Alternatively, if $S(t | \mu(\mathbf{z}), \alpha) =
-S(\mu(\mathbf{z}) t | \alpha)$ then it is an \emph{accelerated
+Alternatively, if $S(t | \mu(\mathbf{z}), \bm{\alpha}) =
+S(\mu(\mathbf{z}) t | \bm{\alpha})$ then it is an \emph{accelerated
   failure time} (AFT) model, so that the effect of covariates is to speed or
 slow the passage of time. For example, doubling the value of a
 covariate with coefficient $\beta=\log(2)$ would give half the
@@ -154,12 +154,15 @@ a right-censoring time, thus the true death time is known only to be
 greater than $t_i$.  Also let $s_i$ be corresponding left-truncation
 (or delayed-entry) times, meaning that individual $i$ is only observed
 conditionally on having survived up to $s_i$, thus $s_i=0$ if there is
-no left-truncation.  This facilitates time-dependent covariates
-(\S\ref{sec:models}) and multi-state models (\S\ref{sec:multistate}).
-Additionally let $t^{max}_i$ be left-censoring times, a less common situation.  If there is no
-left-censoring then these are infinite, so that $S(t^{max}_i)=0$; or
-if the $i$th death time is interval-censored then $c_i=0$ and
-$t^{max}_i$ is finite.
+no left-truncation.   Time-dependent covariates
+(\S\ref{sec:models}) and multi-state models (\S\ref{sec:multistate}) 
+can be represented through left-truncation.
+
+Additionally let $t^{max}_i$ be left-censoring times, a less common
+situation.  If there is no left-censoring then these are infinite, so
+that $S(t^{max}_i)=0$; or if the $i$th death time is interval-censored
+then $c_i=0$ and $t^{max}_i$ is finite; or if there is left-censoring
+but no right-censoring then $c_i=0$ and $t_i=0$.
 
 The likelihood for the parameters $\bm{\theta} = \{\bm{\gamma},\bm{\beta}\}$ in model
 (\ref{eq:model}), given the corresponding data vectors, is
@@ -182,6 +185,7 @@ with primary node positive breast cancer, available in the package as
 \citet{sauerbrei1999building} and \citet{royston:parmar}.  The first
 two records are:
 <<>>=
+library(flexsurv)
 bc[1:2,]
 @ 
 The main model-fitting function is called \code{flexsurvreg}.  Its
@@ -190,18 +194,17 @@ the formula gives the response as a survival object, using the
 \code{Surv} function from the \pkg{survival} package.  Here, this
 indicates that the response variable is \code{recyrs}. 
 This represents time of death or cancer recurrence when \code{censrec} is 1, 
-or censoring when \code{censrec} is 0.  The covariate \code{group} is
+or (right-)censoring when \code{censrec} is 0.  The covariate \code{group} is
 a factor representing a prognostic score, with three levels
 \code{"Good"} (the baseline), \code{"Medium"} and
 \code{"Poor"}. All of these variables are in the data frame
 \code{bc}.
-<<>>=
-library(flexsurv)
-fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
-@ 
+
 If the argument \code{dist} is a string, this denotes a built-in
 survival distribution.  In this case we fit a Weibull survival model.
-
+<<>>=
+fs1 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+@ 
 Printing the fitted model object gives estimates and confidence
 intervals for the model parameters and other useful information.  Note
 that these are the \emph{same parameters} as represented by the R
@@ -257,7 +260,7 @@ function of the same name but beginning with the letter \code{d}.  For
 the Weibull, exponential (\code{dexp}), gamma (\code{dgamma}) and
 log-normal (\code{dlnorm}), the density functions are provided with
 standard installations of R.  These density functions, and the
-corresponding cumulative distribution function (with first letter
+corresponding cumulative distribution functions (with first letter
 \code{p} instead of \code{d}) are used internally in
 \code{flexsurvreg} to compute the likelihood.
 
@@ -265,8 +268,8 @@ corresponding cumulative distribution function (with first letter
 including a Gompertz distribution with unrestricted shape parameter
 (\code{dist="gompertz"}), and the three- and four-parameter families
 described below.  For all built-in distributions, \pkg{flexsurv} also
-defines functions beginning \code{h} giving the hazard, and \code{H}
-for cumulative hazard.
+defines functions beginning with \code{h} giving the hazard, and \code{H}
+for the cumulative hazard.
 
 \paragraph{Generalized gamma} This three-parameter distribution
 includes the Weibull, gamma and log-normal as special cases.  The
@@ -280,7 +283,7 @@ parameters ($\mu$,$\sigma$,$q$), and survivor function
 1 - \Phi(z)  & (q = 0)\\
 \end{array}
 \]
-where $I(a,x) = \int_0^x x^{a-1}\exp(-x)/\Gamma(a)$ is the incomplete gamma function (the cumulative gamma distribution with shape $a$ and scale 1), $\Phi$ is the standard normal cumulative distribution,  $u = \gamma \exp(|q|z)$, $z=(\log(t) - \mu)/\sigma$, and $\gamma=q^{-2}$.   The \citet{prentice:loggamma} parameterisation extends the original one to include a further class of models with negative $q$, and survivor function $I(\gamma,u)$, where $z$ is replaced by $-z$.   This stabilises estimation when the distribution is close to log-normal, since $q=0$ is no longer near the boundary of the parameter space.    In R notation, \footnote{The parameter called $q$ here and in previous literature is called $Q$ in \code{dgengamma} and related functions, since the first argument of a cumulative distribution function is conventionally named \code{q}, for quantile, in R.} the parameter values corresponding to the three special cases are
+where $I(\gamma,u) = \int_0^u x^{\gamma-1}\exp(-x)/\Gamma(\gamma)$ is the incomplete gamma function (the cumulative gamma distribution with shape $a$ and scale 1), $\Phi$ is the standard normal cumulative distribution,  $u = \gamma \exp(|q|z)$, $z=(\log(t) - \mu)/\sigma$, and $\gamma=q^{-2}$.   The \citet{prentice:loggamma} parameterisation extends the original one to include a further class of models with negative $q$, and survivor function $I(\gamma,u)$, where $z$ is replaced by $-z$.   This stabilises estimation when the distribution is close to log-normal, since $q=0$ is no longer near the boundary of the parameter space.    In R notation, \footnote{The parameter called $q$ here and in previous literature is called $Q$ in \code{dgengamma} and related functions, since the first argument of a cumulative distribution function is conventionally named \code{q}, for quantile, in R.} the parameter values corresponding to the three special cases are
 
 \begin{Code}
 dgengamma(x, mu, sigma, Q=0)     ==  dlnorm(x, mu, sigma)                                
@@ -288,6 +291,16 @@ dgengamma(x, mu, sigma, Q=1)     ==  dweibull(x, shape=1/sigma, scale=exp(mu))
 dgengamma(x, mu, sigma, Q=sigma) ==  dgamma(x, shape=1/sigma^2, 
                                                rate=exp(-mu) / sigma^2)  
 \end{Code}
+
+\paragraph{Generalized F} This four-parameter distribution includes
+the generalized gamma, and also the log-logistic, as special cases.
+The variety of hazard shapes that can be represented is discussed by
+\citet{ccox:genf}.  It is provided here in alternative ``original''
+(\code{dist="genf.orig"}) and ``stable'' parameterisations
+(\code{dist="genf"}) as presented by \citet{prentice:genf}. 
+See \code{help(GenF)} and \code{help(GenF.orig)} in the package documentation 
+for the exact definitions.
+
 
 The generalized gamma model is fitted to the breast cancer survival
 data. \code{fs2} is an AFT model, where only the parameter
@@ -303,19 +316,10 @@ fs3 <- flexsurvreg(Surv(recyrs, censrec) ~ group + sigma(group),
 @ 
 Table \ref{tab:aic} compares all the models fitted to the breast
 cancer data, showing absolute fit to the data as measured by the
-maximised -2$\times$ log likelihood $-2LL$, number of parameters $p$,
-and Akaike's information criterion $-2LL + 2p$ which estimates
-predictive ability.
-
-
-\paragraph{Generalized F} This four-parameter distribution includes
-the generalized gamma, and also the log-logistic, as special cases.
-The variety of hazard shapes that can be represented is discussed by
-\citet{ccox:genf}.  It is provided here in alternative ``original''
-(\code{dist="genf.orig"}) and ``stable'' parameterisations
-(\code{dist="genf"}) as presented by \citet{prentice:genf}. 
-See \code{help(GenF)} and \code{help(GenF.orig)} in the package documentation 
-for the exact definitions.
+maximised -2$\times$log likelihood $-2LL$, number of parameters $p$,
+and Akaike's information criterion $-2LL + 2p$ (AIC). 
+The model \code{fs2} has the lowest AIC, indicating 
+the best estimated predictive ability. 
 
 
 \begin{table}
@@ -365,8 +369,10 @@ legend("bottomleft", col=c("black","gray","red","red"),
 
 \code{scale="hazard"} can be used to plot hazards from parametric
 models against kernel density estimates obtained from \pkg{muhaz}
-\citep{muhaz,mueller:wang}. Figure \ref{fig:haz} shows more clearly why the Weibull
-model is inadequate: the hazard must be increasing or decreasing ---
+\citep{muhaz,mueller:wang}. Figure \ref{fig:haz} shows more clearly that 
+the Weibull
+model is inadequate for the breast cancer data: the hazard must be 
+increasing or decreasing ---
 while the generalized gamma can represent the increase and subsequent
 decline in hazard seen in the data.   Similarly, \code{scale="cumhaz"} plots cumulative hazards. 
 \begin{figure}[h]

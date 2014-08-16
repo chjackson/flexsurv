@@ -68,11 +68,9 @@ plot(pt, xlim=range(tgrid),ylim=c(0,1), col=rep("purple",3))
 ## With covariates
 bosms3$x <- rnorm(nrow(bosms3))
 bosms3$x2 <- factor(sample(0:2, size=nrow(bosms3), replace=TRUE))
-bexp2 <- flexsurvreg(Surv(time, status) ~ trans + x + x2, data=bosms3, dist="exp")
+bexp2 <- flexsurvreg(Surv(years, status) ~ trans + x + x2, data=bosms3, dist="exp")
 
 test_that("Errors in msfit.flexsurvreg",{
-    expect_error(mexp2 <- msfit.flexsurvreg(bexp2, t=seq(0,150,10), trans=tmat), "\"tvar\" not supplied and variable .* not in model")
+    expect_error(mexp2 <- msfit.flexsurvreg(bexp2, t=seq(0,150,10), trans=tmat), "Values of covariates .+ not supplied")
     expect_error(mexp2 <- msfit.flexsurvreg(bexp2, t=seq(0,150,10), trans=tmat, tvar="foo"), "variable .* not in model")
-    expect_error(mexp2 <- msfit.flexsurvreg(bexp2, t=seq(0,150,10), trans=tmat, tvar="trans"), "Values of covariates .* not supplied")
-    msfit.flexsurvreg(bexp2, t=seq(0,150,10), trans=tmat, tvar="trans", newdata=data.frame(x=c(0,1,2), x2=c(0,1,2))) #works
 })
