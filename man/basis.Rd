@@ -1,0 +1,47 @@
+\name{basis}
+\alias{basis}
+\alias{dbasis}
+\alias{fss}
+\alias{dfss}
+\title{Natural cubic spline basis}
+\description{
+  Compute a basis for a natural cubic spline, using the parameterisation
+  described by Royston and Parmar (2002).  Used for flexible parametric
+  survival models.
+}
+\usage{
+basis(knots, x)
+dbasis(knots, x)
+fss(x, knots)
+dfss(x, knots)
+}
+\arguments{
+  \item{knots}{Vector of knot locations in increasing order, including the boundary knots at the beginning and end.}
+  \item{x}{Vector of ordinates to compute the basis for.}
+}
+\value{
+  A matrix with one row for each ordinate and one column for each knot.
+
+  \code{basis} returns the basis, and \code{dbasis} returns its
+  derivative with respect to \code{x}.
+
+  \code{fss} and \code{dfss} are the same, but with the order of the
+  arguments swapped around for consistency with similar functions in
+  other R packages.
+}
+\details{
+  The exact formula for the basis is given in \code{\link{flexsurvspline}}.
+}
+\references{
+  Royston, P. and Parmar, M. (2002).  Flexible parametric
+  proportional-hazards and proportional-odds models for censored survival
+  data, with application to prognostic modelling and estimation of
+  treatment effects. Statistics in Medicine 21(1):2175-2197.
+}
+\seealso{
+  \code{\link{flexsurvspline}}.
+}
+\author{
+  Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
+\keyword{models}
