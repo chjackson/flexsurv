@@ -453,7 +453,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
         && (dfns$deriv) ) {
         if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
-        ret$deriv.test <- deriv.test(optpars, Y, X, weights, dlist, inits, dfns, aux, mx, fixedpars)
+        ret$deriv.test <- deriv.test(optpars, Y, X, weights, bhazard, dlist, inits, dfns, aux, mx, fixedpars)
     }
     class(ret) <- "flexsurvreg"
     ret
