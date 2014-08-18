@@ -15,7 +15,8 @@ flexsurv: Flexible parametric models for time-to-event data
 \details{
 
   \code{\link{flexsurvreg}} fits parametric models for time-to-event
-  (survival) data.  Data may be right-censored or left-truncated.
+  (survival) data.  Data may be right-censored, and/or left-censored,
+  and/or left-truncated.
   Several built-in parametric distributions are available.  Any
   user-defined parametric model can also be employed by supplying a list
   with basic information about the distribution, including the density
@@ -38,6 +39,8 @@ flexsurv: Flexible parametric models for time-to-event data
   hazard and hazard functions (\code{\link{summary.flexsurvreg}}).
   These can be plotted against nonparametric estimates
   (\code{\link{plot.flexsurvreg}}) to assess goodness-of-fit.
+  Any other user-defined function of the parameters may be summarised in
+  the same way.
 
   Distribution (``dpqr'') functions for the generalized gamma and F distributions are
   given in \code{\link{GenGamma}}, \code{\link{GenF}} (preferred
@@ -46,7 +49,12 @@ flexsurv: Flexible parametric models for time-to-event data
 
   \code{\link{flexsurv}} also includes the standard Gompertz distribution
   with unrestricted shape parameter, see \code{\link{Gompertz}}.
-
+}
+\section{User guide}{
+  The \bold{flexsurv user guide} vignette explains the methods in
+  detail, and gives several worked examples.  A further vignette
+  \bold{flexsurv-examples} gives a few more complicated examples, and
+  users are encouraged to submit their own.
 }
 \section{Related R packages}{
   \code{\link{flexsurv}} was written to encourage the use of flexible
@@ -75,7 +83,9 @@ flexsurv: Flexible parametric models for time-to-event data
   for a parametric distribution, it can then be used easily in
   \code{\link{flexsurvreg}}.  For instance, several ``reliability''
   distributions used in industrial statistics are available in the
-  \pkg{VGAM} package.  Please report unexplained inconsistencies in
+  \pkg{VGAM} and package, and many other survival distributions
+  are provided in \pkg{ActuDistns}.
+ Please report unexplained inconsistencies in
   results between \pkg{flexsurv} and other software.
 }
 \author{
