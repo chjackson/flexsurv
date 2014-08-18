@@ -10,9 +10,14 @@
 
 \title{flexsurv: flexible parametric survival modelling in R.   Supplementary examples}
 
+\Plainauthor{Christopher Jackson, MRC Biostatistics Unit}
+
+\Abstract{ This vignette of examples supplements the main \pkg{flexsurv} user guide.  }
+\Keywords{survival}
+
 \begin{document} 
 
-This vignette of examples supplements the main user guide.
+
 
 \section{Examples of custom distributions}
 
