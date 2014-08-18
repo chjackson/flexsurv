@@ -226,6 +226,17 @@ expand.inits.args <- function(inits){
     inits2
 }
 
+## User-supplied summary output functions don't have to include all
+## two possible arguments: this expands them if they don't
+
+expand.summfn.args <- function(summfn){
+    summfn2 <- summfn
+    args <- c(alist(t=,start=), formals(summfn))
+    formals(summfn2) <- args[!duplicated(names(args))]
+    body(summfn2) <- body(summfn)
+    summfn2
+}
+
 check.flexsurv.response <- function(Y){
     if (!inherits(Y, "Surv"))
         stop("Response must be a survival object")
@@ -535,6 +546,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     if (is.null(fn)) {
         fn <- summary.fns(x, type)
     }
+    fn <- expand.summfn.args(fn)
     fncall <- list(t,start)
     beta <- if (ncovs==0) 0 else x$res[setdiff(rownames(x$res), x$dlist$pars),"est"]
     if (ncol(X) != length(beta)){

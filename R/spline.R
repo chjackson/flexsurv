@@ -141,9 +141,7 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     as.numeric(haz)
 }
 
-## TODO implement orthogonalised basis
-
-basis <- function(knots, x, orthog=FALSE) {
+basis <- function(knots, x) {
     nx <- length(x)
     if (!is.matrix(knots)) knots <- matrix(rep(knots, nx), byrow=TRUE, ncol=length(knots))
     nk <- ncol(knots)
@@ -162,7 +160,7 @@ basis <- function(knots, x, orthog=FALSE) {
     b
 }
 
-dbasis <- function(knots, x, orthog=FALSE) {
+dbasis <- function(knots, x) {
     nx <- length(x) 
    if (!is.matrix(knots)) knots <- matrix(rep(knots, nx), byrow=TRUE, ncol=length(knots))
     nk <- ncol(knots)
@@ -180,6 +178,9 @@ dbasis <- function(knots, x, orthog=FALSE) {
     }
     b
 }
+
+fss <- function(x, knots) { basis(knots, x) }
+dfss <- function(x, knots) { dbasis(knots, x) }
 
 ## Given a function with matrix arguments (e.g. matrix.fn <-
 ## function(..., gamma, knots), where "gamma" and "knots" have 2

@@ -60,8 +60,9 @@
     \code{"hazard"} for hazards.
   }
   \item{fn}{
-    Custom function of the parameters to summarise against time.  The first two arguments
-    of the function must be \code{t} representing time, and \code{start}
+    Custom function of the parameters to summarise against time.  This
+    has optional first two arguments \code{t} representing time, and
+    \code{start}
     representing left-truncation points.  The other arguments should be the
     parameters of the distribution.   
   }
