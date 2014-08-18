@@ -17,18 +17,19 @@
   distributions are built in, including the three and four-parameter
   generalized gamma and F distributions.  Any parameter of any
   distribution can be modelled as a linear or log-linear function of
-  covariates.  The package also includes the spline model of Royston
-  and Parmar, in which both baseline survival and covariate effects
-  can be arbitrarily flexible parametric functions of time.  The main
-  model-fitting function, \code{flexsurvreg}, uses the familiar syntax
-  of \code{survreg} from the standard \pkg{survival} package.
-  Censoring or left-truncation are specified in \code{Surv} objects.
-  Estimates and confidence intervals for any function of the model
-  parameters can be printed or plotted.  \pkg{flexsurv} also enhances
-  the \pkg{mstate} package \citep{mstate:jss} by providing cumulative
-  hazards for fully-parametric multi-state models.  This article
-  explains the methods and design principles of the package, giving
-  several worked examples of its use.  }
+  covariates.  The package also includes the spline model of
+  \citet{royston:parmar}, in which both baseline survival and
+  covariate effects can be arbitrarily flexible parametric functions
+  of time.  The main model-fitting function, \code{flexsurvreg}, uses
+  the familiar syntax of \code{survreg} from the standard
+  \pkg{survival} package.  Censoring or left-truncation are specified
+  in \code{Surv} objects.  Estimates and confidence intervals for any
+  function of the model parameters can be printed or plotted.
+  \pkg{flexsurv} also enhances the \pkg{mstate} package
+  \citep{mstate:jss} by providing cumulative hazards for
+  fully-parametric multi-state models.  This article explains the
+  methods and design principles of the package, giving several worked
+  examples of its use.  }
 
 \Keywords{survival}
 
@@ -228,7 +229,7 @@ interpretation, as linear effects on $\log(\mu)$.  The multiplicative
 effects $\exp(\bm{\beta})$ are printed in the output as
 \code{exp(est)}.
 
-\subsection{Alternative censoring or truncation mechanisms} 
+\subsection{Additional modelling features}
 \label{sec:censtrunc}
 
 If we also had left-truncation times in a variable called
@@ -248,6 +249,13 @@ form \code{Surv(start,stop,censrec)}, where \code{start} and
 indicates whether a death was observed at \code{stop}.  The function
 \code{survSplit} in \pkg{survival} is a utility to construct data like
 this.
+
+Relative survival models \citep{nelson:relative:survival} can be
+implemented by supplying the variable in the data that represents the
+expected mortality rate in the \code{bhazard} argument to
+\code{flexsurvreg}.  Case weights and data subsets can also be
+specified, as in standard R modelling functions, using \code{weights}
+or \code{subset} arguments.
 
 
 \subsection{Built-in models}
@@ -521,6 +529,10 @@ character string.  The list has the following elements.
   These functions must be \emph{vectorised}, and the density function
   must also accept an argument \code{log}, which when \code{TRUE},
   returns the log density.  See the examples below.
+
+  In some cases, R's scoping rules may not find the functions in the
+  working environment.  They may then be supplied through the
+  \code{dfns} argument to \code{flexsurvreg}.
   
 \item[\code{pars}] Character vector naming the parameters of the
   distribution $\mu,\alpha_1,...,\alpha_R$.  These must match the
@@ -1322,13 +1334,6 @@ or BUGS \citep{bugs:book} would be naturally suited to complex
 extensions such as random effects on multiple parameters or multiple
 hierarchical levels.
 
-Relative survival models \citep{nelson:relative:survival}, often used
-in cancer epidemiology, are a typical application of the Stata
-packages mentioned in this article, but have not yet been attempted
-with \pkg{flexsurv}.  These simply include an known additive offset in
-the hazard function, representing the hazard for a reference
-population, so would not be conceptually difficult.
-
 \pkg{flexsurv} is intended as a platform for parametric survival
 modelling.  Extensions of the software to deal with different models
 may be written by users themselves, through the facilities described
@@ -1348,7 +1353,7 @@ new class of models would ideally come with
   (\S\ref{sec:custom}).
 \end{itemize}
 
-The examples in this paper were run using version 0.4 of \pkg{flexsurv}, available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
+The examples in this paper were run using version 0.4 of \pkg{flexsurv}, which will eventually be available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
 
 \appendix
 \section{Acknowledgements}

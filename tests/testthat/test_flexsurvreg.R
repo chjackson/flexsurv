@@ -324,3 +324,39 @@ test_that("cl",{
     expect_true(fitg2$res[1,2] < fitg$res[1,2])
     expect_true(fitg2$res[1,3] > fitg$res[1,2])
 })
+
+test_that("Relative survival", { 
+    bc$bh <- rep(0.01, nrow(bc))
+
+    ## Compare with stata stgenreg, using Weibull PH model
+
+    hweibullPH <- function(x, shape, scale = 1, log=FALSE){
+        hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
+    }
+    HweibullPH <- function(x, shape, scale=1, log=FALSE){
+        Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
+    }
+    custom.weibullPH <- list(name="weibullPH", 
+                             pars=c("shape","scale"), location="scale",
+                             transforms=c(log, log), inv.transforms=c(exp, exp),
+                             inits = function(t){
+                                 c(1, median(t[t>0]) / log(2))
+                             })
+
+    fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH))
+    expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233)
+    expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038)
+    expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026)
+    expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765)
+
+    ## same results as 
+    ## cd /home/chris/flexsurv/stata
+    ## use stpm/bc
+    ## gen rec = 1 - censrec
+    ## gen recyrs = rectime / 365
+    ## gen bh = 0.01
+    ## stset recyrs, failure(censrec)
+    ## stgenreg, loghazard([ln_lambda] :+ [ln_gamma] :+ (exp([ln_gamma]) :- 1) :* log(#t)) nodes(100) ln_lambda(group2 group3) bhazard(bh)
+### don't know what scale Stata returns the loglik on
+
+})

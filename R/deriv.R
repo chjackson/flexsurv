@@ -3,7 +3,7 @@
 ## dloglik/dp  = sum (df/dp / f(p)) | xobs) + sum(dS/dp / S(p) | xcens) - sum(dS/dp / S(p) | xtrunc)
 ##             = sum(dlogf/dp | xobs) + sum(dlogS/dp | xcens) - sum(dlogS/dp | xtrunc)
 
-Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, dlist, inits, dfns, aux, mx, fixedpars=NULL) {
+Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits, dfns, aux, mx, fixedpars=NULL) {
     pars <- inits
     npars <- length(pars)
     pars[setdiff(1:npars, fixedpars)] <- optpars
@@ -174,10 +174,11 @@ DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"
     ret
 }
 
-deriv.test <- function(optpars, Y, X, weights, dlist, inits, dfns, aux, mx, fixedpars){
-    an.d <- Dminusloglik.flexsurv(optpars, Y, X, weights, dlist, inits, dfns, aux, mx, fixedpars)
+deriv.test <- function(optpars, Y, X, weights, bhazard, dlist, inits, dfns, aux, mx, fixedpars){
+    an.d <- Dminusloglik.flexsurv(optpars, Y, X, weights, bhazard, dlist, inits, dfns, aux, mx, fixedpars)
     require(numDeriv)
-    num.d <- grad(minusloglik.flexsurv, optpars, Y=Y, X=X, weights=weights, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+    num.d <- grad(minusloglik.flexsurv, optpars, Y=Y, X=X, weights=weights, bhazard=bhazard,
+                  dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
     res <- cbind(analytic=an.d, numeric=as.vector(num.d))
     rownames(res) <- names(optpars)
     list(res=res, error=mean(abs(an.d - num.d)))

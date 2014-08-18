@@ -10,8 +10,9 @@
   function with their own survival distributions.
 }
 \usage{
-flexsurvreg(formula, anc=NULL, data, weights, subset, na.action, dist, inits,
-            fixedpars=NULL, dfns=NULL, aux=NULL, cl=0.95, integ.opts, ...)
+flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
+            na.action, dist, inits, fixedpars=NULL, dfns=NULL, aux=NULL,
+            cl=0.95, integ.opts, ...)
 }
 \arguments{
   \item{formula}{
@@ -68,7 +69,10 @@ flexsurvreg(formula, anc=NULL, data, weights, subset, na.action, dist, inits,
     If not given, the variables should be in the working environment.
   }
   \item{weights}{
-    Optional vector of case weights.
+    Optional variable giving case weights.
+  }
+  \item{bhazard}{
+    Optional variable giving expected hazards for relative survival models.
   }
   \item{subset}{
     Vector of integer or logicals specifying the subset of the

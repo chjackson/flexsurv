@@ -31,6 +31,9 @@ Other new modelling features:
 * New "msfit.flexsurvreg" method giving cumulative incidences for
   parametric multi-state models in the format of the "mstate" package.
 
+* Relative survival models, using the "bhazard" argument to
+  flexsurvreg to specify the expected mortality rate.
+
 Custom distributions:
 
 * Custom distributions can be defined through the hazard function.
@@ -95,6 +98,9 @@ Distribution functions:
 
 * Don't warn for shape parameters being exactly zero in generalized
   gamma and F, just give NaN.
+
+* basis() and fss() functions for the natural cubic spline basis made
+  available to users.
 
 
 Version 0.3.1 (2014-02-14)

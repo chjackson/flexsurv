@@ -99,7 +99,7 @@ flexsurv.dists <- list(
                        )
                        )
 
-minusloglik.flexsurv <- function(optpars, Y, X=0, weights, dlist, inits,
+minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits,
                                  dfns, aux, mx, fixedpars=NULL) {
     pars <- inits
     npars <- length(pars)
@@ -127,11 +127,20 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, dlist, inits,
     dcall$log <- TRUE
     ## Generic survival model likelihood
     dead <- Y[,"status"]==1
-    logdens <- (do.call(dfns$d, dcall)*weights)[dead]
-    pmax <- (do.call(dfns$p, pmaxcall))[!dead]
-    pmin <- (do.call(dfns$p, pcall))[!dead]
+    logdens <- (do.call(dfns$d, dcall))
+    pmax <- (do.call(dfns$p, pmaxcall))
+    pmin <- (do.call(dfns$p, pcall))
     pobs <- 1 - do.call(dfns$p, tcall) # prob of being observed = 1 unless left-truncated
-    ret <- - ( sum(logdens) + sum(log(pmax - pmin)*weights[!dead]) - sum(log(pobs)*weights))
+    
+    ## Hazard offset for relative survival models
+    if (any(bhazard>0)){
+        loghaz <- logdens - log(pmax - pmin)
+        offset <- sum(log(1 + bhazard / exp(loghaz)*weights)[dead])
+    } else offset <- 0
+    
+    ret <- - ( sum((logdens*weights)[dead]) +
+              sum((log(pmax - pmin)*weights)[!dead]) -
+              sum(log(pobs)*weights) + offset)
     ret
 }
 
@@ -262,7 +271,7 @@ compress.model.matrices <- function(mml){
     X
 }
 
-flexsurvreg <- function(formula, anc=NULL, data, weights, subset, na.action, dist,
+flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.action, dist,
                         inits, fixedpars=NULL, dfns=NULL, aux=NULL, cl=0.95,
                         integ.opts=NULL, ...)
 {
@@ -304,7 +313,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, subset, na.action, dis
     ## m <- make.model.frame(call, formula, data, weights, subset, na.action, ancnames)
 
     ## Make model frame   
-    indx <- match(c("formula", "data", "weights", "subset", "na.action"), names(call), nomatch = 0)
+    indx <- match(c("formula", "data", "weights", "bhazard", "subset", "na.action"), names(call), nomatch = 0)
     if (indx[1] == 0)
         stop("A \"formula\" argument is required")
     temp <- call[c(1, indx)]
@@ -327,6 +336,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, subset, na.action, dis
     
     weights <- model.extract(m, "weights")
     if (is.null(weights)) weights <- rep(1, nrow(X))
+    bhazard <- model.extract(m, "bhazard")
+    if (is.null(bhazard)) bhazard <- rep(0, nrow(X))
     dat <- list(Y=Y, m=m, mml=mml)
     ncovs <- ncol(m) - 1
     ncoveffs <- ncol(X)
@@ -370,7 +381,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, subset, na.action, dis
 
     if ((is.logical(fixedpars) && fixedpars==TRUE) ||
         (is.numeric(fixedpars) && identical(fixedpars, 1:npars))) {
-        minusloglik <- minusloglik.flexsurv(inits, Y=Y, X=X, weights=weights,
+        minusloglik <- minusloglik.flexsurv(inits, Y=Y, X=X, weights=weights, bhazard=bhazard,
                                             dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx)
         inits.t <- numeric(length(inits))
         for (i in 1:nbpars)
@@ -393,7 +404,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, subset, na.action, dis
         }
         gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
         optim.args <- c(optim.args, list(par=optpars, fn=minusloglik.flexsurv, gr=gr,
-                                         Y=Y, X=X, weights=weights, dlist=dlist,
+                                         Y=Y, X=X, weights=weights, bhazard=bhazard, dlist=dlist,
                                          inits=inits, dfns=dfns, aux=aux,
                                          mx=mx, fixedpars=fixedpars,
                                          hessian=TRUE))

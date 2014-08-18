@@ -116,7 +116,7 @@ Hlink <- function(scale){
 ## cumulative hazard function
 
 Hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", offset=0){
-# TODO base on dp H=-log(1-p) to get error handling etc
+# TODO error handling etc
     match.arg(scale, c("hazard","odds","normal"))
     eta <- basis(knots, log(x)) %*% gamma + as.numeric(X %*% beta) + offset
     as.numeric(Hlink(scale)(eta))
@@ -133,7 +133,7 @@ hlink <- function(scale){
 ## hazard function
 
 hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", offset=0){
-# TODO base on dp:  d / (1 - p)
+# TODO error handling etc
     match.arg(scale, c("hazard","odds","normal"))
     eta <- basis(knots, log(x)) %*% gamma + as.numeric(X %*% beta) + offset
     eeta <- hlink(scale)(eta)
