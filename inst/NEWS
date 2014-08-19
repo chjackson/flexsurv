@@ -1,7 +1,9 @@
 -*- text -*-
 
-Version 0.4 (2014-08-15)
+Version 0.4 (2014-08-19)
 -----------
+
+* New package vignettes: a user guide and a vignette of examples.
 
 Spline models and ancillary covariates:
 
