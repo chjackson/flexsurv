@@ -1,13 +1,15 @@
+document return value for summary fn: vector of length t?
+
+error if using pmatrix.fs with a SMM
+
 quantiles at 0 and 1 are min and max: use in flexsurvspline   
-
-CIs as grey bands not lines
-
-make plot/summary do baseline values of factor covs and mean of continuous
 
 Make sure all features have tests
 
 
 OPTIONAL
+
+make plot/summary do baseline values of factor covs and mean of continuous
 
 Generic (restricted) mean of distributions, integration if necessary
 
@@ -26,3 +28,5 @@ hHsurvspline: vectorise as dp
 intervals in Surv are open on left, closed on right
 
 other types of status: mstate
+
+CIs as grey bands not lines

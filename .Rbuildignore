@@ -19,4 +19,5 @@ vignettes/flexsurv-.+\.pdf
 vignettes/.+.odg
 inst/doc/flexsurv.Rnw
 inst/doc/flexsurv-examples.Rnw
-
+tests/extra
+tests/test_extra.R

@@ -489,7 +489,7 @@ print.flexsurvreg <- function(x, ...)
 form.model.matrix <- function(object, newdata){
     mfo <- model.frame(object)
     covnames <- attr(mfo, "covnames")
-    missing.covs <- covnames[!covnames %in% names(newdata)]
+    missing.covs <- unique(covnames[!covnames %in% names(newdata)])
     if (length(missing.covs)>0)
         stop("Values of covariates ", paste(missing.covs, collapse=", "), " not supplied in \"newdata\"")
     ## don't insist on user defining factors in model as factors in newdata, do this for them
@@ -546,7 +546,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
             stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " elements")
         }
     } else
-        X <- form.model.matrix(object, newdata)
+        X <- form.model.matrix(object, as.data.frame(newdata))
     if (is.null(t))
         t <- sort(unique(dat$Y[,"stop"]))
     if (length(start)==1)
@@ -625,13 +625,29 @@ print.summary.flexsurvreg <- function(x, ...){
     }
 }
 
+add.covs <- function(x, pars, beta, X, transform=FALSE){
+    nres <- nrow(X)
+    if (!is.matrix(pars)) pars <- matrix(pars, nrow=nres, ncol=length(pars), byrow=TRUE)
+    if (!is.matrix(beta)) beta <- matrix(beta, nrow=1)
+    for (j in seq(along=x$dlist$pars)){
+        covinds <- x$mx[[x$dlist$pars[j]]]
+        if (length(covinds) > 0){
+            pars[,j] <- pars[,j] + beta[,covinds] %*% t(X[,covinds,drop=FALSE])
+        }
+        if (!transform)            
+            pars[,j] <- x$dlist$inv.transforms[[j]](pars[,j])
+    }
+    colnames(pars) <- x$dlist$pars
+    pars
+}
+
 ## Draw B samples from multivariate normal distribution of baseline
 ## parameter estimators, for given covariate values
 
 normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE){
     if (is.null(X)) {
         if (is.null(newdata)) stop("neither \"newdata\" nor \"X\" supplied")
-        X <- form.model.matrix(x, newdata)
+        X <- form.model.matrix(x, as.data.frame(newdata))
     }
     sim <- matrix(nrow=B, ncol=nrow(x$res))
     colnames(sim) <- rownames(x$res)
@@ -640,26 +656,12 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE){
     beta <- sim[, x$covpars, drop=FALSE]
     if (nrow(X)==1){
         res <- sim[,x$dlist$pars,drop=FALSE]
-        for (j in seq(along=x$dlist$pars)){
-            covinds <- x$mx[[x$dlist$pars[j]]]
-            if (length(covinds) > 0){
-                res[,j] <- res[,j] + beta[,covinds] %*% t(X[,covinds,drop=FALSE])
-            }
-            if (!transform)
-                res[,j] <- x$dlist$inv.transforms[[j]](res[,j])
-        }
+        res <- add.covs(x=x, pars=res, beta=beta, X=X, transform=transform)
     }  else {
         res <- vector(nrow(X), mode="list")
         for (i in 1:nrow(X)) {
             res[[i]] <- sim[,x$dlist$pars,drop=FALSE]
-            for (j in seq(along=x$dlist$pars)){
-                covinds <- x$mx[[x$dlist$pars[j]]]
-                if (length(covinds) > 0){
-                    res[[i]][,j] <- res[[i]][,j] + beta[,covinds] %*% t(X[i,covinds,drop=FALSE])
-                }
-                if (!transform)
-                    res[[i]][,j] <- x$dlist$inv.transforms[[j]](res[[i]][,j])
-            }
+            res[[i]] <- add.covs(x=x, pars=res[[i]], beta=beta, X=X[i,,drop=FALSE], transform=transform)
         }
     }
     res
@@ -670,17 +672,20 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE){
 ### assumed MVN distribution of MLEs.
 
 normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B){
-    ret <- array(NA_real_, dim=c(B, length(t)))           
     sim <- normboot.flexsurvreg(x, B, X=X)
-    for (i in seq(length=B)) {
-        fncall <- list(t,start)
-        for (j in seq(along=x$dlist$pars))
-            fncall[[x$dlist$pars[j]]] <- sim[i,j]
-        for (j in seq_along(x$aux))
-            fncall[[names(x$aux)[j]]] <- x$aux[[j]]
-        ret[i,] <- do.call(fn, fncall)
+    if (!is.list(sim)) sim <- list(sim)
+    ret <- array(NA_real_, dim=c(nrow(X), B, length(t)))
+    for (k in 1:nrow(X)){
+        for (i in seq(length=B)) {
+            fncall <- list(t,start)
+            for (j in seq(along=x$dlist$pars))
+                fncall[[x$dlist$pars[j]]] <- sim[[k]][i,j]
+            for (j in seq_along(x$aux))
+                fncall[[names(x$aux)[j]]] <- x$aux[[j]]
+            ret[k,i,] <- do.call(fn, fncall)
+        }
     }
-    ret
+    if (nrow(X)==1) ret[1,,,drop=FALSE] else ret
 }
 
 cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
@@ -688,7 +693,8 @@ cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
         ret <- array(NA, dim=c(length(t), 2))
     else {
         ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
-        ret <- t(apply(ret, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE)))
+        ret <- apply(ret, c(1,3), function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+        ret <- t(ret[,1,])
     }
     ret
 }

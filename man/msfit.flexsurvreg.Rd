@@ -48,8 +48,10 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
   \item{newdata}{ A data frame specifying the values of covariates in
     the fitted model, other than the transition number.  This must be
     specified if there are other covariates. The variable names should
-    be the same as those in the fitted model formula, but it should only
-    have one row for each transition in the multi-state model.  }
+    be the same as those in the fitted model formula.   There must be
+    either one value per covariate (the typical situation) or n values
+    per covariate, a different one for each of the n allowed
+    transitions.  }
 
   \item{variance}{ Calculate the variances and covariances of the
     transition cumulative hazards (\code{TRUE} or \code{FALSE}).  This
@@ -75,7 +77,6 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
 
 }
 \examples{
-
 ## 3 state illness-death model for bronchiolitis obliterans
 ## Compare clock-reset / semi-Markov multi-state models
 
