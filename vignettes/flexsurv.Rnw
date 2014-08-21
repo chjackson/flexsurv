@@ -1017,7 +1017,9 @@ know the time of each transition, or even whether transitions of
 a certain type have occurred at all between a pair of observations.
 Multi-state models for that type of data (and also exact event times)
 can be fitted with the \pkg{msm} package for R \citep{msmjss}, but are
-restricted to (piecewise) exponential event time distributions.
+restricted to (piecewise) exponential event time distributions.  Knowing
+the exact event times enables much more flexible models, as shown
+in this section.
 
 \paragraph{Alternative time scales} 
 In semi-Markov (clock-reset) models, $q_{rs}(t)$ depends on the time
