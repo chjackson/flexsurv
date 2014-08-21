@@ -16,12 +16,13 @@
   \item{object}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted
     survival model object.}
 
-  \item{newdata}{ Data frame containing covariate values to produce
-    fitted values for.  There must be a column for every covariate in
-    the model formula, and one row for every combination of covariates
-    the fitted values are wanted for.  These are in the same format as
-    the original data, with factors as a single variable, not 0/1
-    contrasts.
+  \item{newdata}{
+    Data frame containing covariate values to produce fitted values for.
+    Or a list that can be coerced to such a data frame.  There must be a
+    column for every covariate in the model formula, and one row for
+    every combination of covariates the fitted values are wanted for.
+    These are in the same format as the original data, with factors as a
+    single variable, not 0/1 contrasts.
 
     If this is omitted, if there are any continuous covariates, then a
     single summary is provided with all covariates set to their mean
