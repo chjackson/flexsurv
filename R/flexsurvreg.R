@@ -573,6 +573,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     else covnames <- rownames(X)
     names(ret) <- covnames
     for (i in 1:nrow(X)) {
+<<<<<<< HEAD
         basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X, transform=FALSE)
         basepars <- as.list(as.data.frame(basepars.mat))
         fncall <- c(fncall, basepars)
@@ -584,9 +585,25 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
 #            fncall[[dlist$pars[j]]] <- dlist$inv.transforms[[j]](mu)
 #        }
 #        expect_equal(unlist(fncall2), unlist(fncall))
+=======
+        basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X[i,,drop=FALSE], transform=FALSE)
+        basepars <- as.list(as.data.frame(basepars.mat))
+        fncall[dlist$pars] <- basepars
+
+#        for (j in seq(along=dlist$pars)) {
+#            fncall2[[dlist$pars[j]]] <- x$res[dlist$pars[j],"est"]
+#            mu <- dlist$transforms[[j]](fncall2[[dlist$pars[j]]]) ## TODO add.covs function?
+#            covinds <- x$mx[[dlist$pars[j]]]
+#            mu <- mu + X[i,covinds,drop=FALSE] %*% beta[covinds]
+#            fncall2[[dlist$pars[j]]] <- dlist$inv.transforms[[j]](mu)
+#        }
+#        expect_equal(unlist(fncall2), unlist(fncall))
+        
+>>>>>>> d4fbe2aa1d61d6d2a645e288d4e00ae107e64baa
         for (j in seq_along(x$aux)){
             fncall[[names(x$aux)[j]]] <- x$aux[[j]]
         }
+# browser()
         y <- do.call(fn, fncall)
         if (ci){
             res.ci <- cisumm.flexsurvreg(x, t, start, X[i,,drop=FALSE], fn=fn, B=B, cl=cl)
