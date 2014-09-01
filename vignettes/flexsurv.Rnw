@@ -1,5 +1,7 @@
 %\VignetteIndexEntry{flexsurv user guide}
 
+%%% TODO look at and cite parfm
+
 \documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
 \usepackage{tabularx}
@@ -1315,8 +1317,8 @@ maximum likelihood estimates, and by default this is not done.  See
 \code{help(pmatrix.fs)} for full details.
 
 For semi-Markov models, the Kolmogorov equation does not apply, since the
-transition intensity matrix $Q(t)$ is not known in advance at time
-$t$, but depends on when the transitions occur between time $t_0$ and
+transition intensity matrix $Q(t)$ is no longer a deterministic function of $t$, 
+but depends on when the transitions occur between time $t_0$ and
 $t$.  $P(t_0, t)$ can then be estimated by simulation, given the
 estimated cumulative hazards, using \pkg{mstate}'s function
 \code{mssample} \citep{fiocco:mstatepred}.  5000 samples are

@@ -245,6 +245,8 @@ pweibull.quiet <- function(q, shape, scale = 1, lower.tail = TRUE, log.p = FALSE
     ret
 }
 
+rweibull.quiet <- rweibull
+
 ## suppresses NOTE from checker about variables created with "assign"
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
 
