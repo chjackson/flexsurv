@@ -325,7 +325,6 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     m <- eval(temp, parent.frame())
     attr(m,"covnames") <- attr(f2, "covnames") # for "newdata" in summary
     Y <- check.flexsurv.response(model.extract(m, "response"))
-
     mml <- mx <- vector(mode="list", length=length(dlist$pars))
     names(mml) <- names(mx) <- c(dlist$location, setdiff(dlist$pars, dlist$location))
     for (i in names(forms)){
@@ -559,7 +558,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     }
     fn <- expand.summfn.args(fn)
     fncall <- list(t,start)
-    beta <- if (ncovs==0) 0 else x$res[setdiff(rownames(x$res), x$dlist$pars),"est"]
+    beta <- if (ncovs==0) 0 else x$res[x$covpars,"est"]
     if (ncol(X) != length(beta)){
         isare <- if(length(beta)==1) "is" else "are"
         plural <- if(ncol(X)==1) "" else "s"
@@ -574,13 +573,17 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     else covnames <- rownames(X)
     names(ret) <- covnames
     for (i in 1:nrow(X)) {
-        for (j in seq(along=dlist$pars)) {
-            fncall[[dlist$pars[j]]] <- x$res[dlist$pars[j],"est"]
-            mu <- dlist$transforms[[j]](fncall[[dlist$pars[j]]])
-            covinds <- x$mx[[dlist$pars[j]]]
-            mu <- mu + X[i,covinds,drop=FALSE] %*% beta[covinds]
-            fncall[[dlist$pars[j]]] <- dlist$inv.transforms[[j]](mu)
-        }
+        basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X, transform=FALSE)
+        basepars <- as.list(as.data.frame(basepars.mat))
+        fncall <- c(fncall, basepars)
+#        for (j in seq(along=dlist$pars)) {
+#            fncall[[dlist$pars[j]]] <- x$res[dlist$pars[j],"est"]
+#            mu <- dlist$transforms[[j]](fncall[[dlist$pars[j]]]) ## TODO add.covs function?
+#            covinds <- x$mx[[dlist$pars[j]]]
+#            mu <- mu + X[i,covinds,drop=FALSE] %*% beta[covinds]
+#            fncall[[dlist$pars[j]]] <- dlist$inv.transforms[[j]](mu)
+#        }
+#        expect_equal(unlist(fncall2), unlist(fncall))
         for (j in seq_along(x$aux)){
             fncall[[names(x$aux)[j]]] <- x$aux[[j]]
         }
@@ -625,7 +628,7 @@ print.summary.flexsurvreg <- function(x, ...){
     }
 }
 
-add.covs <- function(x, pars, beta, X, transform=FALSE){
+add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to transform on input 
     nres <- nrow(X)
     if (!is.matrix(pars)) pars <- matrix(pars, nrow=nres, ncol=length(pars), byrow=TRUE)
     if (!is.matrix(beta)) beta <- matrix(beta, nrow=1)

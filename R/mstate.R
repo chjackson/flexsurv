@@ -67,8 +67,6 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
 
 pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
                        tvar="trans", sing.inf=1e+10, B=1000, cl=0.95, ...){
-    tr <- sort(unique(na.omit(as.vector(trans))))
-    ntr <- length(tr)
     newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
     X <- form.model.matrix(x, newdata)   
     n <- nrow(trans)

@@ -272,6 +272,7 @@ test_that("Interval censoring",{
     simt[status==0] <- 0.6
     tmin <- simt
     tmax <- ifelse(status==1, simt, Inf)
+
     ## equivalent to right-censoring
     fs1 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
@@ -281,6 +282,20 @@ test_that("Interval censoring",{
     fs1 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
     expect_true(fs1$loglik != fs2$loglik)
+
+    ## compare with survreg
+    ## Default inits don't work for flexsurvreg here
+    ## It's choosing median of "time", same as "time1"
+    ## exp(median(log(t)))/log(2)
+    ## returns 1.0000000000 0.6151366625
+    ## actual scale is 0.46, shape 2.5
+    ## Seems to need both the scale and the shape to be correct
+    flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull",
+                       inits=c(1/0.409, exp(-0.765))) # better inits
+    flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull",
+                inits=c(1, 0.6)) # default inits
+    survreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    
     ## using type="interval"
     status[status==0] <- 3
     fs3 <- flexsurvreg(Surv(tmin, tmax, status, type="interval") ~ 1, dist="weibull")
