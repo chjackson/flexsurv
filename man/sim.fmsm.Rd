@@ -47,7 +47,7 @@ format as standard R functions such as \code{rnorm}, with first argument
 \examples{
 bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
-pmatrix.simfs(bexp, M=10, t=5, trans=tmat)
+sim.fmsm(bexp, M=10, t=5, trans=tmat)
 }
 \author{Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.}
 \keyword{models,survival}

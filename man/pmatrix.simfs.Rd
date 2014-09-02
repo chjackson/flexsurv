@@ -18,7 +18,8 @@
     for the required form of the model and the data.   Additionally
     this should be semi-Markov,  so that the time variable represents
     the time since the last transition.  In other words the response should
-    be of the form \code{Surv(time,status)}. 
+    be of the form \code{Surv(time,status)}. See the package vignette for further
+    explanation. 
   }
   \item{trans}{Matrix indicating allowed transitions.  See
     \code{\link{msfit.flexsurvreg}}.}
@@ -54,7 +55,7 @@
 \details{
   This is computed by simulating a large number of individuals \code{M}
   using the maximum likelihood estimates of the fitted model and the
-  function \code{sim.fmsm}.   Therefore this requires a random sampling
+  function \code{\link{sim.fmsm}}.   Therefore this requires a random sampling
   function for the parametric survival model to be available: see the
   "Details" section of \code{\link{sim.fmsm}}.   This will be available
   for all built-in distributions, though users may need to write this
