@@ -569,6 +569,9 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     else covnames <- rownames(X)
     names(ret) <- covnames
     for (i in 1:nrow(X)) {
+        basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X, transform=FALSE)
+        basepars <- as.list(as.data.frame(basepars.mat))
+        fncall <- c(fncall, basepars)
         basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X[i,,drop=FALSE], transform=FALSE)
         basepars <- as.list(as.data.frame(basepars.mat))
         fncall[dlist$pars] <- basepars
@@ -634,7 +637,6 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 
 ## Draw B samples from multivariate normal distribution of baseline
 ## parameter estimators, for given covariate values
-## FIXME should work with no covariates
 
 normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, raw=FALSE){
     if (x$ncovs > 0 && !raw) {
