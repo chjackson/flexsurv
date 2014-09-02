@@ -17,7 +17,9 @@
   \item{x}{A model fitted with \code{\link{flexsurvreg}}.   See
     \code{\link{msfit.flexsurvreg}}
     for the required form of the model and the data.
-    Additionally, this must be Markov, but can be time-inhomogeneous.
+    Additionally, this must be a Markov / clock-forward model,
+    but can be time-inhomogeneous.  See the package vignette for further
+    explanation. 
   }
   \item{trans}{Matrix indicating allowed transitions.  See
     \code{\link{msfit.flexsurvreg}}.}
@@ -83,9 +85,13 @@
   panel data, where the process is observed only at arbitrary times,
   thus the times of transition are unknown, which makes flexible models
   difficult.
+
+  This function is only valid for Markov ("clock-forward") multi-state
+  models.  See \code{\link{pmatrix.simfs}} for the equivalent for
+  semi-Markov ("clock-reset") models.
 }
 \seealso{
-  \code{\link{msfit.flexsurvreg}}.
+  \code{\link{pmatrix.simfs}}, \code{\link{msfit.flexsurvreg}}.
 }
 \examples{
 # BOS example in vignette, and in msfit.flexsurvreg
