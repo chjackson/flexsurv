@@ -28,10 +28,12 @@ Spline models and ancillary covariates:
 
 Other new modelling features:
 
-* Interval censoring supported in the response.
+* Several utilities for parametric multi-state modelling, including
+  transition probabilities and simulation ("pmatrix.fs",
+  "pmatrix.simfs", "sim.fmsm").  An "msfit.flexsurvreg" method also
+  gives cumulative incidences in the format of the "mstate" package.
 
-* New "msfit.flexsurvreg" method giving cumulative incidences for
-  parametric multi-state models in the format of the "mstate" package.
+* Interval censoring supported in the Surv() response.
 
 * Relative survival models, using the "bhazard" argument to
   flexsurvreg to specify the expected mortality rate.
