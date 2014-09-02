@@ -4,7 +4,7 @@
 \alias{flexsurv}
 \docType{package}
 \title{
-flexsurv: Flexible parametric models for time-to-event data
+  flexsurv: Flexible parametric survival and multi-state models
 }
 \description{
   flexsurv: Flexible parametric models for time-to-event data,
@@ -13,7 +13,6 @@ flexsurv: Flexible parametric models for time-to-event data
   distributions. 
 }
 \details{
-
   \code{\link{flexsurvreg}} fits parametric models for time-to-event
   (survival) data.  Data may be right-censored, and/or left-censored,
   and/or left-truncated.
@@ -42,11 +41,18 @@ flexsurv: Flexible parametric models for time-to-event data
   Any other user-defined function of the parameters may be summarised in
   the same way.
 
+  Multi-state models for time-to-event data can also be fitted with the
+  same functions.  Predictions from those models can then be made
+  using the functions \code{\link{pmatrix.fs}},
+  \code{\link{pmatrix.simfs}} or \code{\link{sim.fmsm}}, or
+  alternatively by \code{\link{msfit.flexsurvreg}} followed by
+  \code{\link{mssample}} or \code{\link{probtrans}} from the package
+  \pkg{mstate}.
+  
   Distribution (``dpqr'') functions for the generalized gamma and F distributions are
   given in \code{\link{GenGamma}}, \code{\link{GenF}} (preferred
   parameterisations) and \code{\link{GenGamma.orig}},
   \code{\link{GenF.orig}} (original parameterisations).
-
   \code{\link{flexsurv}} also includes the standard Gompertz distribution
   with unrestricted shape parameter, see \code{\link{Gompertz}}.
 }

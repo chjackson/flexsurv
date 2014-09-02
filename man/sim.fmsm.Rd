@@ -18,7 +18,7 @@ sim.fmsm(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", debug=FALSE)
   \item{start}{Starting state, or vector of starting states for each of the \code{M} individuals.}
   \item{M}{Number of individual trajectories to simulate.}
   \item{tvar}{Variable in the data representing the transition type.}
-  \item{debug}{(for development use)}
+  \item{debug}{Print intermediate outputs: for development use.}
 }
 \value{
 A list of two matrices named \code{st} and \code{t}.  The rows of each
@@ -37,8 +37,8 @@ numbers from the parametric survival distribution used in the fitted
 model \code{x}.If \code{x} was fitted using a custom distribution,
 called \code{dist} say, then there must be a function called (something like)
 \code{rdist} either in the working environment, or supplied through the
-\code{dfns} argument to \code{flexsurvreg}.  This must be in the same
-format as standard R functions such as \code{rnorm}, with first argument
+\code{dfns} argument to \code{\link{flexsurvreg}}.  This must be in the same
+format as standard R functions such as \code{\link{rnorm}}, with first argument
 \code{n} and remaining arguments giving the parameters of the distribution.
 }
 \seealso{
