@@ -393,13 +393,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
         optpars <- inits[setdiff(1:npars, fixedpars)]
         optim.args <- list(...)
         if (is.null(optim.args$method)){
-            ## L-BFGS-B breaks if lik goes to 0 for finite pars, but BFGS carries on (with warning) if pars zero
-            ## if (dlist$name=="weibull"){            
-            ##     optim.args$method <- "L-BFGS-B"
-            ##     optim.args$lower <- -1e+16
-            ## }
-            ## else
-                optim.args$method <- "BFGS"
+            optim.args$method <- "BFGS"
         }
         gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
         optim.args <- c(optim.args, list(par=optpars, fn=minusloglik.flexsurv, gr=gr,
@@ -489,8 +483,11 @@ form.model.matrix <- function(object, newdata){
     mfo <- model.frame(object)
     covnames <- attr(mfo, "covnames")
     missing.covs <- unique(covnames[!covnames %in% names(newdata)])
-    if (length(missing.covs)>0)
-        stop("Values of covariates ", paste(missing.covs, collapse=", "), " not supplied in \"newdata\"")
+    if (length(missing.covs)>0){
+        missing.covs <- sprintf("\"%s\"", missing.covs)
+        plural <- if (length(missing.covs)>1) "s" else ""
+        stop(sprintf("Value%s of covariate%s ",plural,plural), paste(missing.covs, collapse=", "), " not supplied in \"newdata\"")
+    }
     ## don't insist on user defining factors in model as factors in newdata, do this for them
     facs <- sapply(mfo, is.factor)
     facnames <- gsub(".+\\((.+)\\)","\\1",names(facs))
@@ -522,11 +519,10 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     dat <- x$data
     Xraw <- model.frame(x)[,-1,drop=FALSE]
     isfac <- sapply(Xraw,is.factor)
-    ncovs <- x$ncovs
     type <- match.arg(type, c("survival","cumhaz","hazard"))
     if (is.null(newdata)){
         if (is.vector(X)) X <- matrix(X, nrow=1)
-        if (ncovs > 0 && is.null(X)) {
+        if (x$ncovs > 0 && is.null(X)) {
             ## if any continuous covariates, calculate fitted survival for "average" covariate value
             if (!all(isfac))
                 X <- matrix(colMeans(model.matrix(x)) ,nrow=1)
@@ -558,7 +554,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     }
     fn <- expand.summfn.args(fn)
     fncall <- list(t,start)
-    beta <- if (ncovs==0) 0 else x$res[x$covpars,"est"]
+    beta <- if (x$ncovs==0) 0 else x$res[x$covpars,"est"]
     if (ncol(X) != length(beta)){
         isare <- if(length(beta)==1) "is" else "are"
         plural <- if(ncol(X)==1) "" else "s"
@@ -576,20 +572,9 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X[i,,drop=FALSE], transform=FALSE)
         basepars <- as.list(as.data.frame(basepars.mat))
         fncall[dlist$pars] <- basepars
-
-#        for (j in seq(along=dlist$pars)) {
-#            fncall2[[dlist$pars[j]]] <- x$res[dlist$pars[j],"est"]
-#            mu <- dlist$transforms[[j]](fncall2[[dlist$pars[j]]]) ## TODO add.covs function?
-#            covinds <- x$mx[[dlist$pars[j]]]
-#            mu <- mu + X[i,covinds,drop=FALSE] %*% beta[covinds]
-#            fncall2[[dlist$pars[j]]] <- dlist$inv.transforms[[j]](mu)
-#        }
-#        expect_equal(unlist(fncall2), unlist(fncall))
-        
         for (j in seq_along(x$aux)){
             fncall[[names(x$aux)[j]]] <- x$aux[[j]]
         }
-# browser()
         y <- do.call(fn, fncall)
         if (ci){
             res.ci <- cisumm.flexsurvreg(x, t, start, X[i,,drop=FALSE], fn=fn, B=B, cl=cl)
@@ -599,7 +584,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         ret[[i]] <- data.frame(time=t, est=y, row.names=NULL)
         if (ci) { ret[[i]]$lcl <- ly; ret[[i]]$ucl <- uy}
     }
-    if (ncovs>0) attr(ret,"X") <- X
+    if (x$ncovs>0) attr(ret,"X") <- X
     class(ret) <- "summary.flexsurvreg"
     ret
 }
@@ -649,25 +634,37 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 
 ## Draw B samples from multivariate normal distribution of baseline
 ## parameter estimators, for given covariate values
+## FIXME should work with no covariates
 
-normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE){
-    if (is.null(X)) {
-        if (is.null(newdata)) stop("neither \"newdata\" nor \"X\" supplied")
-        X <- form.model.matrix(x, as.data.frame(newdata))
+normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, raw=FALSE){
+    if (x$ncovs > 0 && !raw) {
+        if (is.null(X)) {
+            if (is.null(newdata)) stop("neither \"newdata\" nor \"X\" supplied")
+            X <- form.model.matrix(x, as.data.frame(newdata))
+        }
     }
     sim <- matrix(nrow=B, ncol=nrow(x$res))
     colnames(sim) <- rownames(x$res)
     sim[,x$optpars] <- rmvnorm(B, x$opt$par, x$cov)
     sim[,x$fixedpars] <- rep(x$res.t[x$fixedpars,"est"],each=B)
-    beta <- sim[, x$covpars, drop=FALSE]
-    if (nrow(X)==1){
-        res <- sim[,x$dlist$pars,drop=FALSE]
-        res <- add.covs(x=x, pars=res, beta=beta, X=X, transform=transform)
-    }  else {
-        res <- vector(nrow(X), mode="list")
-        for (i in 1:nrow(X)) {
-            res[[i]] <- sim[,x$dlist$pars,drop=FALSE]
-            res[[i]] <- add.covs(x=x, pars=res[[i]], beta=beta, X=X[i,,drop=FALSE], transform=transform)
+    if (x$ncovs > 0 && !raw){
+        beta <- sim[, x$covpars, drop=FALSE]
+        if (nrow(X)==1){
+            res <- sim[,x$dlist$pars,drop=FALSE]
+            res <- add.covs(x=x, pars=res, beta=beta, X=X, transform=transform)
+        }  else {
+            res <- vector(nrow(X), mode="list")
+            for (i in 1:nrow(X)) {
+                res[[i]] <- sim[,x$dlist$pars,drop=FALSE]
+                res[[i]] <- add.covs(x=x, pars=res[[i]], beta=beta, X=X[i,,drop=FALSE], transform=transform)
+            }
+        }
+    } else {
+        res <- sim
+        if (!transform){
+            for (j in seq(along=x$dlist$pars)){
+                res[,j] <- x$dlist$inv.transforms[[j]](res[,j])
+            }
         }
     }
     res
@@ -723,13 +720,12 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
     if (is.null(col.ci)) col.ci <- col
     if (is.null(lwd.ci)) lwd.ci <- lwd
     dat <- x$data
-    ncovs <- x$ncovs
     isfac <- sapply(Xraw,is.factor)
     if (!is.null(fn)) type <- ""
     if (!add) {
         mm <- as.data.frame(model.matrix(x))
         form <- "Surv(dat$Y[,\"start\"],dat$Y[,\"stop\"],dat$Y[,\"status\"]) ~ "
-        form <- paste(form, if (ncovs > 0 && all(isfac)) paste("mm[,",1:x$ncoveffs,"]", collapse=" + ") else 1)
+        form <- paste(form, if (x$ncovs > 0 && all(isfac)) paste("mm[,",1:x$ncoveffs,"]", collapse=" + ") else 1)
         form <- as.formula(form)
         ## If any continuous covariates, it is hard to define subgroups
         ## so just plot the population survival
@@ -750,7 +746,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
             }
             else {
                 ## plot hazard for all groups defined by unique combinations of covariates
-                group <- if(ncovs>0) do.call("interaction", mm) else factor(rep(1,nrow(dat$Y)))
+                group <- if(x$ncovs>0) do.call("interaction", mm) else factor(rep(1,nrow(dat$Y)))
                 haz <- list()
                 for (i in 1:nrow(X)) {
                     subset <- (group == unique(group)[i])

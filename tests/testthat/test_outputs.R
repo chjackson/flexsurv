@@ -7,6 +7,17 @@ test_that("normboot.flexsurvreg",{
     set.seed(1); b1 <- normboot.flexsurvreg(fite, B=10, newdata=list(age=c(0,50)))
     set.seed(1); b2 <- normboot.flexsurvreg(fite, B=10, X=matrix(c(0,50),nrow=2))
     expect_equal(b1, b2)   
+
+    ## return cov effs, not adjusted
+    set.seed(1)
+    normboot.flexsurvreg(fite, B=5, raw=TRUE)
+    set.seed(1)
+    normboot.flexsurvreg(fite, B=5, raw=TRUE, transform=TRUE)
+
+    ## no covs
+    fite <- flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist="exp")
+    normboot.flexsurvreg(fite, B=5)
+    normboot.flexsurvreg(fite, B=5, transform=TRUE)   
 })
 
 

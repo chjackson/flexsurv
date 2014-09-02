@@ -10,7 +10,8 @@
   confidence intervals around functions of parameters.
 }
 \usage{
-normboot.flexsurvreg(x, B, newdata = NULL, X = NULL, transform = FALSE)
+normboot.flexsurvreg(x, B, newdata = NULL, X = NULL,
+                     transform = FALSE, raw=FALSE)
 }
 
 \arguments{
@@ -23,7 +24,8 @@ normboot.flexsurvreg(x, B, newdata = NULL, X = NULL, transform = FALSE)
   \item{newdata}{
     Data frame or list containing the covariate values to
     evaluate the parameters at.   If there are covariates in the model, at
-    least one of \code{newdata} or \code{X} must be supplied.
+    least one of \code{newdata} or \code{X} must be supplied,
+    unless \code{raw=TRUE}.
   }
   \item{X}{
     Alternative (less convenient) format for covariate values: a
@@ -36,7 +38,11 @@ normboot.flexsurvreg(x, B, newdata = NULL, X = NULL, transform = FALSE)
    \code{TRUE} if the results should be transformed to the real-line
    scale, typically by log if the parameter is defined as positive.  The
    default \code{FALSE} returns parameters on the natural scale.
-  }
+ }
+ \item{raw}{
+   Return samples of the baseline parameters and the covariate effects,
+   rather than the default of adjusting the baseline parameters for
+   covariates.}
 }
 \value{
   If \code{newdata} includes only one covariate combination, a matrix will be

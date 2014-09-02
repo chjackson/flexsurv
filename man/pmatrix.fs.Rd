@@ -1,11 +1,11 @@
 \name{pmatrix.fs}
 \alias{pmatrix.fs}
-\alias{pmatrix.flexsurvreg}
-\title{Transition probability matrix from a fully-parametric multi-state
-  model}
+\title{Transition probability matrix from a fully-parametric,
+  time-inhomogeneous Markov multi-state model}
 \description{
-  The transition probability matrix for multi-state models fitted to
-  time-to-event data with \code{\link{flexsurvreg}}.  Thie has \eqn{r,s}
+  The transition probability matrix for time-inhomogeneous Markov
+  multi-state models fitted to
+  time-to-event data with \code{\link{flexsurvreg}}.  This has \eqn{r,s}
   entry giving the probability that an individual is in state \eqn{s} at
   time \eqn{t}, given they are in state \eqn{r} at time \eqn{0}. 
 }
@@ -16,7 +16,9 @@
 \arguments{
   \item{x}{A model fitted with \code{\link{flexsurvreg}}.   See
     \code{\link{msfit.flexsurvreg}}
-    for the required form of the model and the data.}
+    for the required form of the model and the data.
+    Additionally, this must be Markov, but can be time-inhomogeneous.
+  }
   \item{trans}{Matrix indicating allowed transitions.  See
     \code{\link{msfit.flexsurvreg}}.}
   \item{t}{Time or vector of times to predict state occupancy
@@ -50,7 +52,7 @@
 
   If \code{ci=TRUE}, each element has attributes \code{"lower"} and
   \code{"upper"} giving matrices of the corresponding confidence limits.
-  These are printed prettily but may be extracted using \code{attr()}.
+  These are formatted for printing but may be extracted using \code{attr()}.
 }
 \details{
   This is computed by solving the Kolmogorov forward differential

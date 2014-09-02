@@ -8,10 +8,12 @@ form.dp <- function(dlist, dfns, integ.opts){
     name <- dlist$name
     hname <- paste0("h",name); Hname <- paste0("H",name)
     dname <- paste0("d",name); pname <- paste0("p",name)
+    rname <- paste0("r",name)
     if (is.function(dfns$d)) d <- dfns$d
     if (is.function(dfns$p)) p <- dfns$p    
     if (is.function(dfns$h)) h <- dfns$h
     if (is.function(dfns$H)) H <- dfns$H
+    if (is.function(dfns$r)) r <- dfns$r
     if (!exists("h")){
         if (exists(hname)) h <- get(hname)
         else {
@@ -68,7 +70,11 @@ form.dp <- function(dlist, dfns, integ.opts){
             }
         }
     }
-
+    if (!exists("r")){
+        if (exists(rname)) r <- get(rname)
+        else r <- NULL
+        ## random sampling function is currently only used for multi-state models
+    }
     ## Check for existence of derivative functions
     ## conventionally called DLd, DLs
     if (is.function(dfns$DLd)) DLd <- dfns$DLd
@@ -78,7 +84,7 @@ form.dp <- function(dlist, dfns, integ.opts){
     else if (exists(paste0("DLS",name))) DLS <- get(paste0("DLS",name))
     else DLS <- NULL
 
-    list(p=p, d=d, h=h, H=H, DLd=DLd, DLS=DLS,
+    list(p=p, d=d, h=h, H=H, r=r, DLd=DLd, DLS=DLS,
          deriv = !is.null(DLd) && !is.null(DLS))
 }
 

@@ -355,10 +355,11 @@ flexsurvspline <- function(formula, data, k=0, knots=NULL, bknots=NULL, scale="h
     aux <- list(knots=knots, scale=scale)
     dfn <- unroll.function(dsurvspline, gamma=0:(nk-1))
     pfn <- unroll.function(psurvspline, gamma=0:(nk-1))
+    rfn <- unroll.function(rsurvspline, gamma=0:(nk-1))
     Ddfn <- if (scale=="normal") NULL else unroll.function(DLdsurvspline, gamma=0:(nk-1))
     DSfn <- if (scale=="normal") NULL else unroll.function(DLSsurvspline, gamma=0:(nk-1))
     args <- c(list(formula=formula, data=data, dist=custom.fss,
-                   dfns=list(d=dfn,p=pfn,DLd=Ddfn,DLS=DSfn), aux=aux), list(...))
+                   dfns=list(d=dfn,p=pfn,r=rfn,DLd=Ddfn,DLS=DSfn), aux=aux), list(...))
     ret <- do.call("flexsurvreg", args) # faff to make ... args work within functions
     ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale))
     ret$call <- call

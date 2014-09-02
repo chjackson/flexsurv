@@ -69,11 +69,12 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
                        tvar="trans", sing.inf=1e+10, B=1000, cl=0.95, ...){
     newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
     X <- form.model.matrix(x, newdata)   
+    ntr <- sum(!is.na(trans))
     n <- nrow(trans)
     dp <- function(t, y, parms, ...){
         P <- matrix(y, nrow=n, ncol=n)
         haz <- numeric(n)
-        for (i in 1:n){
+        for (i in 1:ntr){
             hcall <- list(x=t)
             for (j in seq(along=x$dlist$pars))
                 hcall[[x$dlist$pars[j]]] <- parms$par[i,j]
@@ -113,6 +114,9 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     if(nt==1) res[[1]] else res
 }
 
+# TODO make pmatrix generic
+# pmatrix.flexsurvreg <- pmatrix.fs
+
 format.ci <- function(x, l, u, digits=NULL, ...)
 {
     if (is.null(digits)) digits <- 4
@@ -141,4 +145,111 @@ print.fs.msm.est <- function(x, digits=NULL, ...)
     if (!is.null(attr(x, "lower")))
         print.ci(x, attr(x, "lower"), attr(x, "upper"), digits=digits)
     else print(unclass(x))
+}
+
+absorbing <- function(trans){
+    which(apply(trans, 1, function(x)all(is.na(x))))
+}
+
+transient <- function(trans){
+    which(apply(trans, 1, function(x)any(!is.na(x))))
+}
+
+
+sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", debug=FALSE){
+    if (length(t)==1) t <- rep(t, M)
+    else if (length(t)!=M) stop("length of t should be 1 or M=",M)
+    if (length(start)==1) start <- rep(start, M)
+    else if (length(start)!=M) stop("length of start should be 1 or M=",M)
+    newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
+    X <- form.model.matrix(x, as.data.frame(newdata))
+    beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
+    basepars.mat <- add.covs(x, x$res.t[x$dlist$pars,"est"], beta, X, transform=FALSE)
+    # one row for each transition
+    nst <- nrow(trans)
+    ## TODO only need a max time if model is transient, else if absorbing, can allocate these up front
+    res.st <- cur.st <- start
+    res.t <- cur.t <- rep(0, M)
+    todo <- seq_len(M)
+    while (any(todo)){
+        if (debug) { cat("cur.t\n"); cat(cur.t); cat("\n") }
+        if (debug) { cat("cur.st\n"); cat(cur.st); cat("\n") }
+        if (debug) { cat("TODO\n"); cat(todo); cat("\n") }
+        cur.st.out <- cur.st[todo]
+        cur.t.out <- cur.t[todo]
+        done <- numeric()
+        for (i in unique(cur.st[todo])){
+            if (i %in% transient(trans)) {
+                ## simulate next time and states for people whose current state is i
+                transi <- na.omit(trans[i,])
+                ni <- sum(cur.st[todo]==i)
+                t.trans1 <- matrix(0, nrow=ni, ncol=length(transi))
+                ## simulate times to all potential destination states
+                for (j in seq_along(transi)) {         
+                    basepars <- as.list(as.data.frame(basepars.mat)[transi[j],])
+                    fncall <- c(list(n=ni), basepars, x$aux)
+                    if (is.null(x$dfns$r)) stop("No random sampling function found for this model")
+                    t.trans1[,j] <- do.call(x$dfns$r, fncall)
+                }
+                if (debug) { print(t(t.trans1)) }
+                ## simulated next state is the one with minimum simulated time
+                mc <- max.col(-t.trans1)
+                if (debug) { cat("mc\n"); cat(mc); cat("\n") }
+                if (debug) { cat("transi\n"); cat(transi); cat("\n") }
+                if (debug) { cat("trans[i,]\n"); cat(trans[i,]); cat("\n") }
+                next.state <- match(transi[mc], trans[i,])
+                if (debug) { cat("next.state\n"); cat(next.state); cat("\n") }
+                next.time <- t.trans1[cbind(seq_along(next.state), mc)]
+                if (debug) { cat("next.time\n"); cat(next.time); cat("\n") }
+                inds <- which(cur.st[todo]==i)
+                cur.t.out[inds] <- cur.t.out[inds] + next.time
+                ## if final simulated state is greater than target time, censor at target time
+                cens <- cur.t.out[inds] > t[inds]
+                cur.t.out[inds][cens] <- t[inds][cens]               
+                cur.st.out[!cens] <- next.state[!cens]
+                done <- todo[inds][cens]
+            }
+        }
+        cur.st[todo] <- cur.st.out
+        cur.t[todo] <- cur.t.out
+        res.st <- cbind(res.st, cur.st)
+        res.t <- cbind(res.t, cur.t)
+        done <- union(done, which(cur.st %in% absorbing(trans)))
+        todo <- setdiff(todo, done)
+        if (debug) { cat("\n") }
+    }
+    list(st=unname(res.st), t=unname(res.t))
+}    
+
+
+pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
+                          tvar="trans", M=100000, B=1000, cl=0.95)
+{
+    n <- nrow(trans)
+    res <- matrix(0, nrow=n, ncol=n)
+    if (length(t)>1) stop("\"t\" must be a single number")
+    for (i in seq_len(n)){
+        sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
+                      start=i, M=M, tvar="trans", debug=FALSE)
+        last.st <- sim$st[,ncol(sim$st)]
+        res[i,] <- prop.table(table(factor(last.st, levels=seq_len(n))))
+    }
+    if (ci){
+        sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
+        res.rep <- array(NA_real_, dim=c(B, n*n))
+        for (i in 1:B){
+            x.rep <- x
+            x.rep$res.t[,"est"] <- sim[i,]
+            res.rep[i,] <- pmatrix.simfs(x=x.rep, trans=trans, t=t, newdata=newdata,
+                                          ci=FALSE, tvar=tvar, M=M)
+        }
+        resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
+        resl <- matrix(resci[1,], nrow=n)
+        resu <- matrix(resci[2,], nrow=n)
+        names(resl) <- names(resu) <- t
+        attr(res, "lower") <- resl
+        attr(res, "upper") <- resu
+        class(res) <- "fs.msm.est"
+    }  
+    res
 }

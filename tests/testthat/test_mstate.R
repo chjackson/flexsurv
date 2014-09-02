@@ -6,11 +6,11 @@ library(mstate) # masks flexsurv's generic msfit, so call as msfit.flexsurvreg b
 ### e.g. to illustrate more flexible models fitting better
 
 bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp") 
-bexp2 <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 tgrid <- seq(0,14,by=0.1)
 bwei <- flexsurvreg(Surv(years, status) ~ trans + shape(trans), data=bosms3, dist="weibull")
 bspl <- flexsurvspline(Surv(years, status) ~ trans + gamma1(trans), data=bosms3, k=3)
+bexp.markov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 
 test_that("msfit.flexsurvreg",{
     mexp <- msfit.flexsurvreg(bexp, t=0.01, trans=tmat, tvar="trans")
@@ -24,16 +24,25 @@ test_that("msfit.flexsurvreg",{
 ## With covariates
 set.seed(1)
 bosms3$x <- rnorm(nrow(bosms3))
-bexp2 <- flexsurvreg(Surv(years, status) ~ trans + x, data=bosms3, dist="exp")
+bexp.cov <- flexsurvreg(Surv(years, status) ~ trans + x, data=bosms3, dist="exp")
 
 test_that("newdata in msfit.flexsurvreg",{
-    msfit.flexsurvreg(bexp2, newdata=list(x=1), t=c(0,5,10), trans=tmat, variance=FALSE)
-    msfit.flexsurvreg(bexp2, newdata=list(x=2), t=c(0,5,10), trans=tmat, variance=FALSE)
-    msfit.flexsurvreg(bexp2, newdata=list(x=c(1,2,3)), t=c(0,5,10), trans=tmat, variance=FALSE)
+    msfit.flexsurvreg(bexp.cov, newdata=list(x=1), t=c(0,5,10), trans=tmat, variance=FALSE)
+    msfit.flexsurvreg(bexp.cov, newdata=list(x=2), t=c(0,5,10), trans=tmat, variance=FALSE)
+    msfit.flexsurvreg(bexp.cov, newdata=list(x=c(1,2,3)), t=c(0,5,10), trans=tmat, variance=FALSE)
 })
 
 test_that("Errors in msfit.flexsurvreg",{
-    expect_error(msfit.flexsurvreg(bexp2, t=seq(0,150,10), trans=tmat), "Values of covariates .+ not supplied")
-    expect_error(msfit.flexsurvreg(bexp2, t=seq(0,150,10), trans=tmat, tvar="foo"), "variable .* not in model")
-    expect_error(msfit.flexsurvreg(bexp2, newdata=list(x=c(1,2)), t=c(0,5,10), trans=tmat, variance=FALSE), "length of variables .+ must be")   
+    expect_error(msfit.flexsurvreg(bexp.cov, t=seq(0,150,10), trans=tmat), "Value.* of covariate.* .+ not supplied")
+    expect_error(msfit.flexsurvreg(bexp.cov, t=seq(0,150,10), trans=tmat, tvar="foo"), "variable .* not in model")
+    expect_error(msfit.flexsurvreg(bexp.cov, newdata=list(x=c(1,2)), t=c(0,5,10), trans=tmat, variance=FALSE), "length of variables .+ must be")   
+})
+
+test_that("pmatrix.fs",{
+    pmatrix.fs(bexp.markov, t=c(5,10), trans=tmat)
+})
+
+test_that("pmatrix.simfs",{
+    pmatrix.simfs(bexp, t=5, trans=tmat)
+    pmatrix.simfs(bwei, t=5, trans=tmat)
 })

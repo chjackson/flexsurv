@@ -28,11 +28,11 @@
   \pkg{survival} package.  Censoring or left-truncation are specified
   in \code{Surv} objects.  Estimates and confidence intervals for any
   function of the model parameters can be printed or plotted.
-  \pkg{flexsurv} also enhances the \pkg{mstate} package
-  \citep{mstate:jss} by providing cumulative hazards for
-  fully-parametric multi-state models.  This article explains the
+  \pkg{flexsurv} also provides some tools for predicting from 
+  fully-parametric multi-state models, and connects with the \pkg{mstate}
+  package \citep{mstate:jss}.    This article explains the
   methods and design principles of the package, giving several worked
-  examples of its use.  }
+  examples of its use. }
 
 \Keywords{survival}
 
@@ -99,7 +99,7 @@ built-in survival distributions with a fixed number of parameters, and
 \S\ref{sec:custom} explains how users can define new distributions.
 \S\ref{sec:adim} concentrates on classes of models where the number of
 parameters can be chosen by the user, such as splines.  In
-\S\ref{sec:multistate} a simple use of \pkg{flexsurv} for parametric
+\S\ref{sec:multistate} the use of \pkg{flexsurv} for parametric
 multi-state modelling is described.  Finally \S\ref{sec:extensions}
 suggests some potential future extensions.
 
@@ -1262,7 +1262,9 @@ format as \pkg{mstate}'s \code{msfit} method, the functions of
 probabilities of occupying each state $s$ at time $t > t_0$, given
 that the individual is in state $r$ at time $t_0$.
 \[ P(t_0, t) = P(S(t) = s | S(t_0) = r) \]
-For an inhomogeneous Markov model, these are related to the transition
+
+\paragraph{Markov models}
+For an time-inhomogeneous Markov model, these are related to the transition
 intensities via the Kolmogorov forward equation
 \[ \frac{d P(t_0,t)}{dt} = P(t_0,t) Q(t) \] with initial condition
 $P() = I$ \citep{cox:miller}.  An approximate solution
@@ -1316,20 +1318,32 @@ be obtained by simulation from the asymptotic distribution of the
 maximum likelihood estimates, and by default this is not done.  See
 \code{help(pmatrix.fs)} for full details.
 
-For semi-Markov models, the Kolmogorov equation does not apply, since the
-transition intensity matrix $Q(t)$ is no longer a deterministic function of $t$, 
-but depends on when the transitions occur between time $t_0$ and
-$t$.  $P(t_0, t)$ can then be estimated by simulation, given the
-estimated cumulative hazards, using \pkg{mstate}'s function
-\code{mssample} \citep{fiocco:mstatepred}.  5000 samples are
-sufficient in this case to give estimates of transition probabilities
-that are accurate to within around 0.01, and similar to the clock-forward
-estimates.  Bootstrapping would be required for standard errors, which
-would be computationally expensive given that it currently takes about
-20 seconds to generate 5000 samples.
+\paragraph{Semi-Markov models} 
+For semi-Markov models, the Kolmogorov equation does not apply, since
+the transition intensity matrix $Q(t)$ is no longer a deterministic
+function of $t$, but depends on when the transitions occur between
+time $t_0$ and $t$.  $P(t_0, t)$ can then be estimated by
+simulation. \pkg{mstate} provides the function \code{mssample} to do
+this given the estimated piecewise-constant cumulative hazards
+\citep{fiocco:mstatepred}, produced by \code{msfit} or
+\code{msfit.flexsurvreg}.  However, \code{flexsurv} provides a more
+efficient method for fully-parametric models based on simulating the
+exact times to the next transition.  This is fast for built-in distributions
+since it calls on the standard vectorised R random number generation 
+functions such as \code{rweibull}.  The function \code{sim.fmsm}
+produces simulated trajectories this way, and \code{pmatrix.simfs}
+wraps this to calculate a transition probability matrix.  1000 samples
+from \code{mssample} give estimates of transition probabilities that
+are accurate to within around 0.02, and similar to the clock-forward
+estimates.  However with \code{pmatrix.simfs} we can achieve greater
+precision by simulating 100 times as many trajectories in a shorter
+time.  Simulation-based confidence-intervals are also available in
+\code{pmatrix.simfs}, at an extra computational cost.
 <<eval=FALSE>>=
-mssample(mrcox$Haz, trans=tmat, clock="reset", M=5000, tvec=c(5, 10))
-mssample(mrwei$Haz, trans=tmat, clock="reset", M=5000, tvec=c(5, 10))
+mssample(mrcox$Haz, trans=tmat, clock="reset", M=1000, tvec=c(5, 10))
+mssample(mrwei$Haz, trans=tmat, clock="reset", M=1000, tvec=c(5, 10))
+pmatrix.simfs(crwei, trans=tmat, t=5)
+pmatrix.simfs(crwei, trans=tmat, t=10)
 @ 
 
 
