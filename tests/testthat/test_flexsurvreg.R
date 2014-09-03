@@ -108,8 +108,10 @@ test_that("Fits of flexible distributions reduce to less flexible ones with fixe
                            fixedpars=1, inits=c(1,NA,NA))
     fitga <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="gamma")
     expect_equal(logLik(fitgfix), logLik(fitga), tol=1e-06)
+
     fite <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="exp")
-    fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull", fixedpars=1)
+    fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull", inits=c(1, mean(ovarian$futime)), fixedpars=1)
+
     expect_equal(logLik(fite), logLik(fitw), tol=1e-06)
     expect_equal(fitw$res["scale",1], 1 / fite$res["rate",1], tol=1e-06)
 })
@@ -283,23 +285,10 @@ test_that("Interval censoring",{
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
     expect_true(fs1$loglik != fs2$loglik)
 
-    ## compare with survreg
-    ## Default inits don't work for flexsurvreg here
-    ## It's choosing median of "time", same as "time1"
-    ## exp(median(log(t)))/log(2)
-    ## returns 1.0000000000 0.6151366625
-    ## actual scale is 0.46, shape 2.5
-    ## Seems to need both the scale and the shape to be correct
-    flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull",
-                       inits=c(1/0.409, exp(-0.765))) # better inits
-    flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull",
-                inits=c(1, 0.6)) # default inits
-    survreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
-    
     ## using type="interval"
     status[status==0] <- 3
     fs3 <- flexsurvreg(Surv(tmin, tmax, status, type="interval") ~ 1, dist="weibull")
-    expect_equal(fs1$loglik, fs3$loglik)   
+    expect_equal(fs1$loglik, fs3$loglik)
 })
 
 test_that("NaNs in fitting Weibull distribution",{

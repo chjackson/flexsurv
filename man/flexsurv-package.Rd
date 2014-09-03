@@ -46,7 +46,7 @@
   using the functions \code{\link{pmatrix.fs}},
   \code{\link{pmatrix.simfs}} or \code{\link{sim.fmsm}}, or
   alternatively by \code{\link{msfit.flexsurvreg}} followed by
-  \code{\link{mssample}} or \code{\link{probtrans}} from the package
+  \code{mssample} or \code{probtrans} from the package
   \pkg{mstate}.
   
   Distribution (``dpqr'') functions for the generalized gamma and F distributions are

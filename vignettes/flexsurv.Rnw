@@ -561,10 +561,10 @@ character string.  The list has the following elements.
   Each distribution will ideally have a heuristic for initialising
   parameters from summaries of the data.  For example, since the
   median of the Weibull is $\mu \log(2)^{1/\alpha}$, a sensible
-  estimate of $\mu$ will commonly be the median log uncensored
+  estimate of $\mu$ might be the median log uncensored
   survival time divided by $\log(2)$, with $\alpha=1$, assuming that
-  in practice the true value of $\alpha$ is not often far from 1.  Then
-  we define the function, of one argument \code{t} assumed to be the
+  in practice the true value of $\alpha$ is not far from 1\footnote{though currently a different method is used in the package, a simplification of the method in survreg.}.  Then
+  we would define the function, of one argument \code{t} assumed to be the
   uncensored survival times, returning the initial values for the
   Weibull \code{shape} and \code{scale} respectively.
 

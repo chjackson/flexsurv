@@ -64,7 +64,8 @@ flexsurv.dists <- list(
                        inits = function(t){
 ## TODO regress log CH on log time as in splineinits. gets cov effs as well
                            lt <- log(t[t>0])
-                           c(1, exp(median(lt)) / log(2))
+#                           c(1, exp(median(lt)) / log(2))
+                           c(1.64/var(lt), exp(mean(lt)+0.572)) # from survreg
                        }
                        ),
                        lnorm = list(
@@ -347,7 +348,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if (missing(inits) && is.null(dlist$inits))
         stop("\"inits\" not supplied, and no function to estimate them found in the custom distribution list")
     if (missing(inits) || any(is.na(inits))){
-        wt <- Y[,"time"]*weights*length(Y[,"time"])/sum(weights)
+        yy <- ifelse(Y[,"status"]==3 & is.finite(Y[,"time2"]), (Y[,"time1"] + Y[,"time2"])/2, Y[,"time"])
+        wt <- yy*weights*length(yy)/sum(weights)
         dlist$inits <- expand.inits.args(dlist$inits)
         base.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=aux)
         if (!is.numeric(base.inits)) stop ("\"inits\" function must return a numeric vector")

@@ -1,3 +1,6 @@
+Initial values.  Why exclude right-censored times?  
+For interval-censored, take as halfway in interval
+
 document return value for summary fn: vector of length t?
 
 error if using pmatrix.fs with a SMM

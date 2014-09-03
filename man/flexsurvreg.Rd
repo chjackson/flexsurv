@@ -323,7 +323,9 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
       inverse transformations.  Note these must be lists, even for
       single parameter distributions they should be supplied as,
       e.g. \code{c(exp)} or \code{list(exp)}. }
-    \item{\code{inits}:}{A function of the uncensored survival times \code{t},
+    \item{\code{inits}:}{A function of the observed survival times \code{t}
+      (including right-censoring times, and using the halfway point for
+      interval-censored times)
       which returns a vector of reasonable initial values for maximum
       likelihood estimation of each parameter.  For example,
       \code{function(t){ c(1, mean(t)) }} will always initialize the first

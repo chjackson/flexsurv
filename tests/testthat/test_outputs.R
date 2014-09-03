@@ -23,9 +23,10 @@ test_that("normboot.flexsurvreg",{
 
 test_that("custom function in summary.flexsurvreg",{
     fitw <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="weibull")     
+
     median.weibull <- function(t, start, shape, scale) { qweibull(0.5, shape=shape, scale=scale) }
     summ <- summary(fitw, newdata=list(age=50), fn=median.weibull, t=1, B=10)
-    expect_equal(summ[[1]][1,"est"], 1575.783637970475)
+    expect_equal(summ[[1]][1,"est"], 1575.803185910278, tol=1e-04)
 
     summ <- summary(fitw, newdata=list(age=50), fn=median.weibull, t=c(1,2,3), B=10)
     expect_equal(summ[[1]][1,"est"], summ[[1]][2,"est"])
