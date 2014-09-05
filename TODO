@@ -1,3 +1,5 @@
+why not just run survreg to get inits for Weibull???!
+
 Initial values.  Why exclude right-censored times?  
 For interval-censored, take as halfway in interval
 

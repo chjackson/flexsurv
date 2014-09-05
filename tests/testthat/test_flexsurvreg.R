@@ -209,8 +209,8 @@ test_that("Covariates on ancillary parameters",{
 })
 
 test_that("Various errors",{
-    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,2,3)),"inits must be a numeric vector of length 4")
-    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = "foo"),"inits must be a numeric vector of length 4")
+    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,2,3)),"Initial values .+ length")
+    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = "foo"),"init.+ must be a numeric vector")
     suppressWarnings({
         expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,2,3,-1)),"Initial value for parameter 4 out of range")
         expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,-2,3,-1)),"Initial values for parameters 2,4 out of range")
