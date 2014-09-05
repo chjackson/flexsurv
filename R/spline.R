@@ -273,7 +273,7 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
         logH <- log((1 - surv)/surv)
     else if (aux$scale=="normal")
         logH <- qnorm(1 - surv)
-    b <- basis(aux$knots, log(Y[,"time"]))
+    b <- if (!is.null(aux$knots)) basis(aux$knots, log(Y[,"time"])) else cbind(1, log(Y[,"time"]))
     form <- paste("logH ~ ",
                   paste(paste("b[,",2:ncol(b),"]",sep=""), collapse=" + "))
     if (ncol(X)>0)

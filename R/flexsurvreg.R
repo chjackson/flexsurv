@@ -343,6 +343,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     ncoveffs <- ncol(X)
     nbpars <- length(parnames) # number of baseline parameters
     npars <- nbpars + ncoveffs
+
+     ## TODO merge user and default inits handling
     if (!missing(inits) && (!is.numeric(inits) || (length(inits) != npars)))
         stop("inits must be a numeric vector of length ",npars)
     if (missing(inits) && is.null(dlist$inits))
@@ -351,17 +353,19 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
         yy <- ifelse(Y[,"status"]==3 & is.finite(Y[,"time2"]), (Y[,"time1"] + Y[,"time2"])/2, Y[,"time"])
         wt <- yy*weights*length(yy)/sum(weights)
         dlist$inits <- expand.inits.args(dlist$inits)
-        base.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=aux)
-        if (!is.numeric(base.inits)) stop ("\"inits\" function must return a numeric vector")
-        if (!(length(base.inits) %in% c(nbpars, npars))){
-            if (npars == nbpars)
-                stop("\"inits\" function must return a numeric vector of length ", nbpars, " = number of parameters")
-            else
-                stop("\"inits\" function must return a numeric vector of length ", nbpars, " or ", npars, ", number of parameters including or excluding covariate effects")
+        auto.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=aux)
+        if (!is.numeric(auto.inits)) stop ("\"inits\" function must return a numeric vector")
+        nin <- length(auto.inits)
+        if (nin < npars)
+            default.inits <- c(auto.inits, rep(0,length=npars-nin))
+        else if (nin > npars){
+            default.inits <- auto.inits[1:npars]
+            warning("Initial value function returned vector > ", npars, ": using only the first ", npars)
         }
-        default.inits <- base.inits
-        if (length(base.inits) < npars)
-            default.inits <- c(default.inits, rep(0,ncoveffs))
+        else if (nin < nbpars){
+            stop("inits function returned vector length ", nin, ", but distribution has ",nbpars, " parameters")
+        }
+        else default.inits <- auto.inits
     }
     if (missing(inits)) inits <- default.inits
     else if (any(is.na(inits))) inits[is.na(inits)] <- default.inits[is.na(inits)]
@@ -374,6 +378,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
              paste(outofrange,collapse=","), " out of range")
     }
     names(inits) <- c(parnames, colnames(X))
+
     if (!is.null(fixedpars) && !is.logical(fixedpars) &&
         (!is.numeric(fixedpars) || any(!(fixedpars %in% 1:npars)))){
         dots <- if(npars>2) "...," else ""

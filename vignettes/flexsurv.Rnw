@@ -229,7 +229,7 @@ parameterisation is different: the first coefficient
 $\bm{\beta}$, however, have the same ``accelerated failure time''
 interpretation, as linear effects on $\log(\mu)$.  The multiplicative
 effects $\exp(\bm{\beta})$ are printed in the output as
-\code{exp(est)}.
+\code{exp(est)}.   
 
 \subsection{Additional modelling features}
 \label{sec:censtrunc}
@@ -1385,6 +1385,11 @@ new class of models would ideally come with
   an \code{inits} function in the custom distribution list
   (\S\ref{sec:custom}).
 \end{itemize}
+
+Because of its aim of generality, \code{flexsurvreg} has not yet been
+fine-tuned for specific model classes.  For the Weibull and similar
+two-parameter models, \code{survreg} is expected to be more robust and
+efficient, as its numerical methods are optimised for those models.
 
 The examples in this paper were run using version 0.4 of \pkg{flexsurv}, which will eventually be available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
 
