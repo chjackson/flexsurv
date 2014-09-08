@@ -35,3 +35,7 @@ intervals in Surv are open on left, closed on right
 other types of status: mstate
 
 CIs as grey bands not lines
+
+#are these buggy in survreg::Surv?
+#time <- ifelse(time == Inf, NA, time)
+#time2 <- ifelse(time2 == -Inf, NA, time2)

@@ -14,23 +14,22 @@
 
 \Abstract{ \pkg{flexsurv} is an R package for fully-parametric
   modelling of survival data.  Any parametric time-to-event
-  distribution may be fitted if the user supplies a
-  probability density or hazard function, and ideally also 
-  their cumulative versions.   Standard survival
-  distributions are built in, including the three and four-parameter
-  generalized gamma and F distributions.  Any parameter of any
-  distribution can be modelled as a linear or log-linear function of
-  covariates.  The package also includes the spline model of
-  \citet{royston:parmar}, in which both baseline survival and
-  covariate effects can be arbitrarily flexible parametric functions
-  of time.  The main model-fitting function, \code{flexsurvreg}, uses
-  the familiar syntax of \code{survreg} from the standard
-  \pkg{survival} package.  Censoring or left-truncation are specified
-  in \code{Surv} objects.  Estimates and confidence intervals for any
-  function of the model parameters can be printed or plotted.
-  \pkg{flexsurv} also provides some tools for predicting from 
-  fully-parametric multi-state models, and connects with the \pkg{mstate}
-  package \citep{mstate:jss}.    This article explains the
+  distribution may be fitted if the user supplies a probability
+  density or hazard function, and ideally also their cumulative
+  versions.  Standard survival distributions are built in, including
+  the three and four-parameter generalized gamma and F distributions.
+  Any parameter of any distribution can be modelled as a linear or
+  log-linear function of covariates.  The package also includes the
+  spline model of \citet{royston:parmar}, in which both baseline
+  survival and covariate effects can be arbitrarily flexible
+  parametric functions of time.  The main model-fitting function,
+  \code{flexsurvreg}, uses the familiar syntax of \code{survreg} from
+  the standard \pkg{survival} package.  Censoring or left-truncation
+  are specified in \code{Surv} objects.  Estimates and confidence
+  intervals for any function of the model parameters can be printed or
+  plotted.  \pkg{flexsurv} also provides some tools for predicting
+  from fully-parametric multi-state models, and connects with the
+  \pkg{mstate} package \citep{mstate:jss}.  This article explains the
   methods and design principles of the package, giving several worked
   examples of its use. }
 
@@ -216,8 +215,10 @@ $\log(\mu)$.
 <<>>=
 fs1
 @ 
-The same model can be fitted using \code{survreg} in 
-\pkg{survival}:
+For the Weibull (and exponential and log-normal)
+distributions, \code{flexsurvreg} simply uses \code{survreg} in
+\pkg{survival} to obtain the maximum likelihood estimates. 
+The same model can be fitted as
 <<>>=
 survreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
 @ 
@@ -241,16 +242,13 @@ interval-censored between lower and upper bounds \code{tmin} and
 \code{tmax}, then we would write
 \code{Surv(tmin,tmax,type="interval2")}.  
 
-Note that just as in \texttt{survreg}, time-dependent covariates can
-be represented in ``counting process'' form --- as a series of
-left-truncated survival times.  For each individual there would be
-multiple records, each corresponding to an interval where the
-covariate is assumed to be constant.  The response would be of the
-form \code{Surv(start,stop,censrec)}, where \code{start} and
-\code{stop} are the limits of each interval, and \code{censrec}
-indicates whether a death was observed at \code{stop}.  The function
-\code{survSplit} in \pkg{survival} is a utility to construct data like
-this.
+Time-dependent covariates can be represented in ``counting process''
+form --- as a series of left-truncated survival times.  For each
+individual there would be multiple records, each corresponding to an
+interval where the covariate is assumed to be constant.  The response
+would be of the form \code{Surv(start,stop,censrec)}, where
+\code{start} and \code{stop} are the limits of each interval, and
+\code{censrec} indicates whether a death was observed at \code{stop}.
 
 Relative survival models \citep{nelson:relative:survival} can be
 implemented by supplying the variable in the data that represents the
@@ -430,14 +428,14 @@ values, including the 0/1 contrasts defining factors, which doesn't
 represent any specific covariate combination.}.
 This is done by supplying the \code{newdata} argument, a 
 data frame or list containing covariate values, just as
-in standard R functions like \code{predict.lm}.
+in standard R functions like \code{predict.lm}.   Time-dependent 
+covariates are not understood by these functions.
 
 This \code{plot()} method is only for casual exploratory use.  For
 publication-standard figures, it is preferable to set up the axes
 beforehand (\code{plot(...,type="n")}), and use the \code{lines()} methods, 
 or construct plots by hand using the data available from 
 \code{summary.flexsurvreg()}.
-
 
 
 \subsection{Custom model summaries}
@@ -1385,11 +1383,6 @@ new class of models would ideally come with
   an \code{inits} function in the custom distribution list
   (\S\ref{sec:custom}).
 \end{itemize}
-
-Because of its aim of generality, \code{flexsurvreg} has not yet been
-fine-tuned for specific model classes.  For the Weibull and similar
-two-parameter models, \code{survreg} is expected to be more robust and
-efficient, as its numerical methods are optimised for those models.
 
 The examples in this paper were run using version 0.4 of \pkg{flexsurv}, which will eventually be available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
 
