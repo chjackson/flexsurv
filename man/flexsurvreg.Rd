@@ -12,7 +12,7 @@
 \usage{
 flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
             na.action, dist, inits, fixedpars=NULL, dfns=NULL, aux=NULL,
-            cl=0.95, integ.opts, ...)
+            cl=0.95, integ.opts, sr.control=survreg.control(), ...)
 }
 \arguments{
   \item{formula}{
@@ -104,6 +104,10 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
       \code{"gompertz"} \tab Gompertz \tab rate \tab  PH \cr
     }
 
+    \code{"exponential"} and \code{"lognormal"} can be used as aliases
+    for \code{"exp"} and \code{"lnorm"}, for compatibility with
+    \code{\link{survreg}}.   
+
     Alternatively, \code{dist} can be a list specifying a custom
     distribution.  See section ``Custom distributions'' below for how to
     construct this list.
@@ -117,15 +121,20 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     functions in base R are used where available, otherwise, they are
     provided in this package.
 
-    Note that the Weibull parameterisation is different from that
-    in \code{\link[survival]{survreg}}, instead it is
-    consistent with \code{\link{dweibull}}.
-    The \code{"scale"} reported by \code{\link[survival]{survreg}}
-    is equivalent to \code{1/shape} as defined by
-    \code{\link{dweibull}} and hence \code{\link{flexsurvreg}}.
-    The first coefficient \code{(Intercept)} reported by
-    \code{\link[survival]{survreg}} is equivalent to \code{log(scale)}
-    in \code{\link{dweibull}} and \code{\link{flexsurvreg}}.
+    For the Weibull, exponential and log-normal distributions,
+    \code{\link{flexsurvreg}} simply works by calling
+    \code{\link{survreg}} to obtain the maximum likelihood estimates,
+    then calling \code{\link{optim}} to double-check convergence and
+    obtain the covariance matrix for \code{\link{flexsurvreg}}'s
+    preferred parameterisation.  The Weibull parameterisation is
+    different from that in \code{\link[survival]{survreg}}, instead it
+    is consistent with \code{\link{dweibull}}.  The \code{"scale"}
+    reported by \code{\link[survival]{survreg}} is equivalent to
+    \code{1/shape} as defined by \code{\link{dweibull}} and hence
+    \code{\link{flexsurvreg}}.  The first coefficient \code{(Intercept)}
+    reported by \code{\link[survival]{survreg}} is equivalent to
+    \code{log(scale)} in \code{\link{dweibull}} and
+    \code{\link{flexsurvreg}}.
 
     Similarly in the exponential distribution, the rate, rather than the
     mean, is modelled on covariates.
@@ -185,6 +194,10 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
 
     \code{integ.opts = list(rel.tol=1e-12)}
   }
+  \item{sr.control}{For the models which use \code{\link{survreg}}
+    to find the maximum likelihood estimates (Weibull,
+    exponential, log-normal), this list is passed as
+    the \code{control} argument to \code{survreg}.}
   \item{...}{Optional arguments to the general-purpose \R
     optimisation routine \code{\link{optim}}.  For example, the BFGS
     optimisation algorithm is the default in \code{\link{flexsurvreg}},

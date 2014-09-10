@@ -24,6 +24,20 @@ test_that("Same answers as survreg for Weibull regression",{
     expect_equal(as.numeric(coef(fitws)[1]), log(fitw$res["scale","est"]), tol=1e-03)
 })
 
+test_that("Exponential",{
+    sr <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="exponential")
+    fite <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="exp")
+    expect_equal(sr$loglik[2], fite$loglik)
+    expect_warning(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="exp", sr.control=list(maxiter=2)), "Ran out of iterations")
+})
+
+test_that("Log-normal",{
+    sr <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="lognormal")
+    fitl <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="lognormal")
+    expect_equal(sr$loglik[2], fitl$loglik)
+    expect_warning(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="exp", sr.control=list(maxiter=2)), "Ran out of iterations")
+})
+
 test_that("Weighted fits",{
     wt <- rep(1, nrow(ovarian))
     wt[c(1,3,5,7,9)] <- 10
@@ -209,8 +223,8 @@ test_that("Covariates on ancillary parameters",{
 })
 
 test_that("Various errors",{
-    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,2,3)),"inits must be a numeric vector of length 4")
-    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = "foo"),"inits must be a numeric vector of length 4")
+    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,2,3)),"Initial values .+ length")
+    expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = "foo"),"init.+ must be a numeric vector")
     suppressWarnings({
         expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,2,3,-1)),"Initial value for parameter 4 out of range")
         expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf", inits = c(1,-2,3,-1)),"Initial values for parameters 2,4 out of range")
@@ -274,11 +288,18 @@ test_that("Interval censoring",{
     simt[status==0] <- 0.6
     tmin <- simt
     tmax <- ifelse(status==1, simt, Inf)
-
-    ## equivalent to right-censoring
-    fs1 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    tmax.sr <- ifelse(status==1, simt, NA) # need -Inf instead of Inf, don't understand why. bug?
+## Currently flexsurvreg fails with Inf, just as survreg fails, with Weibull. Consistent with survreg for the moment
+    
+    sr1 <- survreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
+    sr2 <- survreg(Surv(tmin, status) ~ 1, dist="weibull")
+    expect_equal(sr1$loglik[2], sr2$loglik[2])
+    
+    fs1 <- flexsurvreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
     expect_equal(fs1$loglik, fs2$loglik)
+    expect_equal(fs1$loglik, sr1$loglik[2])
+
     ## put an upper bound on censored times
     tmax <- ifelse(status==1, simt, 0.7)
     fs1 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
@@ -289,6 +310,7 @@ test_that("Interval censoring",{
     status[status==0] <- 3
     fs3 <- flexsurvreg(Surv(tmin, tmax, status, type="interval") ~ 1, dist="weibull")
     expect_equal(fs1$loglik, fs3$loglik)
+
 })
 
 test_that("NaNs in fitting Weibull distribution",{

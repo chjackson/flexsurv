@@ -5,6 +5,74 @@ dexph <- function(y)(1 + y / sqrt(y^2 + 1))
 ## sinh(log(y))
 logh <- function(x)((x^2 - 1)/(2*x))
 
+## Convert flexsurvreg fit to a survreg fit for Weibull, exponential
+## or log normal distribution.  Doesn't currently support stratified
+## second parameters.  survreg not supported for counting process
+## data.
+
+sr.weib.inits <- function(t,aux){
+    if (aux$counting){
+        lt <- log(t[t>0])
+###       c(1, exp(median(lt)) / log(2))
+        c(1.64/var(lt), exp(mean(lt)+0.572)) # from survreg
+    } else {
+        aux$formula <- aux$forms[[1]]
+        aux$forms <- NULL
+        aux$dist <- "weibull"
+        sr <- do.call(survreg, aux)
+        sr2fswei(sr)
+    }
+}
+
+sr.exp.inits <- function(t,aux){
+    if (aux$counting){
+        1 / mean(t)
+    } else {
+        aux$formula <- aux$forms[[1]]
+        aux$forms <- NULL
+        aux$dist <- "exponential"
+        sr <- do.call(survreg, aux)
+        sr2fsexp(sr)
+    }
+}
+
+sr.ln.inits <- function(t,aux){
+    if (aux$counting){
+        lt <- log(t[t>0])
+        c(mean(lt), sd(lt))
+    } else {
+        aux$formula <- aux$forms[[1]]
+        aux$forms <- NULL
+        aux$dist <- "lognormal"
+        sr <- do.call(survreg, aux)
+        sr2fsln(sr)
+    }
+}
+
+## Convert parameters of a survreg Weibull model to flexsurvreg built-in Weibull initial values
+
+sr2fswei <- function(sr, ph=FALSE){
+    scale <- exp(coef(sr)[1])
+    beta.scale <- coef(sr)[-1]
+    shape <- mean(1/sr$scale)
+    beta.shape <- if (length(sr$scale)>1) log(sr$scale[1]/sr$scale[-1]) else numeric()
+    if (ph) c(shape, scale^{-shape}, -beta.scale*shape, beta.shape)
+    else c(shape, scale, beta.scale, beta.shape)
+}
+
+sr2fsexp <- function(sr, ph=FALSE){
+    rate <- exp(-coef(sr)[1])
+    beta <- -coef(sr)[-1]
+    c(rate, beta)
+}
+
+sr2fsln <- function(sr, ph=FALSE){
+    meanlog <- coef(sr)[1]
+    sdlog <- sr$scale
+    beta <- coef(sr)[-1]
+    c(meanlog, sdlog, beta)
+}
+
 flexsurv.dists <- list(
                        genf = list(
                        name="genf",
@@ -53,7 +121,7 @@ flexsurv.dists <- list(
                        location="rate",
                        transforms=c(log),
                        inv.transforms=c(exp),
-                       inits=function(t){1 / mean(t)}
+                       inits=sr.exp.inits
                        ),
                        weibull = list(
                        name = "weibull.quiet",
@@ -61,12 +129,7 @@ flexsurv.dists <- list(
                        location="scale",
                        transforms=c(log, log),
                        inv.transforms=c(exp, exp),
-                       inits = function(t){
-## TODO regress log CH on log time as in splineinits. gets cov effs as well
-                           lt <- log(t[t>0])
-#                           c(1, exp(median(lt)) / log(2))
-                           c(1.64/var(lt), exp(mean(lt)+0.572)) # from survreg
-                       }
+                       inits=sr.weib.inits
                        ),
                        lnorm = list(
                        name="lnorm",
@@ -74,10 +137,7 @@ flexsurv.dists <- list(
                        location="meanlog",
                        transforms=c(identity, log),
                        inv.transforms=c(identity, exp),
-                       inits=function(t){
-                           lt <- log(t[t>0])
-                           c(mean(lt), sd(lt))
-                       }
+                       inits=sr.ln.inits
                        ),
                        gamma = list(
                        name="gamma",
@@ -99,6 +159,8 @@ flexsurv.dists <- list(
                        inits=function(t){c(0.001,1 / mean(t))}
                        )
                        )
+flexsurv.dists$exponential <- flexsurv.dists$exp
+flexsurv.dists$lognormal <- flexsurv.dists$lnorm
 
 minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits,
                                  dfns, aux, mx, fixedpars=NULL) {
@@ -254,8 +316,11 @@ check.flexsurv.response <- function(Y){
 ### though "time" only used for initial values, printed time at risk, empirical hazard
     if (attr(Y, "type") == "counting")
         Y <- cbind(Y, time=Y[,"stop"] - Y[,"start"], time1=Y[,"stop"], time2=Inf)
-    else if (attr(Y, "type") == "interval")
-        Y <- cbind(Y, start=0, stop=Y[,"time1"], time=Y[,"time1"])  
+    else if (attr(Y, "type") == "interval"){
+        Y[,"time2"][Y[,"status"]==0] <- Inf
+        Y[,"time2"][Y[,"status"]==2] <- -Inf
+        Y <- cbind(Y, start=0, stop=Y[,"time1"], time=Y[,"time1"])
+    }
     else if (attr(Y, "type") == "right")
         Y <- cbind(Y, start=0, stop=Y[,"time"], time1=Y[,"time"], time2=Inf)
     else stop("Survival object type \"", attr(Y, "type"), "\"", " not supported")
@@ -274,7 +339,7 @@ compress.model.matrices <- function(mml){
 
 flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.action, dist,
                         inits, fixedpars=NULL, dfns=NULL, aux=NULL, cl=0.95,
-                        integ.opts=NULL, ...)
+                        integ.opts=NULL, sr.control=survreg.control(), ...)
 {
     call <- match.call()
     if (missing(dist)) stop("Distribution \"dist\" not specified")
@@ -344,31 +409,32 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     nbpars <- length(parnames) # number of baseline parameters
     npars <- nbpars + ncoveffs
 
-     ## TODO merge user and default inits handling
-    if (!missing(inits) && (!is.numeric(inits) || (length(inits) != npars)))
-        stop("inits must be a numeric vector of length ",npars)
     if (missing(inits) && is.null(dlist$inits))
         stop("\"inits\" not supplied, and no function to estimate them found in the custom distribution list")
     if (missing(inits) || any(is.na(inits))){
         yy <- ifelse(Y[,"status"]==3 & is.finite(Y[,"time2"]), (Y[,"time1"] + Y[,"time2"])/2, Y[,"time"])
         wt <- yy*weights*length(yy)/sum(weights)
         dlist$inits <- expand.inits.args(dlist$inits)
-        auto.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=aux)
-        if (!is.numeric(auto.inits)) stop ("\"inits\" function must return a numeric vector")
-        nin <- length(auto.inits)
-        if (nin < npars)
-            default.inits <- c(auto.inits, rep(0,length=npars-nin))
-        else if (nin > npars){
-            default.inits <- auto.inits[1:npars]
-            warning("Initial value function returned vector > ", npars, ": using only the first ", npars)
-        }
-        else if (nin < nbpars){
-            stop("inits function returned vector length ", nin, ", but distribution has ",nbpars, " parameters")
-        }
-        else default.inits <- auto.inits
+        inits.aux <- c(aux, list(forms=forms, data=if(missing(data)) NULL else data, weights=temp$weights,
+                                 subset=temp$subset, na.action=temp$na.action, control=sr.control,
+                                 counting=(attr(model.extract(m, "response"), "type")=="counting")
+                                 ))
+        auto.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=inits.aux)
+        if (!missing(inits) && any(is.na(inits))) inits[is.na(inits)] <- auto.inits[is.na(inits)]
+        else inits <- auto.inits
     }
-    if (missing(inits)) inits <- default.inits
-    else if (any(is.na(inits))) inits[is.na(inits)] <- default.inits[is.na(inits)]
+    if (!is.numeric(inits)) stop ("initial values must be a numeric vector")
+    nin <- length(inits)
+    if (nin < npars && ncoveffs > 0)
+        inits <- c(inits, rep(0,length=npars-nin))
+    else if (nin > npars){
+        inits <- inits[1:npars]
+        warning("Initial values are a vector length > ", npars, ": using only the first ", npars)
+    }
+    else if (nin < nbpars){
+        stop("Initial values are a vector length ", nin, ", but distribution has ",nbpars, " parameters")
+    }
+
     for (i in 1:nbpars)
         inits[i] <- dlist$transforms[[i]](inits[i])
     outofrange <- which(is.nan(inits) | is.infinite(inits))

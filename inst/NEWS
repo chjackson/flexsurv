@@ -38,6 +38,9 @@ Other new modelling features:
 * Relative survival models, using the "bhazard" argument to
   flexsurvreg to specify the expected mortality rate.
 
+* flexsurvreg now uses survreg to fit Weibull, exponential and
+  log-normal models, unless there is left-truncation.
+
 Custom distributions:
 
 * Custom distributions can be defined through the hazard function.
