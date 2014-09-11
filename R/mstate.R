@@ -155,16 +155,35 @@ transient <- function(trans){
     which(apply(trans, 1, function(x)any(!is.na(x))))
 }
 
+is.flexsurvlist <- function(x){
+    is.list(x) &&
+        (length(x) > 0) && 
+            inherits(x[[1]], "flexsurvreg") && 
+                all(sapply(x, inherits, "flexsurvreg"))
+}
 
 sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", debug=FALSE){
     if (length(t)==1) t <- rep(t, M)
     else if (length(t)!=M) stop("length of t should be 1 or M=",M)
     if (length(start)==1) start <- rep(start, M)
     else if (length(start)!=M) stop("length of start should be 1 or M=",M)
-    newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
-    X <- form.model.matrix(x, as.data.frame(newdata))
-    beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
-    basepars.mat <- add.covs(x, x$res.t[x$dlist$pars,"est"], beta, X, transform=FALSE)
+
+    if (is.flexsurvlist(x)){
+        ntr <- length(x)
+        if (ntr != length(na.omit(as.vector(trans)))) stop(sprintf("x is a list of %s flexsurvreg objects, but trans indicates %s transitions", ntr, length(na.omit(as.vector(trans)))))
+        basepars.mat <- matrix(nrow=ntr, ncol=length(x[[1]]$dlist$pars), dimnames=list(NULL,x[[1]]$dlist$pars))
+        for (i in 1:ntr){
+            X <- form.model.matrix(x[[i]], as.data.frame(newdata))
+            beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
+            basepars.mat[i,] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
+        }
+        x <- x[[1]]
+    } else if (inherits(x, "flexsurvreg")) { 
+        newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
+        X <- form.model.matrix(x, as.data.frame(newdata))
+        beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
+        basepars.mat <- add.covs(x, x$res.t[x$dlist$pars,"est"], beta, X, transform=FALSE)
+    } else stop("expected x to be a flexsurvreg object or list of flexsurvreg objects")
     # one row for each transition
     nst <- nrow(trans)
     ## TODO only need a max time if model is transient, else if absorbing, can allocate these up front
@@ -246,10 +265,59 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
         resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
         resl <- matrix(resci[1,], nrow=n)
         resu <- matrix(resci[2,], nrow=n)
-        names(resl) <- names(resu) <- t
         attr(res, "lower") <- resl
         attr(res, "upper") <- resu
         class(res) <- "fs.msm.est"
     }  
+    res
+}
+
+totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
+                          tvar="trans", group=NULL, M=100000, B=1000, cl=0.95)
+{
+    if (length(t)>1) stop("\"t\" must be a single number")
+    sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
+                    start=start, M=M, tvar="trans", debug=FALSE)
+    dt <- diff(t(cbind(sim$t, t)))
+    st <- factor(t(sim$st), levels=1:nrow(trans))
+    res <- tapply(dt, st, sum) / M
+    res[is.na(res)] <- 0
+    if (!is.null(group)) {
+        if(length(group) != nrow(trans))
+            stop("\"group\" must be a vector of length ",nrow(trans), " = number of states")
+        res <- tapply(res, group, sum)
+    }
+    if (ci){
+        res.rep <- array(NA_real_, dim=c(B, length(res)))
+        if (is.flexsurvlist(x)){
+            sim <- vector("list", length(x))
+            for (j in seq_along(x)){
+                sim[[j]] <- normboot.flexsurvreg(x=x[[j]], B=B, raw=TRUE, transform=TRUE)
+            }
+            for (i in 1:B){
+                x.rep <- x
+                for (j in seq_along(x))
+                    x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
+                res.rep[i,] <- totlos.simfs(x=x.rep, trans=trans, t=t, start=start, newdata=newdata,
+                                            ci=FALSE, tvar=tvar, group=group, M=M)
+            }
+        } else { 
+            sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
+            for (i in 1:B){
+                x.rep <- x
+                x.rep$res.t[,"est"] <- sim[i,]
+                res.rep[i,] <- totlos.simfs(x=x.rep, trans=trans, t=t, start=start, newdata=newdata,
+                                            ci=FALSE, tvar=tvar, M=M)
+            }
+        }
+        resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
+        resl <- resci[1,]
+        resu <- resci[2,]
+        names(resl) <- names(resu) <- t
+        attr(res, "lower") <- resl
+        attr(res, "upper") <- resu
+        class(res) <- "fs.msm.est"
+        res <- cbind(est=res, L=resl, U=resu)
+    }
     res
 }

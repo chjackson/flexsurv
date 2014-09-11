@@ -57,6 +57,7 @@ rgengamma.orig,
 rgompertz,
 sim.fmsm,    
 summary.flexsurvreg,
+totlos.simfs,
 unroll.function
 )
 

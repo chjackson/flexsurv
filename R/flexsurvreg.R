@@ -575,7 +575,7 @@ form.model.matrix <- function(object, newdata){
     for (i in facs) mf[,i] <- factor(mf[,i], levels=levels(mfo[,i]))
     forms <- object$all.formulae
     mml <- vector(mode="list", length=length(object$dlist$pars))
-    names(mml) <- object$dlist$pars
+    names(mml) <- names(forms)
     forms[[1]] <- delete.response(terms(forms[[1]]))
     for (i in names(forms)){
         mml[[i]] <- model.matrix(forms[[i]], mf)

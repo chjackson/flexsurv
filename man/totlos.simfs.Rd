@@ -1,0 +1,87 @@
+\name{totlos.simfs}
+\alias{totlos.simfs}
+\title{Expected total length of stay in specific states, from a fully-parametric,
+  semi-Markov multi-state model}
+\description{
+  The expected total time spent in each state for semi-Markov multi-state models fitted to
+  time-to-event data with \code{\link{flexsurvreg}}.  This is defined by
+  the integral of the transition probability matrix, though this is
+  not analytically possible and is computed by simulation. 
+}
+\usage{
+  totlos.simfs(x, trans, t=1, start=1, newdata=NULL, ci=FALSE, tvar="trans",
+             group=NULL, M=100000, B=1000, cl=0.95)
+}
+\arguments{
+  \item{x}{A model fitted with \code{\link{flexsurvreg}}.   See
+    \code{\link{msfit.flexsurvreg}}
+    for the required form of the model and the data.   Additionally
+    this should be semi-Markov,  so that the time variable represents
+    the time since the last transition.  In other words the response should
+    be of the form \code{Surv(time,status)}. See the package vignette for further
+    explanation. 
+  }
+  \item{trans}{Matrix indicating allowed transitions.  See
+    \code{\link{msfit.flexsurvreg}}.}
+  \item{t}{Maximum time to predict to.}
+  \item{start}{Starting state.}
+  \item{newdata}{A data frame specifying the values of covariates in
+    the fitted model, other than the transition number.  See
+    \code{\link{msfit.flexsurvreg}}. 
+  }
+  \item{ci}{Return a confidence interval calculated by simulating from
+    the asymptotic normal distribution of the maximum likelihood
+    estimates.    This is turned off by default, since two levels of simulation are
+    required.      If turned on, users should adjust \code{B} and/or
+    \code{M} until the results reach the desired precision.
+    The simulation over \code{M} is generally vectorised, therefore
+    increasing \code{B} is usually more expensive than increasing \code{M}.
+  }
+  \item{tvar}{Variable in the data representing the transition type.}
+  \item{group}{Optional grouping for the states.  For example, if there
+    are four states, and \code{group=c(1,1,2,2)}, then
+    \code{\link{totlos.simfs}} returns the expected total time in
+    states 1 and 2 combined, and states 3 and 4 combined.}
+  \item{M}{Number of individuals to simulate in order to approximate the
+    transition probabilities.  Users should adjust this to obtain the
+    required precision. }
+  \item{B}{Number of simulations from the normal asymptotic distribution
+    used to calculate variances.  Decrease for greater speed at the
+    expense of accuracy.}
+  \item{cl}{Width of symmetric confidence intervals, relative to 1.}
+}
+\value{
+  The expected total time spent in each state (or group of states given
+  by \code{group}) up to time \code{t}, and corresponding confidence
+  intervals if requested. 
+}
+\details{
+  This is computed by simulating a large number of individuals \code{M}
+  using the maximum likelihood estimates of the fitted model and the
+  function \code{\link{sim.fmsm}}.   Therefore this requires a random sampling
+  function for the parametric survival model to be available: see the
+  "Details" section of \code{\link{sim.fmsm}}.   This will be available
+  for all built-in distributions, though users may need to write this
+  for custom models.
+
+  Note the random sampling method for \code{flexsurvspline} models is
+  currently very inefficient, so that looping over \code{M} will be very
+  slow.
+
+  The equivalent for time-inhomogeneous Markov models is currently not implemented.
+}
+\seealso{
+  \code{\link{pmatrix.simfs}},\code{\link{sim.fmsm}},\code{\link{msfit.flexsurvreg}}.
+}
+\examples{
+# BOS example in vignette, and in msfit.flexsurvreg
+bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp")
+tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
+
+# predict 4 years spent without BOS, 3 years with BOS, before death
+# As t increases, this should converge
+totlos.simfs(bexp, t=10, trans=tmat)
+totlos.simfs(bexp, t=1000, trans=tmat)
+}
+\author{Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.}
+\keyword{models,survival}
