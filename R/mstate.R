@@ -162,14 +162,38 @@ is.flexsurvlist <- function(x){
                 all(sapply(x, inherits, "flexsurvreg"))
 }
 
-sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", debug=FALSE){
+## Handle predictable time-dependent covariates in simulating from
+## semi-Markov models.  Assume the covariate changes at same rate as
+## time (e.g. age), but the covariate values used in simulation only
+## change when the clock resets, at each change of state.
+
+form.basepars.tcovs <- function(x, transi, # index of allowed transition
+                                newdata, tcovs,
+                                t # time increment
+                                ){
+    if (is.flexsurvlist(x)){
+        x <- x[[transi]]
+        dat <- as.list(newdata)
+    } else if (inherits(x, "flexsurvreg")) {
+        dat <- as.list(newdata[transi,])
+    }
+    for (i in tcovs) { dat[[i]] <- dat[[i]] + t}
+    dat <- as.data.frame(dat)
+    X <- form.model.matrix(x, dat)
+    beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
+    basepars.mat <- add.covs(x, x$res.t[x$dlist$pars,"est"], beta, X, transform=FALSE)
+    as.list(as.data.frame(basepars.mat))
+    ## for distribution with npars parameters, whose values are required at nt different times
+    ## returns (as list) data frame with nt rows, npars cols
+}
+
+sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tcovs=NULL, debug=FALSE){
     if (length(t)==1) t <- rep(t, M)
     else if (length(t)!=M) stop("length of t should be 1 or M=",M)
     if (length(start)==1) start <- rep(start, M)
     else if (length(start)!=M) stop("length of start should be 1 or M=",M)
-
     if (is.flexsurvlist(x)){
-        ntr <- length(x)
+        ntr <- length(x) # number of allowed transitions
         if (ntr != length(na.omit(as.vector(trans)))) stop(sprintf("x is a list of %s flexsurvreg objects, but trans indicates %s transitions", ntr, length(na.omit(as.vector(trans)))))
         basepars.mat <- matrix(nrow=ntr, ncol=length(x[[1]]$dlist$pars), dimnames=list(NULL,x[[1]]$dlist$pars))
         for (i in 1:ntr){
@@ -177,14 +201,14 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", deb
             beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
             basepars.mat[i,] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
         }
-        x <- x[[1]]
+        xbase <- x[[1]]
     } else if (inherits(x, "flexsurvreg")) { 
         newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
         X <- form.model.matrix(x, as.data.frame(newdata))
         beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
         basepars.mat <- add.covs(x, x$res.t[x$dlist$pars,"est"], beta, X, transform=FALSE)
+        xbase <- x
     } else stop("expected x to be a flexsurvreg object or list of flexsurvreg objects")
-    # one row for each transition
     nst <- nrow(trans)
     ## TODO only need a max time if model is transient, else if absorbing, can allocate these up front
     res.st <- cur.st <- start
@@ -198,6 +222,7 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", deb
         cur.t.out <- cur.t[todo]
         done <- numeric()
         for (i in unique(cur.st[todo])){
+            
             if (i %in% transient(trans)) {
                 ## simulate next time and states for people whose current state is i
                 transi <- na.omit(trans[i,])
@@ -205,10 +230,13 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", deb
                 t.trans1 <- matrix(0, nrow=ni, ncol=length(transi))
                 ## simulate times to all potential destination states
                 for (j in seq_along(transi)) {         
-                    basepars <- as.list(as.data.frame(basepars.mat)[transi[j],])
-                    fncall <- c(list(n=ni), basepars, x$aux)
-                    if (is.null(x$dfns$r)) stop("No random sampling function found for this model")
-                    t.trans1[,j] <- do.call(x$dfns$r, fncall)
+                    if (length(tcovs)>0){
+                        basepars <- form.basepars.tcovs(x, j, newdata, tcovs, cur.t.out)
+                    } else 
+                        basepars <- as.list(as.data.frame(basepars.mat)[transi[j],])
+                    fncall <- c(list(n=ni), basepars, xbase$aux)
+                    if (is.null(xbase$dfns$r)) stop("No random sampling function found for this model")
+                    t.trans1[,j] <- do.call(xbase$dfns$r, fncall)
                 }
                 if (debug) { print(t(t.trans1)) }
                 ## simulated next state is the one with minimum simulated time
@@ -242,14 +270,14 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", deb
 
 
 pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
-                          tvar="trans", M=100000, B=1000, cl=0.95)
+                          tvar="trans", tcovs=NULL, M=100000, B=1000, cl=0.95)
 {
     n <- nrow(trans)
     res <- matrix(0, nrow=n, ncol=n)
     if (length(t)>1) stop("\"t\" must be a single number")
     for (i in seq_len(n)){
         sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
-                      start=i, M=M, tvar="trans", debug=FALSE)
+                      start=i, M=M, tvar="trans", tcovs=tcovs, debug=FALSE)
         last.st <- sim$st[,ncol(sim$st)]
         res[i,] <- prop.table(table(factor(last.st, levels=seq_len(n))))
     }
@@ -260,7 +288,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
             x.rep <- x
             x.rep$res.t[,"est"] <- sim[i,]
             res.rep[i,] <- pmatrix.simfs(x=x.rep, trans=trans, t=t, newdata=newdata,
-                                          ci=FALSE, tvar=tvar, M=M)
+                                          ci=FALSE, tvar=tvar, tcovs=tcovs, M=M)
         }
         resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
         resl <- matrix(resci[1,], nrow=n)
@@ -273,11 +301,11 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
 }
 
 totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
-                          tvar="trans", group=NULL, M=100000, B=1000, cl=0.95)
+                          tvar="trans", tcovs=NULL, group=NULL, M=100000, B=1000, cl=0.95)
 {
     if (length(t)>1) stop("\"t\" must be a single number")
     sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
-                    start=start, M=M, tvar="trans", debug=FALSE)
+                    start=start, M=M, tvar="trans", tcovs=tcovs, debug=FALSE)
     dt <- diff(t(cbind(sim$t, t)))
     st <- factor(t(sim$st), levels=1:nrow(trans))
     res <- tapply(dt, st, sum) / M
@@ -299,7 +327,7 @@ totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
                 for (j in seq_along(x))
                     x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
                 res.rep[i,] <- totlos.simfs(x=x.rep, trans=trans, t=t, start=start, newdata=newdata,
-                                            ci=FALSE, tvar=tvar, group=group, M=M)
+                                            ci=FALSE, tvar=tvar, tcovs=tcovs, group=group, M=M)
             }
         } else { 
             sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
@@ -307,7 +335,7 @@ totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
                 x.rep <- x
                 x.rep$res.t[,"est"] <- sim[i,]
                 res.rep[i,] <- totlos.simfs(x=x.rep, trans=trans, t=t, start=start, newdata=newdata,
-                                            ci=FALSE, tvar=tvar, M=M)
+                                            ci=FALSE, tvar=tvar, tcovs=tcovs, M=M)
             }
         }
         resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))

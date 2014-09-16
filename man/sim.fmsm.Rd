@@ -6,7 +6,8 @@
   multi-state model fitted using \code{\link{flexsurvreg}}.
 }
 \usage{
-sim.fmsm(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", debug=FALSE)
+sim.fmsm(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans",
+         tcovs=NULL, debug=FALSE)
 }
 \arguments{
   \item{x}{A model fitted with \code{\link{flexsurvreg}}. See
@@ -18,6 +19,13 @@ sim.fmsm(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", debug=FALSE)
   \item{start}{Starting state, or vector of starting states for each of the \code{M} individuals.}
   \item{M}{Number of individual trajectories to simulate.}
   \item{tvar}{Variable in the data representing the transition type.}
+  \item{tcovs}{Names of "predictable" time-dependent covariates in
+    \code{newdata}, i.e. those whose values change at the
+    same rate as time.  Age is a typical example.  During simulation, their
+    values will be updated after each transition time, by adding the
+    current time to the value supplied in \code{newdata}.  This assumes
+    the covariate is measured in the same unit as time. \code{tcovs}
+    is supplied as a character vector.}
   \item{debug}{Print intermediate outputs: for development use.}
 }
 \value{
@@ -34,12 +42,14 @@ in a transient state at the time given in the \code{t} argument to \code{sim.fms
 \details{
 \code{sim.fmsm} relies on the presence of a function to sample random
 numbers from the parametric survival distribution used in the fitted
-model \code{x}.If \code{x} was fitted using a custom distribution,
+model \code{x}, for example \code{\link{rweibull}} for Weibull models.
+If \code{x} was fitted using a custom distribution,
 called \code{dist} say, then there must be a function called (something like)
 \code{rdist} either in the working environment, or supplied through the
 \code{dfns} argument to \code{\link{flexsurvreg}}.  This must be in the same
-format as standard R functions such as \code{\link{rnorm}}, with first argument
-\code{n} and remaining arguments giving the parameters of the distribution.
+format as standard R functions such as \code{\link{rweibull}}, with first argument
+\code{n}, and remaining arguments giving the parameters of the
+distribution.   It must be vectorised with respect to the parameter arguments.
 }
 \seealso{
 \code{\link{pmatrix.simfs}}

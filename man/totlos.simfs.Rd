@@ -10,7 +10,7 @@
 }
 \usage{
   totlos.simfs(x, trans, t=1, start=1, newdata=NULL, ci=FALSE, tvar="trans",
-             group=NULL, M=100000, B=1000, cl=0.95)
+             tcovs=NULL, group=NULL, M=100000, B=1000, cl=0.95)
 }
 \arguments{
   \item{x}{A model fitted with \code{\link{flexsurvreg}}.   See
@@ -38,6 +38,7 @@
     increasing \code{B} is usually more expensive than increasing \code{M}.
   }
   \item{tvar}{Variable in the data representing the transition type.}
+  \item{tcovs}{Predictable time-dependent covariates such as age, see \code{\link{sim.fmsm}}}.
   \item{group}{Optional grouping for the states.  For example, if there
     are four states, and \code{group=c(1,1,2,2)}, then
     \code{\link{totlos.simfs}} returns the expected total time in

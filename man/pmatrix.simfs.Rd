@@ -10,7 +10,7 @@
 }
 \usage{
   pmatrix.simfs(x, trans, t=1, newdata=NULL, ci=FALSE, tvar="trans",
-             M=100000, B=1000, cl=0.95)
+             tcovs=NULL, M=100000, B=1000, cl=0.95)
 }
 \arguments{
   \item{x}{A model fitted with \code{\link{flexsurvreg}}.   See
@@ -38,6 +38,7 @@
     increasing \code{B} is usually more expensive than increasing \code{M}.
   }
   \item{tvar}{Variable in the data representing the transition type.}
+  \item{tcovs}{Predictable time-dependent covariates such as age, see \code{\link{sim.fmsm}}}.
   \item{M}{Number of individuals to simulate in order to approximate the
     transition probabilities.  Users should adjust this to obtain the
     required precision. }

@@ -4,6 +4,8 @@
 form.dp <- function(dlist, dfns, integ.opts){
     
     ## TODO check for format of dfn (args x, log) 
+    ## FIXME bug if object called d is found in global env
+    ## check for existence in current frame.  inherits false? 
     
     name <- dlist$name
     hname <- paste0("h",name); Hname <- paste0("H",name)
@@ -14,7 +16,7 @@ form.dp <- function(dlist, dfns, integ.opts){
     if (is.function(dfns$h)) h <- dfns$h
     if (is.function(dfns$H)) H <- dfns$H
     if (is.function(dfns$r)) r <- dfns$r
-    if (!exists("h")){
+    if (!exists("h", inherits=FALSE)){
         if (exists(hname)) h <- get(hname)
         else {
             if (!exists("d")){
@@ -34,7 +36,7 @@ form.dp <- function(dlist, dfns, integ.opts){
             }
         }
     }
-    if (!exists("H")){
+    if (!exists("H", inherits=FALSE)){
         if (exists(Hname)) H <- get(Hname)
         else {
             if (!exists("p")) { if (exists(pname)) p <- get(pname) }
@@ -48,7 +50,7 @@ form.dp <- function(dlist, dfns, integ.opts){
             }
         }
     }
-    if (!exists("p")){
+    if (!exists("p", inherits=FALSE)){
         if (exists(pname)) p <- get(pname)
         else {
             p <- function(q, ...) {
@@ -60,7 +62,7 @@ form.dp <- function(dlist, dfns, integ.opts){
             }
         }
     }
-    if (!exists("d")){
+    if (!exists("d", inherits=FALSE)){
         if (exists(dname)) d <- get(dname)
         else { 
             d <- function(x, log=FALSE, ...) {
@@ -70,7 +72,7 @@ form.dp <- function(dlist, dfns, integ.opts){
             }
         }
     }
-    if (!exists("r")){
+    if (!exists("r", inherits=FALSE)){
         if (exists(rname)) r <- get(rname)
         else r <- NULL
         ## random sampling function is currently only used for multi-state models

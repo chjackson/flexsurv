@@ -717,6 +717,7 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
     }
     sim <- matrix(nrow=B, ncol=nrow(x$res))
     colnames(sim) <- rownames(x$res)
+    if (is.na(x$cov[1])) stop("Covariance matrix not available from non-converged model")
     sim[,x$optpars] <- rmvnorm(B, x$opt$par, x$cov)
     sim[,x$fixedpars] <- rep(x$res.t[x$fixedpars,"est"],each=B)
     if (x$ncovs > 0 && !raw){

@@ -27,7 +27,7 @@
   the standard \pkg{survival} package.  Censoring or left-truncation
   are specified in \code{Surv} objects.  Estimates and confidence
   intervals for any function of the model parameters can be printed or
-  plotted.  \pkg{flexsurv} also provides some tools for predicting
+  plotted.  \pkg{flexsurv} also provides functions for predicting
   from fully-parametric multi-state models, and connects with the
   \pkg{mstate} package \citep{mstate:jss}.  This article explains the
   methods and design principles of the package, giving several worked
@@ -98,8 +98,8 @@ built-in survival distributions with a fixed number of parameters, and
 \S\ref{sec:custom} explains how users can define new distributions.
 \S\ref{sec:adim} concentrates on classes of models where the number of
 parameters can be chosen by the user, such as splines.  In
-\S\ref{sec:multistate} the use of \pkg{flexsurv} for parametric
-multi-state modelling is described.  Finally \S\ref{sec:extensions}
+\S\ref{sec:multistate} \pkg{flexsurv} is used for fitting and predicting from 
+fully-parametric multi-state models.  Finally \S\ref{sec:extensions}
 suggests some potential future extensions.
 
 
@@ -159,11 +159,11 @@ infinite, so that $S(t^{max}_i)=0$, or if there is left-censoring but
 no right-censoring then $t_i=0$.
 
 Also let $s_i$ be corresponding left-truncation (or delayed-entry)
-times, meaning that individual $i$ is only observed conditionally on
-having survived up to $s_i$, thus $s_i=0$ if there is no
-left-truncation.  Time-dependent covariates (\S\ref{sec:censtrunc})
-and multi-state models (\S\ref{sec:multistate}) can be represented
-through left-truncation.
+times, meaning that the $i$th survival time is only observed
+conditionally on the individual having survived up to $s_i$, thus
+$s_i=0$ if there is no left-truncation.  Time-dependent covariates
+(\S\ref{sec:censtrunc}) and some multi-state models
+(\S\ref{sec:multistate}) can be represented through left-truncation.
 
 The likelihood for the parameters $\bm{\theta} = \{\bm{\gamma},\bm{\beta}\}$ in model
 (\ref{eq:model}), given the corresponding data vectors, is
@@ -217,7 +217,7 @@ fs1
 @ 
 For the Weibull (and exponential and log-normal)
 distributions, \code{flexsurvreg} simply uses \code{survreg} in
-\pkg{survival} to obtain the maximum likelihood estimates. 
+\pkg{survival} to find the maximum likelihood estimates. 
 The same model can be fitted as
 <<>>=
 survreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
@@ -1011,15 +1011,15 @@ visited or the length of time spent in them.
 series of event times $t_{1},\dots, t_{n}$ for an individual.  The
 last of these may be an observed or right-censored event time.  Note
 \emph{panel data} are not considered here --- that is, observations of
-the state of the process at a series of times
+the state of the process at an arbitrary set of times
 \citep{kalbfleisch:lawless}.  In panel data, we do not necessarily
 know the time of each transition, or even whether transitions of
 a certain type have occurred at all between a pair of observations.
 Multi-state models for that type of data (and also exact event times)
 can be fitted with the \pkg{msm} package for R \citep{msmjss}, but are
 restricted to (piecewise) exponential event time distributions.  Knowing
-the exact event times enables much more flexible models, as shown
-in this section.
+the exact event times enables much more flexible models, which 
+\pkg{flexsurv} can fit. 
 
 \paragraph{Alternative time scales} 
 In semi-Markov (clock-reset) models, $q_{rs}(t)$ depends on the time
@@ -1097,7 +1097,7 @@ The \pkg{mstate} R package \citep{mstate:cmpb,mstate:jss} has a
 utility \code{msprep} to produce data of this form from
 ``wide-format'' datasets where rows represent individuals, and times
 of different events appear in different columns. \pkg{msm}
-\citep{msmjss} has a similar utility \code{msm2Surv} for producing the
+has a similar utility \code{msm2Surv} for producing the
 required form given longitudinal data where rows represent state
 observations.
 
@@ -1115,7 +1115,7 @@ representing six months after transplant.  Values of \code{trans} of
 and BOS$\rightarrow$death respectively.  The first row indicates that
 the patient (\code{id} 7) moved from state 1 (no BOS) to state 2 (BOS)
 at 0.17 years, but (second row) this is also interpreted as a
-censored time from state 1 to state 3, potential death before BOS
+censored time of moving from state 1 to state 3, potential death before BOS
 onset.  This patient then died, given by the third row with
 \code{status} 1 for \code{trans} 3.  Patient 8 died before BOS onset,
 therefore at 8.2 years their potential BOS onset is censored (fourth
@@ -1183,15 +1183,13 @@ to a simpler one (e.g. \S\ref{sec:builtin}, Table \ref{tab:spline}).
 
 \subsection{Obtaining cumulative transition-specific hazards}
 
-The \code{mstate} package enables \emph{semi-parametric} multi-state
-modelling.  Models must be fitted with \code{coxph}, which also
-provides a semi-parametric estimate of each transition-specific
-baseline hazard \citep{mstate:cmpb,mstate:jss}.  These imply
-piecewise-constant estimates of each cumulative $r \rightarrow s$
-transition-specific hazard function $H_{rs}(t) = \int_0^t q_{rs}(u)
-du$.  These estimates, and their covariances, are provided by
-\pkg{mstate}'s function \code{msfit}, and form the basis of prediction
-from the model.  For the Cox models for the BOS data,
+Multi-state models are often characterised by their cumulative $r
+\rightarrow s$ transition-specific hazard functions $H_{rs}(t)
+= \int_0^t q_{rs}(u)du$.  For \emph{semi-parametric}
+multi-state models fitted with \code{coxph}, the function \code{msfit}
+in \code{mstate} \citep{mstate:cmpb,mstate:jss} provides
+piecewise-constant estimates and covariances for $H_{rs}(t)$.
+For the Cox models for the BOS data,
 <<>>=
 library(mstate)
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
@@ -1253,10 +1251,7 @@ legend("topleft", inset=c(0,0.3), c("Non-parametric","Exponential","Weibull"),
 
 \subsection{Prediction from multi-state models}
 
-Since \code{msfit.flexsurvreg} returns transition hazards in the same
-format as \pkg{mstate}'s \code{msfit} method, the functions of
-\pkg{mstate} for prediction can then be used.  For example, the
-\emph{transition probabilities} of the multi-state model are the
+The \emph{transition probabilities} of the multi-state model are the
 probabilities of occupying each state $s$ at time $t > t_0$, given
 that the individual is in state $r$ at time $t_0$.
 \[ P(t_0, t) = P(S(t) = s | S(t_0) = r) \]
@@ -1265,7 +1260,55 @@ that the individual is in state $r$ at time $t_0$.
 For an time-inhomogeneous Markov model, these are related to the transition
 intensities via the Kolmogorov forward equation
 \[ \frac{d P(t_0,t)}{dt} = P(t_0,t) Q(t) \] with initial condition
-$P() = I$ \citep{cox:miller}.  An approximate solution
+$P() = I$ \citep{cox:miller}.  This can be solved numerically, as in
+\citet{titman:nonhomog}.  This is implemented in the function
+\code{pmatrix.fs}, using the \pkg{deSolve} package \citep{deSolve}.
+This returns the full transition probability matrix $P(t_0,t)$ from
+time $t_0=0$ to a time or set of times $t$ specified in the call.
+<<>>=
+pmatrix.fs(cfwei, t=c(5,10), trans=tmat)
+@
+Confidence intervals can be obtained by simulation from the asymptotic
+distribution of the maximum likelihood estimates --- see
+\code{help(pmatrix.fs)} for full details.
+
+TODO explain results here instead of in mstate bit
+TODO put totlos in.  write totlos markov function.  say msms in development
+
+\paragraph{Semi-Markov models} 
+For semi-Markov models, the Kolmogorov equation does not apply, since
+the transition intensity matrix $Q(t)$ is no longer a deterministic
+function of $t$, but depends on when the transitions occur between
+time $t_0$ and $t$. Predictions can then be made by simulation.
+The function \code{sim.fmsm} produces simulated trajectories from
+parametric semi-Markov models by simulating the time to the next
+transition until the individual reaches an absorbing state or a
+specified censoring time.  This requires the presence of a function to
+generate random numbers from the underlying parametric distribution
+--- and is fast for built-in distributions which use vectorised
+functions such as \code{rweibull}.
+
+\code{pmatrix.simfs} wraps \code{sim.fmsm} to calculate a transition
+probability matrix.  1000 samples from \code{mssample} give estimates
+of transition probabilities that are accurate to within around 0.02,
+and similar to the clock-forward estimates.  However with
+\code{pmatrix.simfs} we can achieve greater precision by simulating
+100 times as many trajectories in a shorter time.  Simulation-based
+confidence-intervals are also available in \code{pmatrix.simfs}, at an
+extra computational cost.
+<<eval=FALSE>>=
+pmatrix.simfs(crwei, trans=tmat, t=5)
+pmatrix.simfs(crwei, trans=tmat, t=10)
+@ 
+
+\paragraph{Prediction via mstate}
+
+Alternatively, predictions from parametric multi-state
+models can be made by supplying the cumulative transition-specific hazards,
+calculated with \code{msfit.flexsurvreg}, to functions in the
+\pkg{mstate} package.
+
+For Markov models, an approximate solution to the Kolmogorov equation
 \citep[e.g.][]{aalen:process} is given by a product integral
 \[ P(t_0, t) = \prod_{i=0}^{m-1} \left\{ I + Q(t_i)dt \right\} \]
 where a fine grid of times $t_0,t_1,\ldots,t_m=t$ is chosen to span
@@ -1274,7 +1317,7 @@ cumulative hazard matrix between times $t_i$ and $t_{i+1}$.  $Q$ may
 also depend on other covariates, as long as these are known in
 advance.
 
-In \pkg{mstate} these can be calculated with the \code{probtrans}
+In \pkg{mstate}, these can be calculated with the \code{probtrans}
 function, applied to the cumulative hazards returned by \code{msfit}.
 For Cox models, the time grid is naturally defined by the observed 
 survival times, giving the
@@ -1299,52 +1342,22 @@ data are more sparse (Figure~\ref{fig:bos:cumhaz}).
 ptw <- probtrans(mfwei, predt=0, direction="forward")[[1]]
 ptw[ptw$time %in% c(5,10),]
 @ 
-An alternative approach is to solve the Kolmogorov forward equation
-numerically, as in \citet{titman:nonhomog}.  This is implemented in
-the function \code{pmatrix.fs}, using the \pkg{deSolve} package
-\citep{deSolve}.  This returns the full transition probability matrix
-$P(t_0,t)$ from time $t_0=0$ to a time or set of times $t$ specified
-in the call.  This is more accurate than the time grid approximation 
-unless the grid is very fine.  The first row of each matrix below
-is close to \code{pstate1}--\code{pstate3} in the corresponding row of \code{ptw}.
-<<>>=
-pmatrix.fs(cfwei, t=c(5,10), trans=tmat)
-@ 
-On the other hand, there is no analytic formula for 
-confidence intervals, unlike in \code{probtrans}. Therefore these must
-be obtained by simulation from the asymptotic distribution of the
-maximum likelihood estimates, and by default this is not done.  See
-\code{help(pmatrix.fs)} for full details.
+\code{pstate1}--\code{pstate3} are close to the first rows of the
+matrices returned by \code{pmatrix.fs}.  While \code{probtrans} is
+slower to achieve a similar level of accuracy to \code{pmatrix.fs} for
+the point estimates, an advantage of \code{probtrans} is that standard
+errors are available more cheaply.
 
-\paragraph{Semi-Markov models} 
-For semi-Markov models, the Kolmogorov equation does not apply, since
-the transition intensity matrix $Q(t)$ is no longer a deterministic
-function of $t$, but depends on when the transitions occur between
-time $t_0$ and $t$.  $P(t_0, t)$ can then be estimated by
-simulation. \pkg{mstate} provides the function \code{mssample} to do
-this given the estimated piecewise-constant cumulative hazards
-\citep{fiocco:mstatepred}, produced by \code{msfit} or
-\code{msfit.flexsurvreg}.  However, \code{flexsurv} provides a more
-efficient method for fully-parametric models based on simulating the
-exact times to the next transition.  This is fast for built-in distributions
-since it calls on the standard vectorised R random number generation 
-functions such as \code{rweibull}.  The function \code{sim.fmsm}
-produces simulated trajectories this way, and \code{pmatrix.simfs}
-wraps this to calculate a transition probability matrix.  1000 samples
-from \code{mssample} give estimates of transition probabilities that
-are accurate to within around 0.02, and similar to the clock-forward
-estimates.  However with \code{pmatrix.simfs} we can achieve greater
-precision by simulating 100 times as many trajectories in a shorter
-time.  Simulation-based confidence-intervals are also available in
-\code{pmatrix.simfs}, at an extra computational cost.
+For semi-Markov models, \pkg{mstate} provides the function
+\code{mssample} to produce both simulated trajectories and transition
+probability matrices from semi-Markov models, given the estimated
+piecewise-constant cumulative hazards \citep{fiocco:mstatepred},
+produced by \code{msfit} or \code{msfit.flexsurvreg}, though this is
+generally less efficient than \code{pmatrix.simfs}.
 <<eval=FALSE>>=
 mssample(mrcox$Haz, trans=tmat, clock="reset", M=1000, tvec=c(5, 10))
 mssample(mrwei$Haz, trans=tmat, clock="reset", M=1000, tvec=c(5, 10))
-pmatrix.simfs(crwei, trans=tmat, t=5)
-pmatrix.simfs(crwei, trans=tmat, t=10)
 @ 
-
-
 
 
 \section{Potential extensions}
@@ -1358,7 +1371,7 @@ parametric models.  These might be implemented by exploiting
 tractability for specific distributions, such as gamma frailties, or
 by adjusting standard errors to account for clustering, as implemented
 in \code{survreg}.  More complex random effects models would require
-numerical integration, and \citet{crowther2014multilevel} provide
+numerical integration, for example, \citet{crowther2014multilevel} provide
 Stata software based on Gauss-Hermite quadrature. Alternatively, a
 probabilistic modelling language such as Stan \citep{stan-manual:2014}
 or BUGS \citep{bugs:book} would be naturally suited to complex
