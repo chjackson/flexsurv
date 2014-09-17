@@ -114,6 +114,73 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     if(nt==1) res[[1]] else res
 }
 
+## Obtains matrix T(t) of expected times spent in state (col) starting
+## from state (row) up to time t.
+## Solves the second order linear ODE system T''(t) = P(t) Q(t)
+## Express as dT/dt = P(t), dP/dt = P(t)Q(t), solve for both P and T at once
+
+totlos.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
+                       tvar="trans", sing.inf=1e+10, B=1000, cl=0.95, ...){
+    newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
+    X <- form.model.matrix(x, newdata)   
+    ntr <- sum(!is.na(trans))
+    n <- nrow(trans)
+    nsq <- n*n
+    dp <- function(t, y, parms, ...){
+        P <- matrix(y[nsq + 1:nsq], nrow=n, ncol=n)
+        haz <- numeric(n)
+        for (i in 1:ntr){
+            hcall <- list(x=t)
+            for (j in seq(along=x$dlist$pars))
+                hcall[[x$dlist$pars[j]]] <- parms$par[i,j]
+            haz[i] <- do.call(x$dfns$h, hcall)
+        }
+        Q <- haz[trans]
+        Q[is.na(Q)] <- 0
+        Q[is.infinite(Q) & Q>0] <- sing.inf
+        Q <- matrix(Q, nrow=n, ncol=n)
+        diag(Q) <- -rowSums(Q)
+        list(cbind(P, P %*% Q))
+    }
+    nt <- length(t)
+    if (nt<1) stop("number of times should be at least one")
+    basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
+    init <- cbind(matrix(0, nrow=n, ncol=n), diag(n))
+    res <- ode(y=init, times=c(0,t), func=dp, parms=list(par=basepar), ...)[-1,-1]
+    res.t <- lapply(split(res,1:nt), function(x)matrix(x[1:nsq],nrow=n))
+    res.p <- lapply(split(res,1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
+    names(res.t) <- names(res.p) <- t
+    if (ci){
+        sim <- normboot.flexsurvreg(x=x, B=B, X=X)
+        if (!is.list(sim)) sim <- list(sim)        
+        res.rep <- array(NA_real_, dim=c(B, nt, 2*n*n))
+        for (i in 1:B){
+            pari <- do.call("rbind", lapply(sim, function(x)x[i,,drop=FALSE]))
+            res.rep[i,,] <- ode(y=init, times=c(0,t), func=dp, parms=list(pars=pari),...)[-1,-1]
+        }
+        resci <- apply(res.rep, c(2,3), quantile, c((1-cl)/2, 1 - (1-cl)/2))
+        res.tl <- lapply(split(resci[1,,],1:nt), function(x)matrix(x[1:nsq],nrow=n))
+        res.tu <- lapply(split(resci[2,,],1:nt), function(x)matrix(x[1:nsq],nrow=n))
+        res.pl <- lapply(split(resci[1,,],1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
+        res.pu <- lapply(split(resci[2,,],1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
+        names(res.tl) <- names(res.tu) <- names(res.pl) <- names(res.pu) <- t
+        for (i in 1:nt){
+            attr(res.t[[i]], "lower") <- res.tl[[i]]
+            attr(res.t[[i]], "upper") <- res.tu[[i]]
+            class(res.t[[i]]) <- "fs.msm.est"
+            attr(res.p[[i]], "lower") <- res.pl[[i]]
+            attr(res.p[[i]], "upper") <- res.pu[[i]]
+            class(res.p[[i]]) <- "fs.msm.est"
+        }
+    }
+    if(nt==1) {res.t <- res.t[[1]]; res.p <- res.p[[1]]}
+    attr(res.t, "P") <- res.p
+    class(res.t) <- "totlos.fs"
+    res.t
+}
+
+print.totlos.fs <- function(x, ...){attr(x, "P") <- NULL; print(unclass(x),...)}
+
 # TODO make pmatrix generic
 # pmatrix.flexsurvreg <- pmatrix.fs
 
@@ -221,8 +288,7 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tco
         cur.st.out <- cur.st[todo]
         cur.t.out <- cur.t[todo]
         done <- numeric()
-        for (i in unique(cur.st[todo])){
-            
+        for (i in unique(cur.st[todo])){            
             if (i %in% transient(trans)) {
                 ## simulate next time and states for people whose current state is i
                 transi <- na.omit(trans[i,])

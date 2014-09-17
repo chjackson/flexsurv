@@ -107,4 +107,10 @@ test_that("Errors in custom distributions",{
     custom.foo <- list(name="foo", pars=c("rate"), transforms=log, inv.transforms=exp, location="rate")
     expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
                  "\"transforms\" must be a list")
+    custom.foo <- list(name="foo", pars=c("rate"), transforms=list(2), inv.transforms=c(exp), location="rate")
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "some of \"transforms\" are not functions")
+    custom.foo <- list(name="foo", pars=c("rate"), transforms=c(log), inv.transforms=list(2), location="rate")
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "some of \"inv.transforms\" are not functions")
 })

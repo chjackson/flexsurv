@@ -220,6 +220,8 @@ check.dlist <- function(dlist){
     if (is.null(dlist$inv.transforms)) stop("inverse transforms not given in custom distribution list")
     if (!is.list(dlist$transforms)) stop("\"transforms\" must be a list of functions")
     if (!is.list(dlist$inv.transforms)) stop("\"inv.transforms\" must be a list of functions")
+    if (!all(sapply(dlist$transforms, is.function))) stop("some of \"transforms\" are not functions")
+    if (!all(sapply(dlist$inv.transforms, is.function))) stop("some of \"inv.transforms\" are not functions")
     if (length(dlist$transforms) != npars) stop("transforms vector of length ",length(dlist$transforms),", parameter names of length ",npars)
     if (length(dlist$inv.transforms) != npars) stop("inverse transforms vector of length ",length(dlist$transforms),", parameter names of length ",npars) #
     for (i in 1:npars){

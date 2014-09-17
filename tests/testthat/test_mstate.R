@@ -25,6 +25,7 @@ test_that("msfit.flexsurvreg",{
 set.seed(1)
 bosms3$x <- rnorm(nrow(bosms3))
 bexp.cov <- flexsurvreg(Surv(years, status) ~ trans + x, data=bosms3, dist="exp")
+bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
 
 test_that("newdata in msfit.flexsurvreg",{
     msfit.flexsurvreg(bexp.cov, newdata=list(x=1), t=c(0,5,10), trans=tmat, variance=FALSE)
@@ -38,11 +39,26 @@ test_that("Errors in msfit.flexsurvreg",{
     expect_error(msfit.flexsurvreg(bexp.cov, newdata=list(x=c(1,2)), t=c(0,5,10), trans=tmat, variance=FALSE), "length of variables .+ must be")   
 })
 
+### TODO test values
+
 test_that("pmatrix.fs",{
     pmatrix.fs(bexp.markov, t=c(5,10), trans=tmat)
+    pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
 })
 
 test_that("pmatrix.simfs",{
-    pmatrix.simfs(bexp, t=5, trans=tmat)
-    pmatrix.simfs(bwei, t=5, trans=tmat)
+    pmatrix.simfs(bexp, t=5, trans=tmat, M=100)
+    pmatrix.simfs(bwei, t=5, trans=tmat, M=100)
+    pmatrix.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
+})
+
+test_that("totlos.fs",{
+    totlos.fs(bexp.markov, t=c(5,10), trans=tmat)
+    totlos.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
+})
+
+test_that("totlos.simfs",{
+    totlos.simfs(bexp, t=5, trans=tmat, M=100)
+    totlos.simfs(bwei, t=5, trans=tmat, M=100)
+    totlos.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
 })

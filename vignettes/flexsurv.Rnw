@@ -1,7 +1,5 @@
 %\VignetteIndexEntry{flexsurv user guide}
 
-%%% TODO look at and cite parfm
-
 \documentclass[nojss,nofooter]{jss}
 \usepackage{bm}
 \usepackage{tabularx}
@@ -27,7 +25,7 @@
   the standard \pkg{survival} package.  Censoring or left-truncation
   are specified in \code{Surv} objects.  Estimates and confidence
   intervals for any function of the model parameters can be printed or
-  plotted.  \pkg{flexsurv} also provides functions for predicting
+  plotted.  \pkg{flexsurv} also provides functions for fitting and predicting
   from fully-parametric multi-state models, and connects with the
   \pkg{mstate} package \citep{mstate:jss}.  This article explains the
   methods and design principles of the package, giving several worked
@@ -97,7 +95,7 @@ based on.  \S\ref{sec:models} gives examples of its use for fitting
 built-in survival distributions with a fixed number of parameters, and
 \S\ref{sec:custom} explains how users can define new distributions.
 \S\ref{sec:adim} concentrates on classes of models where the number of
-parameters can be chosen by the user, such as splines.  In
+parameters can be chosen arbitrarily, such as splines.  In
 \S\ref{sec:multistate} \pkg{flexsurv} is used for fitting and predicting from 
 fully-parametric multi-state models.  Finally \S\ref{sec:extensions}
 suggests some potential future extensions.
@@ -291,7 +289,7 @@ parameters ($\mu$,$\sigma$,$q$), and survivor function
 1 - \Phi(z)  & (q = 0)\\
 \end{array}
 \]
-where $I(\gamma,u) = \int_0^u x^{\gamma-1}\exp(-x)/\Gamma(\gamma)$ is the incomplete gamma function (the cumulative gamma distribution with shape $a$ and scale 1), $\Phi$ is the standard normal cumulative distribution,  $u = \gamma \exp(|q|z)$, $z=(\log(t) - \mu)/\sigma$, and $\gamma=q^{-2}$.   The \citet{prentice:loggamma} parameterisation extends the original one to include a further class of models with negative $q$, and survivor function $I(\gamma,u)$, where $z$ is replaced by $-z$.   This stabilises estimation when the distribution is close to log-normal, since $q=0$ is no longer near the boundary of the parameter space.    In R notation, \footnote{The parameter called $q$ here and in previous literature is called $Q$ in \code{dgengamma} and related functions, since the first argument of a cumulative distribution function is conventionally named \code{q}, for quantile, in R.} the parameter values corresponding to the three special cases are
+where $I(\gamma,u) = \int_0^u x^{\gamma-1}\exp(-x)/\Gamma(\gamma)$ is the incomplete gamma function (the cumulative gamma distribution with shape $\gamma$ and scale 1), $\Phi$ is the standard normal cumulative distribution,  $u = \gamma \exp(|q|z)$, $z=(\log(t) - \mu)/\sigma$, and $\gamma=q^{-2}$.   The \citet{prentice:loggamma} parameterisation extends the original one to include a further class of models with negative $q$, and survivor function $I(\gamma,u)$, where $z$ is replaced by $-z$.   This stabilises estimation when the distribution is close to log-normal, since $q=0$ is no longer near the boundary of the parameter space.    In R notation, \footnote{The parameter called $q$ here and in previous literature is called $Q$ in \code{dgengamma} and related functions, since the first argument of a cumulative distribution function is conventionally named \code{q}, for quantile, in R.} the parameter values corresponding to the three special cases are
 
 \begin{Code}
 dgengamma(x, mu, sigma, Q=0)     ==  dlnorm(x, mu, sigma)                                
@@ -386,14 +384,14 @@ legend("bottomleft", col=c("black","gray","red","red"),
   \label{fig:surv}
 \end{figure}
 
-\code{scale="hazard"} can be used to plot hazards from parametric
+The argument \code{type="hazard"} can be set to plot hazards from parametric
 models against kernel density estimates obtained from \pkg{muhaz}
 \citep{muhaz,mueller:wang}. Figure \ref{fig:haz} shows more clearly that 
 the Weibull
 model is inadequate for the breast cancer data: the hazard must be 
 increasing or decreasing ---
 while the generalized gamma can represent the increase and subsequent
-decline in hazard seen in the data.   Similarly, \code{scale="cumhaz"} plots cumulative hazards. 
+decline in hazard seen in the data.   Similarly, \code{type="cumhaz"} plots cumulative hazards. 
 <<haz,include=FALSE,fig=TRUE>>=
 plot(fs1, type="hazard", col="gray", lwd.obs=2, xlab="Years", ylab="Hazard")
 lines(fs2, type="hazard", col="red", lty=2)
@@ -433,7 +431,8 @@ covariates are not understood by these functions.
 
 This \code{plot()} method is only for casual exploratory use.  For
 publication-standard figures, it is preferable to set up the axes
-beforehand (\code{plot(...,type="n")}), and use the \code{lines()} methods, 
+beforehand (\code{plot(...,type="n")}), and use the \code{lines()} methods for 
+\code{flexsurvreg} objects,
 or construct plots by hand using the data available from 
 \code{summary.flexsurvreg()}.
 
@@ -491,7 +490,7 @@ transformed baseline parameters $\gamma$.
 
 \pkg{flexsurv} is not limited to its built-in distributions.  Any
 survival model of the form (\ref{eq:model}--\ref{eq:lik}) can be
-fitted if we can provide either the density function $f()$ or the
+fitted if the user can provide either the density function $f()$ or the
 hazard $h()$.  Many contributed R packages provide probability density
 and cumulative distribution functions for positive distributions.  
 Though survival models may be more naturally characterised by their
@@ -507,7 +506,7 @@ character string.  The list has the following elements.
 
 \begin{description}
 \item[\code{name}] Name of the distribution.  In the first example below, 
-  we use a logistic distribution, and the name is \code{"llogis"}. 
+  we use a log-logistic distribution, and the name is \code{"llogis"}. 
   Then there is assumed to be at least either 
   
   \begin{itemize}
@@ -515,10 +514,10 @@ character string.  The list has the following elements.
   \item a function to compute the hazard, called \code{hllogis}.
   \end{itemize}
   
-  Ideally there will also be a function called \code{pllogis} for the
+  There should also be a function called \code{pllogis} for the
   cumulative distribution (if \code{d} is given), or \code{H} for the
-  cumulative hazard (to complement \code{h}).  If there is no analytic
-  form for $F(t)$ or $H(t)$, then \pkg{flexsurv} can compute these
+  cumulative hazard (to complement \code{h}), if analytic forms for these are available. 
+    If not, then \pkg{flexsurv} can compute them
   internally by numerical integration, as in \pkg{stgenreg}
   \citep{stgenreg}.  The default options of the built-in R routine
   \code{integrate} for adaptive quadrature are used, though these may
@@ -559,17 +558,18 @@ character string.  The list has the following elements.
   Each distribution will ideally have a heuristic for initialising
   parameters from summaries of the data.  For example, since the
   median of the Weibull is $\mu \log(2)^{1/\alpha}$, a sensible
-  estimate of $\mu$ might be the median log uncensored
+  estimate of $\mu$ might be the median log 
   survival time divided by $\log(2)$, with $\alpha=1$, assuming that
-  in practice the true value of $\alpha$ is not far from 1\footnote{though currently a different method is used in the package, a simplification of the method in survreg.}.  Then
+  in practice the true value of $\alpha$ is not far from 1.  Then
   we would define the function, of one argument \code{t} assumed to be the
   uncensored survival times, returning the initial values for the
-  Weibull \code{shape} and \code{scale} respectively.
+  Weibull \code{shape} and \code{scale} respectively \footnote{though Weibull models in 
+    \code{flexsurvreg} are ``initialised'' by fitting the model with \code{survreg}.}.
 
   \code{inits = function(t){ c(1, median(t[t>0]) / log(2)) } }
   
   More complicated initial value functions may use other data such
-  as the covariate values and censored observations: for an example,
+  as the covariate values and censoring indicators: for an example,
   see the function \code{flexsurv.splineinits} in the package source
   that computes initial values for spline models
   (\S\ref{sec:spline}).
@@ -639,7 +639,7 @@ printed \code{flexsurvreg} object can be interpreted as hazard ratios
 or log hazard ratios without any further transformation.
 Here instead of the density and cumulative distribution functions, we
 provide the hazard and cumulative hazard.\footnote{The \pkg{eha} package 
-needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s does.}
+needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s currently does.}
 <<>>=
 detach("package:eha")
 hweibullPH <- function(x, shape, scale = 1, log=FALSE){
@@ -989,7 +989,7 @@ parameters of particular hazards \citep{demiris2011survival}.
 \label{sec:multistate}
 
 A \emph{multi-state model} represents how an individual moves between
-multiple states through time.  Survival analysis is a special case
+multiple states in continuous time.  Survival analysis is a special case
 with two states, ``alive'' and ``dead''.  \emph{Competing risks} are a
 further special case, where there are multiple causes of death, that
 is, one starting state and multiple possible destination states.  
@@ -1058,7 +1058,7 @@ function $q_{rs}(t)$.
 
 \subsection{Representing multi-state data as survival data}
 
-\citet{putter:mstate} discuss how to implement multi-state models by
+\citet{putter:mstate} explain how to implement multi-state models by
 manipulating the data into the a suitable form for survival modelling
 software --- an overview is given here.  For each permitted $r
 \rightarrow s$ transition in the multi-state model, there is a
@@ -1093,15 +1093,7 @@ coupled with:
   the state $r$ entry time.
 \end{itemize}
 
-The \pkg{mstate} R package \citep{mstate:cmpb,mstate:jss} has a
-utility \code{msprep} to produce data of this form from
-``wide-format'' datasets where rows represent individuals, and times
-of different events appear in different columns. \pkg{msm}
-has a similar utility \code{msm2Surv} for producing the
-required form given longitudinal data where rows represent state
-observations.
-
-The outcomes of two patients in the BOS data are given by
+In this form, the outcomes of two patients in the BOS data are
 <<>>=
 bosms3[18:22,]
 @
@@ -1120,6 +1112,14 @@ onset.  This patient then died, given by the third row with
 \code{status} 1 for \code{trans} 3.  Patient 8 died before BOS onset,
 therefore at 8.2 years their potential BOS onset is censored (fourth
 row), but their death before BOS is observed (fifth row).
+
+The \pkg{mstate} R package \citep{mstate:cmpb,mstate:jss} has a
+utility \code{msprep} to produce data of this form from
+``wide-format'' datasets where rows represent individuals, and times
+of different events appear in different columns. \pkg{msm}
+has a similar utility \code{msm2Surv} for producing the
+required form given longitudinal data where rows represent state
+observations.
 
 \subsection{Fitting parametric multi-state models}
 
@@ -1187,7 +1187,7 @@ Multi-state models are often characterised by their cumulative $r
 \rightarrow s$ transition-specific hazard functions $H_{rs}(t)
 = \int_0^t q_{rs}(u)du$.  For \emph{semi-parametric}
 multi-state models fitted with \code{coxph}, the function \code{msfit}
-in \code{mstate} \citep{mstate:cmpb,mstate:jss} provides
+in \pkg{mstate} \citep{mstate:cmpb,mstate:jss} provides
 piecewise-constant estimates and covariances for $H_{rs}(t)$.
 For the Cox models for the BOS data,
 <<>>=
@@ -1249,7 +1249,7 @@ legend("topleft", inset=c(0,0.3), c("Non-parametric","Exponential","Weibull"),
 \label{fig:bos:cumhaz}
 \end{figure}
 
-\subsection{Prediction from multi-state models}
+\subsection{Prediction from parametric multi-state models}
 
 The \emph{transition probabilities} of the multi-state model are the
 probabilities of occupying each state $s$ at time $t > t_0$, given
@@ -1257,7 +1257,7 @@ that the individual is in state $r$ at time $t_0$.
 \[ P(t_0, t) = P(S(t) = s | S(t_0) = r) \]
 
 \paragraph{Markov models}
-For an time-inhomogeneous Markov model, these are related to the transition
+For a time-inhomogeneous Markov model, these are related to the transition
 intensities via the Kolmogorov forward equation
 \[ \frac{d P(t_0,t)}{dt} = P(t_0,t) Q(t) \] with initial condition
 $P() = I$ \citep{cox:miller}.  This can be solved numerically, as in
@@ -1265,37 +1265,37 @@ $P() = I$ \citep{cox:miller}.  This can be solved numerically, as in
 \code{pmatrix.fs}, using the \pkg{deSolve} package \citep{deSolve}.
 This returns the full transition probability matrix $P(t_0,t)$ from
 time $t_0=0$ to a time or set of times $t$ specified in the call.
+Under the Weibull model, the probability 
+of remaining alive and free
+of BOS is estimated at 0.3 at 5 years and 0.09 at 10 years: 
 <<>>=
 pmatrix.fs(cfwei, t=c(5,10), trans=tmat)
-@
-Confidence intervals can be obtained by simulation from the asymptotic
-distribution of the maximum likelihood estimates --- see
-\code{help(pmatrix.fs)} for full details.
-
-TODO explain results here instead of in mstate bit
-TODO put totlos in.  write totlos markov function.  say msms in development
+@ 
+Confidence intervals can be obtained by simulation from the
+asymptotic distribution of the maximum likelihood estimates --- see
+\code{help(pmatrix.fs)} for full details.  A similar function
+\code{totlos.fs} is provided to estimate the expected total
+amount of time spent in state $s$ up to time $t$ for a process that
+starts in state $r$, defined as $\int_{u=0}^tP(0,u)_{rs}du$.
 
 \paragraph{Semi-Markov models} 
 For semi-Markov models, the Kolmogorov equation does not apply, since
 the transition intensity matrix $Q(t)$ is no longer a deterministic
 function of $t$, but depends on when the transitions occur between
 time $t_0$ and $t$. Predictions can then be made by simulation.
-The function \code{sim.fmsm} produces simulated trajectories from
-parametric semi-Markov models by simulating the time to the next
+The function \code{sim.fmsm} simulates trajectories from
+parametric semi-Markov models by repeatedly generating the time to the next
 transition until the individual reaches an absorbing state or a
 specified censoring time.  This requires the presence of a function to
 generate random numbers from the underlying parametric distribution
 --- and is fast for built-in distributions which use vectorised
 functions such as \code{rweibull}.
 
-\code{pmatrix.simfs} wraps \code{sim.fmsm} to calculate a transition
-probability matrix.  1000 samples from \code{mssample} give estimates
-of transition probabilities that are accurate to within around 0.02,
-and similar to the clock-forward estimates.  However with
-\code{pmatrix.simfs} we can achieve greater precision by simulating
-100 times as many trajectories in a shorter time.  Simulation-based
+\code{pmatrix.simfs} calculates the transition
+probability matrix by using \code{sim.fmsm} to simulate state histories for a large number of individuals, by default 1000000.  Simulation-based
 confidence-intervals are also available in \code{pmatrix.simfs}, at an
-extra computational cost.
+extra computational cost, and the expected total length of stay in each state is
+available from \code{totlos.simfs}.
 <<eval=FALSE>>=
 pmatrix.simfs(crwei, trans=tmat, t=5)
 pmatrix.simfs(crwei, trans=tmat, t=10)
@@ -1303,8 +1303,7 @@ pmatrix.simfs(crwei, trans=tmat, t=10)
 
 \paragraph{Prediction via mstate}
 
-Alternatively, predictions from parametric multi-state
-models can be made by supplying the cumulative transition-specific hazards,
+Alternatively, predictions can be made by supplying the cumulative transition-specific hazards,
 calculated with \code{msfit.flexsurvreg}, to functions in the
 \pkg{mstate} package.
 
@@ -1323,7 +1322,7 @@ For Cox models, the time grid is naturally defined by the observed
 survival times, giving the
 Aalen-Johansen estimator \citep{andersen}.  Here, the probability of
 remaining alive and free of BOS is estimated at 0.27 at 5 years and 0.17
-at 10 years.
+at 10 years.  
 <<>>=
 ptc <- probtrans(mfcox, predt=0, direction="forward")[[1]]
 ptc[c(165, 193),]
@@ -1333,27 +1332,31 @@ suggested by \citet{cook:lawless}.  This
 is achieved by passing the object returned by \code{msfit.flexsurvreg}
 to \code{probtrans} in \pkg{mstate}.  It can be made arbitrarily
 accurate by choosing a finer resolution for the grid of times when 
-calling \code{msfit.flexsurvreg}.  Under the Weibull model, the probability 
-of remaining alive and free
-of BOS is estimated at 0.3 at 5 years and 0.09 at 10 years: the
-discrepancy from the Cox model is more marked at 10 years when the
-data are more sparse (Figure~\ref{fig:bos:cumhaz}).
+calling \code{msfit.flexsurvreg}.  
 <<>>=
 ptw <- probtrans(mfwei, predt=0, direction="forward")[[1]]
 ptw[ptw$time %in% c(5,10),]
 @ 
 \code{pstate1}--\code{pstate3} are close to the first rows of the
-matrices returned by \code{pmatrix.fs}.  While \code{probtrans} is
-slower to achieve a similar level of accuracy to \code{pmatrix.fs} for
-the point estimates, an advantage of \code{probtrans} is that standard
-errors are available more cheaply.
+matrices returned by \code{pmatrix.fs}.  The
+discrepancy from the Cox model is more marked at 10 years when the
+data are more sparse (Figure~\ref{fig:bos:cumhaz}).  A finer time
+grid would be required to achieve a similar level of accuracy to 
+\code{pmatrix.fs} for the point estimates, at the cost of a slower run
+time than \code{pmatrix.fs}.  However, an advantage of 
+\code{probtrans} is that standard errors are available more cheaply.
 
 For semi-Markov models, \pkg{mstate} provides the function
 \code{mssample} to produce both simulated trajectories and transition
 probability matrices from semi-Markov models, given the estimated
 piecewise-constant cumulative hazards \citep{fiocco:mstatepred},
 produced by \code{msfit} or \code{msfit.flexsurvreg}, though this is
-generally less efficient than \code{pmatrix.simfs}.
+generally less efficient than \code{pmatrix.simfs}.  In this example,
+1000 samples from \code{mssample} give estimates
+of transition probabilities that are accurate to within around 0.02.  
+However with
+\code{pmatrix.simfs}, greater precision is achieved by simulating
+100 times as many trajectories in a shorter time.  
 <<eval=FALSE>>=
 mssample(mrcox$Haz, trans=tmat, clock="reset", M=1000, tvec=c(5, 10))
 mssample(mrwei$Haz, trans=tmat, clock="reset", M=1000, tvec=c(5, 10))
@@ -1363,20 +1366,27 @@ mssample(mrwei$Haz, trans=tmat, clock="reset", M=1000, tvec=c(5, 10))
 \section{Potential extensions}
 \label{sec:extensions}
 
+More tools for multi-state modelling would be a useful addition to
+\pkg{flexsurv}.  The \pkg{msm} package currently has a more accessible
+interface for fitting and summarising multi-state models, but it was
+designed mainly for panel data rather than event time data, and
+therefore the event time distributions it fits are relatively
+inflexible.
+
 Models where multiple survival times are assumed to be correlated
 within groups, sometimes called (shared) frailty models
-\citep{hougaard1995frailty}, would be a useful extension to \pkg{flexsurv}.  See,
+\citep{hougaard1995frailty}, would also be a useful development.  See,
 e.g. \citet{crowther2014multilevel} for a recent application based on
 parametric models.  These might be implemented by exploiting
 tractability for specific distributions, such as gamma frailties, or
 by adjusting standard errors to account for clustering, as implemented
 in \code{survreg}.  More complex random effects models would require
-numerical integration, for example, \citet{crowther2014multilevel} provide
-Stata software based on Gauss-Hermite quadrature. Alternatively, a
-probabilistic modelling language such as Stan \citep{stan-manual:2014}
-or BUGS \citep{bugs:book} would be naturally suited to complex
-extensions such as random effects on multiple parameters or multiple
-hierarchical levels.
+numerical integration, for example, \citet{crowther2014multilevel}
+provide Stata software based on Gauss-Hermite
+quadrature. Alternatively, a probabilistic modelling language such as
+Stan \citep{stan-manual:2014} or BUGS \citep{bugs:book} would be
+naturally suited to complex extensions such as random effects on
+multiple parameters or multiple hierarchical levels.
 
 \pkg{flexsurv} is intended as a platform for parametric survival
 modelling.  Extensions of the software to deal with different models
