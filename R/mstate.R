@@ -254,6 +254,11 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
     ## returns (as list) data frame with nt rows, npars cols
 }
 
+## TODO Unclear how to check for semi Markov vs nonhomogenous Markov
+## model.  attr(model.response(model.frame(x)), "type") will be
+## "counting" for a nonhomogeneous model, but also if there are
+## time-dependent covariates
+
 sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tcovs=NULL, debug=FALSE){
     if (length(t)==1) t <- rep(t, M)
     else if (length(t)!=M) stop("length of t should be 1 or M=",M)

@@ -1,14 +1,3 @@
-why not just run survreg to get inits for Weibull???!
-
-Initial values.  Why exclude right-censored times?  
-For interval-censored, take as halfway in interval
-
-document return value for summary fn: vector of length t?
-
-error if using pmatrix.fs with a SMM
-
-quantiles at 0 and 1 are min and max: use in flexsurvspline   
-
 Make sure all features have tests
 
 

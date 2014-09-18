@@ -51,13 +51,17 @@
     estimates tend to be unstable, and these plots are intended just to
     roughly indicate the shape of the hazards through time.  The \code{min.time} and \code{max.time}
     options to \code{\link[muhaz]{muhaz}} may sometimes need to be
-    passed as arguments to \code{\link{plot.flexsurvreg}} to avoid an error here.
+    passed as arguments to \code{\link{plot.flexsurvreg}} to avoid an
+    error here.
+
+    Ignored if \code{"fn"} is specified.
   }
   \item{fn}{
     Custom function of the parameters to summarise against time.  The first two arguments
     of the function must be \code{t} representing time, and \code{start}
-    representing left-truncation points,  and there must be a {\dots}
-    argument representing the parameters of the distribution.   
+    representing left-truncation points, and any remaining arguments
+    must be parameters of the distribution.  It
+    should return  a vector of the same length as \code{t}.
   }
   \item{t}{ Vector of times to plot fitted values for, see \code{\link{summary.flexsurvreg}}. }
   \item{start}{ Left-truncation points, see \code{\link{summary.flexsurvreg}}. }

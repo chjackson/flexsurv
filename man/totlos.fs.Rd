@@ -1,16 +1,16 @@
-\name{pmatrix.fs}
-\alias{pmatrix.fs}
-\title{Transition probability matrix from a fully-parametric,
+\name{totlos.fs}
+\alias{totlos.fs}
+\title{Total length of stay in particular states for a fully-parametric,
   time-inhomogeneous Markov multi-state model}
 \description{
-  The transition probability matrix for time-inhomogeneous Markov
-  multi-state models fitted to
-  time-to-event data with \code{\link{flexsurvreg}}.  This has \eqn{r,s}
-  entry giving the probability that an individual is in state \eqn{s} at
-  time \eqn{t}, given they are in state \eqn{r} at time \eqn{0}. 
+  The matrix whose \eqn{r,s} entry is the expected amount of time
+  spent in state \eqn{s} for a time-inhomogeneous, continuous-time Markov
+  multi-state process that starts in state \eqn{r}, up to a maximum time
+  \eqn{t}. This is defined
+  as the integral of the corresponding transition probability up to that time.
 }
 \usage{
-  pmatrix.fs(x, trans, t=1, newdata=NULL, ci=FALSE, tvar="trans",
+  totlos.fs(x, trans, t=1, newdata=NULL, ci=FALSE, tvar="trans",
              sing.inf=1e+10, B=1000, cl=0.95, ...)
 }
 \arguments{
@@ -23,8 +23,7 @@
   }
   \item{trans}{Matrix indicating allowed transitions.  See
     \code{\link{msfit.flexsurvreg}}.}
-  \item{t}{Time or vector of times to predict state occupancy
-    probabilities for.}
+  \item{t}{Time or vector of times to predict up to.  Must be finite.}
   \item{newdata}{A data frame specifying the values of covariates in
     the fitted model, other than the transition number.  See
     \code{\link{msfit.flexsurvreg}}. 
@@ -49,27 +48,37 @@
   \item{...}{Arguments passed to \code{\link{ode}} in \pkg{deSolve}.}
 }
 \value{
-  The transition probability matrix, if \code{t} is of length 1, or a
+  The matrix of lengths of stay \eqn{T(t)}, if \code{t} is of length 1, or a
   list of matrices if \code{t} is longer.
 
   If \code{ci=TRUE}, each element has attributes \code{"lower"} and
   \code{"upper"} giving matrices of the corresponding confidence limits.
-  These are formatted for printing but may be extracted using \code{attr()}.
+  These are formatted for printing but may be extracted using
+  \code{attr()}.
+
+  The result also has an attribute \code{P} giving the transition
+  probability matrices, since these are unavoidably computed as a side
+  effect.  These are suppressed for printing, but can be extracted with
+  \code{attr(...,"P")}.
 }
 \details{
-  This is computed by solving the Kolmogorov forward differential
-  equation numerically, using the methods in the \code{\link{deSolve}}
-  package.    The equation is
+  This is computed by solving a second order extension of the Kolmogorov
+  forward differential equation numerically, using the methods in the
+  \code{\link{deSolve}} package.  The equation is expressed as a linear
+  system
 
+  \deqn{\frac{dT(t)}{dt} = P(t)}
   \deqn{\frac{dP(t)}{dt} = P(t) Q(t)}
 
-  where \eqn{P(t)} is the transition probability matrix for time
-  \eqn{t}, and \eqn{Q(t)} is the transition hazard or intensity as a
-  function of \eqn{t}.  The initial condition is \eqn{P(0) = I}.
+  and solved for \eqn{T(t)} and \eqn{P(t)} simultaneously, where
+  \eqn{T(t)} are the total lengths of stay, \eqn{P(t)} is the transition
+  probability matrix for time \eqn{t}, and \eqn{Q(t)} is the transition
+  hazard or intensity as a function of \eqn{t}.  The initial conditions
+  are \eqn{T(0) = 0} and \eqn{P(0) = I}.
 
   Note that the package \pkg{msm} has a similar method
-  \code{pmatrix.msm}.  \code{pmatrix.fs} should give the same results as
-  \code{pmatrix.msm} when both of these conditions hold:
+  \code{totlos.msm}.  \code{totlos.fs} should give the same results as
+  \code{totlos.msm} when both of these conditions hold:
 
   \itemize{
     \item the time-to-event distribution is exponential for all
@@ -88,20 +97,29 @@
 
   This function is only valid for Markov ("clock-forward") multi-state
   models, though no warning or error is currently given if the model is
-  not Markov.  See \code{\link{pmatrix.simfs}} for the equivalent for
+  not Markov.   See \code{\link{totlos.simfs}} for the equivalent for
   semi-Markov ("clock-reset") models.
 }
 \seealso{
-  \code{\link{pmatrix.simfs}}, \code{\link{msfit.flexsurvreg}}.
+  \code{\link{totlos.simfs}}, \code{\link{pmatrix.fs}}, \code{\link{msfit.flexsurvreg}}.
 }
 \examples{
 # BOS example in vignette, and in msfit.flexsurvreg
 bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans,
                     data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
-# more likely to be dead (state 3) as time moves on, or if start with
-# BOS (state 2)
-pmatrix.fs(bexp, t=c(5,10), trans=tmat)
+
+# predict 4 years spent without BOS, 3 years with BOS, before death
+# As t increases, this should converge
+
+totlos.fs(bexp, t=10, trans=tmat)
+totlos.fs(bexp, t=1000, trans=tmat)
+totlos.fs(bexp, t=c(5,10), trans=tmat)
+
+# Answers should match results in help(totlos.simfs) up to Monte Carlo
+# error there / ODE solving precision here, since with an exponential
+# distribution, the "semi-Markov" model there is the same as the Markov
+# model here
 }
 \author{Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.}
 \keyword{models,survival}

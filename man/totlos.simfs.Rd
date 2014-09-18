@@ -69,7 +69,10 @@
   currently very inefficient, so that looping over \code{M} will be very
   slow.
 
-  The equivalent for time-inhomogeneous Markov models is currently not implemented.
+  The equivalent function for time-inhomogeneous Markov models is
+  \code{\link{totlos.fs}}.  Note neither of these functions give errors
+  or warnings if used with the wrong type of model, but the results will
+  be invalid.
 }
 \seealso{
   \code{\link{pmatrix.simfs}},\code{\link{sim.fmsm}},\code{\link{msfit.flexsurvreg}}.

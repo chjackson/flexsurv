@@ -59,13 +59,17 @@
     \code{"cumhaz"} for cumulative hazards.
 
     \code{"hazard"} for hazards.
-  }
+
+    Ignored if \code{"fn"} is specified.
+}
   \item{fn}{
     Custom function of the parameters to summarise against time.  This
     has optional first two arguments \code{t} representing time, and
     \code{start}
-    representing left-truncation points.  The other arguments should be the
-    parameters of the distribution.   
+    representing left-truncation points, and any remaining arguments
+    must be parameters of the distribution. 
+It should return a vector of the
+    same length as \code{t}.
   }
   \item{t}{ Times to calculate fitted values for. By default, these are the
     sorted unique observation (including censoring) times in the

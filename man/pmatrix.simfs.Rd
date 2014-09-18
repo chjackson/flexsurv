@@ -69,6 +69,8 @@
   \code{\link{pmatrix.fs}} is a more efficient method based on solving
   the Kolmogorov forward equation numerically, which requires the
   multi-state model to be Markov.
+  No error or warning is given if running \code{\link{pmatrix.simfs}} with a Markov
+  model, but this is still invalid. 
 }
 \seealso{
   \code{\link{pmatrix.fs}},\code{\link{sim.fmsm}},\code{\link{msfit.flexsurvreg}}.

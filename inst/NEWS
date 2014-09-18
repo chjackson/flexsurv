@@ -1,9 +1,14 @@
 -*- text -*-
 
-Version 0.4 (2014-08-19)
+Version 0.5 (2014-09-22)
 -----------
 
+* Major new release, so version number bumped from 0.3 to 0.5
+
 * New package vignettes: a user guide and a vignette of examples.
+
+* Development moved from r-forge to
+  https://github.com/chjackson/flexsurv-dev.
 
 Spline models and ancillary covariates:
 
@@ -29,17 +34,18 @@ Spline models and ancillary covariates:
 Other new modelling features:
 
 * Several utilities for parametric multi-state modelling, including
-  transition probabilities and simulation ("pmatrix.fs",
-  "pmatrix.simfs", "sim.fmsm").  An "msfit.flexsurvreg" method also
-  gives cumulative incidences in the format of the "mstate" package.
+  transition probabilities and simulation ("pmatrix.fs", "totlos.fs",
+  "sim.fmsm","pmatrix.simfs", "totlos.simfs").  An "msfit.flexsurvreg"
+  method also gives cumulative incidences in the format of the
+  "mstate" package.
 
 * Interval censoring supported in the Surv() response.
 
 * Relative survival models, using the "bhazard" argument to
   flexsurvreg to specify the expected mortality rate.
 
-* flexsurvreg now uses survreg to fit Weibull, exponential and
-  log-normal models, unless there is left-truncation.
+* flexsurvreg now uses survreg internally to fit Weibull, exponential
+  and log-normal models, unless there is left-truncation.
 
 Custom distributions:
 
@@ -65,8 +71,9 @@ Output functions:
 * New "newdata" argument to summary.flexsurvreg and plot.flexsurvreg
   for an easier way of supplying covariate values.
 
-* User-defined summary functions can be used in summary.flexsurvreg,
-  as an alternative to survival, hazard or cumulative hazard.
+* User-defined summary functions can be used in summary.flexsurvreg
+  and plot.flexsurvreg as an alternative to survival, hazard or
+  cumulative hazard.
 
 * New function "normboot.flexsurvreg" to simulate parameters from the
   asymptotic normal distribution of their estimates.  Used for
@@ -108,6 +115,7 @@ Distribution functions:
 
 * basis() and fss() functions for the natural cubic spline basis made
   available to users.
+
 
 
 Version 0.3.1 (2014-02-14)
