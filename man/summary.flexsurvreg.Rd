@@ -117,23 +117,15 @@ It should return a vector of the
   plot these model-based summaries against empirical summaries such as
   Kaplan-Meier curves, to diagnose model fit.
 
-  Confidence intervals for models fitted with \code{\link{flexsurvreg}}
+  Confidence intervals 
   are obtained by random sampling from the asymptotic normal
   distribution of the maximum likelihood estimates (see, e.g. Mandel
-  (2013)).  For models fitted
-  with \code{\link{flexsurvreg}}, intervals for the hazard are obtained
-  in this way, whereas intervals for the survival and cumulative hazard
-  are obtained analytically as in Royston and Parmar (2002).
+  (2013)).  
 }
 \seealso{
   \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
 }
 \references{
-  Royston, P. and Parmar, M. (2002).  Flexible parametric
-  proportional-hazards and proportional-odds models for censored survival
-  data, with application to prognostic modelling and estimation of
-  treatment effects. Statistics in Medicine 21(1):2175-2197.
-
   Mandel, M. (2013). "Simulation based confidence intervals for
   functions with complicated derivatives." The American Statistician (in
   press).

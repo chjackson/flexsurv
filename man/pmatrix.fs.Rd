@@ -74,9 +74,10 @@
   \itemize{
     \item the time-to-event distribution is exponential for all
     transitions, thus the \code{flexsurvreg} model was fitted with
-    \code{dist="exp"}.
+    \code{dist="exp"} and the model is time-homogeneous.
     \item the \pkg{msm} model was fitted with \code{exacttimes=TRUE},
-    thus all the event times are known.
+    thus all the event times are known, and there are no time-dependent
+    covariates.
   }
 
   \pkg{msm} only allows exponential or piecewise-exponential
@@ -92,7 +93,7 @@
   semi-Markov ("clock-reset") models.
 }
 \seealso{
-  \code{\link{pmatrix.simfs}}, \code{\link{msfit.flexsurvreg}}.
+  \code{\link{pmatrix.simfs}}, \code{\link{totlos.fs}}, \code{\link{msfit.flexsurvreg}}.
 }
 \examples{
 # BOS example in vignette, and in msfit.flexsurvreg

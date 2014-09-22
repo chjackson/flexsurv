@@ -459,12 +459,12 @@ other distributions.
 The argument \code{t} (or \code{start}) can be omitted from \code{median.weibull}, because the median is a time-constant function of the parameters, unlike the
 survival or hazard.
 
-\code{10000} random samples are drawn to produce
-a slightly more precise confidence interval than the default --- users
-should adjust this until the desired level of precision is obtained.
-A useful future extension of the package would be to allow users to 
-supply derivatives of their custom summary function if possible, so that the 
-delta method can be used to obtain approximate confidence intervals 
+\code{10000} random samples are drawn to produce a slightly more
+precise confidence interval than the default --- users should adjust
+this until the desired level of precision is obtained.  A useful
+future extension of the package would be to employ user-supplied (or
+built-in) derivatives of summary functions if possible, so that the
+delta method can be used to obtain approximate confidence intervals
 without simulation.
 
 

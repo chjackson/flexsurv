@@ -44,7 +44,8 @@
   Multi-state models for time-to-event data can also be fitted with the
   same functions.  Predictions from those models can then be made
   using the functions \code{\link{pmatrix.fs}},
-  \code{\link{pmatrix.simfs}} or \code{\link{sim.fmsm}}, or
+  \code{\link{pmatrix.simfs}}, \code{\link{totlos.fs}},
+  \code{\link{totlos.simfs}}, or \code{\link{sim.fmsm}}, or
   alternatively by \code{\link{msfit.flexsurvreg}} followed by
   \code{mssample} or \code{probtrans} from the package
   \pkg{mstate}.
