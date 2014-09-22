@@ -176,9 +176,10 @@ DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"
 
 deriv.test <- function(optpars, Y, X, weights, bhazard, dlist, inits, dfns, aux, mx, fixedpars){
     an.d <- Dminusloglik.flexsurv(optpars, Y, X, weights, bhazard, dlist, inits, dfns, aux, mx, fixedpars)
-    require(numDeriv)
-    num.d <- grad(minusloglik.flexsurv, optpars, Y=Y, X=X, weights=weights, bhazard=bhazard,
-                  dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+    if (requireNamespace("numDeriv", quietly = TRUE))
+        num.d <- numDeriv::grad(minusloglik.flexsurv, optpars, Y=Y, X=X, weights=weights, bhazard=bhazard,
+                                dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+    else stop("\"numDeriv\" package not available")
     res <- cbind(analytic=an.d, numeric=as.vector(num.d))
     rownames(res) <- names(optpars)
     list(res=res, error=mean(abs(an.d - num.d)))

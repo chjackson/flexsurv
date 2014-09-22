@@ -893,7 +893,7 @@ An alternative to the Royston-Parmar spline model is to model the log
 \emph{hazard} as a function of time instead of the log cumulative
 hazard.  \citet{stgenreg} demonstrate this model using the Stata
 \pkg{stgenreg} package.  An advantage explained by
-\citet{royston:lambert:book} is that when there are when there are
+\citet{royston:lambert:book} is that when there are
 multiple time-dependent effects, time-dependent hazard ratios can be
 interpreted independently of the values of other covariates.
 
