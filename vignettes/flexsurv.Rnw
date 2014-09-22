@@ -797,7 +797,7 @@ available where necessary.
 plot(sp1, type="hazard", ylim=c(0, 0.5), xlab="Years", ylab="Hazard")
 lines(sp2, type="hazard", col="red", lty=2)
 lines(fs2, type="hazard", col="blue")
-legend("topright", c("black","red","red","blue"), lty=c(1,1,2,1), lwd=rep(2,4),
+legend("topright", col=c("black","red","red","blue"), lty=c(1,1,2,1), lwd=rep(2,4),
        c("Kernel density estimate","Spline (proportional odds)",
          "Spline (time-varying)","Generalized gamma (time-varying)"))
 @   
@@ -1412,7 +1412,7 @@ new class of models would ideally come with
   (\S\ref{sec:custom}).
 \end{itemize}
 
-The examples in this paper were run using version 0.5 of \pkg{flexsurv}, which will eventually be available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
+The examples in this paper were run using version 0.5 of \pkg{flexsurv}, available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
 
 \appendix
 \section{Acknowledgements}

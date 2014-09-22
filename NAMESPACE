@@ -65,6 +65,7 @@ unroll.function
 importFrom(graphics, plot)
 importFrom(survival, Surv)
 importFrom(survival, survfit)
+importFrom(survival, coxph)
 importFrom(muhaz, muhaz)
 importFrom(mvtnorm, rmvnorm)
 importFrom(deSolve, ode)

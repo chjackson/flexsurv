@@ -35,14 +35,13 @@ test_that("Analytic derivatives match numeric",{
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ shape(factor(ovarian$rx)), dist="weibull")    
     expect_that(fitw, has_accurate_derivs())
 
-    fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ strata(factor(ovarian$rx)), dist="weibull")    
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ factor(ovarian$rx), dist="weibull")    
 
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ factor(ovarian$resid.ds) + shape(factor(ovarian$rx)), inits=c(0.1,0.1,0.2,0.3), dist="weibull")    
     expect_that(fitw, has_accurate_derivs())
 
     ov2 <- ovarian[ovarian$futime>200,]
-    fitw <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="weibull")
+    fitw <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx), dist="weibull")
     expect_that(fitw, has_accurate_derivs())
 
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz", inits=c(0.001, 0.0005), fixedpars=TRUE)

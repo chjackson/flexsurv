@@ -313,19 +313,6 @@ test_that("Interval censoring",{
 
 })
 
-test_that("NaNs in fitting Weibull distribution",{
-    fit <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibull")
-    ## Can avoid these NaNs using alternative hyperbolic sin scale to optimise on
-    custom.weibull <- flexsurv.dists$weibull
-    custom.weibull$transforms <- c(logh, logh)
-    custom.weibull$inv.transforms <- c(exph, exph)
-    fit2 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist=custom.weibull, fixedpars=FALSE)
-
-    expect_equal(fit$loglik, fit2$loglik, tol=1e-06)
-    ## MLEs are the same, but covariance matrix is different.  is small sample
-    ## distribution of MLE differently wrong if optimise on a different scale?
-})
-
 test_that("inits",{
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma", inits=c(6,1,-1))
     fitg2 <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma")
