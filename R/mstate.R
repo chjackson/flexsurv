@@ -244,7 +244,7 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
     } else if (inherits(x, "flexsurvreg")) {
         dat <- as.list(newdata[transi,])
     }
-    for (i in tcovs) { dat[[i]] <- dat[[i]] + t}
+    for (i in tcovs) { dat[[i]] <- dat[[i]] + 0  } # t}
     dat <- as.data.frame(dat)
     X <- form.model.matrix(x, dat)
     beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
@@ -302,7 +302,7 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tco
                 ## simulate times to all potential destination states
                 for (j in seq_along(transi)) {         
                     if (length(tcovs)>0){
-                        basepars <- form.basepars.tcovs(x, j, newdata, tcovs, cur.t.out)
+                        basepars <- form.basepars.tcovs(x, transi[j], newdata, tcovs, cur.t.out)
                     } else 
                         basepars <- as.list(as.data.frame(basepars.mat)[transi[j],])
                     fncall <- c(list(n=ni), basepars, xbase$aux)
