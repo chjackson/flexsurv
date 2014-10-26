@@ -89,6 +89,7 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     }
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
+    ## TODO equivalent for model list format
     basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
     res <- ode(y=diag(n), times=c(0,t), func=dp, parms=list(par=basepar), ...)[-1,-1]
     res <- lapply(split(res,1:nt), function(x)matrix(x,nrow=n))
@@ -244,7 +245,7 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
     } else if (inherits(x, "flexsurvreg")) {
         dat <- as.list(newdata[transi,])
     }
-    for (i in tcovs) { dat[[i]] <- dat[[i]] + t}
+    for (i in tcovs) { dat[[i]] <- dat[[i]] + 0  } # t}
     dat <- as.data.frame(dat)
     X <- form.model.matrix(x, dat)
     beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
@@ -302,7 +303,7 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tco
                 ## simulate times to all potential destination states
                 for (j in seq_along(transi)) {         
                     if (length(tcovs)>0){
-                        basepars <- form.basepars.tcovs(x, j, newdata, tcovs, cur.t.out)
+                        basepars <- form.basepars.tcovs(x, transi[j], newdata, tcovs, cur.t.out)
                     } else 
                         basepars <- as.list(as.data.frame(basepars.mat)[transi[j],])
                     fncall <- c(list(n=ni), basepars, xbase$aux)

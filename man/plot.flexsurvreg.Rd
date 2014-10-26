@@ -5,6 +5,8 @@
 \description{
   Plot fitted survival, cumulative hazard or hazard from a parametric
   model against nonparametric estimates to diagnose goodness-of-fit.
+  Alternatively plot a user-defined function of the model parameters
+  against time.
 }
 \usage{
 \method{plot}{flexsurvreg}(x, newdata=NULL, X=NULL, type="survival",
@@ -38,7 +40,7 @@
   }  
   \item{X}{ Alternative way to supply covariate values, as a model
     matrix.   See \code{\link{summary.flexsurvreg}}.  \code{newdata} is
-    an easier way to do this. 
+    an easier way. 
   }
   \item{type}{ \code{"survival"} for survival, to be plotted against
     Kaplan-Meier estimates from \code{\link[survival]{plot.survfit}}.
@@ -61,7 +63,7 @@
     of the function must be \code{t} representing time, and \code{start}
     representing left-truncation points, and any remaining arguments
     must be parameters of the distribution.  It
-    should return  a vector of the same length as \code{t}.
+    should return a vector of the same length as \code{t}.
   }
   \item{t}{ Vector of times to plot fitted values for, see \code{\link{summary.flexsurvreg}}. }
   \item{start}{ Left-truncation points, see \code{\link{summary.flexsurvreg}}. }

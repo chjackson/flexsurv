@@ -1,8 +1,8 @@
 \name{sim.fmsm}
 \alias{sim.fmsm}
-\title{Simulate paths through a fully parametric multi-state model}
+\title{Simulate paths through a fully parametric semi-Markov multi-state model}
 \description{
-  Simulate changes of state and transition times from a fully parametric
+  Simulate changes of state and transition times from a semi-Markov
   multi-state model fitted using \code{\link{flexsurvreg}}.
 }
 \usage{
@@ -11,7 +11,15 @@ sim.fmsm(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans",
 }
 \arguments{
   \item{x}{A model fitted with \code{\link{flexsurvreg}}. See
-\code{\link{msfit.flexsurvreg}} for the required form of the model and the data.}
+\code{\link{msfit.flexsurvreg}} for the required form of the model and
+the data.
+
+Alternatively \code{x} can be a list of fitted \code{\link{flexsurvreg}}
+model objects.  The \code{i}th element of this list is the model
+corresponding to the \code{i}th transition in \code{trans}.  This is a
+more efficient way to fit a multi-state model, but only valid if the
+parameters are different between different transitions.
+}
   \item{trans}{Matrix indicating allowed transitions.  See \code{\link{msfit.flexsurvreg}}.}
   \item{t}{Time, or vector of times for each of the \code{M} individuals, to simulate trajectories until.}
   \item{newdata}{A data frame specifying the values of covariates in the
@@ -50,9 +58,14 @@ called \code{dist} say, then there must be a function called (something like)
 format as standard R functions such as \code{\link{rweibull}}, with first argument
 \code{n}, and remaining arguments giving the parameters of the
 distribution.   It must be vectorised with respect to the parameter arguments.
+
+This function is only valid for semi-Markov ("clock-reset") models,
+though no warning or error is currently given if the model is not of
+this type. An equivalent for time-inhomogeneous Markov ("clock-forward")
+models has currently not been implemented.
 }
 \seealso{
-\code{\link{pmatrix.simfs}}
+\code{\link{pmatrix.simfs}},\code{\link{totlos.simfs}}
 }
 \examples{
 bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp")

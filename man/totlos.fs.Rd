@@ -71,7 +71,7 @@
   \deqn{\frac{dP(t)}{dt} = P(t) Q(t)}
 
   and solved for \eqn{T(t)} and \eqn{P(t)} simultaneously, where
-  \eqn{T(t)} are the total lengths of stay, \eqn{P(t)} is the transition
+  \eqn{T(t)} is the matrix of total lengths of stay, \eqn{P(t)} is the transition
   probability matrix for time \eqn{t}, and \eqn{Q(t)} is the transition
   hazard or intensity as a function of \eqn{t}.  The initial conditions
   are \eqn{T(0) = 0} and \eqn{P(0) = I}.
@@ -83,9 +83,9 @@
   \itemize{
     \item the time-to-event distribution is exponential for all
     transitions, thus the \code{flexsurvreg} model was fitted with
-    \code{dist="exp"}.
+    \code{dist="exp"}, and is time-homogeneous.
     \item the \pkg{msm} model was fitted with \code{exacttimes=TRUE},
-    thus all the event times are known.
+    thus all the event times are known, and there are no time-dependent covariates.
   }
 
   \pkg{msm} only allows exponential or piecewise-exponential

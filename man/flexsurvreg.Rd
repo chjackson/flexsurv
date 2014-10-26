@@ -5,9 +5,8 @@
   Flexible parametric regression for time-to-event data
 }
 \description{
-  Parametric regression for time-to-event data using the generalized F
-  and other flexible distributions.  Users may easily extend this
-  function with their own survival distributions.
+  Parametric modelling or regression for time-to-event data.  Several built-in
+  distributions are available, and users may supply their own. 
 }
 \usage{
 flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
@@ -106,11 +105,14 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
 
     \code{"exponential"} and \code{"lognormal"} can be used as aliases
     for \code{"exp"} and \code{"lnorm"}, for compatibility with
-    \code{\link{survreg}}.   
+    \code{\link{survreg}}.
 
     Alternatively, \code{dist} can be a list specifying a custom
     distribution.  See section ``Custom distributions'' below for how to
     construct this list.
+
+    Very flexible spline-based distributions can also be fitted with
+    \code{\link{flexsurvspline}}.
 
     The parameterisations of the built-in distributions used here are
     the same as in their built-in distribution functions:
@@ -126,7 +128,9 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     \code{\link{survreg}} to obtain the maximum likelihood estimates,
     then calling \code{\link{optim}} to double-check convergence and
     obtain the covariance matrix for \code{\link{flexsurvreg}}'s
-    preferred parameterisation.  The Weibull parameterisation is
+    preferred parameterisation.
+
+    The Weibull parameterisation is
     different from that in \code{\link[survival]{survreg}}, instead it
     is consistent with \code{\link{dweibull}}.  The \code{"scale"}
     reported by \code{\link[survival]{survreg}} is equivalent to
@@ -140,14 +144,14 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     mean, is modelled on covariates.
   }
   \item{inits}{
-    A numeric vector giving initial values for each unknown parameter.
+    An optional numeric vector giving initial values for each unknown parameter.
     These are numbered in the order: baseline parameters (in the order
     they appear in the distribution function, e.g. shape before scale in
     the Weibull), covariate effects on the location parameter, covariate
     effects on the remaining parameters.  This is the same order as the printed estimates in the fitted model.
     
     If not specified, default initial values are chosen from a simple
-    summary of the uncensored survival time, for example the mean
+    summary of the survival or censoring times, for example the mean
     is often used to initialize scale parameters.  See the object
     \code{flexsurv.dists} in the source for the exact methods used.
     If the likelihood surface may be uneven, it is advised to run
@@ -189,7 +193,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     likelihood estimates, by default 0.95.
   }
   \item{integ.opts}{ List of named arguments to pass to
-    \code{\link{integrate}}, if a custom density is provided without its
+    \code{\link{integrate}}, if a custom density or hazard is provided without its
     cumulative version.  For example,
 
     \code{integ.opts = list(rel.tol=1e-12)}
@@ -197,12 +201,12 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
   \item{sr.control}{For the models which use \code{\link{survreg}}
     to find the maximum likelihood estimates (Weibull,
     exponential, log-normal), this list is passed as
-    the \code{control} argument to \code{survreg}.}
+    the \code{control} argument to \code{\link{survreg}}.}
   \item{...}{Optional arguments to the general-purpose \R
     optimisation routine \code{\link{optim}}.  For example, the BFGS
     optimisation algorithm is the default in \code{\link{flexsurvreg}},
     but this can be changed, for example to \code{method="Nelder-Mead"} which can be
-    more robust to poor initial values.
+    more robust to poor initial values. 
     If the optimisation fails to converge, consider normalising the
     problem using, for example, \code{control=list(fnscale = 2500)}, for
     example, replacing 2500 by a number of the order of magnitude of the
@@ -282,7 +286,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
       \code{pdist} which defines the probability distribution or
       cumulative density, and in case b) there should be a function
       called \code{Hdist} defining the cumulative hazard.  If these
-      additional functions are not provided, flexsurv attempts to
+      additional functions are not provided, \pkg{flexsurv} attempts to
       automatically create them by numerically integrating the density
       or hazard function.  However, model fitting will be much slower,
       or may not even work at all, if the analytic versions of these

@@ -24,16 +24,17 @@
 \subsection{Proportional hazards generalized gamma model}
 
 \citet{stgenreg} discuss using the \pkg{stgenreg} Stata package to
-construct a proportional hazards parameterisation of the generalised
-gamma.  A similar trick can be used in \pkg{flexsurv}.  A
-four-parameter custom distribution is created by defining its hazard
-(and cumulative hazard) functions.  These are obtained by multiplying
-the built-in functions \code{hgengamma} and \code{Hgengamma} by a
-dummy parameter, which is used as the location parameter of the new
-distribution.  The intercept of this parameter is fixed at 1, so that
-the new model is no more complex than the generalized gamma AFT model
-\code{fs3}, but covariate effects on the dummy parameter are now
-interpreted as hazard ratios.
+construct a proportional hazards parameterisation of the
+three-parameter generalised gamma distribution.  A similar trick can
+be used in \pkg{flexsurv}.  A four-parameter custom distribution is
+created by defining its hazard (and cumulative hazard) functions.
+These are obtained by multiplying the built-in functions
+\code{hgengamma} and \code{Hgengamma} by an extra dummy parameter,
+which is used as the location parameter of the new distribution.  The
+intercept of this parameter is fixed at 1 when calling
+\code{flexsurvreg}, so that the new model is no more complex than the
+generalized gamma AFT model \code{fs3}, but covariate effects on the
+dummy parameter are now interpreted as hazard ratios.
 
 <<>>=
 library(flexsurv)
@@ -58,6 +59,9 @@ fs7 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc,
                    dist=custom.gengammaPH, fixedpars=1)
 @ 
 
+
+
+\section{Examples of custom model summaries}
 
 \subsection{Plotting a hazard ratio against time}
 

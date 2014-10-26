@@ -1,11 +1,11 @@
 \name{msfit.flexsurvreg}
 \title{Cumulative intensity function for parametric multi-state
   models}
-\alias{msfit}
 \alias{msfit.flexsurvreg}
 \concept{Survival}
 \description{
-  Cumulative intensity function for fully-parametric multi-state or
+  Cumulative transition-specific intensity/hazard functions for
+  fully-parametric multi-state or
   competing risks models, using a piecewise-constant approximation
   that will allow prediction using the functions in the \pkg{mstate}
   package. 
@@ -23,11 +23,10 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
     The model should have been fitted to data consisting of one row for
     each observed transition and additional rows corresponding to
     censored times to competing transitions.  This is the "long" format,
-    or counting process format, as explained in
-    \code{\link[mstate]{msprep}}.   The \pkg{mstate} package
-    documentation describes how to fit Cox models to this form of data. 
+    or counting process format, as explained in the \pkg{flexsurv}
+    vignette.
 
-    The model should contain a categorical variable indicating the
+    The model should contain a categorical covariate indicating the
     transition.  In \code{flexsurv} this variable can have any name,
     indicated here by the \code{tvar} argument.  In the Cox
     models demonstrated by \pkg{mstate} it is usually included in model
@@ -49,8 +48,8 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
     the fitted model, other than the transition number.  This must be
     specified if there are other covariates. The variable names should
     be the same as those in the fitted model formula.   There must be
-    either one value per covariate (the typical situation) or n values
-    per covariate, a different one for each of the n allowed
+    either one value per covariate (the typical situation) or \eqn{n} values
+    per covariate, a different one for each of the \eqn{n} allowed
     transitions.  }
 
   \item{variance}{ Calculate the variances and covariances of the
@@ -64,7 +63,11 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
     sequence of integers starting from 1.}
 
   \item{trans}{Matrix indicating allowed transitions in the multi-state
-    model, in the format understood by \pkg{mstate}.}
+    model, in the format understood by \pkg{mstate}: a matrix of
+    integers whose \eqn{r,s} entry is \eqn{i} if the \eqn{i}th
+    transition type (reading across rows) is \eqn{r,s}, and has
+    \code{NA}s on the diagonal and where the \eqn{r,s} transition is
+    disallowed.}
 
   \item{B}{Number of simulations from the normal asymptotic distribution
     used to calculate variances.  Decrease for greater speed at the expense of accuracy.}
@@ -74,7 +77,15 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
   used in the \pkg{mstate} package.  The \code{\link[mstate]{msfit}}
   method from \pkg{mstate} returns the equivalent cumulative intensities
   for Cox regression models fitted with \code{\link{coxph}}.
-
+}
+\seealso{
+  \pkg{flexsurv} provides alternative functions designed specifically for
+  predicting from parametric multi-state models without calling
+  \pkg{mstate}.  These include \code{\link{pmatrix.fs}} and
+  \code{\link{pmatrix.simfs}} for the transition probability matrix,
+  and \code{\link{totlos.fs}} and \code{\link{totlos.simfs}} for expected
+  total lengths of stay in states.  These are generally more efficient
+  than going via \pkg{mstate}.
 }
 \examples{
 ## 3 state illness-death model for bronchiolitis obliterans
@@ -108,9 +119,6 @@ for (i in 1:3){
 legend("topright", lwd=c(1,2,3), lty=c(1,2,1),
    c("Cox", "Exponential", "Flexible parametric"), bty="n")
 
-}
-\seealso{
-  \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
 }
 \references{
    Liesbeth C. de Wreede, Marta Fiocco, Hein Putter (2011). \pkg{mstate}: An R

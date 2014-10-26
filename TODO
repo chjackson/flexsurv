@@ -1,9 +1,20 @@
-Make sure all features have tests
+Make sure all features have tests.  use new testthat skip_on_cran() if slow
+
+Investigate whether model list format is also feasible for pmatrix.fs, totlos.fs
+just need to form basepars.mat for given covariates
 
 
 OPTIONAL
 
 make plot/summary do baseline values of factor covs and mean of continuous
+
+Delta method for survival - a lot of faff. 
+
+log-logistic built in: todo derivatives.  which parameterisation?
+   shape, scale one is consistent with weibull link, eha and current
+   manual
+   S(t) = 1/(1 + (t/scale)^shape),   analog to weibull S(t) = exp(-(t/scale)^shape)
+   though not with ActuDistns or Stata (though dweibull not same as stata)
 
 Generic (restricted) mean of distributions, integration if necessary
 
@@ -28,3 +39,5 @@ CIs as grey bands not lines
 #are these buggy in survreg::Surv?
 #time <- ifelse(time == Inf, NA, time)
 #time2 <- ifelse(time2 == -Inf, NA, time2)
+
+Migrate doc to roxygen?

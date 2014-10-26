@@ -21,6 +21,7 @@ test_that("Custom distributions from another package",{
                               inv.transforms=c(exp, exp),
                               inits=function(t){ c(1, median(t)) })
         fitll <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.llogis)
+        detach("package:eha")
     }
 })
     
@@ -71,7 +72,7 @@ test_that("Custom distributions: density only",{
     expect_equal(fitf$loglik, fite$loglik)
 
     ## with covariates
-    fitf <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist=custom.baz, dfns=list(d=dbaz))
+    fitf <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist=custom.baz, dfns=list(d=dbaz), inits=c(9e-07, 0.12))
     fite <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="exp")
     expect_equal(fitf$loglik, fite$loglik, tol=1e-05)
 })

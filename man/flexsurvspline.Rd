@@ -45,10 +45,9 @@ flexsurvspline(formula, data, k=0, knots=NULL, bknots=NULL,
     
     \code{Surv(time, dead) ~ age + sex, anc=list(gamma1=~age + sex)}
 
-    Only \code{Surv} objects of \code{type="right"} or
-    \code{type="counting"}, corresponding to right-censored and/or
-    left-truncated observations, are supported.
-    
+    \code{Surv} objects of \code{type="right"},\code{"counting"},
+    \code{"interval1"} or \code{"interval2"} are supported, corresponding to
+    right-censored, left-truncated or interval-censored observations.
   }
   \item{data}{
     A data frame in which to find variables supplied in \code{formula}.
@@ -94,7 +93,7 @@ flexsurvspline(formula, data, k=0, knots=NULL, bknots=NULL,
     \code{\link{flexsurvreg}}.  }
 }
 \details{
-  This function works as a wrapper around \code{flexsurvreg} by
+  This function works as a wrapper around \code{\link{flexsurvreg}} by
   dynamically constructing a custom distribution using
   \code{\link{dsurvspline}}, \code{\link{psurvspline}} and \code{\link{unroll.function}}.
   
@@ -168,7 +167,7 @@ and \eqn{(x - a)_+ = max(0, x - a)}.
     is performed on the spline basis here.
 
     In the Weibull model, for example, \code{gamma0,gamma1} are
-    \code{-shape log(scale), shape} respectively in
+    \code{-shape*log(scale), shape} respectively in
     \code{\link{dweibull}} or \code{\link{flexsurvreg}} notation, or
     (\code{-Intercept/scale}, \code{1/scale}) in \code{\link[survival]{survreg}}
     notation.

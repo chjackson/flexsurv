@@ -19,7 +19,10 @@
     this should be semi-Markov,  so that the time variable represents
     the time since the last transition.  In other words the response should
     be of the form \code{Surv(time,status)}. See the package vignette for further
-    explanation. 
+    explanation.
+
+    A list of transition-specific models can also be supplied here: see
+  \code{\link{sim.fmsm}}. 
   }
   \item{trans}{Matrix indicating allowed transitions.  See
     \code{\link{msfit.flexsurvreg}}.}
@@ -38,7 +41,7 @@
     increasing \code{B} is usually more expensive than increasing \code{M}.
   }
   \item{tvar}{Variable in the data representing the transition type.}
-  \item{tcovs}{Predictable time-dependent covariates such as age, see \code{\link{sim.fmsm}}}.
+  \item{tcovs}{Predictable time-dependent covariates such as age, see \code{\link{sim.fmsm}}.}
   \item{M}{Number of individuals to simulate in order to approximate the
     transition probabilities.  Users should adjust this to obtain the
     required precision. }
@@ -63,8 +66,8 @@
   for custom models.
 
   Note the random sampling method for \code{flexsurvspline} models is
-  currently very inefficient, so that looping over \code{M} will be very
-  slow.
+  currently very inefficient, so that looping over the \code{M}
+  individuals will be very slow.
 
   \code{\link{pmatrix.fs}} is a more efficient method based on solving
   the Kolmogorov forward equation numerically, which requires the
@@ -73,7 +76,8 @@
   model, but this is still invalid. 
 }
 \seealso{
-  \code{\link{pmatrix.fs}},\code{\link{sim.fmsm}},\code{\link{msfit.flexsurvreg}}.
+  \code{\link{pmatrix.fs}},\code{\link{sim.fmsm}},\code{\link{totlos.simfs}},
+  \code{\link{msfit.flexsurvreg}}.
 }
 \examples{
 # BOS example in vignette, and in msfit.flexsurvreg

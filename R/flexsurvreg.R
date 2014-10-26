@@ -532,7 +532,9 @@ print.flexsurvreg <- function(x, ...)
     covmeans <- colMeans(model.matrix(x))
     covs <- names(covmeans)
     covinds <- match(covs, rownames(x$res))
-    cat("\nCall:\n", deparse(x$call), "\n\n", sep = "")
+    cat("Call:\n")
+    dput(x$call)
+    cat("\n")
     if (x$npars > 0) {
         res <- x$res
         cat ("Estimates: \n")

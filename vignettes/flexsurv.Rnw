@@ -459,12 +459,12 @@ other distributions.
 The argument \code{t} (or \code{start}) can be omitted from \code{median.weibull}, because the median is a time-constant function of the parameters, unlike the
 survival or hazard.
 
-\code{10000} random samples are drawn to produce
-a slightly more precise confidence interval than the default --- users
-should adjust this until the desired level of precision is obtained.
-A useful future extension of the package would be to allow users to 
-supply derivatives of their custom summary function if possible, so that the 
-delta method can be used to obtain approximate confidence intervals 
+\code{10000} random samples are drawn to produce a slightly more
+precise confidence interval than the default --- users should adjust
+this until the desired level of precision is obtained.  A useful
+future extension of the package would be to employ user-supplied (or
+built-in) derivatives of summary functions if possible, so that the
+delta method can be used to obtain approximate confidence intervals
 without simulation.
 
 
@@ -797,7 +797,7 @@ available where necessary.
 plot(sp1, type="hazard", ylim=c(0, 0.5), xlab="Years", ylab="Hazard")
 lines(sp2, type="hazard", col="red", lty=2)
 lines(fs2, type="hazard", col="blue")
-legend("topright", c("black","red","red","blue"), lty=c(1,1,2,1), lwd=rep(2,4),
+legend("topright", col=c("black","red","red","blue"), lty=c(1,1,2,1), lwd=rep(2,4),
        c("Kernel density estimate","Spline (proportional odds)",
          "Spline (time-varying)","Generalized gamma (time-varying)"))
 @   
@@ -893,7 +893,7 @@ An alternative to the Royston-Parmar spline model is to model the log
 \emph{hazard} as a function of time instead of the log cumulative
 hazard.  \citet{stgenreg} demonstrate this model using the Stata
 \pkg{stgenreg} package.  An advantage explained by
-\citet{royston:lambert:book} is that when there are when there are
+\citet{royston:lambert:book} is that when there are
 multiple time-dependent effects, time-dependent hazard ratios can be
 interpreted independently of the values of other covariates.
 
@@ -1412,7 +1412,7 @@ new class of models would ideally come with
   (\S\ref{sec:custom}).
 \end{itemize}
 
-The examples in this paper were run using version 0.5 of \pkg{flexsurv}, which will eventually be available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
+The examples in this paper were run using version 0.5 of \pkg{flexsurv}, available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
 
 \appendix
 \section{Acknowledgements}
