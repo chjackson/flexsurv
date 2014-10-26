@@ -1,7 +1,6 @@
 Make sure all features have tests.  use new testthat skip_on_cran() if slow
 
-Investigate whether model list format is also feasible for pmatrix.fs, totlos.fs
-just need to form basepars.mat for given covariates
+model list format for pmatrix.fs, totlos.fs. just need to form basepars.mat for given covariates
 
 
 OPTIONAL
