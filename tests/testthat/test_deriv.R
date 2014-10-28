@@ -59,10 +59,17 @@ test_that("Analytic derivatives match numeric",{
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ shape(factor(ovarian$resid.ds)), dist="gompertz")
     expect_that(fitg, has_accurate_derivs())
 
+    fitl <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="llogis")
+    expect_that(fitl, has_accurate_derivs())
+
+    
 ## fixedpars
     fitg <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="gompertz", fixedpars=2)
     expect_that(fitg, has_accurate_derivs())
 
+    fitl <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="llogis", fixedpars=2)
+    expect_that(fitl, has_accurate_derivs())
+    
     ## spline, hazard. covs, no trunc.
     bc$foo <- factor(sample(1:3, nrow(bc), replace=TRUE))
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=0, scale="odds")

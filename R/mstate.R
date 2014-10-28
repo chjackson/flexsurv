@@ -89,6 +89,7 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     }
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
+    ## TODO equivalent for model list format
     basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
     res <- ode(y=diag(n), times=c(0,t), func=dp, parms=list(par=basepar), ...)[-1,-1]
     res <- lapply(split(res,1:nt), function(x)matrix(x,nrow=n))

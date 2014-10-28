@@ -27,10 +27,8 @@ s1 <- 2 / (Q^2 + 2*P + Q*delta); s2 <- 2 / (Q^2 + 2*P - Q*delta)
 
 test_that("Generalized F reduces to log logistic",{
     if (is.element("eha", installed.packages()[,1])) {
-        library(eha)
         expect_equal(dgenf(x, mu=mu, sigma=sigma, Q=Q, P=P),
-             dllogis(x, shape=sqrt(2)/sigma, scale=exp(mu)))
-        detach("package:eha")
+                     dllogis(x, shape=sqrt(2)/sigma, scale=exp(mu)), tol=tol)
     }
 })
 
@@ -226,7 +224,7 @@ test_that("Errors in generalized gamma and F",{
     expect_warning(rgenf(4, 1, -2, 1, 1), "Negative")
 })
 
-## TODO test haz and cum haz functions
+## test haz and cum haz functions
 x <- seq(0.1, 100, by=0.1)
 if (interactive())
     plot(x, hgengamma.orig(x, 1, 1, 1), type="l")
@@ -317,7 +315,7 @@ test_that("Spline distribution functions",{
     d2 <- dsurvspline(1, gamma=gamma)
     expect_equal(d1, d2)
 
-    d1 <- eha::dllogis(1, shape=gamma[2], scale= exp(-gamma[1]/gamma[2]))
+    d1 <- dllogis(1, shape=gamma[2], scale= exp(-gamma[1]/gamma[2]))
     d2 <- dsurvspline(1, gamma=gamma, scale="odds")
     expect_equal(d1, d2)
 
@@ -409,4 +407,21 @@ test_that("Generalized gamma definition in Stata manual",{
         Sgg(c(1,2,3),c(-1,2,0.2),c(1,2,1),c(-1, 0, 1)),
         pgengamma(c(1,2,3),c(-1,2,0.2),c(1,2,1),c(-1, 0, 1), lower.tail=FALSE)
         )
+})
+
+test_that("llogis",{
+    x <- c(0.1, 0.2, 0.7)
+    expect_equal(dllogis(x, shape=0.1, scale=0.2), eha::dllogis(x, shape=0.1, scale=0.2))
+    expect_equal(qllogis(x, shape=0.1, scale=0.2), qgeneric(pllogis, p=x, shape=0.1, scale=0.2))
+    expect_equal(x, pllogis(qllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2))
+    q <- numeric(3); for (i in 1:3) q[i] <- qllogis(x[i], shape=0.0001, scale=i/5)
+    expect_equal(q, qllogis(x, shape=0.0001, scale=1:3/5))
+    x <- c(0.5, 1.06, 4.7)
+    expect_equal(x, qllogis(pllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2))
+    if (interactive()) {
+        rl <- rllogis(10000, shape=1.5, scale=1.2)
+        plot(density(rl[rl<100]), xlim=c(0,10))
+        x <- seq(0, 10, by=0.001)
+        lines(x, dllogis(x, shape=1.5, scale=1.2), lty=2)
+    }
 })

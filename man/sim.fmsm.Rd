@@ -11,7 +11,15 @@ sim.fmsm(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans",
 }
 \arguments{
   \item{x}{A model fitted with \code{\link{flexsurvreg}}. See
-\code{\link{msfit.flexsurvreg}} for the required form of the model and the data.}
+\code{\link{msfit.flexsurvreg}} for the required form of the model and
+the data.
+
+Alternatively \code{x} can be a list of fitted \code{\link{flexsurvreg}}
+model objects.  The \code{i}th element of this list is the model
+corresponding to the \code{i}th transition in \code{trans}.  This is a
+more efficient way to fit a multi-state model, but only valid if the
+parameters are different between different transitions.
+}
   \item{trans}{Matrix indicating allowed transitions.  See \code{\link{msfit.flexsurvreg}}.}
   \item{t}{Time, or vector of times for each of the \code{M} individuals, to simulate trajectories until.}
   \item{newdata}{A data frame specifying the values of covariates in the

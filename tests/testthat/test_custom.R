@@ -14,14 +14,30 @@ context("Custom distributions in flexsurvreg")
 test_that("Custom distributions from another package",{
     if (is.element("eha", installed.packages()[,1])) {
         library(eha)
-        custom.llogis <- list(name="llogis",
+        dllogis2 <- eha::dllogis; pllogis2 <- eha::pllogis       
+        custom.llogis <- list(name="llogis2",
                               pars=c("shape","scale"),
                               location="scale",
                               transforms=c(log, log),
                               inv.transforms=c(exp, exp),
                               inits=function(t){ c(1, median(t)) })
-        fitll <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.llogis)
+        fitll <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.llogis, dfns=list(d=dllogis2, p=pllogis2))
+
+        custom.ev <- list(name="EV",
+                          pars=c("shape","scale"),
+                          location="scale",
+                          transforms=c(log, log),
+                          inv.transforms=c(exp, exp),
+                          inits=function(t){ c(1, median(t)) })
+        fitev <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.ev, dfns=list(d=dEV, p=pEV))
+###   h(x) = (b/a)(x/a)^(b-1)exp((x / a)^b)
+###   H(x) = exp( (x / a)^b) ) - 1
+
+
         detach("package:eha")
+
+        fitll.builtin <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="llogis")
+        expect_equal(fitll$loglik, fitll.builtin$loglik)
     }
 })
     

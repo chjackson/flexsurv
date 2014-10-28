@@ -1,5 +1,11 @@
 -*- text -*-
 
+* Log-logistic distribution built in to flexsurvreg, and distribution
+  functions provided.
+
+* Bug fix in tcovs option in semi-Markov model simulation 
+
+
 Version 0.5 (2014-09-22)
 -----------
 

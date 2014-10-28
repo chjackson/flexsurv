@@ -99,6 +99,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
       \code{"weibull"} \tab Weibull   \tab scale \tab  AFT \cr
       \code{"gamma"} \tab Gamma       \tab rate \tab  AFT \cr
       \code{"exp"} \tab Exponential   \tab rate \tab  PH \cr
+      \code{"llogis"} \tab Log-logistic  \tab scale \tab AFT \cr
       \code{"lnorm"} \tab Log-normal  \tab meanlog \tab AFT \cr
       \code{"gompertz"} \tab Gompertz \tab rate \tab  PH \cr
     }
@@ -351,10 +352,10 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     }
   }
 
-  For example, suppose we want to use a log-logistic survival
+  For example, suppose we want to use an extreme value survival
   distribution. This is available in the CRAN package \pkg{eha}, which
   provides conventionally-defined density and probability functions called
-  \code{\link[eha]{dllogis}} and \code{\link[eha]{pllogis}}.  See the
+  \code{\link[eha]{dEV}} and \code{\link[eha]{pEV}}.  See the
   Examples below for the custom list in this case, and the
   subsequent command to fit the model.
 }
@@ -379,17 +380,17 @@ lines(fitw, col="blue", lwd.ci=1, lty.ci=1)
 ## very flexible model to be worthwhile.
 
 ## Custom distribution
-library(eha)  ## make "dllogis" and "pllogis" available to the working environment
-custom.llogis <- list(name="llogis",
+library(eha)  ## make "dEV" and "pEV" available to the working environment
+custom.ev <- list(name="EV",
                       pars=c("shape","scale"),
                       location="scale",
                       transforms=c(log, log),
                       inv.transforms=c(exp, exp),
                       inits=function(t){ c(1, median(t)) })
-fitl <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian,
-                    dist=custom.llogis)
-fitl
-lines(fitl, col.fit="purple", col.ci="purple")
+fitev <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian,
+                    dist=custom.ev)
+fitev
+lines(fitev, col="purple", col.ci="purple")
 
 ## Custom distribution: supply the hazard function only
 hexp2 <- function(x, rate=1){ rate } # exponential distribution

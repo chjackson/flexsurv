@@ -19,7 +19,10 @@
     this should be semi-Markov,  so that the time variable represents
     the time since the last transition.  In other words the response should
     be of the form \code{Surv(time,status)}. See the package vignette for further
-    explanation. 
+    explanation.
+
+    A list of transition-specific models can also be supplied here: see
+  \code{\link{sim.fmsm}}. 
   }
   \item{trans}{Matrix indicating allowed transitions.  See
     \code{\link{msfit.flexsurvreg}}.}

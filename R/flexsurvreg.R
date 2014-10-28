@@ -157,6 +157,19 @@ flexsurv.dists <- list(
                        transforms=c(identity, log),
                        inv.transforms=c(identity, exp),
                        inits=function(t){c(0.001,1 / mean(t))}
+                       ),
+                       llogis = list(
+                       name="llogis",
+                       pars=c("shape","scale"),
+                       location="scale",
+                       transforms=c(log, log),
+                       inv.transforms=c(exp, exp),
+                       inits=function(t){
+                           scale <- median(t)
+                           shape <- 1 / log(quantile(t, 0.25)/scale, base=3)
+                           if (shape < 0) shape <- 1
+                           c(shape, scale)
+                       }
                        )
                        )
 flexsurv.dists$exponential <- flexsurv.dists$exp
@@ -532,7 +545,9 @@ print.flexsurvreg <- function(x, ...)
     covmeans <- colMeans(model.matrix(x))
     covs <- names(covmeans)
     covinds <- match(covs, rownames(x$res))
-    cat("\nCall:\n", deparse(x$call), "\n\n", sep = "")
+    cat("Call:\n")
+    dput(x$call)
+    cat("\n")
     if (x$npars > 0) {
         res <- x$res
         cat ("Estimates: \n")
