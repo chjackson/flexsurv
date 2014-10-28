@@ -9,6 +9,7 @@ Description: Flexible parametric models for time-to-event data, including the Ro
 License: GPL (>= 2)
 Depends: survival
 Imports: muhaz,mvtnorm,deSolve
-Suggests: eha,mstate,numDeriv,testthat,msm,ActuDistns
+Suggests: eha,mstate,numDeriv,testthat,msm,ActuDistns,knitr
+VignetteBuilder: knitr
 LazyLoad: yes
 LazyData: yes

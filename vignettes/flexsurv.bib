@@ -1,5 +1,14 @@
+@Manual{R,
+  title = {\proglang{R}: A Language and Environment for Statistical Computing},
+  author = {{\proglang{R} Core Team}},
+  organization = {\proglang{R} Foundation for Statistical Computing},
+  address = {Vienna, Austria},
+  year = {2014},
+  url = {http://www.R-project.org/},
+}
+
 @article{stgenreg,
-  title={\texttt{stgenreg}: A Stata package for general parametric survival analysis},
+  title={\pkg{stgenreg}: A \proglang{Stata} Package for General Parametric Survival Analysis},
   author={Crowther, M. J. and Lambert, P. C.},
   journal={Journal of Statistical Software},
   volume={53},
@@ -8,16 +17,18 @@
 }
 
 @article{reid:cox:conversation,
-  title={A conversation with Sir David Cox},
+  title={A Conversation with Sir David Cox},
   author={Reid, N.},
   journal={Statistical Science},
   pages={439--455},
+  volume={9},
+  number={3},
   year={1994},
   publisher={JSTOR}
 }
 
 @article{latimer2013survival,
-  title={Survival analysis for economic evaluations alongside clinical trials --- extrapolation with patient-level data inconsistencies, limitations, and a practical guide},
+  title={Survival Analysis for Economic Evaluations Alongside Clinical Trials --- Extrapolation with Patient-Level Data, Inconsistencies, Limitations, and a Practical Guide},
   author={Latimer, N. R.},
   journal={Medical Decision Making},
   volume={33},
@@ -30,8 +41,8 @@
 @Misc{therneau:survival,
   OPTkey = 	 {},
   author =	 {Therneau, T.},
-  title =	 {A Package for Survival Analysis in S},
-  howpublished = {R package version 2.37-7. \url{http://CRAN.R-project.org/package=survival}},
+  title =	 {A Package for Survival Analysis in \proglang{S}},
+  howpublished = {\proglang{R} package version 2.37-7. \url{http://CRAN.R-project.org/package=survival}},
   OPTmonth = 	 {},
   year =	 {2014},
   OPTnote = 	 {},
@@ -41,8 +52,8 @@
 @Book{kalbfleisch:prentice,
   author =	 {Kalbfleisch, J. D. and Prentice, R. L.},
   ALTeditor = 	 {},
-  title = 	 {The statistical analysis of failure time data},
-  publisher = 	 {John Wiley},
+  title = 	 {The Statistical Analysis of Failure Time Data},
+  publisher = 	 {John Wiley \& Sons},
   year = 	 {2002},
   OPTkey = 	 {},
   OPTvolume = 	 {},
@@ -57,7 +68,7 @@
 
 @Article{polyhazard,
   author = 	 {Louzada-Neto, F.},
-  title = 	 {Polyhazard models for lifetime data},
+  title = 	 {Polyhazard Models for Lifetime Data},
   journal = 	 {Biometrics},
   year = 	 {1999},
   OPTkey = 	 {},
@@ -69,7 +80,7 @@
 }
 
 @Article{prentice:loggamma,
-  title={{A log gamma model and its maximum likelihood estimation}},
+  title={A Log Gamma Model and its Maximum Likelihood Estimation},
   author={Prentice, R. L.},
   journal={Biometrika},
   volume={61},
@@ -81,7 +92,7 @@
 
 @Article{prentice:genf,
   author = 	 {Prentice, R. L.},
-  title = 	 {Discrimination among some parametric models},
+  title = 	 {Discrimination Among Some Parametric Models},
   journal = 	 {Biometrika},
   year = 	 {1975},
   OPTkey = 	 {},
@@ -95,7 +106,7 @@
 
 @Article{ccox:taxonomy:hazards,
   author = 	 {Cox, C. and Chu, H. and Schneider, M. F. and Muñoz, A.},
-  title = 	 {Parametric survival analysis and taxonomy of hazard functions for the generalized gamma distribution},
+  title = 	 {Parametric Survival Analysis and Taxonomy of Hazard Functions for the Generalized Gamma Distribution},
   journal = 	 {Statistics in Medicine},
   year = 	 {2007}, 
   OPTkey = 	 {},
@@ -109,12 +120,12 @@
 
 @Article{ccox:genf,
   author = 	 {Cox, C.},
-  title = 	 {The generalized {F} distribution: An umbrella for parametric survival analysis},
+  title = 	 {The Generalized {F} Distribution: An Umbrella for Parametric Survival Analysis},
   journal = 	 {Statistics in Medicine},
   year = 	 {2008},
   OPTkey = 	 {},
   volume =	 {27},
-  OPTnumber =	 {},
+  number =	 {21},
   pages =	 {4301-4312},
   OPTmonth = 	 {},
   OPTnote = 	 {},
@@ -123,7 +134,7 @@
 
 @Article{stacy:gengamma,
   author = 	 {Stacy, E. W.},
-  title = 	 {A generalization of the gamma distribution.},
+  title = 	 {A Generalization of the Gamma Distribution.},
   journal = 	 {The Annals of Mathematical Statistics},
   year = 	 {1962},
   OPTkey = 	 {},
@@ -136,7 +147,7 @@
 }
 
 @book{nash,
-  title={Compact numerical methods for computers: linear algebra and function minimisation},
+  title={Compact Numerical Methods for Computers: Linear Algebra and Function Minimisation},
   author={Nash, J. C.},
   year={1990},
   publisher={CRC Press}
@@ -144,7 +155,7 @@
 
 @Article{royston:parmar,
   author = 	 {Royston, P. and Parmar, M.},
-  title = 	 {Flexible parametric proportional-hazards and proportional-odds models for censored survival data, with application to prognostic modelling and estimation of treatment effects  },
+  title = 	 {Flexible Parametric Proportional-Hazards and Proportional-Odds Models for Censored Survival Data, with Application to Prognostic Modelling and Estimation of Treatment Effects  },
   journal = 	 {Statistics in Medicine},
   year = 	 {2002},
   OPTkey = 	 {},
@@ -157,9 +168,9 @@
 }
 
 @article{stpm:update,
-  title={Flexible parametric alternatives to the Cox model: update},
+  title={Flexible Parametric Alternatives to the Cox Model: Update},
   author={Royston, P.},
-  journal={The Stata Journal},
+  journal={The \proglang{Stata} Journal},
   volume={4},
   number={1},
   pages={98--101},
@@ -167,9 +178,9 @@
 }
 
 @article{stpm:orig,
-  title={Flexible parametric alternatives to the Cox model, and more},
+  title={Flexible Parametric Alternatives to the Cox Model, and More},
   author={Royston, P.},
-  journal={Stata Journal},
+  journal={\proglang{Stata} Journal},
   volume={1},
   number={1},
   pages={1--28},
@@ -177,9 +188,9 @@
 }
 
 @article{stpm2,
-  title={Further development of flexible parametric models for survival analysis},
+  title={Further Development of Flexible Parametric Models for Survival Analysis},
   author={Lambert, P. C. and Royston, P.},
-  journal={Stata Journal},
+  journal={\proglang{Stata} Journal},
   volume={9},
   number={2},
   pages={265},
@@ -203,12 +214,12 @@
 
 @Article{putter:mstate,
   author = 	 {Putter, H. and Fiocco, M. and Geskus, R. B.},
-  title = 	 {{Tutorial in biostatistics: competing risks and multi-state models}},
+  title = 	 {Tutorial in Biostatistics: Competing Risks and Multi-State Models},
   journal = 	 {Statistics in Medicine},
   year = 	 {2007},
   OPTkey = 	 {},
   volume =	 {26},
-  OPTnumber = 	 {},
+  number =	 {8},
   pages =	 {2389-2430},
   OPTmonth = 	 {},
   OPTnote = 	 {},
@@ -216,7 +227,7 @@
 }
 
 @article{mstate:cmpb,
-  title={The \texttt{mstate} package for estimation and prediction in non-and semi-parametric multi-state and competing risks models},
+  title={The \pkg{mstate} Package for Estimation and Prediction in Non-and Semi-Parametric Multi-State and Competing Risks Models},
   author={de Wreede, L.C. and Fiocco, M. and Putter, H.},
   journal={Computer Methods and Programs in Biomedicine},
   volume={99},
@@ -227,33 +238,35 @@
 }
 
 @article{mstate:jss,
-  title={\texttt{mstate}: an R package for the analysis of competing risks and multi-state models},
+  title={\pkg{mstate}: An \proglang{R} Package for the Analysis of Competing Risks and Multi-State Models},
   author={de Wreede, L. C. and Fiocco, M. and Putter, H.},
-  journal={J Stat Softw},
+  journal={Journal of Statistical Software},
   volume={38},
   pages={1--30},
   year={2011}
 }
 
 @Manual{eha,
-    title = {eha: Event History Analysis},
+    title = {\pkg{eha}: Event History Analysis},
     author = {G{\"o}ran Brostr{\"o}m},
     year = {2014},
-    note = {R package version 2.4-1},
+    note = {\proglang{R} package version 2.4-1},
     url = {http://CRAN.R-project.org/package=eha},
 }
 
 @article{yee:wild,
-  title={Vector generalized additive models},
+  title={Vector Generalized Additive Models},
   author={Yee, T. W. and Wild, C. J.},
   journal={Journal of the Royal Statistical Society B},
+  volume={58},
+  number={3},
   pages={481--493},
   year={1996},
   publisher={JSTOR}
 }
 
 @article{actudistns,
-  title={A new R package for actuarial survival models},
+  title={A New \proglang{R} Package for Actuarial Survival Models},
   author={Nadarajah, S. and Bakar, S. A. A.},
   journal={Computational Statistics},
   volume={28},
@@ -264,9 +277,9 @@
 }
 
 @article{sauerbrei1999building,
-  title={Building multivariable prognostic and diagnostic models: transformation of the predictors by using fractional polynomials},
+  title={Building Multivariable Prognostic and Diagnostic Models: Transformation of the Predictors by Using Fractional Polynomials},
   author={Sauerbrei, W. and Royston, P.},
-  journal={Journal of the Royal Statistical Society: Series A (Statistics in Society)},
+  journal={Journal of the Royal Statistical Society A},
   volume={162},
   number={1},
   pages={71--94},
@@ -275,18 +288,20 @@
 }
 
 @article{royston1994regression,
-  title={Regression using fractional polynomials of continuous covariates: parsimonious parametric modelling},
+  title={Regression Using Fractional Polynomials of Continuous Covariates: Parsimonious Parametric Modelling},
   author={Royston, P. and Altman, D. G.},
-  journal={Applied Statistics},
+  journal={Journal of the Royal Statistical Society C},
   pages={429--467},
+  volume={43},
+  number={3},
   year={1994},
   publisher={JSTOR}
 }
 
 @article{sauerbrei2007selection,
-  title={Selection of important variables and determination of functional form for continuous predictors in multivariable model building},
+  title={Selection of Important Variables and Determination of Functional Form for Continuous Predictors in Multivariable Model Building},
   author={Sauerbrei, Willi and Royston, Patrick and Binder, Harald},
-  journal={Statistics in medicine},
+  journal={Statistics in Medicine},
   volume={26},
   number={30},
   pages={5512--5528},
@@ -296,7 +311,7 @@
 
 @Article{mueller:wang,
   author = 	 {Mueller, H. G. and Wang, J. L.},
-  title = 	 {Hazard rates estimation under random censoring with varying kernels and bandwidths},
+  title = 	 {Hazard Rates Estimation Under Random Censoring with Varying Kernels and Bandwidths},
   journal = 	 {Biometrics},
   year = 	 {1994},
   OPTkey = 	 {},
@@ -309,15 +324,15 @@
 }
 
   @Manual{muhaz,
-    title = {muhaz: Hazard Function Estimation in Survival Analysis},
+    title = {\pkg{muhaz}: Hazard Function Estimation in Survival Analysis},
     author = {Hess, K.},
     year = {2010},
-    note = {R package version 1.2.5, S original by K. Hess and R port by R. Gentleman},
+    note = {\proglang{R} package version 1.2.5, \proglang{S} original by K. Hess and \proglang{R} port by R. Gentleman},
     url = {http://CRAN.R-project.org/package=muhaz},
   }
 
   @Article{actuar,
-    title = {actuar: An R Package for Actuarial Science},
+    title = {\pkg{actuar}: An \proglang{R} Package for Actuarial Science},
     author = {Dutang, C. and Goulet, V. and Pigeon, M.},
     journal = {Journal of Statistical Software},
     year = {2008},
@@ -328,10 +343,11 @@
   }
 
 @article{demiris2011survival,
-  title={{Survival extrapolation using the poly-Weibull model}},
+  title={Survival Extrapolation Using the Poly-Weibull Model},
   author={Demiris, N. and Lunn, D. and Sharples, L.D.},
   journal={Statistical Methods in Medical Research},
   year={2011},
+  note={early view, DOI: 10.1177/0962280211419645},
   publisher={SAGE Publications}
 }
 
@@ -351,7 +367,7 @@
 }
 
 @article{titman:nonhomog,
-  title={{Flexible nonhomogeneous Markov models for panel observed data}},
+  title={Flexible Nonhomogeneous Markov Models for Panel Observed Data},
   author={Titman, A. C},
   journal={Biometrics},
   volume={67},
@@ -362,62 +378,65 @@
 }
 
 @article{cook:lawless,
-  title={Statistical issues in modeling chronic disease in cohort studies},
+  title={Statistical Issues in Modeling Chronic Disease in Cohort Studies},
   author={Cook, R. J. and Lawless, J. F.},
   journal={Statistics in Biosciences},
   volume={6},
   number={1},
   pages={127--161},
   year={2014},
-  publisher={Springer}
+  publisher={Springer-Verlag}
 }
 
 @manual{stan-manual:2014,
-  author = {{Stan Development Team}},
+  author = {\proglang{Stan} Development Team},
   year = {2014},
-  title = {Stan Modeling Language Users Guide and Reference Manual,
+  title = {\proglang{Stan} Modeling Language Users Guide and Reference Manual,
            Version 2.4},
   url = {http://mc-stan.org/}
 }
 
 @book{bugs:book,
-  title={The BUGS Book: a practical introduction to Bayesian analysis},
+  title={The \proglang{BUGS} Book: A Practical Introduction to Bayesian Analysis},
   author={Lunn, D. and Jackson, C. and Best, N. and Thomas, A. and Spiegelhalter, D.},
   year={2012},
   publisher={CRC Press}
 }
 
 @article{crowther2014multilevel,
-  title={Multilevel mixed effects parametric survival models using adaptive Gauss--Hermite quadrature with application to recurrent events and individual participant data meta-analysis},
+  title={Multilevel Mixed Effects Parametric Survival Models Using Adaptive Gauss--Hermite Quadrature With Application to Recurrent Events and Individual Participant Data Meta-Analysis},
   author={Crowther, M. J. and Look, M. P. and Riley, R. D.},
   journal={Statistics In Medicine},
+  volume={33},
+  number={22},
   year={2014},
+  pages={3844-3858},
   publisher={Wiley Online Library}
 }
 
 @article{hougaard1995frailty,
-  title={Frailty models for survival data},
+  title={Frailty Models for Survival Data},
   author={Hougaard, P.},
   journal={Lifetime Data Analysis},
   volume={1},
   number={3},
   pages={255--273},
   year={1995},
-  publisher={Springer}
+  publisher={Springer-Verlag}
 }
 
 @article{royston:lambert:book,
-  title={Flexible parametric survival analysis using Stata: beyond the Cox model},
+  title={Flexible Parametric Survival Analysis Using \proglang{Stata}: Beyond the Cox Model},
   author={Royston, P. and Lambert, P. C.},
-  journal={Stata Press books},
+  journal={\proglang{Stata} Press books},
   year={2011},
   publisher={Statacorp Lp}
 }
 
 @article{nelson:relative:survival,
-  title={Flexible parametric models for relative survival, with application in coronary heart disease},
+  title={Flexible Parametric Models for Relative Survival, With Application in Coronary Heart Disease},
   author={Nelson, C. P. and Lambert, P. C. and Squire, I. B. and Jones, D. R.},
-  journal={Statistics in medicine},
+  journal={Statistics in Medicine},
   volume={26},
   number={30},
   pages={5486--5498},
@@ -426,10 +445,10 @@
 }
 
   @Article{gamlss,
-    title = {Generalized additive models for location, scale and shape,(with discussion)},
-    journal = {Applied Statistics},
+    title = {Generalized Additive Models for Location, Scale and Shape (with discussion)},
+    journal = {Journal of the Royal Statistical Society C},
     volume = {54},
-    part = {3},
+    number = {3},
     pages = {507-554},
     year = {2005},
     author = {Rigby, R. A.  and Stasinopoulos, D. M.},
@@ -437,7 +456,7 @@
 
 @Article{msmjss,
   author = 	 {Jackson, C. H.},
-  title = 	 {{Multi-State Models for Panel Data: The \texttt{msm} Package for R}},
+  title = 	 {Multi-State Models for Panel Data: The \pkg{msm} Package for \proglang{R}},
   journal = 	 {Journal of Statistical Software},
   year = 	 {2011},
   OPTkey = 	 {},
@@ -452,14 +471,13 @@
 @Book{cox:miller,
   author = 	 {Cox, D. R. and Miller, H. D.},
   ALTeditor = 	 {},
-  title = 	 {{The Theory of Stochastic Processes}},
+  title = 	 {The Theory of Stochastic Processes},
   publisher = 	 {Chapman and Hall},
   year = 	 {1965},
   OPTkey = 	 {},
   OPTvolume = 	 {},
   OPTnumber = 	 {},
   OPTseries = 	 {},
-  address =	 {London},
   OPTedition = 	 {},
   OPTmonth = 	 {},
   OPTnote = 	 {},
@@ -467,23 +485,22 @@
 }
 
 @book{aalen:process,
-  title={Survival and event history analysis: a process point of view},
+  title={Survival and Event History Analysis: A Process Point of View},
   author={Aalen, Odd and Borgan, Ornulf and Gjessing, Hakon},
   year={2008},
-  publisher={Springer}
+  publisher={Springer-Verlag}
 }
 
 @Book{andersen,
   author =	 {Andersen, P. K. and Borgan, O. and Gill, R. D. and Keiding, N.},
   ALTeditor = 	 {},
-  title = 	 {Statistical models based on counting processes},
-  publisher = 	 {Springer},
+  title = 	 {Statistical Models Based On Counting Processes},
+  publisher = 	 {Springer-Verlag},
   year = 	 {1993},
   OPTkey = 	 {},
   OPTvolume = 	 {},
   OPTnumber = 	 {},
   OPTseries = 	 {},
-  address =	 {New York},
   OPTedition = 	 {},
   OPTmonth = 	 {},
   OPTnote = 	 {},
@@ -491,7 +508,7 @@
 }
 
 @article{fiocco:mstatepred,
-  title={Reduced-rank proportional hazards regression and simulation-based prediction for multi-state models},
+  title={Reduced-rank Proportional Hazards Regression and Simulation-Based Prediction for Multi-State Models},
   author={Fiocco, Marta and Putter, Hein and van Houwelingen, Hans C},
   journal={Statistics in Medicine},
   volume={27},
@@ -502,7 +519,7 @@
 }
 
 @article{mandel:simci,
-  title={Simulation-based confidence intervals for functions with complicated derivatives},
+  title={Simulation-Based Confidence Intervals for Functions with Complicated Derivatives},
   author={Mandel, Micha},
   journal={The American Statistician},
   volume={67},
@@ -513,7 +530,7 @@
 }
 
   @Article{deSolve,
-    title = {Solving Differential Equations in R: Package deSolve},
+    title = {Solving Differential Equations in \proglang{R}: Package \pkg{deSolve}},
     author = {Karline Soetaert and Thomas Petzoldt and R. Woodrow Setzer},
     journal = {Journal of Statistical Software},
     volume = {33},
@@ -528,20 +545,9 @@
     R, FORTRAN, C},
   }  
 
-@Article{parfm,
-    title = {{parfm}: Parametric Frailty Models in {R}},
-    author = {Marco Munda and Federico Rotolo and Catherine Legrand},
-    journal = {Journal of Statistical Software},
-    year = {2012},
-    volume = {51},
-    number = {11},
-    pages = {1--20},
-    url = {http://www.jstatsoft.org/v51/i11/},
-  }
-
 @Article{crowther:general,
   author = 	 {Crowther, M. J. and Lambert, P. C.},
-  title = 	 {A general framework for parametric survival analysis},
+  title = 	 {A General Framework for Parametric Survival Analysis},
   journal = 	 {Statistics in Medicine},
   year = 	 {2014},
   OPTkey = 	 {},
