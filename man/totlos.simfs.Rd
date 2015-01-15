@@ -41,7 +41,7 @@
     increasing \code{B} is usually more expensive than increasing \code{M}.
   }
   \item{tvar}{Variable in the data representing the transition type.}
-  \item{tcovs}{Predictable time-dependent covariates such as age, see \code{\link{sim.fmsm}}}.
+  \item{tcovs}{Predictable time-dependent covariates such as age, see \code{\link{sim.fmsm}}.}
   \item{group}{Optional grouping for the states.  For example, if there
     are four states, and \code{group=c(1,1,2,2)}, then
     \code{\link{totlos.simfs}} returns the expected total time in

@@ -1,6 +1,6 @@
 context("Multi-state modelling and prediction")
 
-library(mstate) # masks flexsurv's generic msfit, so call as msfit.flexsurvreg below
+library(mstate)
 
 ### This would all be better tested through a vignette of worked examples
 ### e.g. to illustrate more flexible models fitting better
@@ -11,6 +11,7 @@ tgrid <- seq(0,14,by=0.1)
 bwei <- flexsurvreg(Surv(years, status) ~ trans + shape(trans), data=bosms3, dist="weibull")
 bspl <- flexsurvspline(Surv(years, status) ~ trans + gamma1(trans), data=bosms3, k=3)
 bexp.markov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
+bln.markov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="lnorm")
 
 test_that("msfit.flexsurvreg",{
     mexp <- msfit.flexsurvreg(bexp, t=0.01, trans=tmat, tvar="trans")
@@ -41,9 +42,13 @@ test_that("Errors in msfit.flexsurvreg",{
 
 ### TODO test values
 
+## TODO CIs on all these
+
 test_that("pmatrix.fs",{
-    pmatrix.fs(bexp.markov, t=c(5,10), trans=tmat)
-    pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
+    pmat <- pmatrix.fs(bexp.markov, t=c(5,10), trans=tmat)
+    expect_equal(pmat$"5"[1,2], 0.267218506920585, tol=1e-06)
+    pmat <- pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
+    expect_equal(pmat$"5"[1,2], 0.259087945965485, tol=1e-06)
 })
 
 test_that("pmatrix.simfs",{

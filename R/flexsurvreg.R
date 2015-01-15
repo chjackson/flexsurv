@@ -213,7 +213,6 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
         loghaz <- logdens - log(pmax - pmin)
         offset <- sum(log(1 + bhazard / exp(loghaz)*weights)[dead])
     } else offset <- 0
-    
     ret <- - ( sum((logdens*weights)[dead]) +
               sum((log(pmax - pmin)*weights)[!dead]) -
               sum(log(pobs)*weights) + offset)
@@ -227,8 +226,13 @@ check.dlist <- function(dlist){
     if (is.null(dlist$pars)) stop("parameter names \"pars\" not given in custom distribution list")
     if (!is.character(dlist$pars)) stop("parameter names \"pars\" should be a character vector")
     npars <- length(dlist$pars)
-    if (is.null(dlist$location)) stop("location parameter not given in custom distribution list")
-    if (!(dlist$location %in% dlist$pars)) stop("location parameter \"",dlist$location,"\" not in list of parameters")
+    if (is.null(dlist$location)) {
+        warning("location parameter not given, assuming it is the first one")
+        dlist$location <- dlist$pars[1]
+    }
+    if (!(dlist$location %in% dlist$pars)) {
+        stop(sprintf("location parameter \"%s\" not in list of parameters", dlist$location))
+    }
     if (is.null(dlist$transforms)) stop("transforms not given in custom distribution list")
     if (is.null(dlist$inv.transforms)) stop("inverse transforms not given in custom distribution list")
     if (!is.list(dlist$transforms)) stop("\"transforms\" must be a list of functions")
@@ -236,7 +240,7 @@ check.dlist <- function(dlist){
     if (!all(sapply(dlist$transforms, is.function))) stop("some of \"transforms\" are not functions")
     if (!all(sapply(dlist$inv.transforms, is.function))) stop("some of \"inv.transforms\" are not functions")
     if (length(dlist$transforms) != npars) stop("transforms vector of length ",length(dlist$transforms),", parameter names of length ",npars)
-    if (length(dlist$inv.transforms) != npars) stop("inverse transforms vector of length ",length(dlist$transforms),", parameter names of length ",npars) #
+    if (length(dlist$inv.transforms) != npars) stop("inverse transforms vector of length ",length(dlist$inv.transforms),", parameter names of length ",npars) #
     for (i in 1:npars){
         if (is.character(dlist$transforms[[i]])) dlist$transforms[[i]] <- get(dlist$transforms[[i]])
         if (is.character(dlist$inv.transforms[[i]])) dlist$inv.transforms[[i]] <- get(dlist$inv.transforms[[i]])
@@ -528,7 +532,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     ret <- c(list(call=call, dlist=dlist, aux=aux,
                   AIC=-2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
-                  N=nrow(dat$Y), events=sum(dat$Y[,"status"]), trisk=sum(dat$Y[,"time"]),
+                  N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
                   concat.formula=f2, all.formulae=forms, dfns=dfns),             
              ret)
     if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
@@ -560,7 +564,10 @@ print.flexsurvreg <- function(x, ...)
             res <- cbind(means, res, ecoefs)
             colnames(res)[1] <- "data mean"
         }
-        print(format(res, digits=3), print.gap=2, quote=FALSE, na.print="")
+        args <- list(...)
+        if (is.null(args$digits)) args$digits <- 3
+        f <- do.call("format", c(list(x=res), args))
+        print(f, print.gap=2, quote=FALSE, na.print="")
     }
     cat("\nN = ", x$N, ",  Events: ", x$events,
         ",  Censored: ", x$N - x$events,
@@ -628,7 +635,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         else if (is.null(X)) X <- as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1))
         else if (!is.matrix(X) || (is.matrix(X) && ncol(X) != x$ncoveffs)) {
             plural <- if (x$ncoveffs > 1) "s" else ""
-            stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " elements")
+            stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " element", plural)
         }
     } else
         X <- form.model.matrix(object, as.data.frame(newdata))
@@ -637,7 +644,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     if (length(start)==1)
         start <- rep(start, length(t))
     else if (length(start) != length(t))
-        stop("length of \"start\" is ",length(start)," should be 1, or length of \"t\" which is ",length(t))
+        stop("length of \"start\" is ",length(start),". Should be 1, or length of \"t\" which is ",length(t))
 
     if (is.null(fn)) {
         fn <- summary.fns(x, type)
@@ -646,6 +653,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     fncall <- list(t,start)
     beta <- if (x$ncovs==0) 0 else x$res[x$covpars,"est"]
     if (ncol(X) != length(beta)){
+        ## don't think we should ever reach here - error should be caught in newdata or X
         isare <- if(length(beta)==1) "is" else "are"
         plural <- if(ncol(X)==1) "" else "s"
         pluralc <- if(length(beta)==1) "" else "s"

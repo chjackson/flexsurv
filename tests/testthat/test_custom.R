@@ -112,6 +112,24 @@ if (0) {
 test_that("Errors in custom distributions",{
     hfoo <- function(x, rate=1){ rate }
     Hfoo <- function(x, rate=1){ rate*x }
+    custom.foo <- list(pars=c("rate"), location="rate", transforms=c(log), inv.transforms=c(exp))
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "\"name\" element of custom distribution list not given")
+    custom.foo <- list(name=0, pars=c("rate"), location="rate", transforms=c(log), inv.transforms=c(exp))
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "\"name\" element of custom distribution list should be a string")
+    custom.foo <- list(name="foo", location="rate", transforms=c(log), inv.transforms=c(exp))
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "parameter names \"pars\" not given")
+    custom.foo <- list(name="foo", pars=2, location="rate", transforms=c(log), inv.transforms=c(exp))
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "parameter names \"pars\" should be a character vector")
+    custom.foo <- list(name="foo", pars="rate", transforms=c(log), inv.transforms=c(exp))
+    expect_warning(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo), fixedpars=TRUE, inits=1),
+                 "location parameter not given, assuming it is the first one")
+    custom.foo <- list(name="foo", pars="rate", location="bar", transforms=c(log), inv.transforms=c(exp))
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo), fixedpars=TRUE, inits=1),
+                 "location parameter \"bar\" not in list of parameters")
     custom.foo <- list(name="foo", pars=c("rate"), location="rate", transforms=c(log), inv.transforms=c(exp))
     expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
                  "\"inits\" not supplied, and no function to estimate them found")
@@ -124,10 +142,26 @@ test_that("Errors in custom distributions",{
     custom.foo <- list(name="foo", pars=c("rate"), transforms=log, inv.transforms=exp, location="rate")
     expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
                  "\"transforms\" must be a list")
+    custom.foo <- list(name="foo", pars=c("rate"), transforms=c(log), inv.transforms=exp, location="rate")
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "\"inv.transforms\" must be a list")
     custom.foo <- list(name="foo", pars=c("rate"), transforms=list(2), inv.transforms=c(exp), location="rate")
     expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
                  "some of \"transforms\" are not functions")
     custom.foo <- list(name="foo", pars=c("rate"), transforms=c(log), inv.transforms=list(2), location="rate")
     expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
                  "some of \"inv.transforms\" are not functions")
+    custom.foo <- list(name="foo", pars=c("rate"), transforms=c(log,log), inv.transforms=c(exp,exp), location="rate")
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "transforms vector of length 2, parameter names of length 1")
+    custom.foo <- list(name="foo", pars=c("rate"), transforms=c(log), inv.transforms=c(exp,exp), location="rate")
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "inverse transforms vector of length 2, parameter names of length 1")
+    custom.foo <- list(name="foo", pars=c("rate"), transforms=c(log), inv.transforms=c(exp), location="rate", inits=1)
+    expect_error(flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo)),
+                 "\"inits\" element of custom distribution list must be a function")
+})
+
+test_that("Errors in form.dp",{
+    expect_error(form.dp(dlist=list(), dfns=list()), "Neither density function .+ nor hazard function")
 })

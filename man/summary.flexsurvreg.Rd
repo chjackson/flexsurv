@@ -98,7 +98,8 @@ It should return a vector of the
 
   \item{cl}{Width of symmetric confidence intervals, relative to 1.}
   
-  \item{...}{Further arguments passed to or from other methods.}
+  \item{...}{Further arguments passed to or from other methods.
+    Currently unused.}
 }
 \value{
   A list with one element for each unique covariate value (if there are

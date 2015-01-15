@@ -7,6 +7,8 @@ tol <- 1e-06
 test_that("Generalized F",{
     expect_equal(dgenf(c(-1,1,2,3,4), mu=0, sigma=1, Q=0, P=1), # FIXME add limiting value for x=0
          c(0, 0.353553390593274, 0.140288989252053, 0.067923038519582, 0.038247711235678), tol=tol)
+    expect_error(Hgenf(c(-1,1,2,3,4), mu=0, sigma=1, P=1), "argument \"Q\" is missing")
+    expect_error(Hgenf(c(-1,1,2,3,4), mu=0, sigma=1, Q=1), "argument \"P\" is missing")
 })
 
 test_that("Generalized F reduces to generalized gamma: d",{
@@ -157,7 +159,9 @@ test_that("Generalized F (original)",{
          c(0,0,0,1,2,3,4))
     x <- c(0.1, 0.4, 0.7); mu <- 0.1; sigma <- 1.2; s1 <- 1.7; s2 <- 10000000
     qgenf.orig(x, mu=mu, sigma=sigma, s1=s1, s2=s2)
+    hgenf.orig(x, mu=mu, sigma=sigma, s1=s1, s2=s2)
     qgengamma.orig(x, shape=1/sigma, scale=exp(mu) / s1^sigma, k=s1) # equal for large s2
+    expect_error(Hgenf.orig(x, mu=mu, sigma=sigma, s1=s1), "argument \"s2\" is missing")
 
     rgenf.orig(n=10, mu=0, sigma=1, s1=1, s2=1)
     if (interactive())  {
@@ -249,6 +253,7 @@ test_that("pgompertz",{
     expect_equal(pgompertz(x, shape=0, rate=0.2), pexp(x, rate=0.2))
     p <- numeric(6); for (i in 1:6) p[i] <- pgompertz(x[i], shape=-0.0001, rate=i/5)
     expect_equal(p, pgompertz(x, shape=-0.0001, rate=1:6/5))
+    expect_equal(p, 1 - exp(-Hgompertz(x, shape=-0.0001, rate=1:6/5)))
 })
 
 test_that("qgompertz",{
@@ -414,6 +419,8 @@ test_that("llogis",{
     expect_equal(dllogis(x, shape=0.1, scale=0.2), eha::dllogis(x, shape=0.1, scale=0.2))
     expect_equal(qllogis(x, shape=0.1, scale=0.2), qgeneric(pllogis, p=x, shape=0.1, scale=0.2))
     expect_equal(x, pllogis(qllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2))
+    expect_equal(x, 1 - exp(-Hllogis(qllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2)))
+    expect_equal(hllogis(x, shape=0.1, scale=0.2),  dllogis(x, shape=0.1, scale=0.2) / (1 - pllogis(x, shape=0.1, scale=0.2)))
     q <- numeric(3); for (i in 1:3) q[i] <- qllogis(x[i], shape=0.0001, scale=i/5)
     expect_equal(q, qllogis(x, shape=0.0001, scale=1:3/5))
     x <- c(0.5, 1.06, 4.7)
@@ -424,4 +431,8 @@ test_that("llogis",{
         x <- seq(0, 10, by=0.001)
         lines(x, dllogis(x, shape=1.5, scale=1.2), lty=2)
     }
+    expect_equal(mean.llogis(shape=0.1, scale=0.2), NaN)
+    expect_equal(var.llogis(shape=1.1, scale=0.2), NaN)
+    mean.llogis(shape=1.1, scale=0.2)
+    var.llogis(shape=2.1, scale=0.2)
 })

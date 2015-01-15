@@ -1,10 +1,14 @@
-Make sure all features have tests.  use new testthat skip_on_cran() if slow
+No error and return NAs if numeric value supplied instead of char factor level in form.model.matrix
+
+More multistate tests.  use new testthat skip_on_cran() if slow
 
 model list format for pmatrix.fs, totlos.fs. just need to form basepars.mat for given covariates
 
 Redo custom documentation in vignette to be EV
 
-Use testCoverage package, as in msm
+put PH weibull in
+
+does 1/2 Surv indicator work, and TRUE/FALSE?  if so is n events reported correctly
 
 
 OPTIONAL

@@ -127,6 +127,43 @@ legend("topright", lwd=c(2,2), col=c("red","darkgray"), bty="n",
        c("Generalized gamma: standard AFT", "Generalized gamma: proportional hazards"))
 @ 
 
+\subsection{Restricted mean survival}
+
+The expected survival up to time $t$, from a model with cumulative distribution $F(t|\alpha)$, is 
+
+\[ E(T|T<t) = \int_0^{t} F(u | \alpha) du \]
+
+%% TODO can t arg to summay fn be omitted if function is independent of time, so it returns one value?
+
+An estimate and confidence interval for this, for a specified
+covariate value, can be computed using a custom summary function as
+follows.  (Note that \Rfunction{summary.flexsurvreg} can be
+abbreviated to \Rfunction{summary}).  As in the
+\Rfunction{median.weibull} example in the user guide vignette, the
+summary function is independent of time, so any value can be specified
+for \Rfunarg{t} in the call to \Rfunction{summary}.  The time horizon
+up to which to compute the mean is specified by the default value of
+the \Rfunarg{horizon} argument to the custom function.  Here we
+compute the unrestricted mean, with \Rfunarg{horizon=Inf}.
+<<>>=
+mean.gengamma <- function(mu, sigma, Q, horizon=Inf, ...){
+    surv <- function(t, ...) {  1 - pgengamma(q=t, mu=mu, sigma=sigma, Q=Q, ...) }
+    integrate(surv, 0, horizon, ...)$value
+}
+summary(fs2, newdata=list(group="Good"), t=1, fn=mean.gengamma)
+summary(fs2, newdata=list(group="Medium"), t=1, fn=mean.gengamma)
+summary(fs2, newdata=list(group="Poor"), t=1, fn=mean.gengamma)
+@ 
+Illustrate the median as well, compare to unrestricted mean...
+<<>>=
+median.gengamma <- function(mu, sigma, Q) { 
+    qgengamma(0.5, mu=mu, sigma=sigma, Q=Q) 
+}
+summary(fs2, newdata=list(group="Good"), t=1, fn=median.gengamma)
+@ 
+
+\subsection{Custom summary functions with spline models}                   
+
 
 \bibliography{flexsurv}
 

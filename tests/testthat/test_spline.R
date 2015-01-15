@@ -211,6 +211,9 @@ test_that("gamma in d/psurvspline can be matrix or vector",{
 })
 
 test_that("Errors in spline",{
+expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, knots="foo"), "\"knots\" must be a numeric vector")
+expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, knots=c(-5, 2)), "knot -5 less than or equal to minimum log time")
+expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, knots=c(2)), "knot 2 greater than or equal to maximum log time")
 expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=0, bknots=c("foo")), "boundary knots should be")
 expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=0, bknots=c(0,1,2)), "boundary knots should be")
 expect_warning(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, subset=1:10, k=0, inits=c(1,1,0,0,0,0), fixedpars=TRUE),

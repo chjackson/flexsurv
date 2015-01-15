@@ -3,7 +3,14 @@
 * Log-logistic distribution built in to flexsurvreg, and distribution
   functions provided.
 
-* Bug fix in tcovs option in semi-Markov model simulation 
+* Bug fix in tcovs option in semi-Markov model simulation.
+
+* "digits" argument supported by default model print function.  This
+  is passed to "format" to format the parameter estimates, and
+  defaults to 3.
+
+* Bug fix in "events" printed output for interval censored
+  data. Thanks to Sabrina Russo.
 
 
 Version 0.5 (2014-09-22)
