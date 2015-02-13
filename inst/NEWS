@@ -1,5 +1,8 @@
 -*- text -*-
 
+Version 0.5.1 (2015-02-13)
+-------------
+
 * Log-logistic distribution built in to flexsurvreg, and distribution
   functions provided.
 
@@ -11,6 +14,9 @@
 
 * Bug fix in "events" printed output for interval censored
   data. Thanks to Sabrina Russo.
+
+* pgompertz returns Inf for q=Inf, even for parameters denoting
+  "living forever", since the CDF is P(X <= q) not P(X < q). 
 
 
 Version 0.5 (2014-09-22)

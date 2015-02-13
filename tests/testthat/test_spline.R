@@ -161,8 +161,8 @@ test_that("Spline models with left-truncation",{
 test_that("Spline models with weighting",{
     wt <- rep(1, nrow(bc)); wt[1:30] <- 2
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, weights=wt)
-    wei <- survreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibull", weights=wt)
-    expect_equal(logLik(spl), logLik(wei), tol=1e-06)
+    wei <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibull", weights=wt)
+    expect_equal(spl$loglik, wei$loglik, tol=1e-06)
 })
 
 test_that("flexsurvspline results match stpm in Stata",{

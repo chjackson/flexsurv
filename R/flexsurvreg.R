@@ -205,6 +205,7 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
     dead <- Y[,"status"]==1
     logdens <- (do.call(dfns$d, dcall))
     pmax <- (do.call(dfns$p, pmaxcall))
+    pmax[pmaxcall$q==Inf] <- 1  # in case user-defined function doesn't already do this
     pmin <- (do.call(dfns$p, pcall))
     pobs <- 1 - do.call(dfns$p, tcall) # prob of being observed = 1 unless left-truncated
     

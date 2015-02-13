@@ -30,6 +30,7 @@ pgompertz <- function(q, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {
         q <- q[sn0]; shape <- shape[sn0]; rate <- rate[sn0]
         prob[sn0] <- 1 - exp(-rate/shape*(exp(shape*q) - 1))
     }
+    prob[q==Inf] <- 1
     if (!lower.tail) prob <- 1 - prob
     if (log.p) prob <- log(prob)
     ret[ind] <- prob

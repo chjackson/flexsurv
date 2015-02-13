@@ -46,7 +46,7 @@ test_that("Weighted fits",{
     wt[c(1,3,5,7,9)] <- 10
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull", weights=wt)
     fitws <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull", weights=wt)
-    expect_equal(logLik(fitws),logLik(fitw),tol=1e-06)
+    expect_equal(fitws$loglik[2],fitw$loglik,tol=1e-06)
 })
 
 test_that("subset",{
@@ -73,6 +73,11 @@ test_that("Log-normal",{
 test_that("Gompertz",{
     fitgo <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="gompertz", fixedpars=TRUE) # model fit is unstable
     expect_equal(fitgo$loglik, -112.8294446076947, tol=1e-06)
+})
+
+test_that("Log-logistic",{
+    fitll <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="llogis", fixedpars=TRUE) 
+    expect_equal(fitll$loglik, -100.274888882706, tol=1e-06)
 })
 
 test_that("Gamma",{
@@ -169,7 +174,7 @@ test_that("Errors in summary function",{
     expect_error(summary(fitg, newdata=list(foo=1)), "Value of covariate \"rx\" not supplied")
     expect_error(summary(fitg, X=matrix(c(0,1),ncol=2), ci=FALSE), "expected X to be a matrix with 1 column or a vector with 1 element")
     expect_error(summary(fitg, X=matrix(c(0,1),ncol=1), start=1:2, ci=FALSE), "length of \"start\"")
-    expect_error(summary(fitg, newdata=list(rx=1, ry=2), ci=FALSE), "length of \"start\"")
+    expect_error(summary(fitg, newdata=list(rx=1, ry=2), start=1:2, ci=FALSE), "length of \"start\"")
 })
 
 test_that("Model fit with covariates and simulated data",{

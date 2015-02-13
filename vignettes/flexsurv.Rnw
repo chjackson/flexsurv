@@ -299,7 +299,7 @@ corresponding cumulative distribution functions (with first letter
 
 \pkg{flexsurv} provides some additional survival distributions,
 including a Gompertz distribution with unrestricted shape parameter
-(\code{dist = "gompertz"}), and the three- and four-parameter families
+(\code{dist = "gompertz"}), the log-logistic, and the three- and four-parameter families
 described below.  For all built-in distributions, \pkg{flexsurv} also
 defines functions beginning with \code{h} giving the hazard, and \code{H}
 for the cumulative hazard.
@@ -377,6 +377,7 @@ the best estimated predictive ability.
     Gamma       & \code{shape, \color{red}{rate}}      & \code{dgamma} & \code{"gamma"}\\
     Log-normal  & \code{{\color{red}{meanlog}}, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
     Gompertz    & \code{shape, {\color{red}{rate}}}      & \code{dgompertz} & \code{"gompertz"} \\
+    Log-logistic & \code{shape, {\color{red}{scale}}}   & \code{dllogis} & \code{"llogis"}\\
     Generalized gamma (Prentice 1975)   & \code{{\color{red}{mu}}, sigma, Q} & \code{dgengamma} & \code{"gengamma"} \\
     Generalized gamma (Stacy 1962)& \code{shape, {\color{red}{scale}}, k} & \code{dgengamma.orig} & \code{"gengamma.orig"} \\
     Generalized F     (stable)    & \code{{\color{red}{mu}}, sigma, Q, P} & \code{dgenf} & \code{"genf"} \\
@@ -594,7 +595,7 @@ character string.  The list has the following elements.
   we would define the function, of one argument \code{t} giving the
   survival or censoring times, returning the initial values for the
   Weibull \code{shape} and \code{scale} respectively \footnote{though Weibull models in 
-    \code{flexsurvreg} are ``initialised'' by fitting the model with \code{survreg}.}.
+    \code{flexsurvreg} are ``initialised'' by fitting the model with \code{survreg}, unless there is left-truncation.}.
 
   \code{inits = function(t){ c(1, median(t[t > 0]) / log(2)) } }
   
@@ -610,7 +611,7 @@ character string.  The list has the following elements.
 
 The following custom model uses the log-logistic distribution functions
 (\code{dllogis} and \code{pllogis}) available in the package
-\pkg{eha}.   The survivor function is $S(t|\mu,\alpha) = 1/(1 + (t/\mu)^\alpha)$,
+\pkg{eha} \footnote{though since version 0.5.1, this distribution is built into \pkg{flexsurv}}   The survivor function is $S(t|\mu,\alpha) = 1/(1 + (t/\mu)^\alpha)$,
 so that the odds $(1-S(t))/S(t)$ of having died are a linear function of log time.
 <<results='hide',message=FALSE,warning=FALSE>>=
 library("eha")
