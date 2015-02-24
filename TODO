@@ -1,3 +1,5 @@
+add dependency on newer R
+
 More multistate tests.  use new testthat skip_on_cran() if slow
 
 model list format for pmatrix.fs, totlos.fs. just need to form basepars.mat for given covariates

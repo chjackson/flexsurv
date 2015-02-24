@@ -1,7 +1,9 @@
 -*- text -*-
 
-Version 0.5.1 (2015-02-13)
+Version 0.5.1 (2015-02-24)
 -------------
+
+* github-only release.
 
 * Log-logistic distribution built in to flexsurvreg, and distribution
   functions provided.
@@ -16,7 +18,8 @@ Version 0.5.1 (2015-02-13)
   data. Thanks to Sabrina Russo.
 
 * pgompertz returns Inf for q=Inf, even for parameters denoting
-  "living forever", since the CDF is P(X <= q) not P(X < q). 
+  "living forever", since the CDF is P(X <= q) not P(X < q).  This
+  affected some fits of the Gompertz distribution.
 
 
 Version 0.5 (2014-09-22)
