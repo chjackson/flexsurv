@@ -20,6 +20,10 @@
     Additionally, this must be a Markov / clock-forward model,
     but can be time-inhomogeneous.  See the package vignette for further
     explanation. 
+
+    \code{x} can also be a list of models, with one component for each
+    permitted transition, as illustrated in
+    \code{\link{msfit.flexsurvreg}}.    
   }
   \item{trans}{Matrix indicating allowed transitions.  See
     \code{\link{msfit.flexsurvreg}}.}
@@ -34,7 +38,8 @@
     estimates.  Turned off by default, since this is computationally
     intensive.   If turned on, users should increase
     \code{B} until the results reach the desired precision.}
-  \item{tvar}{Variable in the data representing the transition type.}
+  \item{tvar}{Variable in the data representing the transition type. Not
+    required if \code{x} is a list of models. }
   \item{sing.inf}{If there is a singularity in the observed hazard,
     for example a Weibull distribution with \code{shape < 1} has infinite
     hazard at \code{t=0}, then as a workaround, the hazard is assumed to

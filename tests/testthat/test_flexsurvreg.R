@@ -76,8 +76,9 @@ test_that("Gompertz",{
 })
 
 test_that("Log-logistic",{
-    fitll <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="llogis", fixedpars=TRUE) 
-    expect_equal(fitll$loglik, -100.274888882706, tol=1e-06)
+    fitlls <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="loglogistic")
+    fitll <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist="llogis")
+    expect_equal(fitll$loglik, fitlls$loglik[2], tol=1e-06)
 })
 
 test_that("Gamma",{
@@ -148,6 +149,10 @@ test_that("Model fit with covariates",{
         lines.flexsurvreg(fitg, X=rbind(c(1.1), c(1.2)), ci=TRUE, col="blue")
         plot.flexsurvreg(fitg, type="hazard")
         plot.flexsurvreg(fitg, type="cumhaz")
+
+        fitg1 <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull")
+        plot.flexsurvreg(fitg1, type="hazard")
+
     }
 })
 
@@ -189,7 +194,6 @@ test_that("Model fit with covariates and simulated data",{
         plot.flexsurvreg(fit)
         lines.flexsurvreg(fit, X=matrix(c(1,2),nrow=2))
         plot(fit)
-        fit
         plot(fit, type="hazard", min.time=0, max.time=25)
         lines(fit, type="hazard", X=matrix(c(1,2),nrow=2))
         x2 <- factor(rbinom(500, 1, 0.5))
@@ -201,6 +205,8 @@ test_that("Model fit with covariates and simulated data",{
         fit <- flexsurvreg(Surv(simt, dead) ~ x2 + x3, dist="genf", control=list(maxit=10000))
         fit <- flexsurvreg(Surv(simt, dead) ~ x2, dist="genf", control=list(maxit=10000))
         plot(fit)
+        summary(fit, type="hazard", ci=FALSE)
+        plot(fit, type="hazard", ci=FALSE)
     }
     x2 <- factor(rbinom(500, 1, 0.5))
     x3 <- rnorm(500,0,1)

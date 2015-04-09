@@ -9,6 +9,8 @@ fit.sp5 <- flexsurvspline(Surv(survtime, dead2) ~ 1, k=5, data=tcrb, method="BFG
 ## min AIC with 4 knots, better than GF
 save(fit, fit.gg, fit.sp2, fit.sp3, fit.sp4, fit.sp5, file="~/work/flexsurv/devel/tcr.rda")
 plot(fit, ci=FALSE)
+plot(fit, ci=FALSE, type="hazard")
+plot(fit, ci=FALSE)
 lines(fit.gg, col="blue", ci=FALSE)
 lines(fit.sp4, col="green", ci=FALSE)
 
@@ -31,6 +33,9 @@ lines(fitc.f, X=rbind(c(1,0,0,0,1,0,0,0),
 
 fitc.f <- flexsurvreg(Surv(survtime, dead2) ~ stage, data=tcrb, dist="genf")
 plot(fitc.f)
-plot(fitc.f, type="hazard", min.time=0, max.time=10)
+plot(fitc.f, type="hazard", min.time=0, max.time=9)
 plot(survfit(Surv(survtime, dead2) ~ stage, data=tcrb))
 lines(fitc.f, X=rbind(c(0,0,0),c(1,0,0),c(0,1,0),c(0,0,1)))
+
+fitc.f <- flexsurvreg(Surv(survtime, dead2) ~ sex, data=tcrb, dist="genf")
+plot(fitc.f, type="hazard", min.time=0, max.time=10)

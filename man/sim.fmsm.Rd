@@ -26,7 +26,8 @@ parameters are different between different transitions.
     fitted model, other than the transition number.  See \code{\link{msfit.flexsurvreg}}.}
   \item{start}{Starting state, or vector of starting states for each of the \code{M} individuals.}
   \item{M}{Number of individual trajectories to simulate.}
-  \item{tvar}{Variable in the data representing the transition type.}
+  \item{tvar}{Variable in the data representing the transition type. Not
+    required if \code{x} is a list of models. }
   \item{tcovs}{Names of "predictable" time-dependent covariates in
     \code{newdata}, i.e. those whose values change at the
     same rate as time.  Age is a typical example.  During simulation, their

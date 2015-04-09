@@ -35,18 +35,31 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
                               trans, B=1000){
     tr <- sort(unique(na.omit(as.vector(trans))))
     ntr <- length(tr)
-    newdata <- form.msm.newdata(object, newdata=newdata, tvar=tvar, trans=trans)
-    X <- form.model.matrix(object, newdata)
-    Haz <- summary(object, type="cumhaz", t=t, X=X, ci=FALSE)
+    if (is.flexsurvlist(object)) {
+        Haz <- vector(ntr, mode="list")
+        for (i in seq_len(ntr))
+            Haz[[i]] <- summary(object[[i]], type="cumhaz", t=t, newdata=newdata, ci=FALSE)[[1]]
+    } else {
+        newdata <- form.msm.newdata(object, newdata=newdata, tvar=tvar, trans=trans)
+        X <- form.model.matrix(object, newdata)
+        Haz <- summary(object, type="cumhaz", t=t, X=X, ci=FALSE)
+    }
     Haz <- do.call("rbind",Haz[seq_along(tr)])
+    rownames(Haz) <- NULL
     Haz$trans <- rep(seq_along(tr), each=length(t))
     names(Haz)[names(Haz)=="est"] <- "Haz"
     res <- list(Haz=Haz, trans=trans)
-    if (variance & !is.na(object$cov[1])){
+    foundse <- if (is.flexsurvlist(object)) all(!is.na(sapply(object, function(x)x$cov[[1]]))) else !is.na(object$cov[1])
+    if (variance && foundse){
         boot <- array(dim=c(B, length(t), ntr))
         for (i in seq_along(tr))
-            boot[,,i] <- normbootfn.flexsurvreg(object, t=t, start=0, X=X[i,,drop=FALSE], B=B,
-                                                fn=summary.fns(object,"cumhaz"))
+            boot[,,i] <-
+                if (is.flexsurvlist(object))
+                    normbootfn.flexsurvreg(object[[i]], t=t, start=0, newdata=newdata, B=B,
+                                           fn=summary.fns(object[[i]],"cumhaz"))
+                else
+                    normbootfn.flexsurvreg(object, t=t, start=0, X=X[i,,drop=FALSE], B=B,
+                                           fn=summary.fns(object,"cumhaz"))
         ntr2 <- 0.5*ntr*(ntr+1)
         nt <- length(t)
         mat <- matrix(nrow=ntr, ncol=ntr)
@@ -65,13 +78,37 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
     res
 }
 
+## Matrix with ntrans rows, npars columns giving transition-specific
+## baseline parameters at given covariate values
+
+pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
+{
+    if (is.flexsurvlist(x)){
+        ntr <- length(x) # number of allowed transitions
+        if (ntr != length(na.omit(as.vector(trans)))) stop(sprintf("x is a list of %s flexsurvreg objects, but trans indicates %s transitions", ntr, length(na.omit(as.vector(trans)))))
+        basepar <- matrix(nrow=ntr, ncol=length(x[[1]]$dlist$pars), dimnames=list(NULL,x[[1]]$dlist$pars))
+        for (i in 1:ntr){
+            X <- if (x[[i]]$ncovs==0) matrix(0) else form.model.matrix(x[[i]], as.data.frame(newdata))
+            beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
+            basepar[i,] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
+        }
+    } else if (inherits(x, "flexsurvreg")) {
+        newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
+        X <- form.model.matrix(x, newdata)   
+        basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
+    } else
+        stop("expected x to be a flexsurvreg object or list of flexsurvreg objects") 
+    basepar
+}
+
+## TODO allow time dependent covs when computing the hazard.
+
 pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
                        tvar="trans", sing.inf=1e+10, B=1000, cl=0.95, ...){
-    newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
-    X <- form.model.matrix(x, newdata)   
     ntr <- sum(!is.na(trans))
     n <- nrow(trans)
     dp <- function(t, y, parms, ...){
+        if (is.flexsurvlist(x)) x <- x[[1]] 
         P <- matrix(y, nrow=n, ncol=n)
         haz <- numeric(n)
         for (i in 1:ntr){
@@ -89,22 +126,14 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     }
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
-    ## TODO equivalent for model list format
-    basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
+    basepar <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
     res <- ode(y=diag(n), times=c(0,t), func=dp, parms=list(par=basepar), ...)[-1,-1]
     res <- lapply(split(res,1:nt), function(x)matrix(x,nrow=n))
     names(res) <- t
     if (ci){
-        sim <- normboot.flexsurvreg(x=x, B=B, X=X)
-        if (!is.list(sim)) sim <- list(sim)        
-        res.rep <- array(NA_real_, dim=c(B, nt, n*n))
-        for (i in 1:B){
-            pari <- do.call("rbind", lapply(sim, function(x)x[i,,drop=FALSE]))
-            res.rep[i,,] <- ode(y=diag(n), times=c(0,t), func=dp, parms=list(pars=pari),...)[-1,-1]
-        }
-        resci <- apply(res.rep, c(2,3), quantile, c((1-cl)/2, 1 - (1-cl)/2))
-        resl <- lapply(split(resci[1,,],1:nt), function(x)matrix(x,nrow=n))
-        resu <- lapply(split(resci[2,,],1:nt), function(x)matrix(x,nrow=n))
+        resci <- bootci.fmsm(x, B, nt*n*n, match.call(), cl)
+        resl <- lapply(split(resci[1,],rep(1:nt, each=n*n)), function(x)matrix(x,nrow=n))
+        resu <- lapply(split(resci[2,],rep(1:nt, each=n*n)), function(x)matrix(x,nrow=n))
         names(resl) <- names(resu) <- t
         for (i in 1:nt){
             attr(res[[i]], "lower") <- resl[[i]]
@@ -122,12 +151,11 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
 
 totlos.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
                        tvar="trans", sing.inf=1e+10, B=1000, cl=0.95, ...){
-    newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
-    X <- form.model.matrix(x, newdata)   
     ntr <- sum(!is.na(trans))
     n <- nrow(trans)
     nsq <- n*n
     dp <- function(t, y, parms, ...){
+        if (is.flexsurvlist(x)) x <- x[[1]] 
         P <- matrix(y[nsq + 1:nsq], nrow=n, ncol=n)
         haz <- numeric(n)
         for (i in 1:ntr){
@@ -145,25 +173,19 @@ totlos.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     }
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
-    basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
+    basepar <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
     init <- cbind(matrix(0, nrow=n, ncol=n), diag(n))
     res <- ode(y=init, times=c(0,t), func=dp, parms=list(par=basepar), ...)[-1,-1]
     res.t <- lapply(split(res,1:nt), function(x)matrix(x[1:nsq],nrow=n))
     res.p <- lapply(split(res,1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
     names(res.t) <- names(res.p) <- t
     if (ci){
-        sim <- normboot.flexsurvreg(x=x, B=B, X=X)
-        if (!is.list(sim)) sim <- list(sim)        
-        res.rep <- array(NA_real_, dim=c(B, nt, 2*n*n))
-        for (i in 1:B){
-            pari <- do.call("rbind", lapply(sim, function(x)x[i,,drop=FALSE]))
-            res.rep[i,,] <- ode(y=init, times=c(0,t), func=dp, parms=list(pars=pari),...)[-1,-1]
-        }
-        resci <- apply(res.rep, c(2,3), quantile, c((1-cl)/2, 1 - (1-cl)/2))
-        res.tl <- lapply(split(resci[1,,],1:nt), function(x)matrix(x[1:nsq],nrow=n))
-        res.tu <- lapply(split(resci[2,,],1:nt), function(x)matrix(x[1:nsq],nrow=n))
-        res.pl <- lapply(split(resci[1,,],1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
-        res.pu <- lapply(split(resci[2,,],1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
+        resci <- bootci.fmsm(x, B, nt*2*n*n, match.call(), cl)
+        tind <- rep(rep(1:nt,each=n*n), 2)
+        res.tl <- lapply(split(resci[1,],tind), function(x)matrix(x[1:nsq],nrow=n))
+        res.tu <- lapply(split(resci[2,],tind), function(x)matrix(x[1:nsq],nrow=n))
+        res.pl <- lapply(split(resci[1,],tind), function(x)matrix(x[nsq + 1:nsq],nrow=n))
+        res.pu <- lapply(split(resci[2,],tind), function(x)matrix(x[nsq + 1:nsq],nrow=n))
         names(res.tl) <- names(res.tu) <- names(res.pl) <- names(res.pu) <- t
         for (i in 1:nt){
             attr(res.t[[i]], "lower") <- res.tl[[i]]
@@ -265,23 +287,10 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tco
     else if (length(t)!=M) stop("length of t should be 1 or M=",M)
     if (length(start)==1) start <- rep(start, M)
     else if (length(start)!=M) stop("length of start should be 1 or M=",M)
-    if (is.flexsurvlist(x)){
-        ntr <- length(x) # number of allowed transitions
-        if (ntr != length(na.omit(as.vector(trans)))) stop(sprintf("x is a list of %s flexsurvreg objects, but trans indicates %s transitions", ntr, length(na.omit(as.vector(trans)))))
-        basepars.mat <- matrix(nrow=ntr, ncol=length(x[[1]]$dlist$pars), dimnames=list(NULL,x[[1]]$dlist$pars))
-        for (i in 1:ntr){
-            X <- form.model.matrix(x[[i]], as.data.frame(newdata))
-            beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
-            basepars.mat[i,] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
-        }
-        xbase <- x[[1]]
-    } else if (inherits(x, "flexsurvreg")) { 
-        newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
-        X <- form.model.matrix(x, as.data.frame(newdata))
-        beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
-        basepars.mat <- add.covs(x, x$res.t[x$dlist$pars,"est"], beta, X, transform=FALSE)
-        xbase <- x
-    } else stop("expected x to be a flexsurvreg object or list of flexsurvreg objects")
+
+    basepars.mat <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
+    xbase <- if (is.flexsurvlist(x)) x[[1]] else x
+
     nst <- nrow(trans)
     ## TODO only need a max time if model is transient, else if absorbing, can allocate these up front
     res.st <- cur.st <- start
@@ -340,6 +349,40 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tco
     list(st=unname(res.st), t=unname(res.t))
 }    
 
+### Generic CIs for multi-state output functions.
+### Replace the parameters in the fitted model object with a draw from the MVN distribution of the MLEs
+### Then calls the output function again on this tweaked model object, with ci=FALSE. Repeat B times.
+
+bootci.fmsm <- function(x, B, ncols, fncall, cl){
+    res.rep <- array(NA_real_, dim=c(B, ncols))
+    fncall$ci <- FALSE
+    if (is.flexsurvlist(x)){
+        sim <- vector("list", length(x))
+        for (j in seq_along(x)){
+            sim[[j]] <- normboot.flexsurvreg(x=x[[j]], B=B, raw=TRUE, transform=TRUE)
+        }
+        for (i in 1:B){
+            x.rep <- x
+            for (j in seq_along(x))
+                x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
+            fncall$x <- x.rep
+            resi <- eval(fncall)
+            ## "P" attribute needed for totlos.fs. need to extend if ever return any other results as attributes.
+            res.rep[i,] <- c(unlist(resi), unlist(attr(resi, "P")))
+        }
+    } else {
+        sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
+        for (i in 1:B){
+            x.rep <- x
+            x.rep$res.t[,"est"] <- sim[i,]
+            fncall$x <- x.rep
+            resi <- eval(fncall)
+            res.rep[i,] <- c(unlist(resi), unlist(attr(resi, "P")))
+        }
+    }
+    resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
+    resci
+}
 
 pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
                           tvar="trans", tcovs=NULL, M=100000, B=1000, cl=0.95)
@@ -354,15 +397,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
         res[i,] <- prop.table(table(factor(last.st, levels=seq_len(n))))
     }
     if (ci){
-        sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
-        res.rep <- array(NA_real_, dim=c(B, n*n))
-        for (i in 1:B){
-            x.rep <- x
-            x.rep$res.t[,"est"] <- sim[i,]
-            res.rep[i,] <- pmatrix.simfs(x=x.rep, trans=trans, t=t, newdata=newdata,
-                                          ci=FALSE, tvar=tvar, tcovs=tcovs, M=M)
-        }
-        resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
+        resci <- bootci.fmsm(x, B, n*n, match.call(), cl)
         resl <- matrix(resci[1,], nrow=n)
         resu <- matrix(resci[2,], nrow=n)
         attr(res, "lower") <- resl
@@ -388,29 +423,7 @@ totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
         res <- tapply(res, group, sum)
     }
     if (ci){
-        res.rep <- array(NA_real_, dim=c(B, length(res)))
-        if (is.flexsurvlist(x)){
-            sim <- vector("list", length(x))
-            for (j in seq_along(x)){
-                sim[[j]] <- normboot.flexsurvreg(x=x[[j]], B=B, raw=TRUE, transform=TRUE)
-            }
-            for (i in 1:B){
-                x.rep <- x
-                for (j in seq_along(x))
-                    x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
-                res.rep[i,] <- totlos.simfs(x=x.rep, trans=trans, t=t, start=start, newdata=newdata,
-                                            ci=FALSE, tvar=tvar, tcovs=tcovs, group=group, M=M)
-            }
-        } else { 
-            sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
-            for (i in 1:B){
-                x.rep <- x
-                x.rep$res.t[,"est"] <- sim[i,]
-                res.rep[i,] <- totlos.simfs(x=x.rep, trans=trans, t=t, start=start, newdata=newdata,
-                                            ci=FALSE, tvar=tvar, tcovs=tcovs, M=M)
-            }
-        }
-        resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
+        resci <- bootci.fmsm(x, B, length(res), match.call(), cl)
         resl <- resci[1,]
         resu <- resci[2,]
         names(resl) <- names(resu) <- t

@@ -34,6 +34,13 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
     function does not do anything in \pkg{flexsurv}.  The formula
     supplied to \code{\link{flexsurvreg}} should be precise about which
     parameters are assumed to vary with the transition type.
+
+    Alternatively, if the parameters (including covariate effects) are
+    assumed to be different between different transitions, then a list
+    of transition-specific models can be formed.  This list has one
+    component for each permitted transition in the multi-state model.
+    This is more computationally efficient, particularly for larger
+    models and datasets.  See the example below, and the vignette.
   }
   
   \item{t}{ Vector of times.  These do not need to be the same as the
@@ -60,7 +67,8 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
   \item{tvar}{Name of the categorical variable in the model formula
     that represents the transition number. The values of this variable
     should correspond to elements of \code{trans}, conventionally a
-    sequence of integers starting from 1.}
+    sequence of integers starting from 1.  Not required if \code{x}
+    is a list of transition-specific models. }
 
   \item{trans}{Matrix indicating allowed transitions in the multi-state
     model, in the format understood by \pkg{mstate}: a matrix of
@@ -92,7 +100,7 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
 ## Compare clock-reset / semi-Markov multi-state models
 
 ## Simple exponential model (reduces to Markov)
-bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans,
+bexp <- flexsurvreg(Surv(years, status) ~ trans,
                     data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 mexp <- msfit.flexsurvreg(bexp, t=seq(0,12,by=0.1), trans=tmat, tvar="trans")
@@ -118,6 +126,18 @@ for (i in 1:3){
 }
 legend("topright", lwd=c(1,2,3), lty=c(1,2,1),
    c("Cox", "Exponential", "Flexible parametric"), bty="n")
+
+## Fit a list of models, one for each transition
+## More computationally efficient, but only valid if parameters
+## are different between transitions.
+bexp.list <- vector(3, mode="list")
+for (i in 1:3) { 
+  bexp.list[[i]] <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==i),
+                                data=bosms3, dist="exp")
+}
+## The list of models can be passed to this and other functions,
+## as if it were a single multi-state model. 
+msfit.flexsurvreg(bexp.list, t=seq(0,12,by=0.1), trans=tmat)
 
 }
 \references{

@@ -1,5 +1,20 @@
 -*- text -*-
 
+Version 0.6 (2015-03-?) 
+-----------
+
+* CRAN release.  Also includes the changes from Version 0.5.1. 
+
+* Full support for multi-state models fitted as a list of
+  independent transition-specific models.
+
+* New function pars.fmsm to return transition-specific parameters in
+  multi-state models.
+
+* Bug fix for empirical hazard plots with categorical covariates.
+  Thanks to Milan Bouchet-Valat.
+
+
 Version 0.5.1 (2015-02-24)
 -------------
 
@@ -58,8 +73,8 @@ Other new modelling features:
 * Several utilities for parametric multi-state modelling, including
   transition probabilities and simulation ("pmatrix.fs", "totlos.fs",
   "sim.fmsm","pmatrix.simfs", "totlos.simfs").  An "msfit.flexsurvreg"
-  method also gives cumulative incidences in the format of the
-  "mstate" package.
+  method also gives cumulative transition-specific hazards in the
+  format of the "mstate" package.
 
 * Interval censoring supported in the Surv() response.
 

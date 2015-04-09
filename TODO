@@ -1,17 +1,12 @@
-add dependency on newer R
-
-More multistate tests.  use new testthat skip_on_cran() if slow
-
-model list format for pmatrix.fs, totlos.fs. just need to form basepars.mat for given covariates
-
-Redo custom documentation in vignette to be EV
-
-put PH weibull in
+SURVREG
 
 does 1/2 Surv indicator work, and TRUE/FALSE?  if so is n events reported correctly
 
 
+
 OPTIONAL
+
+document and test PH weibull. does it need dpq as well as hHr? 
 
 make plot/summary do baseline values of factor covs and mean of continuous
 
@@ -44,3 +39,5 @@ CIs as grey bands not lines
 Migrate doc to roxygen?
 
 Newton-Raphson (analytic second derivs) available in maxLik::maxNR
+
+allow time-dependent covs to influence the hazard in pmatrix.fs

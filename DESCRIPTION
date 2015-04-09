@@ -1,7 +1,7 @@
 Package: flexsurv
 Type: Package
 Title: Flexible parametric survival and multi-state models
-Version: 0.5.1
+Version: 0.6
 Date: 2014-02-24
 Author: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 Maintainer: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
@@ -9,7 +9,7 @@ Description: Flexible parametric models for time-to-event data, including the Ro
 License: GPL (>= 2)
 Depends: survival, R (>= 2.15.0)
 Imports: muhaz,mvtnorm,deSolve
-Suggests: eha,mstate,numDeriv,testthat,msm,ActuDistns,knitr
+Suggests: eha,mstate,numDeriv,testthat,msm,ActuDistns,knitr,TH.data
 VignetteBuilder: knitr
 LazyLoad: yes
 LazyData: yes

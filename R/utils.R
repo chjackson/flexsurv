@@ -175,6 +175,23 @@ mean.weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }
 
 var.weibull <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma(1 + 1/shape))^2) }
 
+
+### Weibull with proportional hazards
+## haz(alpha, lambda) for weibull PH is alpha * lam * x^{alpha-1}
+## haz(shape, scale) for weibull PH is shape * scale * x^{shape-1}
+
+hweibullPH <- function(x, shape, scale = 1, log=FALSE){
+    hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
+}
+
+HweibullPH <- function(x, shape, scale=1, log=FALSE){
+    Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
+}
+
+rweibullPH <- function(n, shape, scale=1){
+    rweibull(n, shape=shape, scale=scale^{-1/shape})
+}
+
 ## Gamma
 
 hgamma <- function(x, shape, rate=1, log=FALSE){

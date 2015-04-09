@@ -102,12 +102,12 @@ It should return a vector of the
     Currently unused.}
 }
 \value{
-  A list with one element for each unique covariate value (if there are
-  only categorical covariates) or one element (if there are no
-  covariates or any continuous covariates).  Each of these elements
+  A list with one component for each unique covariate value (if there are
+  only categorical covariates) or one component (if there are no
+  covariates or any continuous covariates).  Each of these components
   is a matrix with one row for each time in \code{t}, giving the
   estimated survival (or cumulative hazard, or hazard) and 95\%
-  confidence limits.  These list elements are named with the covariate
+  confidence limits.  These list components are named with the covariate
   names and values which define them.
 
   If there are multiple summaries, an additional list component named
