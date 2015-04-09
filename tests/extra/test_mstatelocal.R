@@ -55,3 +55,42 @@ test_that("ODE method matches Aalen-Johansen",{
     ## probtrans returns standard errors efficiently, ODE would need
     ## normal resampling.
 })
+
+test_that("bootstrap CIs in multi state models",{
+    bosms3$x <- rnorm(nrow(bosms3))
+    bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
+    pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1), ci=TRUE, B=3)
+    totlos.fs(bexp.markov, t=c(5), trans=tmat, ci=TRUE, B=5)
+    tl <- totlos.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1), ci=TRUE, B=5)
+    pmatrix.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=10, ci=TRUE, B=3)
+    totlos.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=10, ci=TRUE, B=3)
+
+    bwei.list <- bweic.list <- bweim.list <- bexpc.list <- vector(3, mode="list")
+    for (i in 1:3) {
+        bwei.list[[i]] <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==i),
+                                      data = bosms3, dist = "weibull")
+        bweic.list[[i]] <- flexsurvreg(Surv(years, status) ~ x, subset=(trans==i),
+                                       data = bosms3, dist = "weibull")
+        bweim.list[[i]] <- flexsurvreg(Surv(Tstart, Tstop, status) ~ 1, subset=(trans==i),
+                                       data=bosms3, dist="weibull")
+        bexpc.list[[i]] <- flexsurvreg(Surv(years, status) ~ x, subset=(trans==i), data=bosms3, dist="exp")
+    }
+
+    totlos.simfs(bwei.list, t=5, trans=tmat, M=10, ci=TRUE, B=10)
+    totlos.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), ci=TRUE, B=10)
+    pmatrix.simfs(bwei.list, t=5, trans=tmat, M=100, ci=TRUE, B=10)
+    pmatrix.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), ci=TRUE, B=10)
+    pmatrix.fs(bweim.list, t=5, trans=tmat, ci=TRUE, B=10)
+    pmatrix.fs(bweim.list, t=c(5,10), trans=tmat, ci=TRUE, B=10)
+    totlos.fs(bweim.list, t=5, trans=tmat, ci=TRUE, B=10)
+})
+
+## Qualitative comparisons for msfit variance between list, non-list
+if (0) { 
+    ms1 <- msfit.flexsurvreg(bexpci, newdata=list(x=1), trans=tmat, t=1:10, variance=TRUE, B=1000)
+    ms2 <- msfit.flexsurvreg(bexpc.list, newdata=list(x=1), trans=tmat, t=1:10, variance=TRUE, B=1000)
+    ms1$varHaz[1:10,]
+    ms2$varHaz[1:10,]
+    ms1$varHaz[21:30,] # these cross-correlations take B=1000 to visibly converge
+    ms2$varHaz[21:30,]
+}

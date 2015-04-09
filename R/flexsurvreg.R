@@ -631,6 +631,7 @@ form.model.matrix <- function(object, newdata){
     if (length(extra.covs) > 0) {
         warning("Covariates ", paste(paste("\"", extra.covs, "\"", sep=""), collapse=","), " unknown, ignoring")
         newdata <- newdata[!names(newdata) %in% extra.covs]
+        if (ncol(newdata)==0) return(as.matrix(0, nrow=1))
     }
     ## don't insist on user defining factors in model as factors in newdata, do this for them
     facs <- sapply(mfo, is.factor)
