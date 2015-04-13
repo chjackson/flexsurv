@@ -53,8 +53,8 @@ Hllogis(x, shape=1, scale=1, log=FALSE)
   The probability distribution function is 
   \deqn{F(x | a, b) = 1 - 1 / (1 + (x/b)^a)}
 
-  If \eqn{alpha > 1}, the mean is \eqn{b c / sin(c)}, and
-  if \eqn{alpha > 2} the variance is \eqn{b^2 * (2*c/sin(2*c) -
+  If \eqn{a > 1}, the mean is \eqn{b c / sin(c)}, and
+  if \eqn{a > 2} the variance is \eqn{b^2 * (2*c/sin(2*c) -
   c^2/sin(c)^2)}, where \eqn{c = \pi/a}, otherwise these are undefined.
 }
 \note{
