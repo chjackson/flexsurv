@@ -159,7 +159,7 @@ two groups (defined by two different values of $\mathbf{z}$) is constant
 over time $t$.
 
 Alternatively, if $S(t | \mu(\mathbf{z}), \bm{\alpha}) =
-S(\mu(\mathbf{z}) t | \bm{\alpha})$ then it is an \emph{accelerated
+S_0(\mu(\mathbf{z}) t | \bm{\alpha})$ then it is an \emph{accelerated
   failure time} (AFT) model, so that the effect of covariates is to speed or
 slow the passage of time. For example, doubling the value of a
 covariate with coefficient $\beta=\log(2)$ would give half the
@@ -258,7 +258,10 @@ fs1
 @ 
 For the Weibull (and exponential, log-normal and log-logistic)
 distribution, \code{flexsurvreg} simply acts as a wrapper for \code{survreg}: 
-the maximum likelihood estimates are obtained by \code{survreg} and converted to  \code{flexsurvreg}'s preferred parameterisation.  Therefore the same model can be fitted more directly as
+the maximum likelihood estimates are obtained by \code{survreg}, 
+checked by \code{flexsurvreg} for optimisation convergence, 
+and converted to  \code{flexsurvreg}'s preferred parameterisation.  
+Therefore the same model can be fitted more directly as
 <<>>=
 survreg(Surv(recyrs, censrec) ~ group, data = bc, dist = "weibull")
 @ 
@@ -282,7 +285,7 @@ aftreg(Surv(recyrs, censrec) ~ group, data = bc, dist = "weibull")
 The results are presented in the same parameterisation as
 \code{flexsurvreg}, except that the shape and scale parameters are
 log-transformed, and (unless the argument \code{param="lifeExp"} is
-supplied) the covariate effects have the opposite sign,
+supplied) the covariate effects have the opposite sign.
 
 
 \subsection{Additional modelling features}
@@ -543,7 +546,7 @@ function.  By default, this is the \code{"BFGS"} method \citep{nash}
 using the analytic derivatives of the likelihood with respect to the
 model parameters, if these are available, to improve the speed of
 convergence to the maximum.  These derivatives are built-in for the
-exponential, Weibull, Gompertz, and hazard- and odds-based spline
+exponential, Weibull, Gompertz, log-logistic, and hazard- and odds-based spline
 models (see \S\ref{sec:spline}).  For custom distributions (see
 \S\ref{sec:custom}), the user can optionally supply functions with
 names beginning \code{"DLd"} and \code{"DLS"} respectively
@@ -577,7 +580,7 @@ character string.  The list has the following elements.
 
 \begin{description}
 \item[\code{name}] Name of the distribution.  In the first example below, 
-  we use a log-logistic distribution, and the name is \code{"llogis"}. 
+  we use a log-logistic distribution, and the name is \code{"llogis"} \footnote{though since version 0.5.1, this distribution is built into \pkg{flexsurv} as \code{dist="llogis"} }. 
   Then there is assumed to be at least either 
   
   \begin{itemize}
@@ -651,7 +654,7 @@ character string.  The list has the following elements.
 
 The following custom model uses the log-logistic distribution functions
 (\code{dllogis} and \code{pllogis}) available in the package
-\pkg{eha} \footnote{though since version 0.5.1, this distribution is built into \pkg{flexsurv}}.   
+\pkg{eha}.   
   The survivor function is $S(t|\mu,\alpha) = 1/(1 + (t/\mu)^\alpha)$,
 so that the log odds $\log((1-S(t))/S(t))$ of having died are a linear function of log time.
 <<>>=
@@ -893,13 +896,15 @@ legend("topright", col = c("black",cols[c(3,3,2)]),
   \caption{Comparison of spline and generalized gamma fitted hazards for the breast cancer survival data by prognostic group.}
   \label{fig:spline:haz}
 \end{figure}
-Note that the log hazard ratios, and their standard errors, under the proportional hazards spline
-model with one internal knot, are substantively the same as under a standard Cox model.  
-This illustrates that this class of flexible fully-parametric
-models may be a reasonable alternative to the semi-parametric Cox model.  
-Note the change to \code{scale = "hazard"}, and that a proportional odds
-model may fit better than a proportional hazards model (as in this case, see Table \ref{tab:aic})
-See \citet{royston:parmar} for discussion of these issues. 
+In this example, proportional odds models (\code{scale = "odds"}) are
+better-fitting than proportional hazards models (\code{scale =
+  "hazard"}) (Table \ref{tab:aic}).  Note also that under a proportional hazards
+spline model with one internal knot (\code{sp3}), the log hazard ratios, and their
+standard errors, are substantively the same as under a standard Cox
+model (\code{cox3}).  This illustrates that this class of flexible fully-parametric
+models may be a reasonable alternative to the (semi-parametric) Cox
+model.  See \citet{royston:parmar} for more discussion of these
+issues.
 
 <<>>=
 sp3 <- flexsurvspline(Surv(recyrs, censrec) ~ group, data = bc, k = 1, 
@@ -908,10 +913,10 @@ sp3$res[c("groupMedium", "groupPoor"), c("est", "se")]
 cox3 <- coxph(Surv(recyrs, censrec) ~ group, data = bc)
 coef(summary(cox3))[ , c("coef", "se(coef)")]
 @ 
-An equivalent of a "stratified" Cox proportional hazards model may be obtained by allowing 
+An equivalent of a ``stratified" Cox model may be obtained by allowing 
 \emph{all} the spline parameters to vary with the categorical covariate that defines the strata. 
-In this case, this covariate might be \texttt{group}. 
-With \code{k=}$m$ internal knots, the formula should then include \texttt{group}, representing $\gamma_0$, and $m+1$ further terms representing the parameters $\gamma_1,\ldots,\gamma_{m+1}$, named as follows.
+In this case, this covariate might be \code{group}. 
+With \code{k=}$m$ internal knots, the formula should then include \code{group}, representing $\gamma_0$, and $m+1$ further terms representing the parameters $\gamma_1,\ldots,\gamma_{m+1}$, named as follows.
 <<>>=
 sp4 <- flexsurvspline(Surv(recyrs, censrec) ~ group + gamma1(group) + 
                         gamma2(group), data = bc, k = 1, scale = "hazard")
@@ -923,18 +928,20 @@ flexsurvspline(Surv(recyrs, censrec) ~ group + gamma1(group) +
                gamma2(group) + treat + gamma1(treat), 
                data = bc, k = 1, scale = "hazard")
 @ 
-would represent a model stratified by group, with a time-varying hazard ratio for treatment.
+would represent a model stratified by group, where the hazard ratio for treatment is time-varying, but the model is not fully stratified by treatment.
 
 <<>>=
-res <- t(sapply(list(fs1, fs2, fs3, fs4, sp1, sp2, sp3), 
-                function(x)rbind(-2 * x$loglik, x$npars, x$AIC)))
+res <- t(sapply(list(fs1, fs2, fs3, fs4, sp1, sp2, sp3, sp4), 
+                function(x)rbind(-2 * round(x$loglik,1), x$npars, 
+                                 round(x$AIC,1))))
 rownames(res) <- c("Weibull (fs1)", "Generalized gamma (fs2)",
                    "Generalized gamma (fs3)", "Log-logistic (fs4)",
-                   "Spline (sp1)", "Spline (sp2)", "Spline (sp3)")
+                   "Spline (sp1)", "Spline (sp2)", "Spline (sp3)", 
+                   "Spline (sp4)")
 colnames(res) <- c("-2 log likelihood", "Parameters", "AIC")
 @ 
 \begin{table}[h]
-<<>>=
+<<size="scriptsize">>=
 res
 @ 
   \caption{Comparison of parametric survival models fitted to the breast cancer data.}
@@ -1061,7 +1068,7 @@ bounded optimiser from \proglang{R}'s \code{optim} \citep{nash}.  Without the
 constraint, extreme values of $\gamma_2$, visited by the optimiser,
 cause the numerical integration of the hazard function to fail.
 <<eval=FALSE>>=
-sp4 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data = bc, aux = ak,
+sp5 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data = bc, aux = ak,
                    inits = c(0, 0, 0, 0, 0), 
                    dist = custom.hsurvspline.lh3, 
                    method = "L-BFGS-B", lower = c(-Inf, -Inf, -0.5), 
@@ -1079,8 +1086,8 @@ may make fitting it more stable.
 
 Another potential application is to fractional polynomials
 \citep{royston1994regression}. These are of the form $\sum_{m=1}^M
-\alpha_m x^{p_m} log(x)^n$ where the power $p_m$ is in the standard
-set $\{2,-1,-0.5,0,0.5,1,2,3\}$ (except that $log(x)$ is used instead
+\alpha_m x^{p_m} \log(x)^n$ where the power $p_m$ is in the standard
+set $\{2,-1,-0.5,0,0.5,1,2,3\}$ (except that $\log(x)$ is used instead
 of $x^0$), and $n$ is a non-negative integer. They are similar to
 splines in that they can give arbitrarily close approximations to a
 nonlinear function, such as a hazard curve, and are particularly
@@ -1118,13 +1125,12 @@ for states $r, s = 1,\dots,R$, which for a survival model
 are equivalent to the hazard $h(t)$.  The intensity represents the
 instantaneous risk of moving from state $r$ to state $s$, and is 
 zero if the transition is impossible.  It may
-depend on patient
-characteristics $\mathbf{z}(t)$, the time $t$ itself, and possibly also the ``history'' of
+depend on covariates $\mathbf{z}(t)$, the time $t$ itself, and possibly also the ``history'' of
 the process up to that time, $\mathcal{F}_t$: the states previously
 visited or the length of time spent in them.
 
 \paragraph{Data} Instead of a single event time, there may now be a
-series of event times $t_{1},\dots, t_{n}$ for an individual.  The
+series of event times $t_{1},\dots, t_{n}$ for an individual, corresponding to changes of state.  The
 last of these may be an observed or right-censored event time.  Note
 \emph{panel data} are not considered here --- that is, observations of
 the state of the process at an arbitrary set of times
@@ -1141,7 +1147,8 @@ the exact event times enables much more flexible models, which
 In semi-Markov (clock-reset) models, $q_{rs}(t)$ depends on the time
 $t$ since entry into the current state, but otherwise, the time since
 the beginning of the process is forgotten.  Any software to fit
-survival models can also fit this kind of multi-state model.
+survival models can also fit this kind of multi-state model, as the 
+following sections will explain. 
 
 In an inhomogeneous Markov (clock-forward) model, $t$ represents the
 time since the beginning of the process, but the intensity $q_{rs}(t)$
@@ -1242,13 +1249,15 @@ observations.
 \subsection{Multi-state model likelihood}
 \label{sec:multistate:lik}
 
-After forming survival data as described above, a multi-state model can be
-fitted by maximising the standard survival model likelihood~(\ref{eq:lik}), 
-$l(\bm{\theta} | \mathbf{x}) = \prod_i l_i(\bm{\theta}|x_i)$,  where $\mathbf{x}$ is the
-data, and $i$ now indexes multiple observations for multiple individuals.   
-This can also be written as a product over the $K=\sum_r n_r$
-transitions $k$, and the $m_k$ observations $j$ pertaining to the $k$th
-transition. 
+After forming survival data as described above, a multi-state model
+can be fitted by maximising the standard survival model
+likelihood~(\ref{eq:lik}), $l(\bm{\theta} | \mathbf{x}) = \prod_i
+l_i(\bm{\theta}|x_i)$, where $\mathbf{x}$ is the data, and $i$ now
+indexes multiple observations for multiple individuals.  This can also
+be written as a product over the $K=\sum_r n_r$ transitions $k$, and
+the $m_k$ observations $j$ pertaining to the $k$th transition.  The
+transition type will typically enter this model as a categorical
+covariate --- see the examples in the next section.
 
 \begin{equation}
   \label{eq:lik:multistate}
@@ -1273,8 +1282,7 @@ On the other hand, if any parameters are constrained between
 transitions (e.g. if hazards are proportional between transitions, or
 the effects of covariates on different transitions are the same) then
 it is necessary to maximise the joint
-likelihood~(\ref{eq:lik:multistate}) with a single call.  The transition type 
-will typically enter this model as a categorical covariate.
+likelihood~(\ref{eq:lik:multistate}) with a single call. 
 
 
 \subsection{Fitting parametric multi-state models}
@@ -1508,7 +1516,7 @@ remaining alive and free of BOS is estimated at 0.27 at 5 years and 0.17
 at 10 years.  
 <<>>=
 ptc <- probtrans(mfcox, predt = 0, direction = "forward")[[1]]
-ptc[c(165, 193),]
+round(ptc[c(165, 193),], 3)
 @ 
 For parametric models, using a similar discrete-time approximation was
 suggested by \citet{cook:lawless}.  This
@@ -1518,7 +1526,7 @@ accurate by choosing a finer resolution for the grid of times when
 calling \code{msfit.flexsurvreg}.  
 <<>>=
 ptw <- probtrans(mfwei, predt = 0, direction = "forward")[[1]]
-ptw[ptw$time %in% c(5, 10),]
+round(ptw[ptw$time %in% c(5, 10),], 3)
 @ 
 \code{pstate1}--\code{pstate3} are close to the first rows of the
 matrices returned by \code{pmatrix.fs}.  The
