@@ -1600,7 +1600,7 @@ new class of models would ideally come with
   (\S\ref{sec:custom}).
 \end{itemize}
 
-The examples in this paper were run using version 0.5 of \pkg{flexsurv}, available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
+The examples in this paper were run using version 0.6 of \pkg{flexsurv}, available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
 
 
 \section*{Acknowledgements}
