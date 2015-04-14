@@ -206,17 +206,23 @@ and \eqn{(x - a)_+ = max(0, x - a)}.
 \examples{
 ## Best-fitting model to breast cancer data from Royston and Parmar (2002)
 ## One internal knot (2 df) and cumulative odds scale
+
 spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="odds")
 
 ## Fitted survival
-plot(spl, ci=TRUE, lwd=3, lwd.ci=1, col.ci="gray")
+
+plot(spl, lwd=3, ci=FALSE)
 
 ## Simple Weibull model fits much less well
+
 splw <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=0, scale="hazard")
-lines(splw, col="blue")
+lines(splw, col="blue", ci=FALSE)
 
 ## Alternative way of fitting the Weibull
+
+\dontrun{
 splw2 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
+}
 
 }
 \keyword{models}

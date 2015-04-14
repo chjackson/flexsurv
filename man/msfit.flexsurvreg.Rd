@@ -100,22 +100,28 @@ msfit.flexsurvreg(object, t, newdata=NULL, variance=TRUE,
 ## Compare clock-reset / semi-Markov multi-state models
 
 ## Simple exponential model (reduces to Markov)
+
 bexp <- flexsurvreg(Surv(years, status) ~ trans,
                     data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
-mexp <- msfit.flexsurvreg(bexp, t=seq(0,12,by=0.1), trans=tmat, tvar="trans")
+mexp <- msfit.flexsurvreg(bexp, t=seq(0,12,by=0.1),
+                          trans=tmat, tvar="trans", variance=FALSE)
 
 ## Cox semi-parametric model within each transition
+
 bcox <- coxph(Surv(years, status) ~ strata(trans), data=bosms3)
 require(mstate)
 mcox <- mstate::msfit(bcox, trans=tmat)
 
 ## Flexible parametric spline-based model 
+
 bspl <- flexsurvspline(Surv(years, status) ~ trans + gamma1(trans),
                        data=bosms3, k=3)
-mspl <- msfit.flexsurvreg(bspl, t=seq(0,12,by=0.1), trans=tmat, tvar="trans")
+mspl <- msfit.flexsurvreg(bspl, t=seq(0,12,by=0.1),
+                         trans=tmat, tvar="trans", variance=FALSE)
 
 ## Compare fit: exponential model is OK but the spline is better
+
 plot(mcox, lwd=1, xlim=c(0, 12), ylim=c(0,4))
 cols <- c("black","red","green")
 for (i in 1:3){
@@ -130,14 +136,19 @@ legend("topright", lwd=c(1,2,3), lty=c(1,2,1),
 ## Fit a list of models, one for each transition
 ## More computationally efficient, but only valid if parameters
 ## are different between transitions.
+
+\dontrun{
 bexp.list <- vector(3, mode="list")
 for (i in 1:3) { 
   bexp.list[[i]] <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==i),
                                 data=bosms3, dist="exp")
 }
+
 ## The list of models can be passed to this and other functions,
 ## as if it were a single multi-state model. 
+
 msfit.flexsurvreg(bexp.list, t=seq(0,12,by=0.1), trans=tmat)
+}
 
 }
 \references{
