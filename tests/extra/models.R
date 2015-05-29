@@ -3,7 +3,7 @@
 
 ## Logistic: as in manual
 
-library(eha)
+if (require("eha")){
 custom.llogis <- list(name="llogis",  pars=c("shape","scale"), location="scale",
                       transforms=c(log, log), inv.transforms=c(exp, exp),
                       inits=function(t){ c(1, median(t)) })
@@ -16,8 +16,6 @@ lines(fs2, col="blue")
 
 ## Gompertz-Makeham: wrapping an existing distribution
 ## Need proper vectorisation to work for covariates
-
-library(eha)
 
 dmakeham3 <- function(x, shape1, shape2, scale, ...)  {
     dmakeham(x, shape=c(shape1, shape2), scale=scale, ...)
@@ -42,6 +40,9 @@ fit <- flexsurvreg(Surv(msim, rep(1, 1000)) ~ x, dist=custom.makeham)
 fit # This one needs tight initial values to converge
 
 flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.makeham)
+}
+
+
 ## shape2 and scale parameters appear to be not identifiable
 flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="gompertz")
 

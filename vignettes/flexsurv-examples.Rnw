@@ -181,8 +181,14 @@ implements the Cox model used by
 fully-parametric alternative, implemented as a spline with three
 internal knots.  The number of knots was chosen to minimise AIC.   
 The covariate effects are very similar. 
+
+After fitting the model, the prognostic index can then be derived from categorising
+observations in three groups according to the tertiles of the linear predictor in each model. 
+The indices produced by the Cox model (\code{progc}) and the spline-based model (\code{progf}) agree exactly. 
+
 <<>>=
-library(TH.data)
+if (require("TH.data")){
+
 GBSG2 <- transform(GBSG2,
                    X1a=(age/50)^-2,
                    X1b=(age/50)^-0.5,
@@ -194,16 +200,13 @@ GBSG2 <- transform(GBSG2,
                   X5 + X6, data=GBSG2))
 (prog3 <- flexsurvspline(Surv(time, cens) ~ horTh + X1a + X1b + X4 + 
                            X5 + X6, k=3, data=GBSG2))
-@
-The prognostic index can then be derived from categorising
-observations in three groups according to the tertiles of the linear predictor in each model. 
-The indices produced by the Cox model (\code{progc}) and the spline-based model (\code{progf}) agree exactly. 
-<<>>=
 predc <- predict(progc, type="lp")
 progc <- cut(predc, quantile(predc, 0:3/3))
 predf <- model.matrix(prog3) %*% prog3$res[-(1:5),"est"]
 progf <- cut(predf, quantile(predf, 0:3/3))
 table(progc, progf)
+
+}
 @ 
 
 \bibliography{flexsurv}

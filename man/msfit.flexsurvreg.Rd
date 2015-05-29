@@ -110,7 +110,9 @@ mexp <- msfit.flexsurvreg(bexp, t=seq(0,12,by=0.1),
 ## Cox semi-parametric model within each transition
 
 bcox <- coxph(Surv(years, status) ~ strata(trans), data=bosms3)
-require(mstate)
+
+if (require("mstate")){
+
 mcox <- mstate::msfit(bcox, trans=tmat)
 
 ## Flexible parametric spline-based model 
@@ -132,6 +134,8 @@ for (i in 1:3){
 }
 legend("topright", lwd=c(1,2,3), lty=c(1,2,1),
    c("Cox", "Exponential", "Flexible parametric"), bty="n")
+
+}
 
 ## Fit a list of models, one for each transition
 ## More computationally efficient, but only valid if parameters

@@ -1,48 +1,52 @@
 context("Local multi-state modelling tests")
 
-library(msm)
-bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
-Q3 <- rbind(c(0,1,1),c(0,0,1),c(0,0,0))
-bos3$years <- round((bos3$time - 6)*30) / 365.25
-bmsm <- msm(state ~ years, subject=ptnum, data=bos3, exacttimes=TRUE, qmatrix=Q3)
-bwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + shape(trans), data=bosms3, dist="weibull") 
-tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
+if (require("msm")){
 
-test_that("flexsurv exponential model matches msm",{
-    fs.q <- as.numeric(exp(coef(bexp)[1] + c(0, coef(bexp)[2:3])))
-    msm.q <- qmatrix.msm(bmsm, ci="none")[rbind(c(1,2),c(1,3),c(2,3))]
-    expect_equal(fs.q, msm.q, tol=1e-03)
-    ## markov + "semi-markov" models same in this case
-    expect_equal(bexp$loglik, bmsm$minus2loglik*-0.5, tol=1e-06)
-    bexp2 <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp") 
-    expect_equal(bexp2$loglik, bmsm$minus2loglik*-0.5, tol=1e-06)
-})
+    Q3 <- rbind(c(0,1,1),c(0,0,1),c(0,0,0))
+    bos3$years <- round((bos3$time - 6)*30) / 365.25
+    bmsm <- msm(state ~ years, subject=ptnum, data=bos3, exacttimes=TRUE, qmatrix=Q3)
 
-test_that("P matrix using numerical ODE integrator",{
-    ## one or more times, CIs or no CIs
-    (P <- pmatrix.fs(bwei, tmat))
-    (P <- pmatrix.fs(bwei, tmat, ci=TRUE, B=5))
-    (P <- pmatrix.fs(bwei, t=c(5,10), tmat))
-    (P <- pmatrix.fs(bwei, t=c(5,10), tmat, ci=TRUE, B=5))
+    bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
+    bwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + shape(trans), data=bosms3, dist="weibull") 
+    tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 
-    ## with covariates: newdata argument
-    bosms3$x <- rbinom(nrow(bosms3), 1, 0.4)
-    bxwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ (trans + shape(trans))*x, data=bosms3, dist="weibull") 
-    (P <- pmatrix.fs(bxwei, t=c(5,10), newdata=list(x=rep(0,3)), tmat, ci=TRUE, B=5))
-    (P <- pmatrix.fs(bxwei, t=c(5,10), newdata=list(x=0), tmat, ci=TRUE, B=5))
-    (P <- pmatrix.fs(bxwei, t=c(5,10), newdata=list(x=1), tmat, ci=TRUE, B=5))
-  
-})
+    test_that("flexsurv exponential model matches msm",{
+        fs.q <- as.numeric(exp(coef(bexp)[1] + c(0, coef(bexp)[2:3])))
+        msm.q <- qmatrix.msm(bmsm, ci="none")[rbind(c(1,2),c(1,3),c(2,3))]
+        expect_equal(fs.q, msm.q, tol=1e-03)
+        ## markov + "semi-markov" models same in this case
+        expect_equal(bexp$loglik, bmsm$minus2loglik*-0.5, tol=1e-06)
+        bexp2 <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp") 
+        expect_equal(bexp2$loglik, bmsm$minus2loglik*-0.5, tol=1e-06)
+    })
 
-test_that("P matrix for exponential model matches msm",{
-    expect_equal(pmatrix.msm(bmsm, t=1)[1,1], pmatrix.fs(bexp, tmat)[1,1], tol=1e-04)
-    expect_equal(pmatrix.msm(bmsm, t=1)[1,2], pmatrix.fs(bexp, tmat)[1,2], tol=1e-03)
-    expect_equal(pmatrix.msm(bmsm, t=1)[2,3], pmatrix.fs(bexp, tmat)[2,3], tol=1e-03)
-    pmatrix.fs(bexp, tmat, ci=TRUE, B=5)
-    pmatrix.fs(bexp, tmat, t=c(5,10))
-    pmatrix.fs(bexp, tmat, t=c(5,10), ci=TRUE, B=5)
-})
-    
+    test_that("P matrix using numerical ODE integrator",{
+        ## one or more times, CIs or no CIs
+        (P <- pmatrix.fs(bwei, tmat))
+        (P <- pmatrix.fs(bwei, tmat, ci=TRUE, B=5))
+        (P <- pmatrix.fs(bwei, t=c(5,10), tmat))
+        (P <- pmatrix.fs(bwei, t=c(5,10), tmat, ci=TRUE, B=5))
+
+        ## with covariates: newdata argument
+        bosms3$x <- rbinom(nrow(bosms3), 1, 0.4)
+        bxwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ (trans + shape(trans))*x, data=bosms3, dist="weibull") 
+        (P <- pmatrix.fs(bxwei, t=c(5,10), newdata=list(x=rep(0,3)), tmat, ci=TRUE, B=5))
+        (P <- pmatrix.fs(bxwei, t=c(5,10), newdata=list(x=0), tmat, ci=TRUE, B=5))
+        (P <- pmatrix.fs(bxwei, t=c(5,10), newdata=list(x=1), tmat, ci=TRUE, B=5))
+        
+    })
+
+    test_that("P matrix for exponential model matches msm",{
+        expect_equal(pmatrix.msm(bmsm, t=1)[1,1], pmatrix.fs(bexp, tmat)[1,1], tol=1e-04)
+        expect_equal(pmatrix.msm(bmsm, t=1)[1,2], pmatrix.fs(bexp, tmat)[1,2], tol=1e-03)
+        expect_equal(pmatrix.msm(bmsm, t=1)[2,3], pmatrix.fs(bexp, tmat)[2,3], tol=1e-03)
+        pmatrix.fs(bexp, tmat, ci=TRUE, B=5)
+        pmatrix.fs(bexp, tmat, t=c(5,10))
+        pmatrix.fs(bexp, tmat, t=c(5,10), ci=TRUE, B=5)
+    })
+
+}
+
 test_that("ODE method matches Aalen-Johansen",{
     tgrid <- seq(0,14,by=0.01)
     mwei <- msfit.flexsurvreg(bwei, t=tgrid, trans=tmat, tvar="trans")

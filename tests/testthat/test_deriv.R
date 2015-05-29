@@ -1,5 +1,7 @@
 context("Accuracy of analytic derivatives")
 
+if (require("numDeriv")) { 
+
 has_accurate_derivs <- function(){
     if (!isTRUE(getOption("flexsurv.test.analytic.derivatives")))
         stop("flexsurv.test.analytic.derivatives option not set")
@@ -22,10 +24,6 @@ test_that("Analytic derivatives match numeric",{
     fite <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="exp", inits=c(0.002,0.01,-0.001))
     expect_that(fite, has_accurate_derivs())
 
-
-#    library(devtools)
-#    library(testthat)
-#    load_all("../..")
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="weibull")
     expect_that(fitw, has_accurate_derivs())
 
@@ -93,3 +91,5 @@ test_that("Analytic derivatives match numeric",{
 })
 
 options(flexsurv.test.analytic.derivatives=FALSE)
+
+}

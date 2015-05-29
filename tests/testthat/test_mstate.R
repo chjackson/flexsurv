@@ -1,6 +1,6 @@
 context("Multi-state modelling and prediction")
 
-library(mstate)
+if (require("mstate")) { 
 
 bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp") 
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
@@ -114,3 +114,5 @@ test_that("list and non-list format give same estimates", {
     expect_equal(msfit.flexsurvreg(bexpci, newdata=list(x=1), trans=tmat, t=1:10, variance=FALSE),
                  msfit.flexsurvreg(bexpc.list, newdata=list(x=1), trans=tmat, t=1:10, variance=FALSE), tol=1e-05)
 })
+
+}

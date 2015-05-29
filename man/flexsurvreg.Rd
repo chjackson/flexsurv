@@ -380,7 +380,9 @@ lines(fitw, col="blue", lwd.ci=1, lty.ci=1)
 ## very flexible model to be worthwhile.
 
 ## Custom distribution
-library(eha)  ## make "dEV" and "pEV" available to the working environment
+## make "dEV" and "pEV" from eha package (if installed)
+##   available to the working environment
+if (require("eha")) {
 custom.ev <- list(name="EV",
                       pars=c("shape","scale"),
                       location="scale",
@@ -391,6 +393,8 @@ fitev <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian,
                     dist=custom.ev)
 fitev
 lines(fitev, col="purple", col.ci="purple")
+}
+
 
 ## Custom distribution: supply the hazard function only
 hexp2 <- function(x, rate=1){ rate } # exponential distribution

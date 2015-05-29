@@ -35,8 +35,10 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, init
         ddcall[[i]] <- ddcall[[i]][dead]
         dsccall[[i]] <- dsccall[[i]][!dead]
     }
-    dd <- dderiv(dfns$DLd, ddcall, X[dead,,drop=FALSE], mx, dlist) * weights[dead]
-    dscens <- dderiv(dfns$DLS, dsccall, X[!dead,,drop=FALSE], mx, dlist) * weights[!dead]
+    dd <- dderiv(dfns$DLd, ddcall, X[dead,,drop=FALSE], mx, dlist)
+    dscens <- dderiv(dfns$DLS, dsccall, X[!dead,,drop=FALSE], mx, dlist)
+    if (sum(dead) > 0) dd <- dd * weights[dead]
+    if (sum(!dead) > 0) dscens <- dscens * weights[!dead]
     dstrunc <- dderiv(dfns$DLS, dstcall, X, mx, dlist) * weights
     res <- - ( colSums(dd) + colSums(dscens) - colSums(dstrunc) )
     ## currently wastefully calculates derivs for fixed pars then discards them
@@ -44,9 +46,11 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, init
 }
 
 dderiv <- function(ddfn, ddcall, X, mx, dlist){
-    res.base <- do.call(ddfn, ddcall)
-    res.beta <- Dcov(res.base, X, mx, dlist)
-    cbind(res.base, res.beta)
+    if (length(ddcall$t) == 0) matrix(0) else { 
+        res.base <- do.call(ddfn, ddcall)
+        res.beta <- Dcov(res.base, X, mx, dlist)
+        cbind(res.base, res.beta)
+    }
 }
 
 ## Derivatives of log density with respect to covariate effects are

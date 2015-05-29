@@ -28,10 +28,8 @@ delta <- (Q^2 + 2*P)^{1/2}
 s1 <- 2 / (Q^2 + 2*P + Q*delta); s2 <- 2 / (Q^2 + 2*P - Q*delta)
 
 test_that("Generalized F reduces to log logistic",{
-    if (is.element("eha", installed.packages()[,1])) {
-        expect_equal(dgenf(x, mu=mu, sigma=sigma, Q=Q, P=P),
-                     dllogis(x, shape=sqrt(2)/sigma, scale=exp(mu)), tol=tol)
-    }
+    expect_equal(dgenf(x, mu=mu, sigma=sigma, Q=Q, P=P),
+                 dllogis(x, shape=sqrt(2)/sigma, scale=exp(mu)), tol=tol)
 })
 
 test_that("Generalized F reduces to gamma",{
@@ -416,7 +414,8 @@ test_that("Generalized gamma definition in Stata manual",{
 
 test_that("llogis",{
     x <- c(0.1, 0.2, 0.7)
-    expect_equal(dllogis(x, shape=0.1, scale=0.2), eha::dllogis(x, shape=0.1, scale=0.2))
+    if (require("eha"))
+        expect_equal(dllogis(x, shape=0.1, scale=0.2), eha::dllogis(x, shape=0.1, scale=0.2))
     expect_equal(qllogis(x, shape=0.1, scale=0.2), qgeneric(pllogis, p=x, shape=0.1, scale=0.2))
     expect_equal(x, pllogis(qllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2))
     expect_equal(x, 1 - exp(-Hllogis(qllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2)))

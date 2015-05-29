@@ -1,2 +1,3 @@
-library(testthat)
-test_check("flexsurv")
+if (require("testthat")){
+    test_check("flexsurv")
+}

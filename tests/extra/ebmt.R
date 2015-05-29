@@ -1,4 +1,5 @@
-library(mstate)
+if (require("mstate")) { 
+
 data("ebmt4")
 ebmt <- ebmt4
 head(ebmt)
@@ -34,3 +35,5 @@ e0 <- flexsurvreg(Surv(Tstart,Tstop,status)~trans, data=msebmt, dist="exp")
 e1 <- flexsurvreg(Surv(Tstart,Tstop,status)~trans + factor(match) + factor(agecl), data=msebmt, dist="exp")
 
 msfit.flexsurvreg(e0, t=c(1,10,50,100), tvar="trans", trans=tmat)
+
+}

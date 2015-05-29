@@ -1,3 +1,15 @@
+Bug with spline and derivs and no censoring 
+
+TODO
+examples: eha,mstate.   requires done, but what about links.  keep these for now see if passes check 
+vignettes: mstate
+
+assume ok to leave knitr in suggests, and put 
+<<setup, include=FALSE>>=
+library(knitr)
+@ 
+
+
 SURVREG
 
 does 1/2 Surv indicator work, and TRUE/FALSE?  if so is n events reported correctly
