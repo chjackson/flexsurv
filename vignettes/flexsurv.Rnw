@@ -1006,7 +1006,7 @@ package to implement new model families, through wrappers similar to
 \paragraph{Example: splines on alternative scales}
 
 An alternative to the Royston-Parmar spline model is to model the log
-\emph{hazard} as a function of time instead of the log cumulative
+\emph{hazard} as a spline function of (log) time instead of the log cumulative
 hazard.  \citet{stgenreg} demonstrate this model using the \proglang{Stata}
 \pkg{stgenreg} package.  An advantage explained by
 \citet{royston:lambert:book} is that when there are

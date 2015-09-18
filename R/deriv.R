@@ -138,14 +138,14 @@ DLSgompertz <- function(t, shape, rate){
     res
 }
 
-DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"){
+DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log"){
     d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
 
 # TODO special value handling
-
-    b <- basis(knots, log(t))
-    db <- dbasis(knots, log(t))
+    
+    b <- basis(knots, tsfn(t,timescale))
+    db <- dbasis(knots, tsfn(t,timescale))
     eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
     ds <- rowSums(db * gamma)
     for (i in 1:ncol(gamma)){
@@ -159,13 +159,13 @@ DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"
     ret
 }
 
-DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"){
+DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log"){
 
     d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
 
 # TODO special value handling   
-    b <- basis(knots, log(t))
+    b <- basis(knots, tsfn(t,timescale))
     eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
     for (i in 1:ncol(gamma)){
         if (scale=="hazard")

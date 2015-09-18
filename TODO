@@ -1,4 +1,8 @@
+Bug with spline and all censored
+
 Bug with spline and derivs and no censoring 
+
+Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
 TODO
 examples: eha,mstate.   requires done, but what about links.  keep these for now see if passes check 
@@ -8,6 +12,7 @@ assume ok to leave knitr in suggests, and put
 <<setup, include=FALSE>>=
 library(knitr)
 @ 
+
 
 
 SURVREG

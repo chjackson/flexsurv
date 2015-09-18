@@ -1,5 +1,17 @@
 -*- text -*-
 
+* flexsurvspline now allows the log cumulative hazard (or its
+  alternatives) to be modelled as a spline function of time instead of
+  log time.
+
+* Fix of bug that prevented plots being drawn by categorical
+  covariates by default.
+
+* Fix of bug with spline 
+
+* Option to summary.flexsurvreg to return a tidy data frame.
+
+
 Version 0.6 (2015-04-13) 
 -----------
 

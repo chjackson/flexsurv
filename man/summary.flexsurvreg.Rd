@@ -10,7 +10,8 @@
 \usage{
 \method{summary}{flexsurvreg}(object, newdata=NULL, X=NULL,
                  type="survival", fn=NULL, t=NULL,
-                 start=0, ci=TRUE, B=1000, cl=0.95,...)
+                 start=0, ci=TRUE, B=1000, cl=0.95,
+                 tidy=FALSE, ...)
 }
 \arguments{
   \item{object}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted
@@ -97,12 +98,17 @@ It should return a vector of the
   \code{B=0} to turn off calculation of CIs.}
 
   \item{cl}{Width of symmetric confidence intervals, relative to 1.}
+
+  \item{tidy}{If \code{TRUE}, then the results are returned as a tidy
+    data frame instead of a list.  This can help with using the
+    \pkg{ggplot2} package to compare summaries for different covariate
+    values. }
   
   \item{...}{Further arguments passed to or from other methods.
     Currently unused.}
 }
 \value{
-  A list with one component for each unique covariate value (if there are
+  If \code{tidy=FALSE}, a list with one component for each unique covariate value (if there are
   only categorical covariates) or one component (if there are no
   covariates or any continuous covariates).  Each of these components
   is a matrix with one row for each time in \code{t}, giving the
@@ -110,6 +116,10 @@ It should return a vector of the
   confidence limits.  These list components are named with the covariate
   names and values which define them.
 
+  If \code{tidy=TRUE}, a data frame is returned instead.  This is formed
+  by stacking the above list components, with additional columns to
+  identify the covariate values that each block corresponds to.
+  
   If there are multiple summaries, an additional list component named
   \code{X} contains a matrix with the exact values of contrasts (dummy
   covariates) defining each summary.

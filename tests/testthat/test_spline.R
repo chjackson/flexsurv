@@ -227,3 +227,11 @@ test_that("supplying knots",{
     expect_true(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1)$loglik !=
                 flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1, bknots=c(-5, 2))$loglik)
 })
+
+test_that("Log cumulative hazard as a spline function of absolute time",{
+    spl0 <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, timescale="identity")    
+    spl1 <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=1, timescale="identity")
+    expect_equal(spl0$loglik, -1001.41961378425, tol=1e-06)
+    expect_equal(spl1$loglik, -867.055202323999, tol=1e-06)
+})
+

@@ -255,6 +255,7 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
         loghaz <- logdens - log(pmax - pmin)
         offset <- sum(log(1 + bhazard / exp(loghaz)*weights)[dead])
     } else offset <- 0
+
     ret <- - ( sum((logdens*weights)[dead]) +
               sum((log(pmax - pmin)*weights)[!dead]) -
               sum(log(pobs)*weights) + offset)
@@ -346,6 +347,7 @@ concat.formulae <- function(formula,forms){
     ## used for error message with incomplete "newdata" in summary()
     covnames.bare <- unlist(lapply(forms, function(x)all.vars(delete.response(terms(x)))))
     attr(f2, "covnames") <- covnames.bare
+    attr(f2, "covnames.orig") <- covnames
     f2
 }
         
@@ -451,6 +453,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if (missing(data)) temp[["data"]] <- environment(formula)
     m <- eval(temp, parent.frame())
     attr(m,"covnames") <- attr(f2, "covnames") # for "newdata" in summary
+    attr(m,"covnames.orig") <- intersect(colnames(m), attr(f2, "covnames.orig")) # for finding factors in plot method
     Y <- check.flexsurv.response(model.extract(m, "response"))
     mml <- mx <- vector(mode="list", length=length(dlist$pars))
     names(mml) <- names(mx) <- c(dlist$location, setdiff(dlist$pars, dlist$location))
@@ -461,11 +464,12 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     X <- compress.model.matrices(mml)
     
     weights <- model.extract(m, "weights")
-    if (is.null(weights)) weights <- rep(1, nrow(X))
+    if (is.null(weights)) weights <- m$"(weights)" <- rep(1, nrow(X))
     bhazard <- model.extract(m, "bhazard")
     if (is.null(bhazard)) bhazard <- rep(0, nrow(X))
     dat <- list(Y=Y, m=m, mml=mml)
-    ncovs <- ncol(m) - 1
+    ncovs <- ncol(m) - 2
+    
     ncoveffs <- ncol(X)
     nbpars <- length(parnames) # number of baseline parameters
     npars <- nbpars + ncoveffs
@@ -516,12 +520,13 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
         (is.numeric(fixedpars) && identical(fixedpars, 1:npars))) {
         minusloglik <- minusloglik.flexsurv(inits, Y=Y, X=X, weights=weights, bhazard=bhazard,
                                             dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx)
-        inits.t <- numeric(length(inits))
+        res.t <- matrix(inits, ncol=1)
+        inits.nat <- inits
         for (i in 1:nbpars)
-            inits.t[i] <- dlist$inv.transforms[[i]](inits[i])
-        res <- matrix(inits.t, ncol=1)
-        dimnames(res) <- list(names(inits.t), "est")
-        ret <- list(res=res, npars=0, loglik=-minusloglik)
+            inits.nat[i] <- dlist$inv.transforms[[i]](inits[i])
+        res <- matrix(inits.nat, ncol=1)
+        dimnames(res) <- dimnames(res.t) <- list(names(inits), "est")
+        ret <- list(res=res, res.t=res.t, npars=0, loglik=-minusloglik)
     }
     else {
         optpars <- inits[setdiff(1:npars, fixedpars)]
@@ -567,11 +572,12 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
         }
         ret <- list(res=res, res.t=res.t, cov=cov, coefficients=res.t[,"est"],
                     npars=length(est), fixedpars=fixedpars, optpars=setdiff(1:npars, fixedpars),
-                    mx=mx, ncovs=ncovs, ncoveffs=ncoveffs, basepars=1:nbpars, 
-                    covpars=if (ncoveffs>0) (nbpars+1):npars else NULL,
                     loglik=-opt$value, cl=cl, opt=opt)
     }
     ret <- c(list(call=call, dlist=dlist, aux=aux,
+                  ncovs=ncovs, ncoveffs=ncoveffs, 
+                  mx=mx, basepars=1:nbpars, 
+                  covpars=if (ncoveffs>0) (nbpars+1):npars else NULL,
                   AIC=-2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
@@ -661,12 +667,12 @@ form.model.matrix <- function(object, newdata){
 }
 
 summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL, 
-                                t=NULL, start=0, ci=TRUE, B=1000, cl=0.95,
+                                t=NULL, start=0, ci=TRUE, B=1000, cl=0.95, tidy=FALSE,
                                 ...)
 {
     x <- object
     dat <- x$data
-    Xraw <- model.frame(x)[,-1,drop=FALSE]
+    Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
     isfac <- sapply(Xraw,is.factor)
     type <- match.arg(type, c("survival","cumhaz","hazard"))
     if (is.null(newdata)){
@@ -735,7 +741,13 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         if (ci) { ret[[i]]$lcl <- ly; ret[[i]]$ucl <- uy}
     }
     if (x$ncovs>0) attr(ret,"X") <- X
-    class(ret) <- "summary.flexsurvreg"
+    if (tidy) {
+        ret <- do.call("rbind", ret)
+        covdf <- unique(Xraw)[rep(seq_len(nrow(unique(Xraw))), each=length(t)), , drop=FALSE]
+        rownames(ret) <- NULL
+        ret <- cbind(ret, covdf)
+    }
+    class(ret) <- c("summary.flexsurvreg",class(ret))
     ret
 }
 
@@ -759,11 +771,13 @@ summary.fns <- function(x, type){
 }
 
 print.summary.flexsurvreg <- function(x, ...){
-    for (i in seq_along(x)){
-        cat(names(x)[i], "\n")
-        print(x[[i]])
-        if (i<length(x)) cat("\n")
-    }
+    if (!inherits(x, "data.frame")){ 
+        for (i in seq_along(x)){
+            cat(names(x)[i], "\n")
+            print(x[[i]])
+            if (i<length(x)) cat("\n")
+        }
+    } else print.data.frame(x)
 }
 
 add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to transform on input 
@@ -862,7 +876,8 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                              add=FALSE,...)
 {
     ## don't calculate or plot CIs by default if all covs are categorical -> multiple curves
-    Xraw <- model.frame(x)[,-1,drop=FALSE]
+    mf <- model.frame(x)
+    Xraw <- mf[,attr(mf, "covnames.orig"), drop=FALSE]
     if (is.null(ci))
         ci <- ((x$ncovs == 0) || (!(sapply(Xraw,is.factor))))
     if (!ci) B <- 0

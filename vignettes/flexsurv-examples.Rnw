@@ -131,7 +131,7 @@ legend("topright", lwd=c(2,2), col=c("red","darkgray"), bty="n",
 
 The expected survival up to time $t$, from a model with cumulative distribution $F(t|\alpha)$, is 
 
-\[ E(T|T<t) = \int_0^{t} F(u | \alpha) du \]
+\[ E(T|T<t) = \int_0^{t} 1 - F(u | \alpha) du \]
 
 %% TODO can t arg to summay fn be omitted if function is independent of time, so it returns one value?
 

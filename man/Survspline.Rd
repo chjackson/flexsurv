@@ -13,17 +13,17 @@
 }
 \usage{
 dsurvspline(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard",
-            offset=0, log=FALSE)
+            timescale="log", offset=0, log=FALSE)
 psurvspline(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard",
-            offset=0, lower.tail=TRUE, log.p=FALSE)
+            timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE)
 qsurvspline(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard",
-            offset=0, lower.tail=TRUE, log.p=FALSE)
+            timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE)
 rsurvspline(n, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard",
-            offset=0)
+            timescale="log", offset=0)
 hsurvspline(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard",
-            offset=0)
+            timescale="log", offset=0)
 Hsurvspline(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard",
-            offset=0)
+            timescale="log", offset=0)
 }
 \arguments{
   \item{x,q}{Vector of times.}
@@ -56,6 +56,7 @@ Hsurvspline(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard",
     no knots in addition to the boundaries, this model reduces to the
     Weibull, log-logistic and log-normal respectively.   The scale must be
     common to all times. }
+  \item{timescale}{\code{"log"} or \code{"identity"} as described in \code{\link{flexsurvspline}}.}
   \item{offset}{An extra constant to add to the linear predictor \eqn{\eta}{eta}.}
   \item{log,log.p}{Return log density or probability.}
   \item{lower.tail}{logical; if TRUE (default), probabilities are

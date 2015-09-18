@@ -9,7 +9,7 @@
 }
 \usage{
 flexsurvspline(formula, data, k=0, knots=NULL, bknots=NULL,
-               scale="hazard", ...)
+               scale="hazard", timescale="log",...)
 }
 \arguments{
   \item{formula}{
@@ -60,30 +60,36 @@ flexsurvspline(formula, data, k=0, knots=NULL, bknots=NULL,
     to  \code{df-1} in the notation of \code{stpm} for Stata.  The knots
     are then chosen as equally-spaced quantiles of the log uncensored
     survival times, for example, at the median with one knot,
-    or at the 33\% and 67\% quantiles of log time with two knots.
+    or at the 33\% and 67\% quantiles of log time  (or time, see
+    \code{"timescale"}) with two knots.
     To override this default knot placement, specify \code{knots} instead.
   }
   \item{knots}{
-    Locations of knots on the axis of log time.  If not specified, knot
+    Locations of knots on the axis of log time (or time, see \code{"timescale"}).  If not specified, knot
     locations are chosen as described in \code{k} above.
     Either \code{k} or \code{knots} must be
     specified. If both are specified, \code{knots} overrides \code{k}.
   }
   \item{bknots}{
-    Locations of boundary knots, on the axis of log time.   If not
+    Locations of boundary knots, on the axis of log time (or time, see \code{"timescale"}).   If not
     supplied, these are are chosen as the minimum and maximum log
     death time.    
     }
   \item{scale}{
     If \code{"hazard"}, the log cumulative hazard is modelled as a spline
-    function of log time.
+    function. 
 
     If \code{"odds"}, the log cumulative odds is modelled as a spline
-    function of log time.
+    function.
 
     If \code{"normal"}, \eqn{-\Phi^{-1}(S(t))}{-InvPhi(S(t))} is modelled as a spline
-    function of log time, where \eqn{\Phi^{-1}()}{InvPhi()} is the
+    function, where \eqn{\Phi^{-1}()}{InvPhi()} is the
     inverse normal distribution function \code{\link{qnorm}}.
+  }
+  \item{timescale}{
+    If \code{"log"} (the default) the log cumulative hazard (or
+    alternative) is modelled as a spline function of log time.
+    If \code{"identity"}, it is modelled as a spline function of time. 
   }
   \item{...}{
     Any other arguments to be passed to or through
