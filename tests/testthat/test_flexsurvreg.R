@@ -15,6 +15,7 @@ test_that("Generalized gamma fit",{
     ## GF with "p" fixed at 0
     fitffix <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf",
                            fixedpars=4, inits=c(NA,NA,NA,1e-05))
+    expect_equal(fitffix$loglik, sum(fitffix$logliki))
     expect_equal(fitffix$res[1:3,"est"], fitg$res[1:3,"est"], tol=1e-03)
     expect_equal(fitffix$res[1:3,2:3], fitg$res[1:3,2:3], tol=1e-02)
 })
@@ -393,7 +394,10 @@ test_that("Relative survival", {
                                  c(1, median(t[t>0]) / log(2))
                              })
 
+#     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH), fixedpars=TRUE)
+
     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH))
+    
     expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233)
     expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038)
     expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026)

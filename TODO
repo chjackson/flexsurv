@@ -1,6 +1,4 @@
-Bug with spline and all censored
-
-Bug with spline and derivs and no censoring 
+vignette to match paper
 
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 

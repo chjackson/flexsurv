@@ -241,6 +241,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     \code{\link{vcov}} and \code{\link{confint}} methods for
     \code{flexsurvreg} objects work on this scale.}
   \item{loglik}{Log-likelihood}
+  \item{logliki}{Vector of individual contributions to the log-likelihood}
   \item{AIC}{Akaike's information criterion (-2*log likelihood + 2*number of
     estimated parameters)}
   \item{cov}{Covariance matrix of the parameters, on the real-line scale

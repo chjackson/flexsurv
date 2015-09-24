@@ -6,22 +6,22 @@ bc$foo <- factor(sample(1:3, nrow(bc), replace=TRUE))
 spl <- flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=0)
 
 test_that("Basic flexsurvspline, Weibull",{
-    expect_equal(spl$loglik,  -810.9268592239771, tol=1e-06)
+    expect_equal(spl$loglik,  -810.926859076725, tol=1e-06)
 })
 
 test_that("flexsurvspline summary method",{
     summ <- summary(spl, B=3)$"group=Good,foo=1"
-    expect_equal(summ$est[1],0.9998382213586808, tol=1e-06)
+    expect_equal(summ$est[1],0.999838214156694, tol=1e-05)
     expect_true(all(summ$est > summ$lcl))
     expect_true(all(summ$est < summ$ucl))
     expect_true(all(summ$ucl < 1))
     expect_true(all(summ$lcl > 0))
     summ <- summary(spl, type="survival", B=3, t=1:5)$`group=Good,foo=1`
-    expect_equal(summ$est[1], 0.9684023124859061, tol=1e-05)
+    expect_equal(summ$est[1], 0.9684014494284117, tol=1e-05)
     summ <- summary(spl, type="cumhaz", B=3, t=1:5)$`group=Good,foo=1`
-    expect_equal(summ$est[1],  0.03210766597611767, tol=1e-05)
+    expect_equal(summ$est[1],  0.03210855719443461, tol=1e-05)
     summ <- summary(spl, type="hazard", B=3, t=1:5)$`group=Good,foo=1`
-    expect_equal(summ$est[1],  0.04446246896318996, tol=1e-05)
+    expect_equal(summ$est[1],  0.04446356223043756, tol=1e-05)
 })
 
 if (interactive()){
@@ -48,7 +48,7 @@ test_that("Basic flexsurvspline, Weibull, no covs",{
 
 test_that("Basic flexsurvspline, one knot, best fitting in paper",{
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="odds")
-    expect_equal(spl$loglik, -788.981902005766, tol=1e-06)
+    expect_equal(spl$loglik, -788.981901798638, tol=1e-06)
     expect_equal(spl$loglik  +   sum(log(bc$recyrs[bc$censrec==1])), -615.49431514184, tol=1e-06)
     expect_equal(spl$AIC  +   sum(log(bc$recyrs[bc$censrec==1])), 1761.45139087546, tol=1e-06)
     #results from the paper
@@ -63,9 +63,9 @@ test_that("Basic flexsurvspline, one knot, best fitting in paper",{
 
 test_that("Spline models with hazard and normal scales",{
     splh <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="hazard")
-    expect_equal(splh$loglik, -792.8639669052731)
+    expect_equal(splh$loglik, -792.863797823674, tol=1e-05)
     spln <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="normal")
-    expect_equal(spln$loglik, -785.6232568276927)
+    expect_equal(spln$loglik, -785.623256840396, tol=1e-05)
     if (interactive()){
         plot(spl, ci=TRUE, lwd.ci=1, B=30)
         lines(splh, col="blue", ci=TRUE, B=30)
@@ -131,12 +131,12 @@ test_that("Spline normal models reduce to log-normal",{
 
 test_that("Spline models with time-varying covariate effects",{
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group + gamma1(group), data=bc, knots=1)
-    expect_equal(spl$loglik, -789.0020991517911, tol=1e-04)
-    expect_equal(spl$res["gamma1(groupMedium)","est"],  -0.4106362220548458, tol=1e-04)
+    expect_equal(spl$loglik, -789.002098222827, tol=1e-04)
+    expect_equal(spl$res["gamma1(groupMedium)","est"],  -0.410859123437426, tol=1e-04)
     summ.g <- summary(spl, ci=FALSE, t=c(1,5,10))$`group=Good`
-    expect_equal(summ.g$est[1], 0.9853578335177985, tol=1e-04)
+    expect_equal(summ.g$est[1], 0.9853637097617495, tol=1e-04)
     summ.m <- summary(spl, ci=FALSE, t=c(1,5,10))$`group=Medium`
-    expect_equal(summ.m$est[1], 0.939141744300326, tol=1e-04)
+    expect_equal(summ.m$est[1], 0.9391492993851021, tol=1e-04)
     summ2 <- summary(spl, ci=FALSE, t=c(1,5,10), newdata=data.frame(group=c("Good","Medium")))
     expect_equal(summ2[[1]]$est[1], summ.g$est[[1]])
     expect_equal(summ2[[2]]$est[1], summ.m$est[[1]])
@@ -151,6 +151,7 @@ test_that("Spline models with left-truncation",{
     bc2 <- bc[bc$recyrs>2,]
     (spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc2, k=0, fixedpars=TRUE))
     expect_equal(spl$loglik, -951.4567686517325, tol=1e-06)
+    expect_equal(spl$loglik, sum(spl$logliki), tol=1e-06)
     (spl <- flexsurvspline(Surv(rep(0, nrow(bc2)), recyrs, censrec) ~ 1, data=bc2, k=0))
     expect_equal(spl$loglik, -432.9048860461514, tol=1e-06)
     spl <- flexsurvspline(Surv(rep(1.9, nrow(bc2)), recyrs, censrec) ~ 1, data=bc2, k=0)
@@ -170,7 +171,7 @@ test_that("flexsurvspline results match stpm in Stata",{
     ## see ~/flexsurv/stpm/do1.do
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=0)
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -638.45432, tol=1e-05)
-    expect_equal(as.numeric(spl$res[,"est"]), c(-3.360303, 1.379652, .8465394, 1.672433), tol=1e-05)
+    expect_equal(as.numeric(spl$res[,"est"]), c(-3.360303, 1.379652, .8465394, 1.672433), tol=1e-04)
     
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2)
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -674.75128, tol=1e-04)
@@ -194,9 +195,9 @@ test_that("Expected survival",{
     gamma <- coef(spl)[1:3]
     beta <- coef(spl)[4:5]
     surv <- function(x,...)psurvspline(q=x, gamma=gamma, beta=beta, knots=spl$knots, scale=spl$scale, lower.tail=FALSE, ...)
-    expect_equal(integrate(surv, 0, 5, X=c(0,0))$value, 4.340393, tol=1e-04)# For group="good"
-    expect_equal(integrate(surv, 0, 5, X=c(1,0))$value, 3.664437, tol=1e-04) # For group="medium"
-    expect_equal(integrate(surv, 0, 5, X=c(0,1))$value, 2.712475, tol=1e-04) # For group="poor"
+    expect_equal(integrate(surv, 0, 5, X=c(0,0))$value, 4.341222955052117, tol=1e-04)# For group="good"
+    expect_equal(integrate(surv, 0, 5, X=c(1,0))$value, 3.664826479659649, tol=1e-04) # For group="medium"
+    expect_equal(integrate(surv, 0, 5, X=c(0,1))$value, 2.713301623208948, tol=1e-04) # For group="poor"
 })
 
 test_that("gamma in d/psurvspline can be matrix or vector",{
@@ -227,11 +228,3 @@ test_that("supplying knots",{
     expect_true(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1)$loglik !=
                 flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1, bknots=c(-5, 2))$loglik)
 })
-
-test_that("Log cumulative hazard as a spline function of absolute time",{
-    spl0 <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, timescale="identity")    
-    spl1 <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=1, timescale="identity")
-    expect_equal(spl0$loglik, -1001.41961378425, tol=1e-06)
-    expect_equal(spl1$loglik, -867.055202323999, tol=1e-06)
-})
-

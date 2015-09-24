@@ -78,6 +78,7 @@ importFrom(survival, survreg.control)
 importFrom(muhaz, muhaz)
 importFrom(mvtnorm, rmvnorm)
 importFrom(deSolve, ode)
+importFrom(quadprog, solve.QP)
 
 S3method(print, flexsurvreg)
 S3method(plot, flexsurvreg)

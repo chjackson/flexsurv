@@ -266,74 +266,89 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
     Y <- check.flexsurv.response(model.extract(mf, "response"))
     weights <- model.extract(mf, "weights")
     Y[,"status"] <- ifelse(Y[,"status"]==1, 1, 0) # handle interval censored data (coxph doesn't)
+    X <- mml[[1]][,-1,drop=FALSE]
+
+    ## Use only uncensored observations, unless < 5
+    ## of those, in which case use all.
     dead <- Y[,"status"]==1
-    ## use only uncensored observations, unless < 5 of those, in which case use all
     inc <- if (sum(dead) >= 5) dead else rep(TRUE, nrow(Y))
     inc <- inc & Y[,"start"] < Y[,"stop"]
-    X <- mml[[1]][inc,-1,drop=FALSE]
-    Y <- Y[inc,,drop=FALSE]
-    wt <- weights[inc]
-    ## using coxph on original formula followed by survfit.coxph fails
-    ## due to scoping
-    form <- paste("Surv(Y[,\"start\"], Y[,\"stop\"], Y[,\"status\"]) ~ ")
+   
+    ## Estimate empirical cumulative hazard for each observation 
+    formdat <- as.data.frame(cbind(Y, X))
+    names(formdat)[1:ncol(Y)] <- colnames(Y)
+    form <- c("Surv(start, stop, status) ~")
     if (ncol(X)>0){
-        covnames <- paste("X[,",1:ncol(X),"]",sep="")
-        form <- paste(form, paste(covnames, collapse=" + "))
+        names(formdat)[(ncol(Y)+1):ncol(formdat)] <- paste0("X", 1:ncol(X))
+        form <- paste(form, paste(paste0("X", 1:ncol(X)), collapse=" + "))
     }
     else form <- paste(form, "1")
-
-    bc$gr <- as.numeric(bc$group=="Good")
-    bc$gr2 <- as.numeric(bc$group=="Medium")
-    bc$start <- 0
-    cox <- coxph(Surv(start, recyrs, censrec) ~ gr + gr2, data=bc)
-    newdata <- as.data.frame(matrix(0, nrow=1, ncol=2))
-    names(newdata) <- c("gr","gr2")
-    surv <- survfit(cox, newdata=newdata)
+    cox <- coxph(as.formula(form), weights=weights, subset=inc, data=formdat)
     
-    cox <- coxph(as.formula(form), weights=wt)
-    surv <- survfit(cox)
-
-    ## Currently this fits a Cox regression on the covariates
-    ## Then an overall cumulative haz is estimated for the mean covariate value. 
-    ## Not quite what Royston & Parmar did, which is to predict the survival for the baseline (covariates = 0)
-    ## and then multiply by the hazard ratio for each observation 
-    ## Struggling to use newdata argument in survfit.coxph for this
-
-# why doesn't this work
-#  is it the counting process? 
-#    newdata <- as.data.frame(matrix(0, nrow=1, ncol=length(covnames)))
-#    names(newdata) <- covnames
-#    surv <- survfit(cox, newdata=newdata)
-# 'newdata' had 1 row but variables found have 299 rows 
-    
-    surv <- surv$surv[match(Y[,"stop"], surv$time)]
+    if (ncol(X)>0){
+        newdata <- as.data.frame(matrix(rep(0, ncol(X)), nrow=1))
+        names(newdata) <- paste0("X", 1:ncol(X))
+        surv <- survfit(cox, newdata=newdata)
+    } else surv <- survfit(cox)
+    surv <- surv$surv[match(Y[inc,"stop"], surv$time)]
+    surv <- surv^exp(cox$linear.predictors)
     if (aux$scale=="hazard")
         logH <- log(-log(surv))
     else if (aux$scale=="odds")
         logH <- log((1 - surv)/surv)
     else if (aux$scale=="normal")
         logH <- qnorm(1 - surv)
-    b <- if (!is.null(aux$knots))
-             basis(aux$knots, tsfn(Y[,"time"], aux$timescale))
-         else cbind(1, tsfn(Y[,"time"], aux$timescale))
-
-    form <- paste("logH ~ ",
-                  paste(paste("b[,",2:ncol(b),"]",sep=""), collapse=" + "))
-    if (ncol(X)>0)
-        form <- paste(form, "+", paste(paste("X[,",1:ncol(X),"]",sep=""), collapse=" + "))
-    ## include interactions between covs and spline basis
+    x <- tsfn(Y[inc,"time"], aux$timescale)
+    b <- if (!is.null(aux$knots)) basis(aux$knots, x) else cbind(1, x)
+    
+    ## Regress empirical logH on covariates and spline basis to obtain
+    ## initial values.
+    ## Constrain initial spline function to be increasing, using
+    ## quadratic programming
+    Xq <- cbind(b, X[inc,,drop=FALSE])
+    kx <- x
+    kr <- diff(range(x))
+    kx[1] <- x[1] - 0.01*kr
+    kx[length(kx)] <- x[length(kx)] + 0.01*kr
+    db <- if (!is.null(aux$knots)) dbasis(aux$knots, kx) else cbind(0, kx)
+    dXq <- cbind(db, matrix(0, nrow=nrow(db), ncol=ncol(X)))
     nints <- length(mml)-1
-    inter <- lapply(mml[-1], function(x)NULL)
-    for (i in seq_along(inter)){
+    for (i in seq_len(nints)){
         Xi <- mml[[i+1]][inc,-1,drop=FALSE]
-        ncovsi <- if (is.null(Xi)) 0 else ncol(Xi)
-        nam <- paste0("X",i)
-        assign(nam, Xi)
-        inter[[i]] <- if (ncovsi==0) NULL else paste0("b[,",i+1,"]:", paste0(nam,"[,",seq_len(ncovsi),"]"))
+        Xq <- cbind(Xq, Xi*b[,i+1])
+        dXq <- cbind(dXq, Xi*db[,i+1])
     }
-    inter <- paste(unlist(inter), collapse=" + ")
-    if (inter != "") form <- paste(form, inter, sep="+")
-    inits <- coef(lm(as.formula(form), weights=wt))
+    y <- logH[is.finite(logH)]
+    Xq <- Xq[is.finite(logH),,drop=FALSE]
+    dXq <- dXq[is.finite(logH),,drop=FALSE]
+    eps <- rep(1e-09, length(y)) # so spline is strictly increasing
+
+    inits <- solve.QP(Dmat=t(Xq) %*% Xq, dvec=t(t(y) %*% Xq), Amat=t(dXq), bvec=eps)$solution
+    inits
+}
+
+## Initialise coefficients on spline intercepts (standard hazard
+## ratios in PH models) using standard Cox regression, in cases where
+## the default inits routine above results in parameters that give a
+## zero likelihood, e.g. GBSG2 example
+
+flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
+{
+    inits <- flexsurv.splineinits(t=t, mf=mf, mml=mml, aux=aux)
+    Y <- check.flexsurv.response(model.extract(mf, "response"))
+    weights <- model.extract(mf, "weights")
+    Y[,"status"] <- ifelse(Y[,"status"]==1, 1, 0) # handle interval censored data (coxph doesn't)
+    X <- mml[[1]][,-1,drop=FALSE]
+    formdat <- as.data.frame(cbind(Y, X))
+    names(formdat)[1:ncol(Y)] <- colnames(Y)
+    form <- c("Surv(start, stop, status) ~")
+    if (ncol(X)>0){
+        names(formdat)[(ncol(Y)+1):ncol(formdat)] <- paste0("X", 1:ncol(X))
+        form <- paste(form, paste(paste0("X", 1:ncol(X)), collapse=" + "))
+        cox <- coxph(as.formula(form), weights=weights, data=formdat)
+        covinds <- length(aux$knots) + 1:ncol(X)
+        inits[covinds] <- coef(cox)
+    }
     inits
 }
 
@@ -406,6 +421,15 @@ flexsurvspline <- function(formula, data, k=0, knots=NULL, bknots=NULL, scale="h
     DSfn <- if (scale=="normal") NULL else unroll.function(DLSsurvspline, gamma=0:(nk-1))
     args <- c(list(formula=formula, data=data, dist=custom.fss,
                    dfns=list(d=dfn,p=pfn,r=rfn,DLd=Ddfn,DLS=DSfn), aux=aux), list(...))
+
+    ## Try an alternative initial value routine if the default one gives zero likelihood
+    fpold <- args$fixedpars
+    args$fixedpars <- TRUE
+    if (is.infinite(do.call("flexsurvreg", args)$loglik)){
+        args$dist$inits <- flexsurv.splineinits.cox
+    }
+    args$fixedpars <- fpold
+    
     ret <- do.call("flexsurvreg", args) # faff to make ... args work within functions
     ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale))
     ret$call <- call

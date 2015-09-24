@@ -253,12 +253,21 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
     ## Hazard offset for relative survival models
     if (any(bhazard>0)){
         loghaz <- logdens - log(pmax - pmin)
-        offset <- sum(log(1 + bhazard / exp(loghaz)*weights)[dead])
-    } else offset <- 0
+        offseti <- log(1 + bhazard / exp(loghaz)*weights)
+    } else offseti <- rep(0, length(logdens))
+    offset <- sum(offseti[dead])
+## TODO express as individual-specific liks to return for debugging 
 
-    ret <- - ( sum((logdens*weights)[dead]) +
-              sum((log(pmax - pmin)*weights)[!dead]) -
-              sum(log(pobs)*weights) + offset)
+    loglik <- numeric(length(logdens))
+    loglik[dead] <- (logdens*weights)[dead] + offseti[dead]
+    loglik[!dead] <- (log(pmax - pmin)*weights)[!dead]
+    loglik <- loglik - log(pobs)*weights
+    
+#    ret <- - ( sum((logdens*weights)[dead]) +
+#              sum((log(pmax - pmin)*weights)[!dead]) -
+#              sum(log(pobs)*weights) + offset)
+    ret <- -sum(loglik)
+    attr(ret, "indiv") <- loglik
     ret
 }
 
@@ -526,7 +535,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
             inits.nat[i] <- dlist$inv.transforms[[i]](inits[i])
         res <- matrix(inits.nat, ncol=1)
         dimnames(res) <- dimnames(res.t) <- list(names(inits), "est")
-        ret <- list(res=res, res.t=res.t, npars=0, loglik=-minusloglik)
+        ret <- list(res=res, res.t=res.t, npars=0,
+                    loglik=-as.vector(minusloglik), logliki=attr(minusloglik,"indiv"))
     }
     else {
         optpars <- inits[setdiff(1:npars, fixedpars)]
@@ -570,9 +580,12 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
             ## theoretically could also do logit SE(g(x) = exp(x)/(1 + exp(x))) = g'(x) SE(x);  g'(x) = exp(x)/(1 + exp(x))^2
             ## or any interval scale (dglogit) as in msm
         }
+        minusloglik <- minusloglik.flexsurv(res.t[,"est"], Y=Y, X=X, weights=weights, bhazard=bhazard,
+                                            dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx)
         ret <- list(res=res, res.t=res.t, cov=cov, coefficients=res.t[,"est"],
                     npars=length(est), fixedpars=fixedpars, optpars=setdiff(1:npars, fixedpars),
-                    loglik=-opt$value, cl=cl, opt=opt)
+                    loglik=-opt$value, logliki=attr(minusloglik,"indiv"),
+                    cl=cl, opt=opt)
     }
     ret <- c(list(call=call, dlist=dlist, aux=aux,
                   ncovs=ncovs, ncoveffs=ncoveffs, 

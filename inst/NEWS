@@ -1,13 +1,28 @@
 -*- text -*-
 
+Version 0.7 (??)
+-----------
+
 * flexsurvspline now allows the log cumulative hazard (or its
   alternatives) to be modelled as a spline function of time instead of
   log time.
 
+* The routine for generating initial values in flexsurvspline has been
+  improved.  This now obeys the constraint that the log cumulative
+  hazard is increasing, thus avoiding errors from optim() when this
+  wasn't satisfied.  Cox regression is used as a fallback to
+  initialise covariate effects if this fails.
+
+* As a result, flexsurv now depends on the "quadprog" package.
+
+* New "logliki" component in model objects, containing vector of
+  log-likelihoods for each observation at the estimated or fixed
+  parameters.
+
 * Fix of bug that prevented plots being drawn by categorical
   covariates by default.
 
-* Fix of bug with spline 
+* Fix of bug with spline models and no censored data.
 
 * Option to summary.flexsurvreg to return a tidy data frame.
 
