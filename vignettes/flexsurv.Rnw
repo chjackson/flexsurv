@@ -278,10 +278,9 @@ effects $\exp(\bm{\beta})$ are printed in the output as
 \end{sloppypar}
 
 The same model can be fitted in \pkg{eha}, also by maximum likelihood, as
-<<results='hide',message=FALSE,warning=FALSE>>=
-if (require("eha")){
+<<results='hide',eval=FALSE>>=
+library(eha)
 aftreg(Surv(recyrs, censrec) ~ group, data = bc, dist = "weibull")
-}
 @ 
 The results are presented in the same parameterisation as
 \code{flexsurvreg}, except that the shape and scale parameters are
@@ -657,7 +656,7 @@ The following custom model uses the log-logistic distribution functions
 \pkg{eha}.   
   The survivor function is $S(t|\mu,\alpha) = 1/(1 + (t/\mu)^\alpha)$,
 so that the log odds $\log((1-S(t))/S(t))$ of having died are a linear function of log time.
-<<>>=
+<<eval=FALSE>>=
 custom.llogis <- list(name = "llogis",  pars = c("shape", "scale"), 
                       location = "scale",
                       transforms = c(log, log), 
@@ -682,7 +681,7 @@ The shape parameters $\alpha_1,\alpha_2$ are provided to
 expects distribution functions to have one argument for each
 parameter.  Therefore we write our own functions that wrap around 
 the third-party functions.
-<<>>=
+<<eval=FALSE>>=
 dmakeham3 <- function(x, shape1, shape2, scale, ...)  {
     dmakeham(x, shape = c(shape1, shape2), scale = scale, ...)
 }
@@ -695,12 +694,12 @@ pmakeham3 <- function(q, shape1, shape2, scale, ...)  {
 That is, we can supply a vector of alternative values for one or more
 arguments, and expect a vector of the same length to be returned.  The
 \proglang{R} base function \code{Vectorize} can be used to do this here.
-<<>>=
+<<eval=FALSE>>=
 dmakeham3 <- Vectorize(dmakeham3) 
 pmakeham3 <- Vectorize(pmakeham3)
 @ 
 and this allows us to write, for example, 
-<<>>=
+<<eval=FALSE>>=
 pmakeham3(c(0, 1, 1, Inf), 1, c(1, 1, 2, 1), 1)
 @ 
 We could then use \code{dist = list(name = "makeham3", pars = c("shape1", "shape2", \\
@@ -716,9 +715,8 @@ printed \code{flexsurvreg} object can be interpreted as hazard ratios
 or log hazard ratios without any further transformation.
 Here instead of the density and cumulative distribution functions, we
 provide the hazard and cumulative hazard.\footnote{The \pkg{eha} package 
-needs to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s currently does.}
+may need to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s currently does.}
 <<>>=
-detach("package:eha")
 hweibullPH <- function(x, shape, scale = 1, log = FALSE){
     hweibull(x, shape = shape, scale = scale ^ {-1 / shape}, log = log)
 }
@@ -810,7 +808,8 @@ is the log cumulative hazard.  Table \ref{tab:spline} explains two
 further choices of $g()$, and the parameter values and distributions
 they simplify to for $m=0$.  The probability density and cumulative
 distribution functions for all these models are available as
-\code{dsurvspline} and \code{psurvspline}.
+\code{dsurvspline} and \code{psurvspline}.  A model with an absolute time
+scale ($x = t$) is also available through \code{timescale="identity"}. 
 
   \begin{table}
   \begin{tabularx}{\textwidth}{lXlp{1.4in}}
@@ -931,11 +930,11 @@ flexsurvspline(Surv(recyrs, censrec) ~ group + gamma1(group) +
 would represent a model stratified by group, where the hazard ratio for treatment is time-varying, but the model is not fully stratified by treatment.
 
 <<>>=
-res <- t(sapply(list(fs1, fs2, fs3, fs4, sp1, sp2, sp3, sp4), 
+res <- t(sapply(list(fs1, fs2, fs3, sp1, sp2, sp3, sp4), 
                 function(x)rbind(-2 * round(x$loglik,1), x$npars, 
                                  round(x$AIC,1))))
 rownames(res) <- c("Weibull (fs1)", "Generalized gamma (fs2)",
-                   "Generalized gamma (fs3)", "Log-logistic (fs4)",
+                   "Generalized gamma (fs3)", 
                    "Spline (sp1)", "Spline (sp2)", "Spline (sp3)", 
                    "Spline (sp4)")
 colnames(res) <- c("-2 log likelihood", "Parameters", "AIC")

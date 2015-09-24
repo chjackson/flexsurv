@@ -22,7 +22,8 @@ Version 0.7 (??)
 * Fix of bug that prevented plots being drawn by categorical
   covariates by default.
 
-* Fix of bug with spline models and no censored data.
+* Fix of bugs with spline models and no data censored, or all data
+  interval censored.
 
 * Option to summary.flexsurvreg to return a tidy data frame.
 

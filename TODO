@@ -1,9 +1,8 @@
-vignette to match paper
+spline with interval2 data see pmetcalfe.r
 
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
 TODO
-examples: eha,mstate.   requires done, but what about links.  keep these for now see if passes check 
 vignettes: mstate
 
 assume ok to leave knitr in suggests, and put 

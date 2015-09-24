@@ -264,10 +264,18 @@ unroll.function <- function(mat.fn, ...){
 flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
 {
     Y <- check.flexsurv.response(model.extract(mf, "response"))
-    weights <- model.extract(mf, "weights")
-    Y[,"status"] <- ifelse(Y[,"status"]==1, 1, 0) # handle interval censored data (coxph doesn't)
+ 
+    ## Impute interval-censored data, where Cox doesn't work.
+    intcens <- Y[,"status"]==3 & (Y[,"start"] < Y[,"stop"])
+    Y[intcens,"status"] <- 1
+    Y[intcens,"stop"] <- Y[intcens,"start"] + (Y[intcens,"stop"] - Y[intcens,"start"])/2  
+    Y[,"status"] <- ifelse(Y[,"status"]==1, 1, 0)
+    
     X <- mml[[1]][,-1,drop=FALSE]
 
+    ### TODO if all data are censored, coxph doesn't work
+    ### if less than 5 events, impute
+    
     ## Use only uncensored observations, unless < 5
     ## of those, in which case use all.
     dead <- Y[,"status"]==1
@@ -275,15 +283,16 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
     inc <- inc & Y[,"start"] < Y[,"stop"]
    
     ## Estimate empirical cumulative hazard for each observation 
-    formdat <- as.data.frame(cbind(Y, X))
+    formdat <- as.data.frame(cbind(Y, X, weights=model.extract(mf, "weights")))
     names(formdat)[1:ncol(Y)] <- colnames(Y)
     form <- c("Surv(start, stop, status) ~")
     if (ncol(X)>0){
-        names(formdat)[(ncol(Y)+1):ncol(formdat)] <- paste0("X", 1:ncol(X))
+        names(formdat)[ncol(Y) + 1:ncol(X)] <- paste0("X", 1:ncol(X))
         form <- paste(form, paste(paste0("X", 1:ncol(X)), collapse=" + "))
     }
     else form <- paste(form, "1")
-    cox <- coxph(as.formula(form), weights=weights, subset=inc, data=formdat)
+    formdat <- formdat[inc,]
+    cox <- coxph(as.formula(form), weights=weights, data=formdat)
     
     if (ncol(X)>0){
         newdata <- as.data.frame(matrix(rep(0, ncol(X)), nrow=1))
@@ -336,15 +345,20 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 {
     inits <- flexsurv.splineinits(t=t, mf=mf, mml=mml, aux=aux)
     Y <- check.flexsurv.response(model.extract(mf, "response"))
-    weights <- model.extract(mf, "weights")
-    Y[,"status"] <- ifelse(Y[,"status"]==1, 1, 0) # handle interval censored data (coxph doesn't)
+    ## Impute interval-censored data, where Cox doesn't work.
+    intcens <- Y[,"status"]==3 & (Y[,"start"] < Y[,"stop"])
+    Y[intcens,"status"] <- 1
+    Y[intcens,"stop"] <- Y[intcens,"start"] + (Y[intcens,"stop"] - Y[intcens,"start"])/2  
+    Y[,"status"] <- ifelse(Y[,"status"]==1, 1, 0)
+    inc <- Y[,"start"] < Y[,"stop"]   
     X <- mml[[1]][,-1,drop=FALSE]
-    formdat <- as.data.frame(cbind(Y, X))
+    formdat <- as.data.frame(cbind(Y, X, weights=model.extract(mf, "weights")))
     names(formdat)[1:ncol(Y)] <- colnames(Y)
     form <- c("Surv(start, stop, status) ~")
     if (ncol(X)>0){
-        names(formdat)[(ncol(Y)+1):ncol(formdat)] <- paste0("X", 1:ncol(X))
+        names(formdat)[ncol(Y) + 1:ncol(X)] <- paste0("X", 1:ncol(X))
         form <- paste(form, paste(paste0("X", 1:ncol(X)), collapse=" + "))
+        formdat <- formdat[inc,]
         cox <- coxph(as.formula(form), weights=weights, data=formdat)
         covinds <- length(aux$knots) + 1:ncol(X)
         inits[covinds] <- coef(cox)

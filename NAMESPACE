@@ -89,3 +89,15 @@ S3method(logLik, flexsurvreg)
 S3method(model.frame, flexsurvreg)
 S3method(model.matrix, flexsurvreg)
 S3method(print, summary.flexsurvreg)
+
+importFrom("graphics", "lines")
+importFrom("stats", "as.formula", "coef", "cov", "delete.response",
+           "dexp", "dgamma", "dlnorm", "dnorm", "dweibull", "median",
+           "model.extract", "model.frame", "model.matrix", "na.omit",
+           "pbeta", "pexp", "pgamma", "plnorm", "plogis", "pnorm",
+           "pweibull", "qexp", "qf", "qgamma", "qlnorm", "qlogis",
+           "qnorm", "quantile", "reformulate", "rf", "rgamma",
+           "rlnorm", "runif", "rweibull", "sd", "terms", "uniroot",
+           "var")
+
+importFrom("mstate", "msfit", "probtrans")
