@@ -1,15 +1,6 @@
-spline with interval2 data see pmetcalfe.r
-
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
-TODO
-vignettes: mstate
-
-assume ok to leave knitr in suggests, and put 
-<<setup, include=FALSE>>=
-library(knitr)
-@ 
-
+dpqrhH survspline: do these work with a single x=0, already filled in in dbase.survspline, so need if (any(ind)) around rest? 
 
 
 SURVREG
@@ -20,13 +11,16 @@ does 1/2 Surv indicator work, and TRUE/FALSE?  if so is n events reported correc
 
 OPTIONAL
 
-document and test PH weibull. does it need dpq as well as hHr? 
+Generic (restricted) mean of distributions, integration if necessary.
+   See surv2sampleComp package
+Restricted SD in same way?
+
 
 make plot/summary do baseline values of factor covs and mean of continuous
 
-Delta method for survival - a lot of distribution-specific faff.
+abstract newdata thing - default to baseline
 
-Generic (restricted) mean of distributions, integration if necessary
+Delta method for survival - a lot of distribution-specific faff.
 
 inits and fixedpars named
 
@@ -55,3 +49,8 @@ Migrate doc to roxygen?
 Newton-Raphson (analytic second derivs) available in maxLik::maxNR
 
 allow time-dependent covs to influence the hazard in pmatrix.fs
+
+any role for pseudo-observations?  (residual plots? regressing functions of pars directly on covs?)
+http://smm.sagepub.com/content/19/1/71.full.pdf+html
+
+piecewise exponential distribution

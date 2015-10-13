@@ -397,11 +397,12 @@ test_that("Relative survival", {
 #     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH), fixedpars=TRUE)
 
     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH))
+    fs6bd <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
     
-    expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233)
-    expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038)
-    expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026)
-    expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765)
+    expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tol=1e-05)
+    expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tol=1e-05)
+    expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tol=1e-05)
+    expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765, tol=1e-05)
 
     ## same results as 
     ## cd /home/chris/flexsurv/stata

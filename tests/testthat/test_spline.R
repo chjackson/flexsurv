@@ -166,6 +166,13 @@ test_that("Spline models with weighting",{
     expect_equal(spl$loglik, wei$loglik, tol=1e-06)
 })
 
+test_that("Spline models with relative survival",{
+    bc$bh <- rep(0.01, nrow(bc))
+    spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, bhazard=bh)
+#    wei <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibullPH", bhazard=bh)
+#    expect_equal(spl$loglik, wei$loglik, tol=1e-06)
+})
+
 test_that("flexsurvspline results match stpm in Stata",{
     ## Numbers copied from Stata output for equivalent stpm commands
     ## see ~/flexsurv/stpm/do1.do
@@ -217,14 +224,24 @@ expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, knots=c(-5, 
 expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, knots=c(2)), "knot 2 greater than or equal to maximum log time")
 expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=0, bknots=c("foo")), "boundary knots should be")
 expect_error(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=0, bknots=c(0,1,2)), "boundary knots should be")
-expect_warning(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, subset=1:10, k=0, inits=c(1,1,0,0,0,0), fixedpars=TRUE),
-               "minimum and maximum log death times are the same")
+expect_warning(
+    flexsurvspline(Surv(recyrs, censrec) ~ foo, data=bc, subset=1:10, k=0, inits=c(1,1,0,0,0,0), fixedpars=TRUE)
+  , "minimum and maximum log death times are the same")
 })
 
 test_that("supplying knots",{
     ldtimes <- log(bc$recyrs[bc$censrec==1])
     expect_equal(flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1)$loglik,
-                 flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, knots=median(ldtimes), bknots=range(ldtimes))$loglik)   
+                 flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, knots=median(ldtimes), bknots=range(ldtimes))$loglik, tol=1e-08)   
     expect_true(flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1)$loglik !=
                 flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1, bknots=c(-5, 2))$loglik)
+})
+
+test_that("subset",{
+    subflex <- flexsurvspline(Surv(time = time, event = status) ~ sex + cut(age, 4), data = survival::lung,
+                              subset = !is.na(wt.loss))
+    subflex2 <- flexsurvspline(Surv(time = time, event = status) ~ sex + cut(age, 4), data = survival::lung[!is.na(survival::lung$wt.loss),])
+    expect_equal(subflex$loglik, subflex2$loglik, tol=1e-08)
+    subflex <- flexsurvspline(Surv(time = time, event = status) ~ sex + cut(age, 4), data = survival::lung, 
+                              subset = survival::lung$age > 60) # empty factor level in subset, should be dropped since 0.7
 })

@@ -8,7 +8,8 @@
   model of Royston and Parmar (2002).
 }
 \usage{
-flexsurvspline(formula, data, k=0, knots=NULL, bknots=NULL,
+flexsurvspline(formula, data, weights, bhazard, subset,
+               k=0, knots=NULL, bknots=NULL,
                scale="hazard", timescale="log",...)
 }
 \arguments{
@@ -52,6 +53,16 @@ flexsurvspline(formula, data, k=0, knots=NULL, bknots=NULL,
   \item{data}{
     A data frame in which to find variables supplied in \code{formula}.
     If not given, the variables should be in the working environment.
+  }
+  \item{weights}{
+    Optional variable giving case weights.
+  }
+  \item{bhazard}{
+    Optional variable giving expected hazards for relative survival models.
+  }
+  \item{subset}{
+    Vector of integers or logicals specifying the subset of the
+    observations to be used in the fit.
   }
   \item{k}{
     Number of knots in the spline. The default \code{k=0} gives

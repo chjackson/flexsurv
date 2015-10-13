@@ -331,11 +331,12 @@ corresponding cumulative distribution functions (with first letter
 \code{flexsurvreg} to compute the likelihood.
 
 \pkg{flexsurv} provides some additional survival distributions,
-including a Gompertz distribution with unrestricted shape parameter
-(\code{dist = "gompertz"}), log-logistic, and the three- and four-parameter families
-described below.  For all built-in distributions, \pkg{flexsurv} also
-defines functions beginning with \code{h} giving the hazard, and \code{H}
-for the cumulative hazard.
+including a Gompertz distribution with unrestricted shape parameter,
+Weibull with proportional hazards parameterisation, log-logistic, and
+the three- and four-parameter families described below.  For all
+built-in distributions, \pkg{flexsurv} also defines functions
+beginning with \code{h} giving the hazard, and \code{H} for the
+cumulative hazard.
 
 \paragraph{Generalized gamma} This three-parameter distribution
 includes the Weibull, gamma and log-normal as special cases.  The
@@ -406,7 +407,8 @@ the best estimated predictive ability.
     & {\footnotesize{(location in \code{\color{red}{red}})}} & & \\
 \hline
     Exponential & \code{\color{red}{rate}}             & \code{dexp}   & \code{"exp"} \\
-    Weibull     & \code{shape, {\color{red}{scale}}}     & \code{dweibull} & \code{"weibull"} \\
+    Weibull (accelerated failure time)     & \code{shape, {\color{red}{scale}}}     & \code{dweibull} & \code{"weibull"} \\
+    Weibull (proportional hazards)     & \code{shape, {\color{red}{scale}}}     & \code{dweibullPH} & \code{"weibullPH"} \\
     Gamma       & \code{shape, \color{red}{rate}}      & \code{dgamma} & \code{"gamma"}\\
     Log-normal  & \code{{\color{red}{meanlog}}, sdlog}   & \code{dlnorm} & \code{"lnorm"}\\
     Gompertz    & \code{shape, {\color{red}{rate}}}      & \code{dgompertz} & \code{"gompertz"} \\
@@ -709,12 +711,16 @@ the second shape parameter is poorly identifiable.
 
 \paragraph{Example: Changing the parameterisation of a distribution}
 
-We may want to fit a Weibull model like \code{fs1}, but with the proportional hazards (PH) parameterisation $S(t) =
-\exp(-\mu t^\alpha)$, so that the covariate effects reported in the
-printed \code{flexsurvreg} object can be interpreted as hazard ratios
-or log hazard ratios without any further transformation.
-Here instead of the density and cumulative distribution functions, we
-provide the hazard and cumulative hazard.\footnote{The \pkg{eha} package 
+We may want to fit a Weibull model like \code{fs1}, but with the
+proportional hazards (PH) parameterisation $S(t) = \exp(-\mu
+t^\alpha)$, so that the covariate effects reported in the printed
+\code{flexsurvreg} object can be interpreted as hazard ratios or log
+hazard ratios without any further transformation.  Here instead of the
+density and cumulative distribution functions, we provide the hazard
+and cumulative hazard.  (Note that since version 0.7, the
+\code{"weibullPH"} distribution is built in to \code{flexsurvreg} ---
+but this example has been kept here for illustrative purposes.)
+\footnote{The \pkg{eha} package 
 may need to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s currently does.}
 <<>>=
 hweibullPH <- function(x, shape, scale = 1, log = FALSE){
@@ -740,7 +746,7 @@ The fitted model is the same as \code{fs1}, therefore the maximised likelihood i
 The parameter estimates of \code{fs6} can be transformed to those of \code{fs1} as shown. 
 The shape $\alpha$ is common to both models, the scale $\mu^\prime$ in the AFT model is related to the PH scale $\mu$ as  $\mu^\prime$ = $\mu^{-1/\alpha}$.   
 The effects $\beta^\prime$ on life expectancy in the AFT model
-are related to the hazard ratios $\beta$ as $\beta^\prime = -\beta/\alpha$.
+are related to the log hazard ratios $\beta$ as $\beta^\prime = -\beta/\alpha$.
 
 A slightly more complicated example is given in the package vignette
 \code{flexsurv-examples} of constructing a proportional hazards

@@ -79,11 +79,14 @@ form.dp <- function(dlist, dfns, integ.opts){
     }
     ## Check for existence of derivative functions
     ## conventionally called DLd, DLs
+    ## if dfns$deriv set to FALSE on entry, derivatives not available
     if (is.function(dfns$DLd)) DLd <- dfns$DLd
-    else if (exists(paste0("DLd",name))) DLd <- get(paste0("DLd",name))
+    else if (is.null(dfns$deriv) && exists(paste0("DLd",name)))
+        DLd <- get(paste0("DLd",name))
     else DLd <- NULL
     if (is.function(dfns$DLS)) DLS <- dfns$DLS
-    else if (exists(paste0("DLS",name))) DLS <- get(paste0("DLS",name))
+    else if (is.null(dfns$deriv) && exists(paste0("DLS",name)))
+        DLS <- get(paste0("DLS",name))
     else DLS <- NULL
 
     list(p=p, d=d, h=h, H=H, r=r, DLd=DLd, DLS=DLS,

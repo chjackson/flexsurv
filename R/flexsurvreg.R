@@ -255,17 +255,13 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
         loghaz <- logdens - log(pmax - pmin)
         offseti <- log(1 + bhazard / exp(loghaz)*weights)
     } else offseti <- rep(0, length(logdens))
-    offset <- sum(offseti[dead])
-## TODO express as individual-specific liks to return for debugging 
 
+    ## Express as vector of individual likelihood contributions 
     loglik <- numeric(length(logdens))
     loglik[dead] <- (logdens*weights)[dead] + offseti[dead]
     loglik[!dead] <- (log(pmax - pmin)*weights)[!dead]
     loglik <- loglik - log(pobs)*weights
     
-#    ret <- - ( sum((logdens*weights)[dead]) +
-#              sum((log(pmax - pmin)*weights)[!dead]) -
-#              sum(log(pobs)*weights) + offset)
     ret <- -sum(loglik)
     attr(ret, "indiv") <- loglik
     ret
@@ -461,6 +457,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     temp[["formula"]] <- f2
     if (missing(data)) temp[["data"]] <- environment(formula)
     m <- eval(temp, parent.frame())
+    m <- droplevels(m) # remove unused factor levels after subset applied
     attr(m,"covnames") <- attr(f2, "covnames") # for "newdata" in summary
     attr(m,"covnames.orig") <- intersect(colnames(m), attr(f2, "covnames.orig")) # for finding factors in plot method
     Y <- check.flexsurv.response(model.extract(m, "response"))
@@ -477,7 +474,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     bhazard <- model.extract(m, "bhazard")
     if (is.null(bhazard)) bhazard <- rep(0, nrow(X))
     dat <- list(Y=Y, m=m, mml=mml)
-    ncovs <- ncol(m) - 2
+    ncovs <- length(attr(m, "covnames.orig"))
     
     ncoveffs <- ncol(X)
     nbpars <- length(parnames) # number of baseline parameters
@@ -490,7 +487,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
         wt <- yy*weights*length(yy)/sum(weights)
         dlist$inits <- expand.inits.args(dlist$inits)
         inits.aux <- c(aux, list(forms=forms, data=if(missing(data)) NULL else data, weights=temp$weights,
-                                 subset=temp$subset, na.action=temp$na.action, control=sr.control,
+                                 control=sr.control,
                                  counting=(attr(model.extract(m, "response"), "type")=="counting")
                                  ))
         auto.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=inits.aux)
@@ -792,6 +789,8 @@ print.summary.flexsurvreg <- function(x, ...){
         }
     } else print.data.frame(x)
 }
+
+## TODO would converting newdata to X be better handled in this function
 
 add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to transform on input 
     nres <- nrow(X)

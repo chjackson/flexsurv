@@ -130,8 +130,13 @@ Hlink <- function(scale){
 Hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
 # TODO error handling etc
     match.arg(scale, c("hazard","odds","normal"))
-    eta <- basis(knots, tsfn(x, timescale)) %*% gamma + as.numeric(X %*% beta) + offset
-    as.numeric(Hlink(scale)(eta))
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale)
+    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
+    if (any(ind)){
+        eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
+        ret[ind] <- as.numeric(Hlink(scale)(eta))
+    }
+    ret
 }
 
 hlink <- function(scale){
@@ -147,9 +152,11 @@ hlink <- function(scale){
 hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
 # TODO error handling etc
     match.arg(scale, c("hazard","odds","normal"))
-    eta <- basis(knots, tsfn(x, timescale)) %*% gamma + as.numeric(X %*% beta) + offset
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale)
+    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
+    eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
     eeta <- hlink(scale)(eta)
-    haz <- dtsfn(x, timescale) * dbasis(knots, tsfn(x, timescale)) %*% gamma * eeta
+    haz <- dtsfn(x, timescale) * rowSums(dbasis(knots, tsfn(x, timescale)) * gamma) * eeta
     as.numeric(haz)
 }
 
@@ -264,7 +271,7 @@ unroll.function <- function(mat.fn, ...){
 flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
 {
     Y <- check.flexsurv.response(model.extract(mf, "response"))
- 
+
     ## Impute interval-censored data, where Cox doesn't work.
     intcens <- Y[,"status"]==3 & (Y[,"start"] < Y[,"stop"])
     Y[intcens,"status"] <- 1
@@ -366,12 +373,17 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
     inits
 }
 
-flexsurvspline <- function(formula, data, k=0, knots=NULL, bknots=NULL, scale="hazard", timescale="log", ...){
+flexsurvspline <- function(formula, data, weights, bhazard, subset,
+                           k=0, knots=NULL, bknots=NULL, scale="hazard", timescale="log", ...){
     ## Get response matrix from the formula.  Only need this to obtain
     ## default knots.  Largely copied from flexsurvreg - ideally
-    ## should be in separate function, but can't make scoping work.   
+    ## should be in separate function, but can't make scoping work.
+
+    ## TODO get weights and subset data from here
+    ## pass temp$weights, temp$subset through
+    
     call <- match.call()
-    indx <- match(c("formula", "data", "weights", "subset", "na.action"), names(call), nomatch = 0)
+    indx <- match(c("formula", "data", "weights", "bhazard", "subset", "na.action"), names(call), nomatch = 0)
     if (indx[1] == 0)
         stop("A \"formula\" argument is required")
     temp <- call[c(1, indx)]
@@ -381,6 +393,7 @@ flexsurvspline <- function(formula, data, k=0, knots=NULL, bknots=NULL, scale="h
     environment(f2) <- environment(formula)
     temp[["formula"]] <- f2
     if (missing(data)) temp[["data"]] <- environment(formula)
+    if (missing(data)) data <- environment(formula) # TESTME to pass to flexsurvreg
     m <- eval(temp, parent.frame())
     Y <- check.flexsurv.response(model.extract(m, "response"))
     
@@ -421,7 +434,7 @@ flexsurvspline <- function(formula, data, k=0, knots=NULL, bknots=NULL, scale="h
     
     nk <- length(knots)
     custom.fss <- list(
-        name = "fn", # unused, d,p functions passed through
+        name = "survspline", # unused, d,p functions passed through
         pars = c(paste0("gamma",0:(nk-1))),
         location = c("gamma0"),
         transforms = rep(c(identity), nk), inv.transforms=rep(c(identity), nk),
@@ -431,10 +444,13 @@ flexsurvspline <- function(formula, data, k=0, knots=NULL, bknots=NULL, scale="h
     dfn <- unroll.function(dsurvspline, gamma=0:(nk-1))
     pfn <- unroll.function(psurvspline, gamma=0:(nk-1))
     rfn <- unroll.function(rsurvspline, gamma=0:(nk-1))
+    hfn <- unroll.function(hsurvspline, gamma=0:(nk-1))
+    Hfn <- unroll.function(Hsurvspline, gamma=0:(nk-1))
     Ddfn <- if (scale=="normal") NULL else unroll.function(DLdsurvspline, gamma=0:(nk-1))
     DSfn <- if (scale=="normal") NULL else unroll.function(DLSsurvspline, gamma=0:(nk-1))
     args <- c(list(formula=formula, data=data, dist=custom.fss,
-                   dfns=list(d=dfn,p=pfn,r=rfn,DLd=Ddfn,DLS=DSfn), aux=aux), list(...))
+                   dfns=list(d=dfn,p=pfn,r=rfn,h=hfn,H=Hfn,
+                   DLd=Ddfn,DLS=DSfn,deriv=!(scale=="normal")), aux=aux), list(...))
 
     ## Try an alternative initial value routine if the default one gives zero likelihood
     fpold <- args$fixedpars
@@ -443,6 +459,9 @@ flexsurvspline <- function(formula, data, k=0, knots=NULL, bknots=NULL, scale="h
         args$dist$inits <- flexsurv.splineinits.cox
     }
     args$fixedpars <- fpold
+    args$weights <- temp$weights
+    args$bhazard <- temp$bhazard
+    args$subset <- temp$subset
     
     ret <- do.call("flexsurvreg", args) # faff to make ... args work within functions
     ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale))

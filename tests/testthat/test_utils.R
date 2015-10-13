@@ -435,3 +435,30 @@ test_that("llogis",{
     mean.llogis(shape=1.1, scale=0.2)
     var.llogis(shape=2.1, scale=0.2)
 })
+
+test_that("WeibullPH",{
+    a <- 0.1; m <- 2
+    b <- m^(-1/a)
+    x <- c(-Inf, NaN, NA, -1, 0, 1, 2, Inf)
+    expect_equal(dweibullPH(x, a, m), dweibull(x, a, b))
+    expect_equal(dweibullPH(x, a, m), dweibull(x, a, b), log=TRUE)
+    expect_equal(pweibullPH(x, a, m), pweibull(x, a, b))
+    expect_equal(pweibullPH(x, a, m), pweibull(x, a, b), log.p=TRUE)
+    expect_equal(pweibullPH(x, a, m), pweibull(x, a, b), lower.tail=FALSE)
+    qq <- c(0, 0.5, 0.7, 1)
+    expect_equal(qweibullPH(qq, a, m), qweibull(qq, a, b))
+    expect_equal(hweibullPH(x, a, m), hweibull(x, a, b))
+    expect_equal(hweibullPH(x, a, m), hweibull(x, a, b), log=TRUE)
+    expect_equal(HweibullPH(x, a, m), Hweibull(x, a, b))
+    expect_equal(HweibullPH(x, a, m), Hweibull(x, a, b), log=TRUE)
+    set.seed(1); x1 <- rweibull(10, a, b)
+    set.seed(1); x2 <- rweibullPH(10, a, m)
+    expect_equal(x1, x2)
+
+    fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ rx, data = ovarian, dist="weibull")
+    fitwp <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ rx, data = ovarian, dist="weibullPH")
+    expect_equal(fitw$res["shape","est"], fitwp$res["shape","est"], tol=1e-06)
+    expect_equal(fitw$res["scale","est"], fitwp$res["scale","est"]^(-1/fitwp$res["shape","est"]), tol=1e-05)
+    expect_equal(coef(fitw)["rx"], -coef(fitwp)["rx"] / fitwp$res["shape","est"])
+    
+})

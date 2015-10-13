@@ -74,7 +74,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     Optional variable giving expected hazards for relative survival models.
   }
   \item{subset}{
-    Vector of integer or logicals specifying the subset of the
+    Vector of integers or logicals specifying the subset of the
     observations to be used in the fit.
   }
   \item{na.action}{a missing-data filter function, applied after any

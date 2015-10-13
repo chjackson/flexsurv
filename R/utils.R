@@ -180,6 +180,18 @@ var.weibull <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma
 ## haz(alpha, lambda) for weibull PH is alpha * lam * x^{alpha-1}
 ## haz(shape, scale) for weibull PH is shape * scale * x^{shape-1}
 
+dweibullPH <- function(x, shape, scale = 1, log=FALSE){
+    dweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
+}
+
+pweibullPH <- function(q, shape, scale = 1, lower.tail=TRUE, log.p=FALSE){
+    pweibull(q, shape=shape, scale=scale^{-1/shape}, lower.tail=lower.tail, log.p=log.p)
+}
+
+qweibullPH <- function(p, shape, scale = 1, lower.tail=TRUE, log.p=FALSE){
+    qweibull(p, shape=shape, scale=scale^{-1/shape}, lower.tail=lower.tail, log.p=log.p)
+}
+
 hweibullPH <- function(x, shape, scale = 1, log=FALSE){
     hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
 }

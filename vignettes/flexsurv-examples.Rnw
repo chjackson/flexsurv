@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{some examples of using flexsurv}
+%\VignetteIndexEntry{Supplementary examples of using flexsurv}
 
 
 \documentclass[nojss,nofooter]{jss}

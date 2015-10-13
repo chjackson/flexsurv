@@ -15,6 +15,10 @@ Version 0.7 (??)
 
 * As a result, flexsurv now depends on the "quadprog" package.
 
+* dweibullPH and related functions give the Weibull distribution in
+  proportional hazards parameterisation, and "weibullPH" is supported
+  as a built-in model for flexsurvreg.
+
 * New "logliki" component in model objects, containing vector of
   log-likelihoods for each observation at the estimated or fixed
   parameters.
@@ -23,7 +27,9 @@ Version 0.7 (??)
   covariates by default.
 
 * Fix of bugs with spline models and no data censored, or all data
-  interval censored.
+  interval censored (github issue 3).
+
+* Fix of bugs with subsetting in flexsurvspline (github issue 6).
 
 * Option to summary.flexsurvreg to return a tidy data frame.
 
