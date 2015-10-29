@@ -23,6 +23,11 @@ Version 0.7 (??)
   log-likelihoods for each observation at the estimated or fixed
   parameters.
 
+* Fix of various bugs with supplying "newdata" to summary functions
+  (github issue 7).  The behaviour here should now be like predict.lm,
+  e.g. variables in newdata that were originally factors should be
+  supplied as factor or character, not numeric.
+  
 * Fix of bug that prevented plots being drawn by categorical
   covariates by default.
 

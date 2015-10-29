@@ -1,7 +1,5 @@
 context("Multi-state modelling and prediction")
 
-if (require("mstate")) { 
-
 bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp") 
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 tgrid <- seq(0,14,by=0.1)
@@ -12,7 +10,7 @@ bln.markov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist
 
 test_that("msfit.flexsurvreg",{
     mexp <- msfit.flexsurvreg(bexp, t=0.01, trans=tmat, tvar="trans")
-    summ <- summary.flexsurvreg(bexp, t=0.01, type="cumhaz", ci=FALSE, newdata=list(trans=1:3))
+    summ <- summary.flexsurvreg(bexp, t=0.01, type="cumhaz", ci=FALSE, newdata=list(trans=factor(1:3, levels=1:3)))
     summ <- as.numeric(unlist(lapply(summ, function(x)x$est[x$time==0.01])))   
     expect_equal(mexp$Haz$Haz[mexp$Haz$time==0.01], summ)
     mwei <- msfit.flexsurvreg(bwei, t=c(0.01, 0.02), trans=tmat, tvar="trans", B=10)
@@ -115,4 +113,4 @@ test_that("list and non-list format give same estimates", {
                  msfit.flexsurvreg(bexpc.list, newdata=list(x=1), trans=tmat, t=1:10, variance=FALSE), tol=1e-05)
 })
 
-}
+
