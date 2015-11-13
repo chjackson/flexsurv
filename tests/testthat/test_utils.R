@@ -347,6 +347,11 @@ test_that("Spline distribution functions",{
     expect_equal(1 - psurvspline(1, g, knots=k),  psurvspline(1, g, knots=k, lower.tail=FALSE))
     expect_equal(log(psurvspline(c(-1,NA,1), g, knots=k)),  psurvspline(c(-1,NA,1), g, knots=k, log.p=TRUE))
 
+    ## single x=0: fully defined in in dbase.survspline
+    expect_equal(dsurvspline(0, g, knots=k), 0)
+    ## value for x=0?  currently zero, should it be limit as x reduces to 0? 
+    expect_equal(hsurvspline(0, g, knots=k), 0)
+    
     ## TODO special value handling and vectorisation for d function
     if(0){
         bc$foo <- factor(sample(1:3, nrow(bc), replace=TRUE))

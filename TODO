@@ -1,8 +1,4 @@
-do we really have to depend on mstate, why not just import the fns used in the vignette
-
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
-
-dpqrhH survspline: do these work with a single x=0, already filled in in dbase.survspline, so need if (any(ind)) around rest? 
 
 
 SURVREG
@@ -18,6 +14,8 @@ Generic (restricted) mean of distributions, integration if necessary.
 Restricted SD in same way?
 
 Tidy up summary functions, including bootstrap, covariate handling.
+
+hsurvspline at x=0, currently zero, should it be limit as x reduces to 0? 
 
 make plot/summary do baseline values of factor covs and mean of continuous
 

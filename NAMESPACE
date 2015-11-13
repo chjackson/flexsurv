@@ -104,6 +104,7 @@ importFrom("stats", "as.formula", "coef", "cov", "delete.response",
            "pweibull", "qexp", "qf", "qgamma", "qlnorm", "qlogis",
            "qnorm", "quantile", "reformulate", "rf", "rgamma",
            "rlnorm", "runif", "rweibull", "sd", "terms", "uniroot",
-           "var")
+           "var", ".checkMFClasses", ".getXlevels", "qweibull",
+           "weights")
 
 importFrom("mstate", "msfit", "probtrans")

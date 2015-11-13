@@ -1,6 +1,6 @@
 -*- text -*-
 
-Version 0.7 (??)
+Version 0.7 (2015-11-13)
 -----------
 
 * flexsurvspline now allows the log cumulative hazard (or its
@@ -19,12 +19,14 @@ Version 0.7 (??)
   proportional hazards parameterisation, and "weibullPH" is supported
   as a built-in model for flexsurvreg.
 
+* Option to summary.flexsurvreg to return a tidy data frame.
+
 * New "logliki" component in model objects, containing vector of
   log-likelihoods for each observation at the estimated or fixed
   parameters.
 
 * Fix of various bugs with supplying "newdata" to summary functions
-  (github issue 7).  The behaviour here should now be like predict.lm,
+  (github issue #7).  The behaviour here should now be like predict.lm,
   e.g. variables in newdata that were originally factors should be
   supplied as factor or character, not numeric.
   
@@ -32,11 +34,9 @@ Version 0.7 (??)
   covariates by default.
 
 * Fix of bugs with spline models and no data censored, or all data
-  interval censored (github issue 3).
+  interval censored (github issue #3).
 
-* Fix of bugs with subsetting in flexsurvspline (github issue 6).
-
-* Option to summary.flexsurvreg to return a tidy data frame.
+* Fix of bugs with subsetting in flexsurvspline (github issue #6).
 
 
 Version 0.6 (2015-04-13) 

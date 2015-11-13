@@ -920,7 +920,6 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
             }
             else {
                 ## plot hazard for all groups defined by unique combinations of covariates
-                ## TODO TEST THIS 
                 group <- if(x$ncovs>0) do.call("interaction", mm) else factor(rep(0,nrow(dat$Y)))
                 Xgroup <- factor(do.call("interaction", as.data.frame(X)), levels=levels(group))
                 haz <- list()
