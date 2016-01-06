@@ -222,44 +222,66 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
     npars <- length(pars)
     pars[setdiff(1:npars, fixedpars)] <- optpars
     nbpars <- length(dlist$pars)
-    pars <- as.list(pars)
+    pars <- pars.dead <- pars.ndead <- as.list(pars)
+    dead <- Y[,"status"]==1
     if (npars > nbpars) {
         beta <- unlist(pars[(nbpars+1):npars])
-        for (i in dlist$pars)
+        for (i in dlist$pars){
             pars[[i]] <- pars[[i]] + X[,mx[[i]],drop=FALSE] %*% beta[mx[[i]]]
+            pars.dead[[i]] <- pars[[i]][dead]
+            pars.ndead[[i]] <- pars[[i]][!dead]
+        }
     }
-    pcall <- list()
+    fnargs <- fnargs.dead <- fnargs.ndead <- list()
     for (i in 1:nbpars){
-        pcall[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars[[i]])
+        fnargs[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars[[i]])
+        fnargs.dead[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars.dead[[i]])
+        fnargs.ndead[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars.ndead[[i]])
     }
     for (i in seq_along(aux)){
-        if (!(names(aux)[i] %in% dlist$pars))
-            pcall[[names(aux)[i]]] <- aux[[i]]
+        if (!(names(aux)[i] %in% dlist$pars)){
+            nx <- names(aux)[i]
+            fnargs[[nx]] <- fnargs.dead[[nx]] <- fnargs.ndead[[nx]] <- aux[[i]]
+        }
     }
-    pmaxcall <- dcall <- tcall <- pcall
-    pcall$q <- Y[,"time1"]
-    pmaxcall$q <- Y[,"time2"] # Inf if right-censored, giving pmax=1
-    dcall$x <- Y[,"time1"]
-    tcall$q <- Y[,"start"]  
-    dcall$log <- TRUE
-    ## Generic survival model likelihood
-    dead <- Y[,"status"]==1
-    logdens <- (do.call(dfns$d, dcall))
-    pmax <- (do.call(dfns$p, pmaxcall))
-    pmax[pmaxcall$q==Inf] <- 1  # in case user-defined function doesn't already do this
-    pmin <- (do.call(dfns$p, pcall))
-    pobs <- 1 - do.call(dfns$p, tcall) # prob of being observed = 1 unless left-truncated
+    ## Generic survival model likelihood contributions
+    ## Observed deaths
+    dargs <- fnargs.dead
+    dargs$x <- Y[dead,"time1"]
+    dargs$log <- TRUE
+    logdens <- (do.call(dfns$d, dargs))
+
+    ## Left censoring times 
+    pmaxargs <- fnargs.ndead
+    pmaxargs$q <- Y[!dead,"time2"] # Inf if right-censored, giving pmax=1
+    pmax <- (do.call(dfns$p, pmaxargs))
+    pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
+
+    ## Right censoring times
+    pargs <- fnargs.ndead
+    pargs$q <- Y[!dead,"time1"]
+    pmin <- (do.call(dfns$p, pargs))
+
+    ## Left-truncation
+    targs <- fnargs
+    targs$q <- Y[,"start"]
+    pobs <- 1 - do.call(dfns$p, targs) # prob of being observed = 1 unless left-truncated
     
     ## Hazard offset for relative survival models
     if (any(bhazard>0)){
-        loghaz <- logdens - log(pmax - pmin)
-        offseti <- log(1 + bhazard / exp(loghaz)*weights)
+        pargs <- fnargs.dead
+        pargs$q <- Y[dead,"time1"]
+        pminb <- do.call(dfns$p, pargs)
+        loghaz <- logdens - log(1 - pminb)
+        offseti <- log(1 + bhazard[dead] / exp(loghaz)*weights[dead])
     } else offseti <- rep(0, length(logdens))
-
+    
     ## Express as vector of individual likelihood contributions 
-    loglik <- numeric(length(logdens))
-    loglik[dead] <- (logdens*weights)[dead] + offseti[dead]
-    loglik[!dead] <- (log(pmax - pmin)*weights)[!dead]
+    loglik <- numeric(nrow(Y))
+    loglik[dead] <- (logdens*weights[dead]) + offseti
+
+    if (any(pmax < pmin)) browser()
+    loglik[!dead] <- (log(pmax - pmin)*weights[!dead])
     loglik <- loglik - log(pobs)*weights
     
     ret <- -sum(loglik)

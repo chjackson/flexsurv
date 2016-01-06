@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Slightly more efficient likelihood calculations, and removed
+  spurious warning from liklihood with interval censoring.
+
+
 Version 0.7 (2015-11-13)
 -----------
 

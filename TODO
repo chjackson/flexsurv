@@ -1,3 +1,5 @@
+Warn about survival times of zero (or stop=start)
+
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
 

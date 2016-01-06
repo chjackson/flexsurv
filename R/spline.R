@@ -458,7 +458,7 @@ flexsurvspline <- function(formula, data, weights, bhazard, subset,
     args$weights <- temp$weights
     args$bhazard <- temp$bhazard
     args$subset <- temp$subset
-    
+
     ret <- do.call("flexsurvreg", args) # faff to make ... args work within functions
     ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale))
     ret$call <- call
