@@ -279,8 +279,6 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
     ## Express as vector of individual likelihood contributions 
     loglik <- numeric(nrow(Y))
     loglik[dead] <- (logdens*weights[dead]) + offseti
-
-    if (any(pmax < pmin)) browser()
     loglik[!dead] <- (log(pmax - pmin)*weights[!dead])
     loglik <- loglik - log(pobs)*weights
     

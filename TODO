@@ -1,5 +1,7 @@
 Warn about survival times of zero (or stop=start)
 
+Incomprehensible error if survival times negative, at least in flexsurvspline
+
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
 
@@ -11,13 +13,16 @@ does 1/2 Surv indicator work, and TRUE/FALSE?  if so is n events reported correc
 
 OPTIONAL
 
+Migrate doc to roxygen - Rd2roxygen package will help this
+options(roxygen.comment = "##' ")   for ESS
+
 Generic (restricted) mean of distributions, integration if necessary.
    See surv2sampleComp package
 Restricted SD in same way?
 
 Tidy up summary functions, including bootstrap, covariate handling.
 
-hsurvspline at x=0, currently zero, should it be limit as x reduces to 0? 
+hsurvspline at x=0, currently zero, should it be limit as x reduces to 0?
 
 make plot/summary do baseline values of factor covs and mean of continuous
 
@@ -46,8 +51,6 @@ CIs as grey bands not lines
 #are these buggy in survreg::Surv?
 #time <- ifelse(time == Inf, NA, time)
 #time2 <- ifelse(time2 == -Inf, NA, time2)
-
-Migrate doc to roxygen?
 
 Newton-Raphson (analytic second derivs) available in maxLik::maxNR
 
