@@ -1,5 +1,7 @@
 Warn about survival times of zero (or stop=start)
 
+D can be non pos-def in QP (github #9).  Why does this happen?  At least back up to Cox routine if does.
+
 Incomprehensible error if survival times negative, at least in flexsurvspline
 
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
@@ -25,6 +27,8 @@ Tidy up summary functions, including bootstrap, covariate handling.
 hsurvspline at x=0, currently zero, should it be limit as x reduces to 0?
 
 make plot/summary do baseline values of factor covs and mean of continuous
+
+Residuals, e.g. Cox-Snell
 
 abstract newdata thing - default to baseline
 

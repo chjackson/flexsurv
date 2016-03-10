@@ -315,7 +315,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
       parameters, which when \code{TRUE}, computes the log density,
       using a numerically stable additive formula if possible.
 
-      Additional functions named \code{"DLd"} and \code{"DLS"} may be
+      Additional functions with names beginning with \code{"DLd"} and \code{"DLS"} may be
       defined to calculate the derivatives of the
       log density and log survival probability, with respect to the
       parameters of the distribution.   The parameters are expressed on

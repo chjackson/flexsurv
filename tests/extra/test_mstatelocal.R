@@ -1,14 +1,14 @@
 context("Local multi-state modelling tests")
 
-if (require("msm")){
+tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 
+if (require("msm")){
     Q3 <- rbind(c(0,1,1),c(0,0,1),c(0,0,0))
-    bos3$years <- round((bos3$time - 6)*30) / 365.25
+    bos3$years <- bos3$time / 365.25
     bmsm <- msm(state ~ years, subject=ptnum, data=bos3, exacttimes=TRUE, qmatrix=Q3)
 
     bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
     bwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + shape(trans), data=bosms3, dist="weibull") 
-    tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 
     test_that("flexsurv exponential model matches msm",{
         fs.q <- as.numeric(exp(coef(bexp)[1] + c(0, coef(bexp)[2:3])))
@@ -22,8 +22,9 @@ if (require("msm")){
 
     test_that("P matrix using numerical ODE integrator",{
         ## one or more times, CIs or no CIs
+        tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
         (P <- pmatrix.fs(bwei, tmat))
-        (P <- pmatrix.fs(bwei, tmat, ci=TRUE, B=5))
+        (P <- pmatrix.fs(bwei, trans=tmat, ci=TRUE, B=5))
         (P <- pmatrix.fs(bwei, t=c(5,10), tmat))
         (P <- pmatrix.fs(bwei, t=c(5,10), tmat, ci=TRUE, B=5))
 

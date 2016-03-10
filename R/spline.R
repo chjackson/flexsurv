@@ -341,7 +341,11 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
     dXq <- dXq[is.finite(logH),,drop=FALSE]
     eps <- rep(1e-09, length(y)) # so spline is strictly increasing
 
-    inits <- solve.QP(Dmat=t(Xq) %*% Xq, dvec=t(t(y) %*% Xq), Amat=t(dXq), bvec=eps)$solution
+    Dmat <- t(Xq) %*% Xq
+    posdef <- all(eigen(Dmat)$values > 0) # TODO work out why non-positive definite matrices can occur here
+    if (!posdef)
+        inits <- flexsurv.splineinits.cox(t=t, mf=mf, mml=mml, aux=aux)
+    else inits <- solve.QP(Dmat=Dmat, dvec=t(t(y) %*% Xq), Amat=t(dXq), bvec=eps)$solution
     inits
 }
 
