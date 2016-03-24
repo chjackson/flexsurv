@@ -1,6 +1,6 @@
 Warn about survival times of zero (or stop=start)
 
-D can be non pos-def in QP (github #9).  Why does this happen?  At least back up to Cox routine if does.
+
 
 Incomprehensible error if survival times negative, at least in flexsurvspline
 
@@ -23,6 +23,8 @@ Generic (restricted) mean of distributions, integration if necessary.
 Restricted SD in same way?
 
 Tidy up summary functions, including bootstrap, covariate handling.
+
+D can be non pos-def in QP (github #9). Worked around for now, but why does this happen?
 
 hsurvspline at x=0, currently zero, should it be limit as x reduces to 0?
 

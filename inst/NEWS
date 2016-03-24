@@ -1,7 +1,12 @@
 -*- text -*-
 
+Version 0.7.1 (2016-03-24)
+-------------
+
 * Slightly more efficient likelihood calculations, and removed
-  spurious warning from liklihood with interval censoring.
+  spurious warning from likelihood with interval censoring.
+
+* Tests modified to work with the latest (and current) testthat.
 
 
 Version 0.7 (2015-11-13)
