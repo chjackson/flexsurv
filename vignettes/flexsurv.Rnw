@@ -51,7 +51,10 @@ render_sweave()
   from fully-parametric multi-state models, and connects with the
   \pkg{mstate} package \citep{mstate:jss}.  This article explains the
   methods and design principles of the package, giving several worked
-  examples of its use. }
+  examples of its use. 
+
+\emph{[Note: A version of this vignette is published as \citet{flexsurv} in Journal of Statistical Software. There have been no substantial changes since.]}
+}
 
 \Keywords{survival, multi-state models, multistate models}
 
@@ -1189,7 +1192,7 @@ function $q_{rs}(t)$.
 \label{sec:multistate:data}
 
 \citet{andersen:keiding} and \citet{putter:mstate} explain how to implement multi-state models by
-manipulating the data into the a suitable form for survival modelling
+manipulating the data into a suitable form for survival modelling
 software --- an overview is given here.  For each permitted $r
 \rightarrow s$ transition in the multi-state model, there is a
 corresponding ``survival'' (time-to-event) model, with hazard rates
@@ -1604,7 +1607,7 @@ new class of models would ideally come with
   (\S\ref{sec:custom}).
 \end{itemize}
 
-The examples in this paper were run using version 0.6 of \pkg{flexsurv}, available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
+\pkg{flexsurv} is available from \url{http://CRAN.R-project.org/package=flexsurv}.  Development versions are available on \url{https://github.com/chjackson/flexsurv-dev}, and contributions are welcome.
 
 
 \section*{Acknowledgements}

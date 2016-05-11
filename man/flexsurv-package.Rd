@@ -99,6 +99,10 @@
   Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
 }
 \references{
+  Jackson, C. (2016). flexsurv: A Platform for Parametric
+  Survival Modeling in R. Journal of Statistical Software, 70(8),
+  1-33. doi:10.18637/jss.v070.i08
+
   Royston, P. and Parmar, M. (2002).  Flexible parametric
   proportional-hazards and proportional-odds models for censored survival
   data, with application to prognostic modelling and estimation of

@@ -22,6 +22,8 @@ Generic (restricted) mean of distributions, integration if necessary.
    See surv2sampleComp package
 Restricted SD in same way?
 
+Time dependent covs in summary.flexsurvreg
+
 Tidy up summary functions, including bootstrap, covariate handling.
 
 D can be non pos-def in QP (github #9). Worked around for now, but why does this happen?

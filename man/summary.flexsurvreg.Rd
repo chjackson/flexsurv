@@ -133,6 +133,10 @@ It should return a vector of the
   distribution of the maximum likelihood estimates (see, e.g. Mandel
   (2013)).  
 }
+\details{
+  Time-dependent covariates are not currently supported.  The covariate
+  values are assumed to be constant through time for each fitted curve.
+}
 \seealso{
   \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
 }

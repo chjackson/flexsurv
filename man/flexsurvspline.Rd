@@ -208,6 +208,10 @@ and \eqn{(x - a)_+ = max(0, x - a)}.
   proportional-hazards and proportional-odds models for censored survival
   data, with application to prognostic modelling and estimation of
   treatment effects. Statistics in Medicine 21(1):2175-2197.
+
+  Jackson, C. (2016). flexsurv: A Platform for Parametric
+  Survival Modeling in R. Journal of Statistical Software, 70(8),
+  1-33. doi:10.18637/jss.v070.i08
 }
 \author{
   Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>

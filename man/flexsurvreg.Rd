@@ -251,10 +251,9 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
   \code{\link{model.frame.flexsurvreg}} or \code{\link{model.matrix.flexsurvreg}}.}
 }
 \references{
-  Jackson, C. H. and Sharples, L. D. and Thompson, S. G. (2010)
-  Survival models in health economic evaluations: balancing fit and
-  parsimony to improve prediction. International Journal of Biostatistics
-  6(1):Article 34.
+  Jackson, C. (2016). flexsurv: A Platform for Parametric
+  Survival Modeling in R. Journal of Statistical Software, 70(8),
+  1-33. doi:10.18637/jss.v070.i08
 
   Cox, C. (2008) The generalized \eqn{F} distribution: An umbrella for
   parametric survival analysis.  Statistics in Medicine 27:4301-4312.
@@ -262,6 +261,11 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
   Cox, C., Chu, H., Schneider, M. F. and Muñoz, A. (2007)
   Parametric survival analysis and taxonomy of hazard functions for the
   generalized gamma distribution.  Statistics in Medicine 26:4252-4374
+
+  Jackson, C. H. and Sharples, L. D. and Thompson, S. G. (2010)
+  Survival models in health economic evaluations: balancing fit and
+  parsimony to improve prediction. International Journal of Biostatistics
+  6(1):Article 34.
 }
 \author{
   Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
