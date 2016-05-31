@@ -170,7 +170,7 @@ flexsurv.dists <- list(
                        inits=sr.weib.inits
                        ),
                        weibullPH = list(
-                       name="weibullPH", 
+                       name="weibullPH",
                        pars=c("shape","scale"),
                        location="scale",
                        transforms=c(log, log),
@@ -251,7 +251,7 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
     dargs$log <- TRUE
     logdens <- (do.call(dfns$d, dargs))
 
-    ## Left censoring times 
+    ## Left censoring times
     pmaxargs <- fnargs.ndead
     pmaxargs$q <- Y[!dead,"time2"] # Inf if right-censored, giving pmax=1
     pmax <- (do.call(dfns$p, pmaxargs))
@@ -266,7 +266,7 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
     targs <- fnargs
     targs$q <- Y[,"start"]
     pobs <- 1 - do.call(dfns$p, targs) # prob of being observed = 1 unless left-truncated
-    
+
     ## Hazard offset for relative survival models
     if (any(bhazard>0)){
         pargs <- fnargs.dead
@@ -275,13 +275,13 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits
         loghaz <- logdens - log(1 - pminb)
         offseti <- log(1 + bhazard[dead] / exp(loghaz)*weights[dead])
     } else offseti <- rep(0, length(logdens))
-    
-    ## Express as vector of individual likelihood contributions 
+
+    ## Express as vector of individual likelihood contributions
     loglik <- numeric(nrow(Y))
     loglik[dead] <- (logdens*weights[dead]) + offseti
     loglik[!dead] <- (log(pmax - pmin)*weights[!dead])
     loglik <- loglik - log(pobs)*weights
-    
+
     ret <- -sum(loglik)
     attr(ret, "indiv") <- loglik
     ret
@@ -375,7 +375,7 @@ concat.formulae <- function(formula,forms){
     attr(f2, "covnames.orig") <- covnames
     f2
 }
-        
+
 ## User-supplied initial value functions don't have to include all
 ## four possible arguments: this expands them if they don't
 
@@ -457,7 +457,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     }
     forms <- c(location=get.locform(formula, ancnames), anc)
     names(forms)[[1]] <- dlist$location
-    
+
     ## a) calling model.frame() directly doesn't work.  it only looks in
     ## "data" or the environment of "formula" for extra variables like
     ## "weights". needs to also look in environment of flexsurvreg.
@@ -466,7 +466,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     ## flexsurvreg within a function
     ## m <- make.model.frame(call, formula, data, weights, subset, na.action, ancnames)
 
-    ## Make model frame   
+    ## Make model frame
     indx <- match(c("formula", "data", "weights", "bhazard", "subset", "na.action"), names(call), nomatch = 0)
     if (indx[1] == 0)
         stop("A \"formula\" argument is required")
@@ -488,14 +488,14 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
         mx[[i]] <- length(unlist(mx)) + seq_len(ncol(mml[[i]][,-1,drop=FALSE]))
     }
     X <- compress.model.matrices(mml)
-    
+
     weights <- model.extract(m, "weights")
     if (is.null(weights)) weights <- m$"(weights)" <- rep(1, nrow(X))
     bhazard <- model.extract(m, "bhazard")
     if (is.null(bhazard)) bhazard <- rep(0, nrow(X))
     dat <- list(Y=Y, m=m, mml=mml)
     ncovs <- length(attr(m, "covnames.orig"))
-    
+
     ncoveffs <- ncol(X)
     nbpars <- length(parnames) # number of baseline parameters
     npars <- nbpars + ncoveffs
@@ -605,13 +605,13 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
                     cl=cl, opt=opt)
     }
     ret <- c(list(call=call, dlist=dlist, aux=aux,
-                  ncovs=ncovs, ncoveffs=ncoveffs, 
-                  mx=mx, basepars=1:nbpars, 
+                  ncovs=ncovs, ncoveffs=ncoveffs,
+                  mx=mx, basepars=1:nbpars,
                   covpars=if (ncoveffs>0) (nbpars+1):npars else NULL,
                   AIC=-2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
-                  concat.formula=f2, all.formulae=forms, dfns=dfns),             
+                  concat.formula=f2, all.formulae=forms, dfns=dfns),
              ret)
     if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
         && (dfns$deriv) ) {
@@ -621,7 +621,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     class(ret) <- "flexsurvreg"
     ret
 }
-    
+
 print.flexsurvreg <- function(x, ...)
 {
     covmeans <- colMeans(model.matrix(x))
@@ -667,13 +667,13 @@ form.model.matrix <- function(object, newdata){
         stop(sprintf("Value%s of covariate%s ",plural,plural), paste(missing.covs, collapse=", "), " not supplied in \"newdata\"")
     }
 
-    ## as in predict.lm 
+    ## as in predict.lm
     tt <- attr(mfo, "terms")
     Terms <- delete.response(tt)
     mf <- model.frame(Terms, newdata, xlev = .getXlevels(tt, mfo))
-    if (!is.null(cl <- attr(Terms, "dataClasses"))) 
+    if (!is.null(cl <- attr(Terms, "dataClasses")))
         .checkMFClasses(cl, mf)
-    
+
     forms <- object$all.formulae
     mml <- vector(mode="list", length=length(object$dlist$pars))
     names(mml) <- names(forms)
@@ -687,7 +687,7 @@ form.model.matrix <- function(object, newdata){
     X
 }
 
-summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL, 
+summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL,
                                 t=NULL, start=0, ci=TRUE, B=1000, cl=0.95, tidy=FALSE,
                                 ...)
 {
@@ -766,9 +766,12 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     if (x$ncovs>0) attr(ret,"X") <- X
     if (tidy) {
         ret <- do.call("rbind", ret)
-        covdf <- unique(Xraw)[rep(seq_len(nrow(unique(Xraw))), each=length(t)), , drop=FALSE]
-        rownames(ret) <- NULL
-        ret <- cbind(ret, covdf)
+        if(!is.null(newdata)){
+            nd <- attr(X, "newdata")
+            covdf <- nd[rep(seq_len(nrow(nd)), each=length(t)), , drop=FALSE]
+            rownames(ret) <- rownames(covdf) <- NULL
+            ret <- cbind(ret, covdf)
+        }
     }
     class(ret) <- c("summary.flexsurvreg",class(ret))
     ret
@@ -789,12 +792,12 @@ summary.fns <- function(x, type){
            "cumhaz" = function(t,start,...) {
                ret <- x$dfns$H(t,...) - x$dfns$H(start,...)
                ret[t<start] <- 0
-               ret                         
+               ret
            })
 }
 
 print.summary.flexsurvreg <- function(x, ...){
-    if (!inherits(x, "data.frame")){ 
+    if (!inherits(x, "data.frame")){
         for (i in seq_along(x)){
             cat(names(x)[i], "\n")
             print(x[[i]])
@@ -805,7 +808,7 @@ print.summary.flexsurvreg <- function(x, ...){
 
 ## TODO would converting newdata to X be better handled in this function
 
-add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to transform on input 
+add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to transform on input
     nres <- nrow(X)
     if (!is.matrix(pars)) pars <- matrix(pars, nrow=nres, ncol=length(pars), byrow=TRUE)
     if (!is.matrix(beta)) beta <- matrix(beta, nrow=1)
@@ -814,7 +817,7 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
         if (length(covinds) > 0){
             pars[,j] <- pars[,j] + beta[,covinds] %*% t(X[,covinds,drop=FALSE])
         }
-        if (!transform)            
+        if (!transform)
             pars[,j] <- x$dlist$inv.transforms[[j]](pars[,j])
     }
     colnames(pars) <- x$dlist$pars

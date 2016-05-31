@@ -1,5 +1,12 @@
 -*- text -*-
 
+Version 1.0.1 (2016-05-31)
+-------------
+
+* Bug fix: covariates were labelled wrongly in summary.flexsurvreg
+  tidy output.  Thanks to Owain Saunders.
+
+
 Version 1.0.0 (2016-05-10)
 -------------
 
