@@ -1,0 +1,20 @@
+bibentry(bibtype = "Article",
+  title        = "{flexsurv}: A Platform for Parametric Survival Modeling in {R}",
+  author       = person(given = "Christopher",
+                        family = "Jackson",
+                        email = "chris.jackson@mrc-bsu.cam.ac.uk"),
+  journal      = "Journal of Statistical Software",
+  year         = "2016",
+  volume       = "70",
+  number       = "8",
+  pages        = "1--33",
+  doi          = "10.18637/jss.v070.i08",
+
+  header       = "To cite flexsurv in publications use:",
+  textVersion  =
+  paste("Christopher Jackson (2016).",
+        "flexsurv: A Platform for Parametric Survival Modeling in R.",
+        "Journal of Statistical Software, 70(8), 1-33.",
+        "doi:10.18637/jss.v070.i08")
+)
+
