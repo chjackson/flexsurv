@@ -9,3 +9,4 @@ The development repository for the [flexsurv](http://cran.r-project.org/package=
 ```r
 install.packages("devtools") # if devtools not already installed
 devtools::install_github('chjackson/flexsurv')
+```
