@@ -160,7 +160,7 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     if (any(ind)){
         eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
         eeta <- hlink(scale)(eta)
-        ret[ind] <- dtsfn(x, timescale) * rowSums(dbasis(knots, tsfn(x, timescale)) * gamma) * eeta
+        ret[ind] <- dtsfn(x, timescale)[ind] * rowSums(dbasis(knots, tsfn(x, timescale))[ind] * gamma) * eeta
     }
     as.numeric(ret)
 }
