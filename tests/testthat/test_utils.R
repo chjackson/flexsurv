@@ -337,10 +337,19 @@ test_that("Spline distribution functions",{
     expect_equal(-log(1 - psurvspline(0.2,g,knots=k)), Hsurvspline(0.2,g,knots=k))
     expect_equal(-log(1 - psurvspline(0.2,g,knots=k,scale="odds")), Hsurvspline(0.2,g,knots=k,scale="odds"))
     expect_equal(-log(1 - psurvspline(0.2,g,knots=k,scale="normal")), Hsurvspline(0.2,g,knots=k,scale="normal"))
-
     expect_equal(dsurvspline(c(-1,0,NA,NaN,Inf), g, knots=k), c(0,0,NA,NA,NaN))
+
+    qsurvspline(0.2,g,knots=k)
+
     expect_equal(psurvspline(qsurvspline(0.2,g,knots=k), g, knots=k), 0.2)
     expect_equal(qsurvspline(psurvspline(0.2,g,knots=k), g, knots=k), 0.2)
+
+    ## Vectorised q and p functions, through qgeneric
+    kvec <- rbind(k, k+1)
+    gvec <- rbind(g, g*1.1)
+    expect_equal(psurvspline(qsurvspline(0.2,gvec,knots=kvec), gvec, knots=kvec), c(0.2,0.2))
+    expect_equal(qsurvspline(psurvspline(0.2,gvec,knots=kvec), gvec, knots=kvec), c(0.2,0.2))
+
     expect_equal(psurvspline(c(NA,NaN,-1,0), gamma=c(1,1), knots=c(-10, 10)), c(NA,NA,0,0))
     expect_equal(qsurvspline(c(0,1), gamma=c(1,1), knots=c(-10, 10)), c(-Inf, Inf))
 

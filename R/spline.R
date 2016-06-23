@@ -111,7 +111,7 @@ psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 qsurvspline <- function(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE){
     if (log.p) p <- exp(p)
     if (!lower.tail) p <- 1 - p
-    qgeneric(psurvspline, p=p, gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, offset=offset)
+    qgeneric(psurvspline, p=p, matargs=c("gamma","knots"), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, offset=offset)
 }
 
 rsurvspline <- function(n, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){

@@ -6,7 +6,7 @@
   given the equivalent probability distribution function.
 }
 \usage{
-qgeneric(pdist, p, ...)
+qgeneric(pdist, p, matargs=NULL, ...)
 }
 \arguments{
   \item{pdist}{ Probability distribution function,
@@ -19,6 +19,12 @@ qgeneric(pdist, p, ...)
   }
   \item{p}{ Vector of probabilities to find the quantiles for. }
 
+  \item{matargs}{Character vector giving the elements of \code{...}
+  which represent vector parameters of the distribution.  Empty by
+  default.  When vectorised, these will become matrices.  This is used
+  for the arguments \code{gamma} and \code{knots} in
+  \code{\link{qsurvspline}}.}
+  
   \item{...}{ The remaining arguments define parameters of the
     distribution \code{pdist}.  These MUST be named explicitly.
 

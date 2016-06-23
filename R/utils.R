@@ -77,7 +77,7 @@ rbase <- function(dname, n, ...){
 ### Requires a probability function "pdist" for the same distribution
 ### in the working environment.
 
-qgeneric <- function(pdist, p, ...)
+qgeneric <- function(pdist, p, matargs=NULL, ...)
 {
     args <- list(...)
     if (is.null(args$log.p)) args$log.p <- FALSE
@@ -89,14 +89,34 @@ qgeneric <- function(pdist, p, ...)
     ret <- numeric(length(p))
     ret[p == 0] <- args$lbound
     ret[p == 1] <- args$ubound
-    args[c("lower.tail","log.p","lbound","ubound")] <- NULL
+    ## args containing vector params of the distribution (e.g. gamma and knots in dsurvspline)
+    args.mat <- args[matargs]
+    args[c(matargs,"lower.tail","log.p","lbound","ubound")] <- NULL
+    ## Other args assumed to contain scalar params of the distribution.
+    ## Replicate all to their maximum length, along with p 
+    matlen <- if(is.null(matargs)) NULL else sapply(args.mat, function(x){if(is.matrix(x))nrow(x) else 1})
+    veclen <- sapply(args, length)
+    maxlen <- max(c(length(p), veclen, matlen))
+    for (i in seq(along=args))
+        args[[i]] <- rep(args[[i]], length.out=maxlen)
+    for (i in seq(along=args.mat)){
+        if (is.matrix(args.mat[[i]]))
+            args.mat[[i]] <- apply(args.mat[[i]], 2, function(x)rep(x, length=maxlen))
+        else args.mat[[i]] <- matrix(args.mat[[i]], nrow=maxlen, ncol=length(args.mat[[i]]), byrow=TRUE)
+    }
+    p <- rep(p, length.out=maxlen)
+
     ret[p < 0 | p > 1] <- NaN
     ind <- (p > 0 & p < 1)
     if (any(ind)) {
         hind <- seq(along=p)[ind]
         h <- function(y) {
+            args <- lapply(args, function(x)x[hind[i]])
+            args.mat <- lapply(args.mat, function(x)x[hind[i],])
+            p <- p[hind[i]]
             args$q <- y
-            (do.call(pdist, args) - p)[hind[i]]
+            args <- c(args, args.mat)
+            (do.call(pdist, args) - p)
         }
         ptmp <- numeric(length(p[ind]))
         for (i in 1:length(p[ind])) {
