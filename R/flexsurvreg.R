@@ -450,12 +450,17 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     ancnames <- setdiff(parnames, dlist$location)
 
     check.formula(formula, dlist)
+    if (!is.null(anc)){
+      if (!is.list(anc) || !all(sapply(anc, function(x)inherits(x, "formula"))))
+        stop("\"anc\" must be a list of formulae")
+    }
+    
     # Create named formula list
     forms <- parseFormulas(
       formula,
       locname = dlist$location,
       ancnames = ancnames,
-      anc = NULL,
+      anc = anc,
       data = data
     )
 

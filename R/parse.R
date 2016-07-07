@@ -32,7 +32,7 @@ parseFormulas <- function(formula, locname, ancnames, anc = NULL, data = NULL){
   
   # Extract location terms
   specialIndices <- do.call(c, lapply(specialTerms, function(x) x$terms))
-  if(length(specialIndices) == 0) locTermsPrimary <- attributes(terms)$terms.labels
+  if(length(specialIndices) == 0) locTermsPrimary <- attributes(terms)$term.labels
   else locTermsPrimary <- attributes(terms[-specialIndices])$term.labels
   
   # Extract strata terms
@@ -100,9 +100,12 @@ parseFormulas <- function(formula, locname, ancnames, anc = NULL, data = NULL){
     ancTerms <- lapply(
       ancnames,
       function(x){
-        ancTerms <- append(attributes(terms(anc[[x]]))$terms.labels, strataTerms)
-        if(length(ancTerms) == 0) NULL
-        else reformulate(ancTerms)
+        if(!is.null(anc[[x]])){
+          ancTerms <- append(attributes(terms(anc[[x]]))$term.labels, strataTerms)
+          if(length(ancTerms) == 0) return(NULL)
+          else return(reformulate(ancTerms))
+        }
+        else return(NULL)
       }
     )
   }
