@@ -329,11 +329,12 @@ check.formula <- function(formula, dlist){
     if (!inherits(formula,"formula")) stop("\"formula\" must be a formula object")
     if (!("strata" %in% dlist$pars)){
         labs <- attr(terms(formula), "term.labels")
-        strat <- grep("strata\\((.+)\\)",labs)
-        if (any(strat)){
-            cov <- gsub("strata\\((.+)\\)","\\1",labs[strat[1]])
-            warning("Ignoring \"strata\" function: interpreting \"",cov, "\" as a covariate on \"", dlist$location, "\"")
-        }
+        # Check disabled, strata statement now supported
+        #strat <- grep("strata\\((.+)\\)",labs)
+        #if (any(strat)){
+        #    cov <- gsub("strata\\((.+)\\)","\\1",labs[strat[1]])
+        #    warning("Ignoring \"strata\" function: interpreting \"",cov, "\" as a covariate on \"", dlist$location, "\"")
+        #}
     }
 }
 
@@ -432,8 +433,13 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     call <- match.call()
     if (missing(dist)) stop("Distribution \"dist\" not specified")
     if (is.character(dist)) {
-        match.arg(dist, names(flexsurv.dists))
-        dlist <- flexsurv.dists[[dist]]
+      # Added: case insensitve matching of distributions
+      # Step 1: Use match.arg on lowercase argument, dists.
+      # Step 2: Use match to get index in distribution list from
+      # value obtained in step 1, and grab corresponding element.
+      dist <- match.arg(tolower(dist), tolower(names(flexsurv.dists)))
+      dist <- names(flexsurv.dists)[match(dist,tolower(names(flexsurv.dists)))]
+      dlist <- flexsurv.dists[[dist]]
     }
     else if (is.list(dist)) {
         dlist <- check.dlist(dist)
@@ -444,19 +450,19 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     ancnames <- setdiff(parnames, dlist$location)
 
     check.formula(formula, dlist)
-    if (is.null(anc)){
-        anc <- vector(mode="list", length=length(ancnames))
-        names(anc) <- ancnames
-        for (i in ancnames){
-            anc[[i]] <- ancpar.formula(formula, i)
-        }
+    if (!is.null(anc)){
+      if (!is.list(anc) || !all(sapply(anc, function(x)inherits(x, "formula"))))
+        stop("\"anc\" must be a list of formulae")
     }
-    else {
-        if (!is.list(anc) || !all(sapply(anc, function(x)inherits(x, "formula"))))
-            stop("\"anc\" must be a list of formulae")
-    }
-    forms <- c(location=get.locform(formula, ancnames), anc)
-    names(forms)[[1]] <- dlist$location
+    
+    # Create named formula list
+    forms <- parseFormulas(
+      formula,
+      locname = dlist$location,
+      ancnames = ancnames,
+      anc = anc,
+      data = data
+    )
 
     ## a) calling model.frame() directly doesn't work.  it only looks in
     ## "data" or the environment of "formula" for extra variables like
