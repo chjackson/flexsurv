@@ -19,7 +19,7 @@ parseFormulas <- function(formula, locname, ancnames, anc = NULL, data = NULL){
   env <- environment(formula)
   
   # Extract response
-  response <- as.character(formula)[2]
+  response <- as.character(formula[2])
   
   # Name vectors of special/parameter names
   names(ancnames) <- ancnames
