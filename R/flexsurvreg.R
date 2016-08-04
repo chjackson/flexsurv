@@ -433,6 +433,12 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if (missing(dist)) stop("Distribution \"dist\" not specified")
     if (is.character(dist)) {
         match.arg(dist, names(flexsurv.dists))
+        # Added: case insensitve matching of distributions
+        # Step 1: Use match.arg on lowercase argument, dists.
+        # Step 2: Use match to get index in distribution list from
+        # value obtained in step 1, and grab corresponding element.
+        dist <- match.arg(tolower(dist), tolower(names(flexsurv.dists)))
+        dist <- names(flexsurv.dists)[match(dist,tolower(names(flexsurv.dists)))]
         dlist <- flexsurv.dists[[dist]]
     }
     else if (is.list(dist)) {
