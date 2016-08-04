@@ -421,3 +421,15 @@ test_that("warning with strata", {
     expect_warning(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ strata(ovarian$resid.ds), dist="gengamma", inits=c(6,1,-1,0)),
                    "Ignoring \"strata\" function: interpreting \"ovarian\\$resid.ds\" as a covariate on \"mu\"")
 })
+
+test_that("Distribution names are case insensitive",{
+  fs1 = flexsurvreg(Surv(rectime, censrec)~group,dist="weibull",data=bc)
+  fs2 = flexsurvreg(Surv(rectime, censrec)~group,dist="Weibull",data=bc)
+ expect_equal(fs1$loglik, fs2$loglik, tol=1e-06)
+})
+
+test_that("Weibull hazards from summary are reliable",{
+  fs1 = flexsurvreg(Surv(rectime, censrec)~group ,dist="weibull",data=bc)
+  output = summary(fs1, t=seq(from=0,to=30000,length.out=100), ci=F, tidy=T)
+  expect_true(all(is.finite(output$est)))
+})
