@@ -1,5 +1,23 @@
 -*- text -*-
 
+
+Version 1.0.2 (2016-09-26)
+-------------
+
+* Bug fix: "start" was being ignored by plot.flexsurvreg. Thanks to
+  Ruth Keogh.
+
+* Built-in distribution names are now case-insensitive.  Thanks to
+  Jordan Amdahl.
+
+* Fix for Weibull hazard function to avoid numeric instability.
+  Thanks to Jordan Amdahl.
+
+* Fix to hsurvspline when t includes 0.  Thanks to Jordan Amdahl.
+
+* Vectorised parameters supported in qgeneric.
+
+
 Version 1.0.1 (2016-05-31)
 -------------
 

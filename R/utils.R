@@ -296,6 +296,15 @@ pweibull.quiet <- function(q, shape, scale = 1, lower.tail = TRUE, log.p = FALSE
 
 rweibull.quiet <- rweibull
 
+hweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
+  ret <- suppressWarnings(hweibull(x=x, shape=shape, scale=scale, log=log))
+  ret
+}
+
+Hweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
+  ret <- suppressWarnings(Hweibull(x=x, shape=shape, scale=scale, log=log))
+  ret
+}
+
 ## suppresses NOTE from checker about variables created with "assign"
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
-

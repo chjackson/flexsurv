@@ -6,6 +6,8 @@ Incomprehensible error if survival times negative, at least in flexsurvspline
 
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
+compare with rstpm2 package
+
 
 SURVREG
 

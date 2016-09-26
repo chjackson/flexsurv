@@ -909,7 +909,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
     if (is.null(ci))
         ci <- ((x$ncovs == 0) || (!(sapply(Xraw,is.factor))))
     if (!ci) B <- 0
-    summ <- summary.flexsurvreg(x, newdata=newdata, X=X, type=type, fn=fn, t=t, ci=ci, B=B, cl=cl)
+    summ <- summary.flexsurvreg(x, newdata=newdata, X=X, type=type, fn=fn, t=t, start=start, ci=ci, B=B, cl=cl)
     t <- summ[[1]]$time
     X <- if (is.null(attr(summ,"X"))) as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1)) else attr(summ,"X")
     if (is.null(col.ci)) col.ci <- col
