@@ -1,6 +1,7 @@
 \encoding{latin1}
 \name{flexsurvreg}
 \alias{flexsurvreg}
+\alias{flexsurv.dists}
 \title{
   Flexible parametric regression for time-to-event data
 }
@@ -82,7 +83,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
   }
   \item{dist}{
     Typically, one of the strings in the first column of the following
-    table, identifying a built-in distribution.
+    table, identifying a built-in distribution.   
     This table also identifies the location parameters, and whether
     covariates on these parameters represent a proportional hazards (PH)
     or accelerated failure time (AFT) model.  In an accelerated failure
@@ -143,6 +144,12 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
 
     Similarly in the exponential distribution, the rate, rather than the
     mean, is modelled on covariates.
+
+    The object \code{flexsurv.dists} lists the names of the built-in
+    distributions, their parameters, location parameter, functions used
+    to transform the parameter ranges to and from the real line, and the
+    functions used to generate initial values of each parameter for
+    estimation.   
   }
   \item{inits}{
     An optional numeric vector giving initial values for each unknown parameter.

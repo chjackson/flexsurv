@@ -10,7 +10,7 @@
 }
 \usage{
 \method{plot}{flexsurvreg}(x, newdata=NULL, X=NULL, type="survival",
-        fn=NULL, t=NULL, start=NULL,
+        fn=NULL, t=NULL, start=0,
         est=TRUE, ci=NULL, B=1000, cl=0.95,
         col.obs="black", lty.obs=1, lwd.obs=1,
         col="red", lty=1, lwd=2,

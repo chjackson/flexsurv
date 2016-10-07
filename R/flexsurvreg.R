@@ -432,7 +432,6 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     call <- match.call()
     if (missing(dist)) stop("Distribution \"dist\" not specified")
     if (is.character(dist)) {
-        match.arg(dist, names(flexsurv.dists))
         # Added: case insensitve matching of distributions
         # Step 1: Use match.arg on lowercase argument, dists.
         # Step 2: Use match to get index in distribution list from
@@ -902,7 +901,7 @@ cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
     ret
 }
 
-plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, t=NULL, start=NULL,
+plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, t=NULL, start=0,
                              est=TRUE, ci=NULL, B=1000, cl=0.95,
                              col.obs="black", lty.obs=1, lwd.obs=1,
                              col="red",lty=1,lwd=2,
