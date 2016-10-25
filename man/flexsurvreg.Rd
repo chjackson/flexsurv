@@ -161,7 +161,7 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     If not specified, default initial values are chosen from a simple
     summary of the survival or censoring times, for example the mean
     is often used to initialize scale parameters.  See the object
-    \code{flexsurv.dists} in the source for the exact methods used.
+    \code{flexsurv.dists} for the exact methods used.
     If the likelihood surface may be uneven, it is advised to run
     the optimisation starting from various different initial values
     to ensure convergence to the true global maximum.

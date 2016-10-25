@@ -94,4 +94,9 @@ test_that("summary.flexsurvreg tidy output",{
     Model.nc <- flexsurvreg(Surv(time, status) ~1 ,data=lung, dist="weibull")
     expect_equivalent(summary.flexsurvreg(Model.nc, t= c(4,5),tidy=TRUE, ci=FALSE),
                       summary.flexsurvreg(Model.nc, t= c(4,5),tidy=FALSE, ci=FALSE)[[1]])
+
+    ## covariates but no newdata - covariate column should be included
+    st <- summary.flexsurvreg(Model.1, tidy=TRUE, ci=FALSE)
+    expect_equal(st[1,"est"], 0.99723991647129, tol=1e-06)
+    expect_equivalent(st[1,"agecat"], ">=65")
 })

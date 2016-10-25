@@ -1,7 +1,7 @@
 Package: flexsurv
 Type: Package
 Title: Flexible Parametric Survival and Multi-State Models
-Version: 1.0.3
+Version: 1.0.3.9000
 Date: 2016-10-07
 Author: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 Maintainer: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>

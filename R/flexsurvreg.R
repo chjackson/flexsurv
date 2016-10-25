@@ -771,9 +771,12 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     if (x$ncovs>0) attr(ret,"X") <- X
     if (tidy) {
         ret <- do.call("rbind", ret)
-        if(!is.null(newdata)){
-            nd <- attr(X, "newdata")
-            covdf <- nd[rep(seq_len(nrow(nd)), each=length(t)), , drop=FALSE]
+        if (x$ncovs>0) {
+            if (!is.null(newdata)){
+                nd <- attr(X, "newdata")
+                covdf <- nd[rep(seq_len(nrow(nd)), each=length(t)), , drop=FALSE]
+            } else 
+                covdf <- unique(Xraw)[rep(seq_len(nrow(unique(Xraw))), each=length(t)), , drop=FALSE]
             rownames(ret) <- rownames(covdf) <- NULL
             ret <- cbind(ret, covdf)
         }
