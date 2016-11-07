@@ -405,8 +405,8 @@ check.flexsurv.response <- function(Y){
     if (attr(Y, "type") == "counting")
         Y <- cbind(Y, time=Y[,"stop"] - Y[,"start"], time1=Y[,"stop"], time2=Inf)
     else if (attr(Y, "type") == "interval"){
-        Y[,"time2"][Y[,"status"]==0] <- Inf
-        Y[,"time2"][Y[,"status"]==2] <- -Inf
+        Y[,"time2"][Y[,"status"]==0] <- Inf   # upper bound with right censoring 
+        Y[,"time2"][Y[,"status"]==2] <- -Inf  # 
         Y <- cbind(Y, start=0, stop=Y[,"time1"], time=Y[,"time1"])
     }
     else if (attr(Y, "type") == "right")

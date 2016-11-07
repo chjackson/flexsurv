@@ -343,9 +343,10 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
 
     Dmat <- t(Xq) %*% Xq
     posdef <- all(eigen(Dmat)$values > 0) # TODO work out why non-positive definite matrices can occur here
-    if (!posdef)
+    if (!posdef && is.null(aux$skip.pd.check))
         inits <- flexsurv.splineinits.cox(t=t, mf=mf, mml=mml, aux=aux)
-    else inits <- solve.QP(Dmat=Dmat, dvec=t(t(y) %*% Xq), Amat=t(dXq), bvec=eps)$solution
+    else if (posdef) inits <- solve.QP(Dmat=Dmat, dvec=t(t(y) %*% Xq), Amat=t(dXq), bvec=eps)$solution
+    else inits <- rep(0, ncol(Xq)) # if Cox fails to get pos def
     inits
 }
 
@@ -356,6 +357,7 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
 
 flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 {
+    aux$skip.pd.check <- TRUE # avoid infinite recursion
     inits <- flexsurv.splineinits(t=t, mf=mf, mml=mml, aux=aux)
     Y <- check.flexsurv.response(model.extract(mf, "response"))
     ## Impute interval-censored data, where Cox doesn't work.
@@ -425,7 +427,17 @@ flexsurvspline <- function(formula, data, weights, bhazard, subset,
         }
     }
     if (is.null(bknots)) {
-        bknots <- c(min(tsfn(dtimes,timescale)), max(tsfn(dtimes,timescale)))
+        ## boundary knots chosen from min/max observed death times...
+        if (length(dtimes)>0) { 
+            bt <- dtimes
+        } else {
+            ## unless all observations censored, where censoring times used instead
+            ## "time" used with right censoring 
+            ## "time1", "time2" used with interval censoring
+            bt <- c(Y[,"time1"], Y[,"time2"], Y[,"time"])
+            bt <- bt[is.finite(bt)]
+        }
+        bknots <- c(min(tsfn(bt,timescale)), max(tsfn(bt,timescale)))
         if (bknots[1] == bknots[2])
             warning("minimum and maximum log death times are the same: knot and boundary knot locations should be supplied explicitly")
     } else 
