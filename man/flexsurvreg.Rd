@@ -238,7 +238,6 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
 \value{
   A list of class \code{"flexsurvreg"} containing information about the
   fitted model.  Components of interest to users may include:
-
   \item{call}{A copy of the function call, for use in post-processing.}
   \item{dlist}{List defining the survival distribution used.}
   \item{res}{Matrix of maximum likelihood estimates and confidence
@@ -247,6 +246,9 @@ flexsurvreg(formula, anc=NULL, data, weights, bhazard, subset,
     limits, with parameters all transformed to the real line.  The \code{\link{coef}},
     \code{\link{vcov}} and \code{\link{confint}} methods for
     \code{flexsurvreg} objects work on this scale.}
+  \item{coefficients}{The transformed maximum likelihood estimates, as
+  in \code{res.t}. Calling \code{coef()} on a \code{\link{flexsurvreg}}
+  object simply returns this component.}
   \item{loglik}{Log-likelihood}
   \item{logliki}{Vector of individual contributions to the log-likelihood}
   \item{AIC}{Akaike's information criterion (-2*log likelihood + 2*number of
