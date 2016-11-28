@@ -1017,3 +1017,6 @@ logLik.flexsurvreg <- function(object, ...){
     val
 }
 
+coef.flexsurvreg <- function(object, ...){
+    object$coefficients
+}

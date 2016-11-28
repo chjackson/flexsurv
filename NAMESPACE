@@ -96,6 +96,7 @@ S3method(logLik, flexsurvreg)
 S3method(model.frame, flexsurvreg)
 S3method(model.matrix, flexsurvreg)
 S3method(print, summary.flexsurvreg)
+S3method(coef, flexsurvreg)
 
 importFrom("graphics", "lines")
 importFrom("stats", "as.formula", "coef", "cov", "delete.response",
