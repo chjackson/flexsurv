@@ -4,42 +4,23 @@
 
 dgengamma <- function(x, mu=0, sigma=1, Q, log=FALSE) {
     d <- dbase("gengamma", log=log, x=x, mu=mu, sigma=sigma, Q=Q)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    logdens <- numeric(length(x))
-    logdens[Q==0] <- dlnorm(x[Q==0], mu[Q==0], sigma[Q==0], log=TRUE)
-    qn0 <- Q!=0
-    if (any(qn0)) {
-        x <- x[qn0]; mu <- mu[qn0]; sigma <- sigma[qn0]; Q <- Q[qn0]
-        y <- log(x)
-        w <- ((y - mu)/sigma)
-        logdens[qn0] <- -log(sigma*x) + log(abs(Q)) + (Q^-2)*log(Q^-2) + Q^-2*(Q*w - exp(Q*w)) - lgamma(Q^-2)
-    }
-    ret[ind] <- if (log) logdens else exp(logdens)
+    ret <- d$ret
+    ret[d$ind] <- dgengamma_work(d$x, d$mu, d$sigma, d$Q, log)
     ret
 }
 
 pgengamma <- function(q, mu=0, sigma=1, Q, lower.tail = TRUE, log.p = FALSE) {
-    d <- dbase("gengamma", lower.tail=lower.tail, log=log.p, q=q, mu=mu, sigma=sigma, Q=Q)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    prob <- numeric(length(q))
-    prob[Q==0] <- plnorm(q[Q==0], mu[Q==0], sigma[Q==0])
-    qn0 <- Q!=0
-    if (any(qn0)) {
-        q <- q[qn0]; mu <- mu[qn0]; sigma <- sigma[qn0]; Q <- Q[qn0]
-        y <- log(q)
-        w <- ((y - mu)/sigma)
-        expnu <- exp(Q*w)*Q^-2
-        prob[qn0] <- ifelse(Q > 0, pgamma(expnu, Q^-2), 1 - pgamma(expnu, Q^-2))
-    }
-    if (!lower.tail) prob <- 1 - prob
-    if (log.p) prob <- log(prob)
-    ret[ind] <- prob
+    d <- dbase("gengamma", lower.tail=lower.tail,
+               log=log.p, q=q, mu=mu, sigma=sigma, Q=Q)
+    
+    ret <- d$ret
+    ret[d$ind] <- pgengamma_work(d$q, d$mu, d$sigma, d$Q, lower.tail, log.p)
     ret
 }
 
 Hgengamma <- function(x, mu=0, sigma=1, Q)
 {
-    -log(pgengamma(q=x, mu=mu, sigma=sigma, Q=Q, lower.tail=FALSE))
+    -pgengamma(q=x, mu=mu, sigma=sigma, Q=Q, lower.tail=FALSE, log.p=TRUE)
 }
 
 hgengamma <- function(x, mu=0, sigma=1, Q)
