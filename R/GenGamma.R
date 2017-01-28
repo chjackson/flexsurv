@@ -3,19 +3,11 @@
 ### FIXME value for x = 0 
 
 dgengamma <- function(x, mu=0, sigma=1, Q, log=FALSE) {
-    d <- dbase("gengamma", log=log, x=x, mu=mu, sigma=sigma, Q=Q)
-    ret <- d$ret
-    ret[d$ind] <- dgengamma_work(d$x, d$mu, d$sigma, d$Q, log)
-    ret
+    dgengamma_work(x, mu, sigma, Q, log)
 }
 
 pgengamma <- function(q, mu=0, sigma=1, Q, lower.tail = TRUE, log.p = FALSE) {
-    d <- dbase("gengamma", lower.tail=lower.tail,
-               log=log.p, q=q, mu=mu, sigma=sigma, Q=Q)
-    
-    ret <- d$ret
-    ret[d$ind] <- pgengamma_work(d$q, d$mu, d$sigma, d$Q, lower.tail, log.p)
-    ret
+    pgengamma_work(q, mu, sigma, Q, lower.tail, log.p)
 }
 
 Hgengamma <- function(x, mu=0, sigma=1, Q)

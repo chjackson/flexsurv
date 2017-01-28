@@ -6,6 +6,26 @@
 #include "mapply_4.h"
 
 namespace {
+
+  inline double below_distribution(bool lower_tail, bool give_log) {
+    if (lower_tail) {
+      if (give_log) {return R_NegInf;} else {return 0;}
+    } else {
+      if (give_log) {return 0;} else {return R_NegInf;}
+    }
+	   
+  }
+  
+  inline double gengamma_bad(const double mu,
+			     const double sigma,
+			     const double Q) {
+    if (sigma < 0) {
+      Rcpp::warning("Negative scale parameter \"sigma\"");
+      return true;
+    }
+    return false;
+  }
+    
   class dgengamma {
   public:
     typedef double result_type;
@@ -14,7 +34,17 @@ namespace {
 			     const double mu,
 			     const double sigma,
 			     const double Q) const {
+      /* 
+	 check the parameters 
+      */
+      if (gengamma_bad(mu, sigma, Q)) {
+	return NA_REAL;
+      };
 
+      if (x < 0) {
+	return R_NegInf;
+      }
+      
       /*
 	this function relies on interesting levels of cancellation if
 	Q is small or x is small
@@ -47,6 +77,15 @@ namespace {
 			     const double mu,
 			     const double sigma,
 			     const double big_q) const {
+      /* check the arguments */
+      if (gengamma_bad(mu, sigma, big_q)) {
+	return NA_REAL;
+      }
+      
+      if ( q < 0 ) {
+	return below_distribution(lower_tail, give_log);
+      }
+      
       if (big_q!=0) {
 	const double y = std::log(q);
 	const double w = (y - mu) / sigma;
@@ -75,10 +114,23 @@ dgengamma_work(const Rcpp::NumericVector& x,
 	       const Rcpp::NumericVector& sigma,
 	       const Rcpp::NumericVector& Q,
 	       const bool log) {
+  R_xlen_t size
+    = std::max(std::max(sigma.size(),
+			Q.size()),
+	       std::max(x.size(),
+			mu.size()));
   if (log) {
-    return mapply(x, mu, sigma, Q, dgengamma());
+    return mapply(Rcpp::rep_len(x, size),
+		  Rcpp::rep_len(mu, size),
+		  Rcpp::rep_len(sigma, size),
+		  Rcpp::rep_len(Q, size),
+		  dgengamma());
   } else {
-    return Rcpp::exp(mapply(x, mu, sigma, Q, dgengamma()));
+    return Rcpp::exp(mapply(Rcpp::rep_len(x, size),
+			    Rcpp::rep_len(mu, size),
+			    Rcpp::rep_len(sigma, size),
+			    Rcpp::rep_len(Q, size),
+			    dgengamma()));
   }
 }
 
@@ -90,5 +142,15 @@ pgengamma_work(const Rcpp::NumericVector& q,
 	       const Rcpp::NumericVector& Q,
 	       const bool lower_tail,
 	       const bool give_log) {
-  return mapply(q, mu, sigma, Q, pgengamma(lower_tail, give_log));
+  R_xlen_t size
+    = std::max(std::max(sigma.size(),
+			Q.size()),
+	       std::max(q.size(),
+			mu.size()));
+
+  return mapply(Rcpp::rep_len(q, size),
+		Rcpp::rep_len(mu, size),
+		Rcpp::rep_len(sigma, size),
+		Rcpp::rep_len(Q, size),
+		pgengamma(lower_tail, give_log));
 }
