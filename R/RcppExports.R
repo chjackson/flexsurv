@@ -9,3 +9,7 @@ pgengamma_work <- function(q, mu, sigma, Q, lower_tail, give_log) {
     .Call('flexsurv_pgengamma_work', PACKAGE = 'flexsurv', q, mu, sigma, Q, lower_tail, give_log)
 }
 
+dgompertz_work <- function(x, shape, rate, log) {
+    .Call('flexsurv_dgompertz_work', PACKAGE = 'flexsurv', x, shape, rate, log)
+}
+

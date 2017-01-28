@@ -36,3 +36,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dgompertz_work
+Rcpp::NumericVector dgompertz_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate, const bool log);
+RcppExport SEXP flexsurv_dgompertz_work(SEXP xSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type rate(rateSEXP);
+    Rcpp::traits::input_parameter< const bool >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(dgompertz_work(x, shape, rate, log));
+    return rcpp_result_gen;
+END_RCPP
+}

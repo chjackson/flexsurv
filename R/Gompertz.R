@@ -8,15 +8,8 @@
 
 dgompertz <- function(x, shape, rate=1, log=FALSE) {
     d <- dbase("gompertz", log=log, x=x, shape=shape, rate=rate)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    logdens <- numeric(length(x))
-    logdens[shape==0] <- dexp(x[shape==0], rate=rate[shape==0], log=TRUE)
-    sn0 <- shape!=0
-    if (any(sn0)) { 
-        x <- x[sn0]; shape <- shape[sn0]; rate <- rate[sn0]
-        logdens[sn0] <- log(rate) + shape*x - rate/shape*(exp(shape*x) - 1)
-    }    
-    ret[ind] <- if (log) logdens else exp(logdens)
+    ret <- d$ret
+    ret[d$ind] <- dgompertz_work(d$x, d$shape, d$rate, log)
     ret
 }
 
