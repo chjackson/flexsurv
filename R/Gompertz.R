@@ -7,10 +7,7 @@
 ## shape/scale labelled wrong way round.
 
 dgompertz <- function(x, shape, rate=1, log=FALSE) {
-    d <- dbase("gompertz", log=log, x=x, shape=shape, rate=rate)
-    ret <- d$ret
-    ret[d$ind] <- dgompertz_work(d$x, d$shape, d$rate, log)
-    ret
+    dgompertz_work(x, shape, rate, log)
 }
 
 pgompertz <- function(q, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {
