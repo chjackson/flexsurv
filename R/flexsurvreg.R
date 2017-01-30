@@ -212,6 +212,34 @@ flexsurv.dists <- list(
 flexsurv.dists$exponential <- flexsurv.dists$exp
 flexsurv.dists$lognormal <- flexsurv.dists$lnorm
 
+buildTransformer <- function(inits, nbpars, dlist) {
+    par.transform <-
+        lapply(seq_len(nbpars),
+               function(ind) {
+                   xform  <- dlist$inv.transforms[[ind]]
+                   function(pars) {
+                       xform(pars[[ind]])
+                   }
+               })
+    names(par.transform) <- names(inits)[seq_len(nbpars)]
+    function(pars) {
+        lapply(par.transform,
+               function(item, par) { item(par) },
+               pars)
+    }
+}
+
+buildAuxParms <- function(aux, dlist) {
+    aux.transform <- list()
+    for (ind in seq_along(aux)) {
+        name <- names(aux)[[ind]]
+        if (!(name %in% dlist$pars)) {
+            aux.transform[[name]] <- aux[[ind]]
+        }
+    }
+    aux.transform
+}
+
 logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
                           inits, dfns, aux, mx, fixedpars=NULL) {
     pars   <- inits
@@ -225,16 +253,28 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
     event.times <- Y[event, "time1"]
     left.censor <- Y[!event, "time2"]
     right.censor <- Y[!event, "time1"]
+
+    event.weights <- weights[event]
+    no.event.weights <- weights[!event]
     
+    par.transform <- buildTransformer(inits, nbpars, dlist)
+
+    aux.pars <- buildAuxParms(aux, dlist)
+
+    default.offset <- rep.int(0, length(event.times))
+    do.hazard <- any(bhazard > 0)
+
+    loglik <- rep.int(0, nrow(Y))
     ## the ... here is to work around optim
     function(optpars, ...) {
 
         pars[insert.locations] <- optpars
+        raw.pars <- pars
         pars <- as.list(pars)
 
         pars.event <- pars.nevent <- pars
         if (npars > nbpars) {
-            beta <- unlist(pars[(nbpars+1):npars])
+            beta <- raw.pars[(nbpars+1):npars]
             for (i in dlist$pars){
                 pars[[i]] <- pars[[i]] +
                     X[,mx[[i]],drop=FALSE] %*% beta[mx[[i]]]
@@ -242,58 +282,50 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
                 pars.nevent[[i]] <- pars[[i]][!event]
             }
         }
-        fnargs <- fnargs.event <- fnargs.nevent <- list()
-        for (i in 1:nbpars){
-            fnargs[[names(pars)[i]]] <-
-                dlist$inv.transforms[[i]](pars[[i]])
-            fnargs.event[[names(pars)[i]]] <-
-                dlist$inv.transforms[[i]](pars.event[[i]])
-            fnargs.nevent[[names(pars)[i]]] <-
-                dlist$inv.transforms[[i]](pars.nevent[[i]])
-        }
-        for (i in seq_along(aux)){
-            if (!(names(aux)[i] %in% dlist$pars)){
-                nx <- names(aux)[i]
-                fnargs[[nx]] <- fnargs.event[[nx]] <-
-                    fnargs.nevent[[nx]] <- aux[[i]]
-            }
-        }
+
+        fnargs <- c(par.transform(pars),
+                    aux.pars)
+        fnargs.event <- c(par.transform(pars.event),
+                          aux.pars)
+        fnargs.nevent <- c(par.transform(pars.nevent),
+                           aux.pars)
+        
         ## Generic survival model likelihood contributions
         ## Observed deaths
         dargs <- fnargs.event
         dargs$x <- event.times
         dargs$log <- TRUE
-        logdens <- (do.call(dfns$d, dargs))
+        logdens <- do.call(dfns$d, dargs)
         
         ## Left censoring times
         pmaxargs <- fnargs.nevent
         pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
-        pmax <- (do.call(dfns$p, pmaxargs))
+        pmax <- do.call(dfns$p, pmaxargs)
         pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
         
         ## Right censoring times
         pargs <- fnargs.nevent
         pargs$q <- right.censor
-        pmin <- (do.call(dfns$p, pargs))
+        pmin <- do.call(dfns$p, pargs)
         
         ## Left-truncation
-        targs <- fnargs
+        targs   <- fnargs
         targs$q <- Y[,"start"]
         pobs <- 1 - do.call(dfns$p, targs) # prob of being observed = 1 unless left-truncated
 
         ## Hazard offset for relative survival models
-        if (any(bhazard>0)){
-            pargs <- fnargs.event
-            pargs$q <- Y[event,"time1"]
-            pminb <- do.call(dfns$p, pargs)
-            loghaz <- logdens - log(1 - pminb)
+        if (do.hazard){
+            pargs   <- fnargs.event
+            pargs$q <- event.times
+            pminb   <- do.call(dfns$p, pargs)
+            loghaz  <- logdens - log(1 - pminb)
             offseti <- log(1 + bhazard[event] / exp(loghaz)*weights[event])
-        } else offseti <- rep(0, length(logdens))
-        
+        } else {
+            offseti <- default.offset
+        }
         ## Express as vector of individual likelihood contributions
-        loglik <- numeric(nrow(Y))
-        loglik[event] <- (logdens*weights[event]) + offseti
-        loglik[!event] <- (log(pmax - pmin)*weights[!event])
+        loglik[event] <- (logdens*event.weights) + offseti
+        loglik[!event] <- (log(pmax - pmin)*no.event.weights)
         loglik <- loglik - log(pobs)*weights
         
         ret <- -sum(loglik)
