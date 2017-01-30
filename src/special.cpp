@@ -28,7 +28,7 @@ namespace {
   }
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng=false)]]
 Rcpp::NumericVector exph(const Rcpp::NumericVector& y) {
   // exp(asinh(x))
   return Rcpp::ifelse(y >= 0,
@@ -36,7 +36,7 @@ Rcpp::NumericVector exph(const Rcpp::NumericVector& y) {
 		      -1/(y - Rcpp::sapply(y, restrict_hypot)));
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng=false)]]
 Rcpp::NumericVector dexph(const Rcpp::NumericVector& y) {
   return Rcpp::sapply(y, dexph_work);		      
 }

@@ -1,9 +1,5 @@
-## exp(asinh(y))
-exph <- function(y)(y + sqrt(y^2 + 1))
-dexph <- function(y)(1 + y / sqrt(y^2 + 1))
-
 ## sinh(log(y))
-logh <- function(x)((x^2 - 1)/(2*x))
+logh <- function(x) { 0.5 * (x - 1/x) }
 
 ## Convert flexsurvreg fit to a survreg fit for Weibull, exponential
 ## or log normal distribution.  Doesn't currently support stratified

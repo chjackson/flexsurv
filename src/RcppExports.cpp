@@ -10,7 +10,6 @@ Rcpp::NumericVector dgengamma_work(const Rcpp::NumericVector& x, const Rcpp::Num
 RcppExport SEXP flexsurv_dgengamma_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type sigma(sigmaSEXP);
@@ -25,7 +24,6 @@ Rcpp::NumericVector pgengamma_work(const Rcpp::NumericVector& q, const Rcpp::Num
 RcppExport SEXP flexsurv_pgengamma_work(SEXP qSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type sigma(sigmaSEXP);
@@ -36,17 +34,48 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_gengamma
+Rcpp::LogicalVector check_gengamma(const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q);
+RcppExport SEXP flexsurv_check_gengamma(SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type Q(QSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_gengamma(mu, sigma, Q));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dgompertz_work
 Rcpp::NumericVector dgompertz_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate, const bool log);
 RcppExport SEXP flexsurv_dgompertz_work(SEXP xSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type rate(rateSEXP);
     Rcpp::traits::input_parameter< const bool >::type log(logSEXP);
     rcpp_result_gen = Rcpp::wrap(dgompertz_work(x, shape, rate, log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// exph
+Rcpp::NumericVector exph(const Rcpp::NumericVector& y);
+RcppExport SEXP flexsurv_exph(SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(exph(y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dexph
+Rcpp::NumericVector dexph(const Rcpp::NumericVector& y);
+RcppExport SEXP flexsurv_dexph(SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(dexph(y));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -47,15 +47,6 @@ rgengamma <- function(n, mu=0, sigma=1, Q) {
     ret
 }
 
-check.gengamma <- function(mu, sigma, Q){
-    ret <- rep(TRUE, length(mu))
-    if (missing(Q)) stop("shape parameter \"Q\" not given")
-    if (any(sigma < 0)) {  # no warning for sigma 0, since may occur in optimisation. 
-        warning("Negative scale parameter \"sigma\""); ret[sigma<0] <- FALSE
-    }
-    ret
-}
-
 ### FIXME limiting value for x=0:  0 if bk >1, 1 if b=k=1, ... ? 
 
 dgengamma.orig <- function(x, shape, scale=1, k, log=FALSE){

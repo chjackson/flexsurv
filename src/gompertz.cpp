@@ -51,7 +51,7 @@ namespace {
 
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng=false)]]
 Rcpp::NumericVector
 dgompertz_work(const Rcpp::NumericVector& x,
 	       const Rcpp::NumericVector& shape,

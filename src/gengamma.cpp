@@ -104,7 +104,7 @@ namespace {
 
 
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng=false)]]
 Rcpp::NumericVector
 dgengamma_work(const Rcpp::NumericVector& x,
 	       const Rcpp::NumericVector& mu,
@@ -124,7 +124,7 @@ dgengamma_work(const Rcpp::NumericVector& x,
 		     log);
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(rng=false)]]
 Rcpp::NumericVector
 pgengamma_work(const Rcpp::NumericVector& q,
 	       const Rcpp::NumericVector& mu,
@@ -143,4 +143,11 @@ pgengamma_work(const Rcpp::NumericVector& q,
 		Rcpp::rep_len(sigma, size),
 		Rcpp::rep_len(Q, size),
 		gengamma::cdf(lower_tail, give_log));
+}
+
+// [[Rcpp::export(name="check.gengamma", rng=false)]]
+Rcpp::LogicalVector check_gengamma(const Rcpp::NumericVector& mu,
+				   const Rcpp::NumericVector& sigma,
+				   const Rcpp::NumericVector& Q) {
+  return !(Rcpp::mapply(mu, sigma, Q, gengamma::bad));
 }
