@@ -84,6 +84,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dllogis_work
+Rcpp::NumericVector dllogis_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& scale, const bool log);
+RcppExport SEXP flexsurv_dllogis_work(SEXP xSEXP, SEXP shapeSEXP, SEXP scaleSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< const bool >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(dllogis_work(x, shape, scale, log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pllogis_work
+Rcpp::NumericVector pllogis_work(const Rcpp::NumericVector& q, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& scale, const bool lower_tail, const bool give_log);
+RcppExport SEXP flexsurv_pllogis_work(SEXP qSEXP, SEXP shapeSEXP, SEXP scaleSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type scale(scaleSEXP);
+    Rcpp::traits::input_parameter< const bool >::type lower_tail(lower_tailSEXP);
+    Rcpp::traits::input_parameter< const bool >::type give_log(give_logSEXP);
+    rcpp_result_gen = Rcpp::wrap(pllogis_work(q, shape, scale, lower_tail, give_log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// check_llogis
+Rcpp::LogicalVector check_llogis(const Rcpp::NumericVector& shape, const Rcpp::NumericVector& scale);
+RcppExport SEXP flexsurv_check_llogis(SEXP shapeSEXP, SEXP scaleSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type scale(scaleSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_llogis(shape, scale));
+    return rcpp_result_gen;
+END_RCPP
+}
 // exph
 Rcpp::NumericVector exph(const Rcpp::NumericVector& y);
 RcppExport SEXP flexsurv_exph(SEXP ySEXP) {

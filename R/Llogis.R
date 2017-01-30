@@ -1,20 +1,10 @@
 dllogis <- function(x, shape=1, scale=1, log = FALSE)
 {
-    d <- dbase("llogis", log=log, x=x, shape=shape, scale=scale)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    logdens <- log(shape) - log(scale) + (shape-1)*(log(x) - log(scale)) - 2*log(1 + (x/scale)^shape)
-    ret[ind] <- if (log) logdens else exp(logdens)
-    ret
+    dllogis_work(x, shape, scale, log)
 }
 
 pllogis <- function(q, shape=1, scale=1, lower.tail = TRUE, log.p = FALSE) {
-    d <- dbase("llogis", lower.tail=lower.tail, log=log.p, q=q, shape=shape, scale=scale)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    prob <- 1 - 1/(1 + (q/scale)^shape)
-    if (!lower.tail) prob <- 1 - prob
-    if (log.p) prob <- log(prob)
-    ret[ind] <- prob
-    ret
+    pllogis_work(q, shape, scale, lower.tail, log.p)
 }
 
 qllogis <- function(p, shape=1, scale=1, lower.tail = TRUE, log.p = FALSE) {
@@ -44,13 +34,6 @@ Hllogis <- function(x, shape=1, scale=1, log = FALSE)
 {
     ret <- - pllogis(x, shape, scale, lower.tail=FALSE, log.p=TRUE)
     if (log) ret <- log(ret)
-    ret
-}
-
-check.llogis <- function(shape, scale){
-    ret <- rep(TRUE, length(shape))
-    if (any(shape<=0)) {warning("Non-positive shape parameter"); ret[shape<=0] <- FALSE}
-    if (any(scale<=0)) {warning("Non-positive scale parameter"); ret[scale<=0] <- FALSE}
     ret
 }
 

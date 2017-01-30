@@ -25,6 +25,18 @@ check.gompertz <- function(shape, rate) {
     .Call('flexsurv_check_gompertz', PACKAGE = 'flexsurv', shape, rate)
 }
 
+dllogis_work <- function(x, shape, scale, log) {
+    .Call('flexsurv_dllogis_work', PACKAGE = 'flexsurv', x, shape, scale, log)
+}
+
+pllogis_work <- function(q, shape, scale, lower_tail, give_log) {
+    .Call('flexsurv_pllogis_work', PACKAGE = 'flexsurv', q, shape, scale, lower_tail, give_log)
+}
+
+check.llogis <- function(shape, scale) {
+    .Call('flexsurv_check_llogis', PACKAGE = 'flexsurv', shape, scale)
+}
+
 exph <- function(y) {
     .Call('flexsurv_exph', PACKAGE = 'flexsurv', y)
 }
