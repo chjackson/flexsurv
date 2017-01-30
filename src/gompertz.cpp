@@ -17,7 +17,7 @@ namespace {
       }
     }
     
-    inline double bad(const double shape, const double rate) {
+    inline bool bad(const double shape, const double rate) {
       if (rate < 0) {
 	Rcpp::warning("Negative rate parameter");
 	return true;

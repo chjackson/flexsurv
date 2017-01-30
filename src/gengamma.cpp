@@ -10,9 +10,9 @@ namespace {
 
   namespace gengamma {
   
-    inline double bad(const double mu,
-		      const double sigma,
-		      const double Q) {
+    inline bool bad(const double mu,
+		    const double sigma,
+		    const double Q) {
       if (sigma < 0) {
 	Rcpp::warning("Negative scale parameter \"sigma\"");
 	return true;
@@ -149,5 +149,9 @@ pgengamma_work(const Rcpp::NumericVector& q,
 Rcpp::LogicalVector check_gengamma(const Rcpp::NumericVector& mu,
 				   const Rcpp::NumericVector& sigma,
 				   const Rcpp::NumericVector& Q) {
-  return !(Rcpp::mapply(mu, sigma, Q, gengamma::bad));
+  const R_xlen_t size = mu.size();
+  return !Rcpp::mapply(mu,
+		       Rcpp::rep_len(sigma, size),
+		       Rcpp::rep_len(Q, size),
+		       gengamma::bad);
 }
