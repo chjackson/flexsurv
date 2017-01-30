@@ -11,20 +11,7 @@ dgompertz <- function(x, shape, rate=1, log=FALSE) {
 }
 
 pgompertz <- function(q, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {
-    d <- dbase("gompertz", lower.tail=lower.tail, log=log.p, q=q, shape=shape, rate=rate)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    prob <- numeric(length(q))
-    prob[shape==0] <- pexp(q[shape==0], rate=rate[shape==0])
-    sn0 <- shape!=0
-    if (any(sn0)) { 
-        q <- q[sn0]; shape <- shape[sn0]; rate <- rate[sn0]
-        prob[sn0] <- 1 - exp(-rate/shape*(exp(shape*q) - 1))
-    }
-    prob[q==Inf] <- 1
-    if (!lower.tail) prob <- 1 - prob
-    if (log.p) prob <- log(prob)
-    ret[ind] <- prob
-    ret
+    pgompertz_work(q, shape, rate, lower.tail, log.p)
 }
 
 qgompertz <- function(p, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {

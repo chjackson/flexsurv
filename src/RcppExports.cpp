@@ -59,6 +59,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pgompertz_work
+Rcpp::NumericVector pgompertz_work(const Rcpp::NumericVector& q, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate, const bool lower_tail, const bool give_log);
+RcppExport SEXP flexsurv_pgompertz_work(SEXP qSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type rate(rateSEXP);
+    Rcpp::traits::input_parameter< const bool >::type lower_tail(lower_tailSEXP);
+    Rcpp::traits::input_parameter< const bool >::type give_log(give_logSEXP);
+    rcpp_result_gen = Rcpp::wrap(pgompertz_work(q, shape, rate, lower_tail, give_log));
+    return rcpp_result_gen;
+END_RCPP
+}
 // check_gompertz
 Rcpp::LogicalVector check_gompertz(const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate);
 RcppExport SEXP flexsurv_check_gompertz(SEXP shapeSEXP, SEXP rateSEXP) {
