@@ -59,6 +59,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_gompertz
+Rcpp::LogicalVector check_gompertz(const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate);
+RcppExport SEXP flexsurv_check_gompertz(SEXP shapeSEXP, SEXP rateSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type rate(rateSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_gompertz(shape, rate));
+    return rcpp_result_gen;
+END_RCPP
+}
 // exph
 Rcpp::NumericVector exph(const Rcpp::NumericVector& y);
 RcppExport SEXP flexsurv_exph(SEXP ySEXP) {

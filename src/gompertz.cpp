@@ -68,3 +68,11 @@ dgompertz_work(const Rcpp::NumericVector& x,
 		     log);
 }
 
+// [[Rcpp::export(name="check.gompertz", rng=false)]]
+Rcpp::LogicalVector check_gompertz(const Rcpp::NumericVector& shape,
+				   const Rcpp::NumericVector& rate) {
+  const R_xlen_t size = shape.size();
+  return !Rcpp::mapply(shape,
+		       Rcpp::rep_len(rate, size),
+		       gompertz::bad);
+}

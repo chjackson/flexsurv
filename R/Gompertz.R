@@ -69,10 +69,3 @@ Hgompertz <- function(x, shape, rate = 1, log = FALSE)
     if (log) ret[ind] <- log(ret[ind])
     ret
 }
-
-check.gompertz <- function(shape, rate=1){
-    ret <- rep(TRUE, length(shape))
-    if (missing(shape)) stop("shape parameter not given")
-    if (any(rate<0)) {warning("Negative rate parameter"); ret[rate<0] <- FALSE}
-    ret
-}

@@ -17,6 +17,10 @@ dgompertz_work <- function(x, shape, rate, log) {
     .Call('flexsurv_dgompertz_work', PACKAGE = 'flexsurv', x, shape, rate, log)
 }
 
+check.gompertz <- function(shape, rate) {
+    .Call('flexsurv_check_gompertz', PACKAGE = 'flexsurv', shape, rate)
+}
+
 exph <- function(y) {
     .Call('flexsurv_exph', PACKAGE = 'flexsurv', y)
 }
