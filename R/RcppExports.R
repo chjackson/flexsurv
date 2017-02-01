@@ -45,3 +45,19 @@ dexph <- function(y) {
     .Call('flexsurv_dexph', PACKAGE = 'flexsurv', y)
 }
 
+basis_vector <- function(knots, x) {
+    .Call('flexsurv_basis_vector', PACKAGE = 'flexsurv', knots, x)
+}
+
+basis_matrix <- function(knots, x) {
+    .Call('flexsurv_basis_matrix', PACKAGE = 'flexsurv', knots, x)
+}
+
+dbasis_vector <- function(knots, x) {
+    .Call('flexsurv_dbasis_vector', PACKAGE = 'flexsurv', knots, x)
+}
+
+dbasis_matrix <- function(knots, x) {
+    .Call('flexsurv_dbasis_matrix', PACKAGE = 'flexsurv', knots, x)
+}
+

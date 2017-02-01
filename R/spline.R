@@ -166,41 +166,19 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 }
 
 basis <- function(knots, x) {
-    nx <- length(x)
-    if (!is.matrix(knots)) knots <- matrix(rep(knots, nx), byrow=TRUE, ncol=length(knots))
-    nk <- ncol(knots)
-    b <- matrix(nrow=length(x), ncol=nk)
-    if (nk>0){
-        b[,1] <- 1
-        b[,2] <- x
+    if (is.matrix(knots)) {
+        basis_matrix(knots, x)
+    } else {
+        basis_vector(knots, x)
     }
-    if (nk>2) {
-        lam <- (knots[,nk] - knots)/(knots[,nk] - knots[,1])
-        for (j in 1:(nk-2)) {
-            b[,j+2] <- pmax(x - knots[,j+1], 0)^3 - lam[,j+1]*pmax(x - knots[,1], 0)^3 -
-                (1 - lam[,j+1])*pmax(x - knots[,nk], 0)^3
-        }
-    }
-    b
 }
 
 dbasis <- function(knots, x) {
-    nx <- length(x) 
-   if (!is.matrix(knots)) knots <- matrix(rep(knots, nx), byrow=TRUE, ncol=length(knots))
-    nk <- ncol(knots)
-    b <- matrix(nrow=length(x), ncol=nk)
-    if (nk>0){
-        b[,1] <- 0
-        b[,2] <- 1
+    if (is.matrix(knots)) {
+        dbasis_matrix(knots, x)
+    } else {
+        dbasis_vector(knots, x)
     }
-    if (nk>2) {
-        lam <- (knots[,nk] - knots)/(knots[,nk] - knots[,1])
-        for (j in 3:nk) {
-            b[,j] <- 3*pmax(x - knots[,j-1], 0)^2 - 3*lam[,j-1]*pmax(x - knots[,1], 0)^2 -
-                3*(1 - lam[,j-1])*pmax(x - knots[,nk], 0)^2
-        }
-    }
-    b
 }
 
 fss <- function(x, knots) { basis(knots, x) }

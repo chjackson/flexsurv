@@ -142,3 +142,51 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// basis_vector
+Rcpp::NumericVector basis_vector(const Rcpp::NumericVector& knots, const Rcpp::NumericVector& x);
+RcppExport SEXP flexsurv_basis_vector(SEXP knotsSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type knots(knotsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(basis_vector(knots, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// basis_matrix
+Rcpp::NumericMatrix basis_matrix(const Rcpp::NumericMatrix& knots, const Rcpp::NumericVector& x);
+RcppExport SEXP flexsurv_basis_matrix(SEXP knotsSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type knots(knotsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(basis_matrix(knots, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dbasis_vector
+Rcpp::NumericVector dbasis_vector(const Rcpp::NumericVector& knots, const Rcpp::NumericVector& x);
+RcppExport SEXP flexsurv_dbasis_vector(SEXP knotsSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type knots(knotsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(dbasis_vector(knots, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dbasis_matrix
+Rcpp::NumericMatrix dbasis_matrix(const Rcpp::NumericMatrix& knots, const Rcpp::NumericVector& x);
+RcppExport SEXP flexsurv_dbasis_matrix(SEXP knotsSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type knots(knotsSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(dbasis_matrix(knots, x));
+    return rcpp_result_gen;
+END_RCPP
+}
