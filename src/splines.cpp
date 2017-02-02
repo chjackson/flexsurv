@@ -57,8 +57,8 @@ Rcpp::NumericMatrix basis_matrix(const Rcpp::NumericMatrix& knots,
   result(Rcpp::_, 0) = Rcpp::rep(1, x.size());
   result(Rcpp::_, 1) = x;
 
-  for (R_xlen_t ind=0; ind < knots.ncol() - 2;++ind) {
-    for (R_xlen_t ind_r=0; ind_r < result.nrow(); ++ind_r) {
+  for (R_xlen_t ind_r=0; ind_r < result.nrow(); ++ind_r) {
+    for (R_xlen_t ind=0; ind < knots.ncol() - 2;++ind) {
       const double last  = knots(ind_r, knots.ncol() - 1);
       const double first = knots(ind_r, 0);
       const double lam = (last - knots(ind_r, ind + 1)) / (last - first);
@@ -109,8 +109,8 @@ Rcpp::NumericMatrix dbasis_matrix(const Rcpp::NumericMatrix& knots,
   result(Rcpp::_, 0) = Rcpp::rep(0, x.size());
   result(Rcpp::_, 1) = Rcpp::rep(1, x.size());
 
-  for (R_xlen_t ind=0; ind < knots.ncol() - 2;++ind) {
-    for (R_xlen_t ind_r=0; ind_r < result.nrow(); ++ind_r) {
+  for (R_xlen_t ind_r=0; ind_r < result.nrow(); ++ind_r) {
+   for (R_xlen_t ind=0; ind < knots.ncol() - 2;++ind) {
       const double last  = knots(ind_r, knots.ncol() - 1);
       const double first = knots(ind_r, 0);
       const double lam   = (last - knots(ind_r, ind + 1)) / (last - first);
