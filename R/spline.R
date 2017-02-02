@@ -9,8 +9,10 @@ dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE){
     lg <- nrow(gamma)
     nret <- max(length(q), lg)
     q <- rep(q, length=nret)
-    gamma <- apply(gamma, 2, function(x)rep(x,length=nret))
-    knots <- apply(knots, 2, function(x)rep(x,length=nret))
+
+    gamma <- apply(gamma, 2, rep, length=nret)
+    knots <- apply(knots, 2, rep, length=nret)
+    
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=nret)
     if(!is.matrix(knots)) knots <- matrix(knots, nrow=nret)
     if (ncol(gamma) != ncol(knots)) {
@@ -18,13 +20,11 @@ dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE){
     }
     scale <- match.arg(scale, c("hazard","odds","normal"))
     if (deriv){
-        ret <- matrix(nrow=nret, ncol=ncol(gamma))
+        ret <- matrix(0, nrow=nret, ncol=ncol(gamma))
         ret[is.na(q),] <- NA
-        ret[!is.na(q) & q <= 0,] <- 0
     } else {
         ret <- numeric(nret)
         ret[is.na(q)] <- NA
-        ret[!is.na(q) & q <= 0] <- 0
     }
     ind <- !is.na(q) & q > 0
     q <- q[ind]; gamma <- gamma[ind,,drop=FALSE]
