@@ -268,6 +268,423 @@ compress.model.matrices <- function(mml){
     X
 }
 
+
+
+##' Flexible parametric regression for time-to-event data
+##' 
+##' Parametric modelling or regression for time-to-event data.  Several
+##' built-in distributions are available, and users may supply their own.
+##' 
+##' Parameters are estimated by maximum likelihood using the algorithms
+##' available in the standard R \code{\link{optim}} function.  Parameters
+##' defined to be positive are estimated on the log scale.  Confidence
+##' intervals are estimated from the Hessian at the maximum, and transformed
+##' back to the original scale of the parameters.
+##' 
+##' The usage of \code{\link{flexsurvreg}} is intended to be similar to
+##' \code{\link[survival]{survreg}} in the \pkg{survival} package.
+##' 
+##' @aliases flexsurvreg flexsurv.dists
+##' @param formula A formula expression in conventional R linear modelling
+##' syntax. The response must be a survival object as returned by the
+##' \code{\link{Surv}} function, and any covariates are given on the right-hand
+##' side.  For example,
+##' 
+##' \code{Surv(time, dead) ~ age + sex}
+##' 
+##' \code{Surv} objects of \code{type="right"},\code{"counting"},
+##' \code{"interval1"} or \code{"interval2"} are supported, corresponding to
+##' right-censored, left-truncated or interval-censored observations.
+##' 
+##' If there are no covariates, specify \code{1} on the right hand side, for
+##' example \code{Surv(time, dead) ~ 1}.
+##' 
+##' By default, covariates are placed on the ``location'' parameter of the
+##' distribution, typically the "scale" or "rate" parameter, through a linear
+##' model, or a log-linear model if this parameter must be positive.  This
+##' gives an accelerated failure time model or a proportional hazards model
+##' (see \code{dist} below) depending on how the distribution is parameterised.
+##' 
+##' Covariates can be placed on other (``ancillary'') parameters by using the
+##' name of the parameter as a ``function'' in the formula.  For example, in a
+##' Weibull model, the following expresses the scale parameter in terms of age
+##' and a treatment variable \code{treat}, and the shape parameter in terms of
+##' sex and treatment.
+##' 
+##' \code{Surv(time, dead) ~ age + treat + shape(sex) + shape(treat)}
+##' 
+##' However, if the names of the ancillary parameters clash with any real
+##' functions that might be used in formulae (such as \code{I()}, or
+##' \code{factor()}), then those functions will not work in the formula.  A
+##' safer way to model covariates on ancillary parameters is through the
+##' \code{anc} argument to \code{\link{flexsurvreg}}.
+##' 
+##' \code{\link{survreg}} users should also note that the function
+##' \code{strata()} is ignored, so that any covariates surrounded by
+##' \code{strata()} are applied to the location parameter.
+##' @param anc An alternative and safer way to model covariates on ancillary
+##' parameters, that is, parameters other than the main location parameter of
+##' the distribution.  This is a named list of formulae, with the name of each
+##' component giving the parameter to be modelled.  The model above can also be
+##' defined as:
+##' 
+##' \code{Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex + treat)}
+##' @param data A data frame in which to find variables supplied in
+##' \code{formula}.  If not given, the variables should be in the working
+##' environment.
+##' @param weights Optional variable giving case weights.
+##' @param bhazard Optional variable giving expected hazards for relative
+##' survival models.
+##' @param subset Vector of integers or logicals specifying the subset of the
+##' observations to be used in the fit.
+##' @param na.action a missing-data filter function, applied after any 'subset'
+##' argument has been used. Default is \code{options()$na.action}.
+##' @param dist Typically, one of the strings in the first column of the
+##' following table, identifying a built-in distribution.  This table also
+##' identifies the location parameters, and whether covariates on these
+##' parameters represent a proportional hazards (PH) or accelerated failure
+##' time (AFT) model.  In an accelerated failure time model, the covariate
+##' speeds up or slows down the passage of time.  So if the coefficient
+##' (presented on the log scale) is log(2), then doubling the covariate value
+##' would give half the expected survival time.
+##' 
+##' \tabular{llll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
+##' \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
+##' scale \tab AFT \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
+##' AFT \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT
+##' \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr \code{"gamma"}
+##' \tab Gamma \tab rate \tab AFT \cr \code{"exp"} \tab Exponential \tab rate
+##' \tab PH \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \cr
+##' \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \cr \code{"gompertz"}
+##' \tab Gompertz \tab rate \tab PH \cr }
+##' 
+##' \code{"exponential"} and \code{"lognormal"} can be used as aliases for
+##' \code{"exp"} and \code{"lnorm"}, for compatibility with
+##' \code{\link{survreg}}.
+##' 
+##' Alternatively, \code{dist} can be a list specifying a custom distribution.
+##' See section ``Custom distributions'' below for how to construct this list.
+##' 
+##' Very flexible spline-based distributions can also be fitted with
+##' \code{\link{flexsurvspline}}.
+##' 
+##' The parameterisations of the built-in distributions used here are the same
+##' as in their built-in distribution functions: \code{\link{dgengamma}},
+##' \code{\link{dgengamma.orig}}, \code{\link{dgenf}},
+##' \code{\link{dgenf.orig}}, \code{\link{dweibull}}, \code{\link{dgamma}},
+##' \code{\link{dexp}}, \code{\link{dlnorm}}, \code{\link{dgompertz}},
+##' respectively.  The functions in base R are used where available, otherwise,
+##' they are provided in this package.
+##' 
+##' For the Weibull, exponential and log-normal distributions,
+##' \code{\link{flexsurvreg}} simply works by calling \code{\link{survreg}} to
+##' obtain the maximum likelihood estimates, then calling \code{\link{optim}}
+##' to double-check convergence and obtain the covariance matrix for
+##' \code{\link{flexsurvreg}}'s preferred parameterisation.
+##' 
+##' The Weibull parameterisation is different from that in
+##' \code{\link[survival]{survreg}}, instead it is consistent with
+##' \code{\link{dweibull}}.  The \code{"scale"} reported by
+##' \code{\link[survival]{survreg}} is equivalent to \code{1/shape} as defined
+##' by \code{\link{dweibull}} and hence \code{\link{flexsurvreg}}.  The first
+##' coefficient \code{(Intercept)} reported by \code{\link[survival]{survreg}}
+##' is equivalent to \code{log(scale)} in \code{\link{dweibull}} and
+##' \code{\link{flexsurvreg}}.
+##' 
+##' Similarly in the exponential distribution, the rate, rather than the mean,
+##' is modelled on covariates.
+##' 
+##' The object \code{flexsurv.dists} lists the names of the built-in
+##' distributions, their parameters, location parameter, functions used to
+##' transform the parameter ranges to and from the real line, and the functions
+##' used to generate initial values of each parameter for estimation.
+##' @param inits An optional numeric vector giving initial values for each
+##' unknown parameter.  These are numbered in the order: baseline parameters
+##' (in the order they appear in the distribution function, e.g. shape before
+##' scale in the Weibull), covariate effects on the location parameter,
+##' covariate effects on the remaining parameters.  This is the same order as
+##' the printed estimates in the fitted model.
+##' 
+##' If not specified, default initial values are chosen from a simple summary
+##' of the survival or censoring times, for example the mean is often used to
+##' initialize scale parameters.  See the object \code{flexsurv.dists} for the
+##' exact methods used.  If the likelihood surface may be uneven, it is advised
+##' to run the optimisation starting from various different initial values to
+##' ensure convergence to the true global maximum.
+##' @param fixedpars Vector of indices of parameters whose values will be fixed
+##' at their initial values during the optimisation.  The indices are ordered
+##' as in \code{inits}.  For example, in a stable generalized Gamma model with
+##' two covariates, to fix the third of three generalized gamma parameters (the
+##' shape \code{Q}, see the help for \code{\link{GenGamma}}) and the second
+##' covariate, specify \code{fixedpars = c(3, 5)}
+##' @param dfns An alternative way to define a custom survival distribution
+##' (see section ``Custom distributions'' below).  A list whose components may
+##' include \code{"d"}, \code{"p"}, \code{"h"}, or \code{"H"} containing the
+##' probability density, cumulative distribution, hazard, or cumulative hazard
+##' functions of the distribution.  For example,
+##' 
+##' \code{list(d=dllogis, p=pllogis)}.
+##' 
+##' If \code{dfns} is used, a custom \code{dlist} must still be provided, but
+##' \code{dllogis} and \code{pllogis} need not be visible from the global
+##' environment.  This is useful if \code{flexsurvreg} is called within other
+##' functions or environments where the distribution functions are also defined
+##' dynamically.
+##' @param aux A named list of other arguments to pass to custom distribution
+##' functions.  This is used, for example, by \code{\link{flexsurvspline}} to
+##' supply the knot locations and modelling scale (e.g. hazard or odds).  This
+##' cannot be used to fix parameters of a distribution --- use \code{fixedpars}
+##' for that.
+##' @param cl Width of symmetric confidence intervals for maximum likelihood
+##' estimates, by default 0.95.
+##' @param integ.opts List of named arguments to pass to
+##' \code{\link{integrate}}, if a custom density or hazard is provided without
+##' its cumulative version.  For example,
+##' 
+##' \code{integ.opts = list(rel.tol=1e-12)}
+##' @param sr.control For the models which use \code{\link{survreg}} to find
+##' the maximum likelihood estimates (Weibull, exponential, log-normal), this
+##' list is passed as the \code{control} argument to \code{\link{survreg}}.
+##' @param ... Optional arguments to the general-purpose optimisation routine
+##' \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the
+##' default in \code{\link{flexsurvreg}}, but this can be changed, for example
+##' to \code{method="Nelder-Mead"} which can be more robust to poor initial
+##' values.  If the optimisation fails to converge, consider normalising the
+##' problem using, for example, \code{control=list(fnscale = 2500)}, for
+##' example, replacing 2500 by a number of the order of magnitude of the
+##' likelihood. If 'false' convergence is reported with a non-positive-definite
+##' Hessian, then consider tightening the tolerance criteria for convergence.
+##' If the optimisation takes a long time, intermediate steps can be printed
+##' using the \code{trace} argument of the control list. See
+##' \code{\link{optim}} for details.
+##' @return A list of class \code{"flexsurvreg"} containing information about
+##' the fitted model.  Components of interest to users may include:
+##' \item{call}{A copy of the function call, for use in post-processing.}
+##' \item{dlist}{List defining the survival distribution used.}
+##' \item{res}{Matrix of maximum likelihood estimates and confidence limits,
+##' with parameters on their natural scales.} \item{res.t}{Matrix of maximum
+##' likelihood estimates and confidence limits, with parameters all transformed
+##' to the real line.  The \code{\link{coef}}, \code{\link{vcov}} and
+##' \code{\link{confint}} methods for \code{flexsurvreg} objects work on this
+##' scale.} \item{coefficients}{The transformed maximum likelihood estimates,
+##' as in \code{res.t}. Calling \code{coef()} on a \code{\link{flexsurvreg}}
+##' object simply returns this component.} \item{loglik}{Log-likelihood}
+##' \item{logliki}{Vector of individual contributions to the log-likelihood}
+##' \item{AIC}{Akaike's information criterion (-2*log likelihood + 2*number of
+##' estimated parameters)} \item{cov}{Covariance matrix of the parameters, on
+##' the real-line scale (e.g. log scale), which can be extracted with
+##' \code{\link{vcov}}.} \item{data}{Data used in the model fit.  To extract
+##' this in the standard R formats, use use
+##' \code{\link{model.frame.flexsurvreg}} or
+##' \code{\link{model.matrix.flexsurvreg}}.}
+##' @section Custom distributions: \code{\link{flexsurvreg}} is intended to be
+##' easy to extend to handle new distributions.  To define a new distribution
+##' for use in \code{\link{flexsurvreg}}, construct a list with the following
+##' elements:
+##' 
+##' \describe{ \item{list("name")}{A string naming the distribution.  If this
+##' is called \code{"dist"}, for example, then there must be visible in the
+##' working environment, at least, either
+##' 
+##' a) a function called \code{ddist} which defines the probability density,
+##' 
+##' or
+##' 
+##' b) a function called \code{hdist} which defines the hazard.
+##' 
+##' Ideally, in case a) there should also be a function called \code{pdist}
+##' which defines the probability distribution or cumulative density, and in
+##' case b) there should be a function called \code{Hdist} defining the
+##' cumulative hazard.  If these additional functions are not provided,
+##' \pkg{flexsurv} attempts to automatically create them by numerically
+##' integrating the density or hazard function.  However, model fitting will be
+##' much slower, or may not even work at all, if the analytic versions of these
+##' functions are not available.
+##' 
+##' The functions must accept vector arguments (representing different times,
+##' or alternative values for each parameter) and return the results as a
+##' vector.  The function \code{\link{Vectorize}} may be helpful for doing
+##' this: see the example below.
+##' 
+##' These functions may be in an add-on package (see below for an example) or
+##' may be user-written.  If they are user-written they must be defined in the
+##' global environment, or supplied explicitly through the \code{dfns} argument
+##' to \code{flexsurvreg}.  The latter may be useful if the functions are
+##' created dynamically (as in the source of \code{flexsurvspline}) and thus
+##' not visible through R's scoping rules.
+##' 
+##' Arguments other than parameters must be named in the conventional way --
+##' for example \code{x} for the first argument of the density function or
+##' hazard, as in \code{\link{dnorm}(x, ...)} and \code{q} for the first
+##' argument of the probability function.  Density functions should also have
+##' an argument \code{log}, after the parameters, which when \code{TRUE},
+##' computes the log density, using a numerically stable additive formula if
+##' possible.
+##' 
+##' Additional functions with names beginning with \code{"DLd"} and
+##' \code{"DLS"} may be defined to calculate the derivatives of the log density
+##' and log survival probability, with respect to the parameters of the
+##' distribution.  The parameters are expressed on the real line, for example
+##' after log transformation if they are defined as positive.  The first
+##' argument must be named \code{t}, representing the time, and the remaining
+##' arguments must be named as the parameters of the density function. The
+##' function must return a matrix with rows corresponding to times, and columns
+##' corresponding to the parameters of the distribution.  The derivatives are
+##' used, if available, to speed up the model fitting with \code{\link{optim}}.
+##' }\item{:}{A string naming the distribution.  If this is called
+##' \code{"dist"}, for example, then there must be visible in the working
+##' environment, at least, either
+##' 
+##' a) a function called \code{ddist} which defines the probability density,
+##' 
+##' or
+##' 
+##' b) a function called \code{hdist} which defines the hazard.
+##' 
+##' Ideally, in case a) there should also be a function called \code{pdist}
+##' which defines the probability distribution or cumulative density, and in
+##' case b) there should be a function called \code{Hdist} defining the
+##' cumulative hazard.  If these additional functions are not provided,
+##' \pkg{flexsurv} attempts to automatically create them by numerically
+##' integrating the density or hazard function.  However, model fitting will be
+##' much slower, or may not even work at all, if the analytic versions of these
+##' functions are not available.
+##' 
+##' The functions must accept vector arguments (representing different times,
+##' or alternative values for each parameter) and return the results as a
+##' vector.  The function \code{\link{Vectorize}} may be helpful for doing
+##' this: see the example below.
+##' 
+##' These functions may be in an add-on package (see below for an example) or
+##' may be user-written.  If they are user-written they must be defined in the
+##' global environment, or supplied explicitly through the \code{dfns} argument
+##' to \code{flexsurvreg}.  The latter may be useful if the functions are
+##' created dynamically (as in the source of \code{flexsurvspline}) and thus
+##' not visible through R's scoping rules.
+##' 
+##' Arguments other than parameters must be named in the conventional way --
+##' for example \code{x} for the first argument of the density function or
+##' hazard, as in \code{\link{dnorm}(x, ...)} and \code{q} for the first
+##' argument of the probability function.  Density functions should also have
+##' an argument \code{log}, after the parameters, which when \code{TRUE},
+##' computes the log density, using a numerically stable additive formula if
+##' possible.
+##' 
+##' Additional functions with names beginning with \code{"DLd"} and
+##' \code{"DLS"} may be defined to calculate the derivatives of the log density
+##' and log survival probability, with respect to the parameters of the
+##' distribution.  The parameters are expressed on the real line, for example
+##' after log transformation if they are defined as positive.  The first
+##' argument must be named \code{t}, representing the time, and the remaining
+##' arguments must be named as the parameters of the density function. The
+##' function must return a matrix with rows corresponding to times, and columns
+##' corresponding to the parameters of the distribution.  The derivatives are
+##' used, if available, to speed up the model fitting with \code{\link{optim}}.
+##' } \item{list("pars")}{Vector of strings naming the parameters of the
+##' distribution. These must be the same names as the arguments of the density
+##' and probability functions.  }\item{:}{Vector of strings naming the
+##' parameters of the distribution. These must be the same names as the
+##' arguments of the density and probability functions.  }
+##' \item{list("location")}{Name of the main parameter governing the mean of
+##' the distribution.  This is the default parameter on which covariates are
+##' placed in the \code{formula} supplied to \code{flexsurvreg}. }\item{:}{Name
+##' of the main parameter governing the mean of the distribution.  This is the
+##' default parameter on which covariates are placed in the \code{formula}
+##' supplied to \code{flexsurvreg}. } \item{list("transforms")}{List of R
+##' functions which transform the range of values taken by each parameter onto
+##' the real line.  For example, \code{c(log, log)} for a distribution with two
+##' positive parameters. }\item{:}{List of R functions which transform the
+##' range of values taken by each parameter onto the real line.  For example,
+##' \code{c(log, log)} for a distribution with two positive parameters. }
+##' \item{list("inv.transforms")}{List of R functions defining the
+##' corresponding inverse transformations.  Note these must be lists, even for
+##' single parameter distributions they should be supplied as, e.g.
+##' \code{c(exp)} or \code{list(exp)}. }\item{:}{List of R functions defining
+##' the corresponding inverse transformations.  Note these must be lists, even
+##' for single parameter distributions they should be supplied as, e.g.
+##' \code{c(exp)} or \code{list(exp)}. } \item{list("inits")}{A function of the
+##' observed survival times \code{t} (including right-censoring times, and
+##' using the halfway point for interval-censored times) which returns a vector
+##' of reasonable initial values for maximum likelihood estimation of each
+##' parameter.  For example, \code{function(t){ c(1, mean(t)) }} will always
+##' initialize the first of two parameters at 1, and the second (a scale
+##' parameter, for instance) at the mean of \code{t}.  }\item{:}{A function of
+##' the observed survival times \code{t} (including right-censoring times, and
+##' using the halfway point for interval-censored times) which returns a vector
+##' of reasonable initial values for maximum likelihood estimation of each
+##' parameter.  For example, \code{function(t){ c(1, mean(t)) }} will always
+##' initialize the first of two parameters at 1, and the second (a scale
+##' parameter, for instance) at the mean of \code{t}.  } }
+##' 
+##' For example, suppose we want to use an extreme value survival distribution.
+##' This is available in the CRAN package \pkg{eha}, which provides
+##' conventionally-defined density and probability functions called
+##' \code{\link[eha]{dEV}} and \code{\link[eha]{pEV}}.  See the Examples below
+##' for the custom list in this case, and the subsequent command to fit the
+##' model.
+##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##' @seealso \code{\link{flexsurvspline}} for flexible survival modelling using
+##' the spline model of Royston and Parmar.
+##' 
+##' \code{\link{plot.flexsurvreg}} and \code{\link{lines.flexsurvreg}} to plot
+##' fitted survival, hazards and cumulative hazards from models fitted by
+##' \code{\link{flexsurvreg}} and \code{\link{flexsurvspline}}.
+##' @references Jackson, C. (2016). flexsurv: A Platform for Parametric
+##' Survival Modeling in R. Journal of Statistical Software, 70(8), 1-33.
+##' doi:10.18637/jss.v070.i08
+##' 
+##' Cox, C. (2008) The generalized \eqn{F} distribution: An umbrella for
+##' parametric survival analysis.  Statistics in Medicine 27:4301-4312.
+##' 
+##' Cox, C., Chu, H., Schneider, M. F. and Muñoz, A. (2007) Parametric survival
+##' analysis and taxonomy of hazard functions for the generalized gamma
+##' distribution.  Statistics in Medicine 26:4252-4374
+##' 
+##' Jackson, C. H. and Sharples, L. D. and Thompson, S. G. (2010) Survival
+##' models in health economic evaluations: balancing fit and parsimony to
+##' improve prediction. International Journal of Biostatistics 6(1):Article 34.
+##' @keywords models survival
+##' @examples
+##' 
+##' data(ovarian)
+##' ## Compare generalized gamma fit with Weibull
+##' fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="gengamma")
+##' fitg
+##' fitw <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="weibull")
+##' fitw
+##' plot(fitg)
+##' lines(fitw, col="blue", lwd.ci=1, lty.ci=1)
+##' ## Identical AIC, probably not enough data in this simple example for a
+##' ## very flexible model to be worthwhile.
+##' 
+##' ## Custom distribution
+##' ## make "dEV" and "pEV" from eha package (if installed)
+##' ##   available to the working environment
+##' if (require("eha")) {
+##' custom.ev <- list(name="EV",
+##'                       pars=c("shape","scale"),
+##'                       location="scale",
+##'                       transforms=c(log, log),
+##'                       inv.transforms=c(exp, exp),
+##'                       inits=function(t){ c(1, median(t)) })
+##' fitev <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian,
+##'                     dist=custom.ev)
+##' fitev
+##' lines(fitev, col="purple", col.ci="purple")
+##' }
+##' 
+##' 
+##' ## Custom distribution: supply the hazard function only
+##' hexp2 <- function(x, rate=1){ rate } # exponential distribution
+##' hexp2 <- Vectorize(hexp2)
+##' custom.exp2 <- list(name="exp2", pars=c("rate"), location="rate",
+##'                     transforms=c(log), inv.transforms=c(exp),
+##'                     inits=function(t)1/mean(t))
+##' flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.exp2)
+##' flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist="exp")
+##' ## should give same answer
+##' 
+##' @export
 flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.action, dist,
                         inits, fixedpars=NULL, dfns=NULL, aux=NULL, cl=0.95,
                         integ.opts=NULL, sr.control=survreg.control(), ...)
@@ -482,6 +899,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     ret
 }
 
+##' @export
 print.flexsurvreg <- function(x, ...)
 {
     covmeans <- colMeans(model.matrix(x))
@@ -547,6 +965,117 @@ form.model.matrix <- function(object, newdata){
     X
 }
 
+
+
+##' Summaries of fitted flexible survival models
+##' 
+##' Return fitted survival, cumulative hazard or hazard at a series of times
+##' from a fitted \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}
+##' model.
+##' 
+##' Time-dependent covariates are not currently supported.  The covariate
+##' values are assumed to be constant through time for each fitted curve.
+##' 
+##' @param object Output from \code{\link{flexsurvreg}} or
+##' \code{\link{flexsurvspline}}, representing a fitted survival model object.
+##' @param newdata Data frame containing covariate values to produce fitted
+##' values for.  Or a list that can be coerced to such a data frame.  There
+##' must be a column for every covariate in the model formula, and one row for
+##' every combination of covariates the fitted values are wanted for.  These
+##' are in the same format as the original data, with factors as a single
+##' variable, not 0/1 contrasts.
+##' 
+##' If this is omitted, if there are any continuous covariates, then a single
+##' summary is provided with all covariates set to their mean values in the
+##' data - for categorical covariates, the means of the 0/1 indicator variables
+##' are taken.  If there are only factor covariates in the model, then all
+##' distinct groups are used by default.
+##' @param X Alternative way of defining covariate values to produce fitted
+##' values for.  Since version 0.4, \code{newdata} is an easier way that
+##' doesn't require the user to create factor contrasts, but \code{X} has been
+##' kept for backwards compatibility.
+##' 
+##' Columns of \code{X} represent different covariates, and rows represent
+##' multiple combinations of covariate values.  For example
+##' \code{matrix(c(1,2),nrow=2)} if there is only one covariate in the model,
+##' and we want survival for covariate values of 1 and 2.  A vector can also be
+##' supplied if just one combination of covariates is needed.
+##' 
+##' For ``factor'' (categorical) covariates, the values of the contrasts
+##' representing factor levels (as returned by the \code{\link{contrasts}}
+##' function) should be used.  For example, for a covariate \code{agegroup}
+##' specified as an unordered factor with levels \code{20-29, 30-39, 40-49,
+##' 50-59}, and baseline level \code{20-29}, there are three contrasts.  To
+##' return summaries for groups \code{20-29} and \code{40-49}, supply \code{X =
+##' rbind(c(0,0,0), c(0,1,0))}, since all contrasts are zero for the baseline
+##' level, and the second contrast is ``turned on'' for the third level
+##' \code{40-49}.
+##' @param type \code{"survival"} for survival probabilities.
+##' 
+##' \code{"cumhaz"} for cumulative hazards.
+##' 
+##' \code{"hazard"} for hazards.
+##' 
+##' Ignored if \code{"fn"} is specified.
+##' @param fn Custom function of the parameters to summarise against time.
+##' This has optional first two arguments \code{t} representing time, and
+##' \code{start} representing left-truncation points, and any remaining
+##' arguments must be parameters of the distribution.  It should return a
+##' vector of the same length as \code{t}.
+##' @param t Times to calculate fitted values for. By default, these are the
+##' sorted unique observation (including censoring) times in the data - for
+##' left-truncated datasets these are the "stop" times.
+##' @param start Optional left-truncation time or times.  The returned
+##' survival, hazard or cumulative hazard will be conditioned on survival up to
+##' this time.
+##' 
+##' A vector of the same length as \code{t} can be supplied to allow different
+##' truncation times for each prediction time, though this doesn't make sense
+##' in the usual case where this function is used to calculate a predicted
+##' trajectory for a single individual.  This is why the default \code{start}
+##' time was changed for version 0.4 of \pkg{flexsurv} - this was previously a
+##' vector of the start times observed in the data.
+##' @param ci Set to \code{FALSE} to omit confidence intervals.
+##' @param B Number of simulations from the normal asymptotic distribution of
+##' the estimates used to calculate confidence intervals.  Decrease for greater
+##' speed at the expense of accuracy, or set \code{B=0} to turn off calculation
+##' of CIs.
+##' @param cl Width of symmetric confidence intervals, relative to 1.
+##' @param tidy If \code{TRUE}, then the results are returned as a tidy data
+##' frame instead of a list.  This can help with using the \pkg{ggplot2}
+##' package to compare summaries for different covariate values.
+##' @param ... Further arguments passed to or from other methods.  Currently
+##' unused.
+##' @return If \code{tidy=FALSE}, a list with one component for each unique
+##' covariate value (if there are only categorical covariates) or one component
+##' (if there are no covariates or any continuous covariates).  Each of these
+##' components is a matrix with one row for each time in \code{t}, giving the
+##' estimated survival (or cumulative hazard, or hazard) and 95\% confidence
+##' limits.  These list components are named with the covariate names and
+##' values which define them.
+##' 
+##' If \code{tidy=TRUE}, a data frame is returned instead.  This is formed by
+##' stacking the above list components, with additional columns to identify the
+##' covariate values that each block corresponds to.
+##' 
+##' If there are multiple summaries, an additional list component named
+##' \code{X} contains a matrix with the exact values of contrasts (dummy
+##' covariates) defining each summary.
+##' 
+##' The \code{\link{plot.flexsurvreg}} function can be used to quickly plot
+##' these model-based summaries against empirical summaries such as
+##' Kaplan-Meier curves, to diagnose model fit.
+##' 
+##' Confidence intervals are obtained by random sampling from the asymptotic
+##' normal distribution of the maximum likelihood estimates (see, e.g. Mandel
+##' (2013)).
+##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
+##' @seealso \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
+##' @references Mandel, M. (2013). "Simulation based confidence intervals for
+##' functions with complicated derivatives." The American Statistician (in
+##' press).
+##' @keywords models
+##' @export
 summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL,
                                 t=NULL, start=0, ci=TRUE, B=1000, cl=0.95, tidy=FALSE,
                                 ...)
@@ -659,6 +1188,7 @@ summary.fns <- function(x, type){
            })
 }
 
+##' @export
 print.summary.flexsurvreg <- function(x, ...){
     if (!inherits(x, "data.frame")){
         for (i in seq_along(x)){
@@ -690,6 +1220,52 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 ## Draw B samples from multivariate normal distribution of baseline
 ## parameter estimators, for given covariate values
 
+
+
+##' Simulate from the asymptotic normal distribution of parameter estimates.
+##' 
+##' Produce a matrix of alternative parameter estimates under sampling
+##' uncertainty, at covariate values supplied by the user.  Used by
+##' \code{\link{summary.flexsurvreg}} for obtaining confidence intervals around
+##' functions of parameters.
+##' 
+##' 
+##' @param x A fitted model from \code{\link{flexsurvreg}}.
+##' @param B Number of samples.
+##' @param newdata Data frame or list containing the covariate values to
+##' evaluate the parameters at.  If there are covariates in the model, at least
+##' one of \code{newdata} or \code{X} must be supplied, unless \code{raw=TRUE}.
+##' @param X Alternative (less convenient) format for covariate values: a
+##' matrix with one row, with one column for each covariate or factor contrast.
+##' Formed from all the "model matrices", one for each named parameter of the
+##' distribution, with intercepts excluded, \code{cbind}ed together.
+##' @param transform \code{TRUE} if the results should be transformed to the
+##' real-line scale, typically by log if the parameter is defined as positive.
+##' The default \code{FALSE} returns parameters on the natural scale.
+##' @param raw Return samples of the baseline parameters and the covariate
+##' effects, rather than the default of adjusting the baseline parameters for
+##' covariates.
+##' @return If \code{newdata} includes only one covariate combination, a matrix
+##' will be returned with \code{B} rows, and one column for each named
+##' parameter of the survival distribution.
+##' 
+##' If more than one covariate combination is requested (e.g. \code{newdata} is
+##' a data frame with more than one row), then a list of matrices will be
+##' returned, one for each covariate combination.
+##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
+##' @seealso \code{\link{summary.flexsurvreg}}
+##' @references Mandel, M. (2013). "Simulation based confidence intervals for
+##' functions with complicated derivatives." The American Statistician (in
+##' press).
+##' @keywords models
+##' @examples
+##' 
+##'     fite <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="exp")
+##'     normboot.flexsurvreg(fite, B=10, newdata=list(age=50))
+##'     normboot.flexsurvreg(fite, B=10, X=matrix(50,nrow=1))
+##'     normboot.flexsurvreg(fite, B=10, newdata=list(age=0))  ## closer to...
+##'     fite$res
+##' @export
 normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, raw=FALSE){
     if (x$ncovs > 0 && !raw) {
         if (is.null(X)) {
@@ -759,6 +1335,92 @@ cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
     ret
 }
 
+
+
+##' Plots of fitted flexible survival models
+##' 
+##' Plot fitted survival, cumulative hazard or hazard from a parametric model
+##' against nonparametric estimates to diagnose goodness-of-fit.  Alternatively
+##' plot a user-defined function of the model parameters against time.
+##' 
+##' 
+##' @param x Output from \code{\link{flexsurvreg}} or
+##' \code{\link{flexsurvspline}}, representing a fitted survival model object.
+##' @param newdata Data frame containing covariate values to produce fitted
+##' values for.  See \code{\link{summary.flexsurvreg}}.
+##' 
+##' If there are only factor covariates in the model, then Kaplan-Meier (or
+##' nonparametric hazard...)  curves are plotted for all distinct groups, and
+##' by default, fitted curves are also plotted for these groups.  To plot
+##' Kaplan-Meier and fitted curves for only a subset of groups, use
+##' \code{plot(survfit())} followed by \code{lines.flexsurvreg()}.
+##' 
+##' If there are any continuous covariates, then a single population
+##' Kaplan-Meier curve is drawn. By default, a single fitted curve is drawn
+##' with the covariates set to their mean values in the data - for categorical
+##' covariates, the means of the 0/1 indicator variables are taken.
+##' @param X Alternative way to supply covariate values, as a model matrix.
+##' See \code{\link{summary.flexsurvreg}}.  \code{newdata} is an easier way.
+##' @param type \code{"survival"} for survival, to be plotted against
+##' Kaplan-Meier estimates from \code{\link[survival]{plot.survfit}}.
+##' 
+##' \code{"cumhaz"} for cumulative hazard, plotted against transformed
+##' Kaplan-Meier estimates from \code{\link[survival]{plot.survfit}}.
+##' 
+##' \code{"hazard"} for hazard, to be plotted against smooth nonparametric
+##' estimates from \code{\link[muhaz]{muhaz}}.  The nonparametric estimates
+##' tend to be unstable, and these plots are intended just to roughly indicate
+##' the shape of the hazards through time.  The \code{min.time} and
+##' \code{max.time} options to \code{\link[muhaz]{muhaz}} may sometimes need to
+##' be passed as arguments to \code{\link{plot.flexsurvreg}} to avoid an error
+##' here.
+##' 
+##' Ignored if \code{"fn"} is specified.
+##' @param fn Custom function of the parameters to summarise against time.  The
+##' first two arguments of the function must be \code{t} representing time, and
+##' \code{start} representing left-truncation points, and any remaining
+##' arguments must be parameters of the distribution.  It should return a
+##' vector of the same length as \code{t}.
+##' @param t Vector of times to plot fitted values for, see
+##' \code{\link{summary.flexsurvreg}}.
+##' @param start Left-truncation points, see \code{\link{summary.flexsurvreg}}.
+##' @param est Plot fitted curves (\code{TRUE} or \code{FALSE}.)
+##' @param ci Plot confidence intervals for fitted curves. By default, this is
+##' \code{TRUE} if one observed/fitted curve is plotted, and \code{FALSE} if
+##' multiple curves are plotted.
+##' @param B Number of simulations controlling accuracy of confidence
+##' intervals, as used in \code{\link[=summary.flexsurvreg]{summary}}.
+##' Decrease for greater speed at the expense of accuracy, or set \code{B=0} to
+##' turn off calculation of CIs.
+##' @param cl Width of confidence intervals, by default 0.95 for 95\%
+##' intervals.
+##' @param col.obs Colour of the nonparametric curve.
+##' @param lty.obs Line type of the nonparametric curve.
+##' @param lwd.obs Line width of the nonparametric curve.
+##' @param col Colour of the fitted parametric curve(s).
+##' @param lty Line type of the fitted parametric curve(s).
+##' @param lwd Line width of the fitted parametric curve(s).
+##' @param col.ci Colour of the fitted confidence limits, defaulting to the
+##' same as for the fitted curve.
+##' @param lty.ci Line type of the fitted confidence limits.
+##' @param lwd.ci Line width of the fitted confidence limits.
+##' @param ylim y-axis limits: vector of two elements.
+##' @param add If \code{TRUE}, add lines to an existing plot, otherwise new
+##' axes are drawn.
+##' @param ... Other options to be passed to \code{\link{plot.survfit}} or
+##' \code{\link[muhaz]{muhaz}}, for example, to control the smoothness of the
+##' nonparametric hazard estimates.  The \code{min.time} and \code{max.time}
+##' options to \code{\link[muhaz]{muhaz}} may sometimes need to be changed from
+##' the defaults.
+##' @note Some standard plot arguments such as \code{"xlim","xlab"} may not
+##' work.  This function was designed as a quick check of model fit.  Users
+##' wanting publication-quality graphs are advised to set up an empty plot with
+##' the desired axes first (e.g. with \code{plot(...,type="n",...)}), then use
+##' suitable \code{\link{lines}} functions to add lines.
+##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
+##' @seealso \code{\link{flexsurvreg}}
+##' @keywords models hplot
+##' @export
 plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, t=NULL, start=0,
                              est=TRUE, ci=NULL, B=1000, cl=0.95,
                              col.obs="black", lty.obs=1, lwd.obs=1,
@@ -772,7 +1434,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
     if (is.null(ci))
         ci <- ((x$ncovs == 0) || (!(sapply(Xraw,is.factor))))
     if (!ci) B <- 0
-    summ <- summary.flexsurvreg(x, newdata=newdata, X=X, type=type, fn=fn, t=t, start=start, ci=ci, B=B, cl=cl)
+    summ <- summary(x, newdata=newdata, X=X, type=type, fn=fn, t=t, start=start, ci=ci, B=B, cl=cl)
     t <- summ[[1]]$time
     X <- if (is.null(attr(summ,"X"))) as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1)) else attr(summ,"X")
     if (is.null(col.ci)) col.ci <- col
@@ -834,6 +1496,46 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
     }
 }
 
+
+
+##' Add fitted flexible survival curves to a plot
+##' 
+##' Add fitted survival (or hazard or cumulative hazard) curves from a
+##' \code{\link{flexsurvreg}} model fit to an existing plot.
+##' 
+##' Equivalent to \code{\link{plot.flexsurvreg}(...,add=TRUE)}.
+##' 
+##' 
+##' @param x Output from \code{\link{flexsurvreg}}, representing a fitted
+##' survival model object.
+##' @param newdata Covariate values to produce fitted curves for, as a data
+##' frame, as described in \code{\link{plot.flexsurvreg}}.
+##' @param X Covariate values to produce fitted curves for, as a matrix, as
+##' described in \code{\link{plot.flexsurvreg}}.
+##' @param type \code{"survival"} for survival, \code{"cumhaz"} for cumulative
+##' hazard, or \code{"hazard"} for hazard, as in
+##' \code{\link{plot.flexsurvreg}}.
+##' @param t Vector of times to plot fitted values for.
+##' @param est Plot fitted curves (\code{TRUE} or \code{FALSE}.)
+##' @param ci Plot confidence intervals for fitted curves.
+##' @param B Number of simulations controlling accuracy of confidence
+##' intervals, as used in \code{\link[=summary.flexsurvreg]{summary}}.
+##' @param cl Width of confidence intervals, by default 0.95 for 95\%
+##' intervals.
+##' @param col Colour of the fitted curve(s).
+##' @param lty Line type of the fitted curve(s).
+##' @param lwd Line width of the fitted curve(s).
+##' @param col.ci Colour of the confidence limits, defaulting to the same as
+##' for the fitted curve.
+##' @param lty.ci Line type of the confidence limits.
+##' @param lwd.ci Line width of the confidence limits, defaulting to the same
+##' as for the fitted curve.
+##' @param ... Other arguments to be passed to the generic \code{\link{plot}}
+##' and \code{\link{lines}} functions.
+##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
+##' @seealso \code{\link{flexsurvreg}}
+##' @keywords models aplot
+##' @export
 lines.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", t=NULL,
                               est=TRUE, ci=NULL, B=1000, cl=0.95,
                               col="red",lty=1,lwd=2,
@@ -843,6 +1545,7 @@ lines.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", t=NULL,
                      col=col, lty=lty, lwd=lwd, col.ci=col.ci,lty.ci=lty.ci,lwd.ci=lwd.ci, add=TRUE, ...)
 }
 
+##' @export
 vcov.flexsurvreg <- function (object, ...)
 {
     object$cov
@@ -852,18 +1555,53 @@ vcov.flexsurvreg <- function (object, ...)
     assign("flexsurv.dfns", new.env(), envir=parent.env(environment()))
 }
 
+
+
+##' Extract original data from \code{flexsurvreg} objects.
+##' 
+##' Extract the data from a model fitted with \code{flexsurvreg}.
+##' 
+##' 
+##' @aliases model.frame.flexsurvreg model.matrix.flexsurvreg
+##' @param formula A fitted model object, as returned by
+##' \code{\link{flexsurvreg}}.
+##' @param object A fitted model object, as returned by
+##' \code{\link{flexsurvreg}}.
+##' @param par String naming the parameter whose linear model matrix is
+##' desired.
+##' 
+##' The default value of \code{par=NULL} returns a matrix consisting of the
+##' model matrices for all models in the object \code{cbind}ed together, with
+##' the intercepts excluded.  This is not really a ``model matrix'' in the
+##' usual sense, however, the columns directly correspond to the covariate
+##' coefficients in the matrix of estimates from the fitted model.
+##' @param ... Further arguments (not used).
+##' @return \code{model.frame} returns a data frame with all the original
+##' variables used for the model fit.
+##' 
+##' \code{model.matrix} returns a design matrix for a part of the model that
+##' includes covariates.  The required part is indicated by the \code{"par"}
+##' argument (see above).
+##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
+##' @seealso \code{\link{flexsurvreg}}, \code{\link{model.frame}},
+##' \code{\link{model.matrix}}.
+##' @keywords models
+##' @export
 model.frame.flexsurvreg <- function(formula, ...)
 {
     x <- formula
     x$data$m
 }
 
+##' @export
+##' @rdname model.frame.flexsurvreg
 model.matrix.flexsurvreg <- function(object, par=NULL, ...)
 {
     x <- object
     if (is.null(par)) compress.model.matrices(x$data$mml) else x$data$mml[[par]]
 }
 
+##' @export
 logLik.flexsurvreg <- function(object, ...){
     val <- object$loglik
     attr(val, "df") <- object$npars
@@ -872,6 +1610,30 @@ logLik.flexsurvreg <- function(object, ...){
     val
 }
 
+##' Extract model coefficients from fitted flexible survival models
+##' 
+##' Extract model coefficients from fitted flexible survival models.  This
+##' presents all parameter estimates, transformed to the real line if necessary.
+##' For example, shape or scale parameters, which are constrained to be
+##' positive, are returned on the log scale.
+##' 
+##' This matches the behaviour of \code{coef.default} for standard R model
+##' families such as \code{\link[stats]{glm}}, where intercepts in regression
+##' models are presented on the same scale as the covariate effects.  Note that
+##' any parameter in a distribution fitted by \code{\link{flexsurvreg}} or
+##' \code{\link{flexsurvreg}} may be an intercept in a regression model.
+#' 
+##' @param object Output from \code{\link{flexsurvreg}} or
+##' \code{\link{flexsurvspline}}, representing a fitted survival model object.
+##' @param ... Further arguments passed to or from other methods.  Currently
+##' unused.
+##' @return This returns the \code{mod$res.t[,"est"]} component of the fitted
+##' model object \code{mod}.  See \code{\link{flexsurvreg}},
+##' \code{\link{flexsurvspline}} for full documentation of all components.
+##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
+##' @seealso \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
+##' @keywords models
+##' @export
 coef.flexsurvreg <- function(object, ...){
     object$coefficients
 }

@@ -99,6 +99,7 @@ sr2fsllog <- function(sr){
     c(shape, scale, beta)
 }
 
+##' @export
 flexsurv.dists <-
     list(genf = list(
              name="genf",
