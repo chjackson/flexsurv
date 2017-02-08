@@ -1,5 +1,4 @@
 #include <cmath>
-#include <exception>
 
 #include <Rcpp.h>
 

@@ -1,5 +1,3 @@
-#include <exception>
-
 #include <Rcpp.h>
 
 #include "distribution.h"
