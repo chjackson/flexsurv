@@ -1,0 +1,39 @@
+\name{coef.flexsurvreg}
+\title{Extract model coefficients from fitted flexible survival models}
+\alias{coef.flexsurvreg}
+\concept{Survival}
+\description{
+  Extract model coefficients from fitted flexible survival models.  This
+  presents all parameter estimates, transformed to the real line
+  if necessary.  For example, shape or scale parameters, which are
+  constrained to be positive, are returned on the log scale. 
+}
+\usage{
+\method{coef}{flexsurvreg}(object, ...)
+}
+\arguments{
+  \item{object}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted
+    survival model object.}
+  
+  \item{...}{Further arguments passed to or from other methods.
+    Currently unused.}
+}
+\value{
+  This returns the \code{mod$res.t[,"est"]} component of the fitted
+    model object \code{mod}.  See \code{\link{flexsurvreg}},
+    \code{\link{flexsurvspline}} for full documentation of all
+    components.
+}
+\details{
+  This matches the behaviour of \code{coef.default} for
+  standard R model families such as \code{\link[stats]{glm}}, where 
+  intercepts in regression models are presented on the same scale as the
+  covariate effects.  Note that any parameter in a distribution fitted by
+  \code{\link{flexsurvreg}} or  \code{\link{flexsurvreg}}
+  may be an intercept in a regression model. 
+}
+\seealso{
+  \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
+}
+\author{C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}}
+\keyword{models}
