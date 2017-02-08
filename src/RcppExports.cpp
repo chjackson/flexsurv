@@ -5,6 +5,50 @@
 
 using namespace Rcpp;
 
+// dgenf_work
+Rcpp::NumericVector dgenf_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const Rcpp::NumericVector& P, const bool log);
+RcppExport SEXP flexsurv_dgenf_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP, SEXP logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type P(PSEXP);
+    Rcpp::traits::input_parameter< const bool >::type log(logSEXP);
+    rcpp_result_gen = Rcpp::wrap(dgenf_work(x, mu, sigma, Q, P, log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pgenf_work
+Rcpp::NumericVector pgenf_work(const Rcpp::NumericVector& q, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const Rcpp::NumericVector& P, const bool lower_tail, const bool give_log);
+RcppExport SEXP flexsurv_pgenf_work(SEXP qSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type P(PSEXP);
+    Rcpp::traits::input_parameter< const bool >::type lower_tail(lower_tailSEXP);
+    Rcpp::traits::input_parameter< const bool >::type give_log(give_logSEXP);
+    rcpp_result_gen = Rcpp::wrap(pgenf_work(q, mu, sigma, Q, P, lower_tail, give_log));
+    return rcpp_result_gen;
+END_RCPP
+}
+// check_genf
+Rcpp::LogicalVector check_genf(const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const Rcpp::NumericVector& P);
+RcppExport SEXP flexsurv_check_genf(SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type P(PSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_genf(mu, sigma, Q, P));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dgengamma_work
 Rcpp::NumericVector dgengamma_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const bool log);
 RcppExport SEXP flexsurv_dgengamma_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP logSEXP) {
