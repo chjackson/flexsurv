@@ -700,7 +700,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     dat <- x$data
     Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
     isfac <- sapply(Xraw,is.factor)
-    type <- match.arg(type, c("survival","cumhaz","hazard"))
+    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","median","mean"))
     if (is.null(newdata)){
         if (is.vector(X)) X <- matrix(X, nrow=1)
         if (x$ncovs > 0 && is.null(X)) {
@@ -723,7 +723,8 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         }
     } else
         X <- form.model.matrix(object, as.data.frame(newdata))
-    if (is.null(t))
+    if(is.null(t) && type %in% c("mean","median")) t <- 0
+    else if (is.null(t))
         t <- sort(unique(dat$Y[,"stop"]))
     if (length(start)==1)
         start <- rep(start, length(t))
@@ -792,6 +793,11 @@ summary.fns <- function(x, type){
                ret[t<start] <- 1 # prob[t<start] was previously 0
                ret
            },
+           "median" = function(start,...) {
+             start_p = 1 - x$dfns$p(start,...)
+             med_from_start = start_p/2
+             ret = x$dfns$q(med_from_start,...)
+           },
            "hazard" = function(t,start,...) {
                ret <- x$dfns$h(t,...) * (1 - x$dfns$p(start,...))
                ret[t<start] <- 0
@@ -801,6 +807,28 @@ summary.fns <- function(x, type){
                ret <- x$dfns$H(t,...) - x$dfns$H(start,...)
                ret[t<start] <- 0
                ret
+           },
+           "mean" = function(start,...) {
+             start_len <- length(start)
+             ret <- numeric(start_len)
+             for(i in seq_len(start_len)){
+               ret[i] <- integrate(
+                 function(times) 1 - x$dfns$p(times,...), start[i], Inf
+               )$value
+             }
+             ret[t<start] <- 0
+             ret
+           },
+           "rmst" = function(t,start,...) {
+             t_len <- length(t)
+             ret <- numeric(t_len)
+             for(i in seq_len(t_len)){
+               ret[i] <- integrate(
+                 function(times) 1 - x$dfns$p(times,...), start[i], t[i]
+               )$value
+             }
+             ret[t<start] <- 0
+             ret
            })
 }
 
