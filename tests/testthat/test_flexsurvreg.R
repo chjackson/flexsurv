@@ -433,3 +433,39 @@ test_that("Weibull hazards from summary are reliable",{
   output = summary(fs1, t=seq(from=0,to=30000,length.out=100), ci=F, tidy=T)
   expect_true(all(is.finite(output$est)))
 })
+
+
+
+test_that("RMST/Mean calculations are working",{
+  
+  fs1 = flexsurvreg(Surv(rectime, censrec)~group ,dist="weibull",data=bc)
+  fs2 = flexsurvreg(Surv(rectime, censrec)~group ,dist="exp",data=bc)
+  
+  res1 = summary(fs1,t=c(Inf,Inf,Inf),start=c(0,10,100),type="rmst")
+  res2 = summary(fs1,start=c(0,10,100),type="mean")
+    
+  res1_len = length(res1)
+  for(i in seq_len(res1_len)){
+    expect_equal(
+      res1[[i]]$est,
+      res2[[i]]$est
+    )
+  }
+  
+  # RMST of exponential to 100 starting at 0 should be the same
+  # as RMST to 200 starting at 100.
+  res3 = summary(fs2,t=c(100,200),start=c(0,100),type="rmst")
+  res3_len = length(res3)
+  for(i in seq_len(res1_len)){
+    expect_equal(
+      res3[[i]]$est[1],
+      res3[[i]]$est[2]
+    )
+  }
+  
+  expect_warning(
+    summary(fs1,t=10,start=c(0,10,100),type="mean"),
+    "Mean selected, but time specified.  For restricted mean, set type to 'rmst'."
+  )
+  
+})

@@ -60,6 +60,10 @@
     \code{"cumhaz"} for cumulative hazards.
 
     \code{"hazard"} for hazards.
+    
+    \code{"rmst"} for restricted mean survival.
+    
+    \code{"mean"} for mean survival.
 
     Ignored if \code{"fn"} is specified.
 }

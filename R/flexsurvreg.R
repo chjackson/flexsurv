@@ -700,7 +700,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     dat <- x$data
     Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
     isfac <- sapply(Xraw,is.factor)
-    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","median","mean"))
+    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean"))
     if (is.null(newdata)){
         if (is.vector(X)) X <- matrix(X, nrow=1)
         if (x$ncovs > 0 && is.null(X)) {
@@ -723,7 +723,13 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         }
     } else
         X <- form.model.matrix(object, as.data.frame(newdata))
-    if(is.null(t) && type %in% c("mean","median")) t <- 0
+    
+    if(type == "mean"){
+      if(!is.null(t)) warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
+      # Type = mean same as RMST w/ time = Inf
+      t = rep(Inf,length(start))
+      type = "rmst"
+    }
     else if (is.null(t))
         t <- sort(unique(dat$Y[,"stop"]))
     if (length(start)==1)
@@ -808,23 +814,13 @@ summary.fns <- function(x, type){
                ret[t<start] <- 0
                ret
            },
-           "mean" = function(start,...) {
-             start_len <- length(start)
-             ret <- numeric(start_len)
-             for(i in seq_len(start_len)){
-               ret[i] <- integrate(
-                 function(times) 1 - x$dfns$p(times,...), start[i], Inf
-               )$value
-             }
-             ret[t<start] <- 0
-             ret
-           },
            "rmst" = function(t,start,...) {
              t_len <- length(t)
              ret <- numeric(t_len)
+             start_p = 1 - x$dfns$p(start,...)
              for(i in seq_len(t_len)){
                ret[i] <- integrate(
-                 function(times) 1 - x$dfns$p(times,...), start[i], t[i]
+                 function(end) (1 - x$dfns$p(end,...))/ start_p[i], start[i], t[i]
                )$value
              }
              ret[t<start] <- 0
