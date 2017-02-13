@@ -1016,6 +1016,10 @@ form.model.matrix <- function(object, newdata){
 ##' 
 ##' \code{"hazard"} for hazards.
 ##' 
+##' \code{"rmst"} for restricted mean survival.
+##' 
+##' \code{"mean"} for mean survival.
+##' 
 ##' Ignored if \code{"fn"} is specified.
 ##' @param fn Custom function of the parameters to summarise against time.
 ##' This has optional first two arguments \code{t} representing time, and
