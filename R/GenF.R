@@ -5,44 +5,12 @@
 ## Equation 2 in C.Cox (2008) is wrong, delta*beta*m1 not beta*m1 in first exponent in numerator
 
 dgenf <- function(x, mu=0, sigma=1, Q, P, log=FALSE) {
-    d <- dbase("genf", log=log, x=x, mu=mu, sigma=sigma, Q=Q, P=P)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    logdens <- numeric(length(x))
-    logdens[P==0] <- dgengamma(x[P==0], mu[P==0], sigma[P==0], Q[P==0], log=TRUE)
-    pn0 <- P!=0
-    if (any(pn0)) {
-        x <- x[pn0]; mu <- mu[pn0]; sigma <- sigma[pn0]; Q <- Q[pn0]; P <- P[pn0]
-        tmp <- Q^2 + 2*P
-        delta <- sqrt(tmp)
-        s1 <- 2 / (tmp + Q*delta)
-        s2 <- 2 / (tmp - Q*delta)
-        expw <- x^(delta/sigma)*exp(-mu*delta/sigma)
-        logdens[pn0] <- log(delta) + s1/sigma*delta*(log(x) - mu) + s1*(log(s1) - log(s2)) - log(sigma*x) - (s1+s2)*log(1 + s1*expw/s2) - lbeta(s1, s2)
-    }
-    ret[ind] <- if (log) logdens else exp(logdens)
-    ret
+    dgenf_work(x, mu, sigma, Q, P, log)
 }
 
 pgenf <- function(q, mu=0, sigma=1, Q, P, lower.tail = TRUE, log.p = FALSE)
 {
-    d <- dbase("genf", lower.tail=lower.tail, log=log.p, q=q, mu=mu, sigma=sigma, Q=Q, P=P)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
-    prob <- numeric(length(q))
-    prob[P==0] <- pgengamma(q[P==0], mu[P==0], sigma[P==0], Q[P==0], lower.tail=TRUE, log.p=FALSE)
-    pn0 <- P!=0
-    if (any(pn0)) {
-        q <- q[pn0]; mu <- mu[pn0]; sigma <- sigma[pn0]; Q <- Q[pn0]; P <- P[pn0]
-        tmp <- Q^2 + 2*P
-        delta <- sqrt(tmp)
-        s1 <- 2 / (tmp + Q*delta)
-        s2 <- 2 / (tmp - Q*delta)
-        expw <- q^(delta/sigma)*exp(-mu*delta/sigma)
-        prob[pn0] <- 1 - pbeta(s2/(s2 + s1*expw), s2, s1)
-    }
-    if (!lower.tail) prob <- 1 - prob
-    if (log.p) prob <- log(prob)
-    ret[ind] <- prob
-    ret
+    pgenf_work(q, mu, sigma, Q, P, lower.tail, log.p)
 }
 
 Hgenf <- function(x, mu=0, sigma=1, Q, P)
@@ -92,14 +60,6 @@ rgenf <- function(n, mu=0, sigma=1, Q, P)
     ret
 }
 
-check.genf <- function(mu, sigma, Q, P){
-    ret <- rep(TRUE, length(mu))
-    if (missing(Q)) stop("shape parameter \"Q\" not given")
-    if (missing(P)) stop("shape parameter \"P\" not given")
-    if (any(sigma < 0)) {warning("Negative scale parameter \"sigma\""); ret[sigma<0] <- FALSE}
-    if (any(P < 0)) {warning("Negative shape parameter \"P\""); ret[P<0] <- FALSE}
-    ret
-}
 
 dgenf.orig <- function(x, mu=0, sigma=1, s1, s2, log=FALSE) {
     d <- dbase("genf.orig", log=log, x=x, mu=mu, sigma=sigma, s1=s1, s2=s2)

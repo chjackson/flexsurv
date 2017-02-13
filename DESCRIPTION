@@ -7,11 +7,23 @@ Author: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 Maintainer: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 Description: Flexible parametric models for time-to-event data, including the Royston-Parmar spline model, generalized gamma and generalized F distributions.   Any user-defined parametric distribution can be fitted, given at least an R function defining the probability density or hazard.  There are also tools for fitting and predicting from fully parametric multi-state models.
 License: GPL (>= 2)
+<<<<<<< HEAD
 Depends: survival,R (>= 2.15.0)
 Imports: mstate (>= 0.2.10),muhaz,mvtnorm,deSolve,quadprog
+=======
+Depends: survival, R (>= 2.15.0)
+Imports:
+    mstate (>= 0.2.10),
+    muhaz,
+    mvtnorm,
+    deSolve,
+    quadprog,
+    Rcpp (>= 0.11.5)
+>>>>>>> 843595c70cdbcb4a2bc58dd2966425d0f5bbea61
 Suggests: eha,numDeriv,testthat,msm,ActuDistns,knitr,TH.data,colorspace
 URL: https://github.com/chjackson/flexsurv-dev
 BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr
 LazyLoad: yes
 LazyData: yes
+LinkingTo: Rcpp

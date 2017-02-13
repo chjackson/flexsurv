@@ -110,3 +110,6 @@ importFrom("stats", "as.formula", "coef", "cov", "delete.response",
            "weights")
 
 importFrom("mstate", "msfit", "probtrans")
+
+importFrom(Rcpp,sourceCpp)
+useDynLib(flexsurv)
