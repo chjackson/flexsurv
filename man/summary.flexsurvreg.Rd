@@ -9,7 +9,6 @@
   B = 1000, cl = 0.95, tidy = FALSE, ...)
 }
 \arguments{
-<<<<<<< HEAD
   \item{object}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted
     survival model object.}
 
@@ -106,7 +105,7 @@ It should return a vector of the
   
   \item{...}{Further arguments passed to or from other methods.
     Currently unused.}
-=======
+
 \item{object}{Output from \code{\link{flexsurvreg}} or
 \code{\link{flexsurvspline}}, representing a fitted survival model object.}
 
@@ -188,7 +187,7 @@ package to compare summaries for different covariate values.}
 
 \item{...}{Further arguments passed to or from other methods.  Currently
 unused.}
->>>>>>> 62bc48dab94de6bef7f3bbc2900ffa9d51253e8e
+
 }
 \value{
 If \code{tidy=FALSE}, a list with one component for each unique
