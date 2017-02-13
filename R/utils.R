@@ -77,6 +77,57 @@ rbase <- function(dname, n, ...){
 ### Requires a probability function "pdist" for the same distribution
 ### in the working environment.
 
+
+
+##' Generic function to find quantiles of a distribution
+##' 
+##' Generic function to find the quantiles of a distribution, given the
+##' equivalent probability distribution function.
+##' 
+##' This function is intended to enable users to define \code{"q"} functions
+##' for new distributions, in cases where the distribution function
+##' \code{pdist} is available analytically, but the quantile function is not.
+##' 
+##' It works by finding the root of the equation \eqn{h(q) = pdist(q) - p = 0}.
+##' Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
+##' 50\% until \eqn{h()} is of opposite sign at either end.  The root is then
+##' found using \code{\link{uniroot}}.
+##' 
+##' This assumes a suitably smooth, continuous distribution.
+##' 
+##' An identical function is provided in the \pkg{msm} package.
+##' 
+##' @param pdist Probability distribution function, for example,
+##' \code{\link{pnorm}} for the normal distribution, which must be defined in
+##' the current workspace.  This should accept and return vectorised parameters
+##' and values.  It should also return the correct values for the entire real
+##' line, for example a positive distribution should have \code{pdist(x)==0}
+##' for \eqn{x<0}.
+##' @param p Vector of probabilities to find the quantiles for.
+##' @param matargs Character vector giving the elements of \code{...} which
+##' represent vector parameters of the distribution.  Empty by default.  When
+##' vectorised, these will become matrices.  This is used for the arguments
+##' \code{gamma} and \code{knots} in \code{\link{qsurvspline}}.
+##' @param ...  The remaining arguments define parameters of the distribution
+##' \code{pdist}.  These MUST be named explicitly.
+##' 
+##' This may also contain the standard arguments \code{log.p} (logical; default
+##' \code{FALSE}, if \code{TRUE}, probabilities p are given as log(p)), and
+##' \code{lower.tail} (logical; if \code{TRUE} (default), probabilities are P[X
+##' <= x] otherwise, P[X > x].).
+##' 
+##' If the distribution is bounded above or below, then this should contain
+##' arguments \code{lbound} and \code{ubound} respectively, and these will be
+##' returned if \code{p} is 0 or 1 respectively.  Defaults to \code{-Inf} and
+##' \code{Inf} respectively.
+##' @return Vector of quantiles of the distribution at \code{p}.
+##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##' @keywords distribution
+##' @examples
+##' 
+##' qnorm(c(0.025, 0.975), 0, 1)
+##' qgeneric(pnorm, c(0.025, 0.975), mean=0, sd=1) # must name the arguments
+##' @export
 qgeneric <- function(pdist, p, matargs=NULL, ...)
 {
     args <- list(...)
@@ -132,184 +183,6 @@ qgeneric <- function(pdist, p, matargs=NULL, ...)
     ret
 }
 
-### Hazard and cumulative hazard functions for R built in
-### distributions.  Where possible, use more numerically stable
-### formulae than d/(1-p) and -log(1-p)
-
-hexp <- function(x, rate=1, log=FALSE){
-    h <- dbase("exp", log=log, x=x, rate=rate)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    ret[ind] <- if (log) log(rate) else rate
-    ret
-}
-
-Hexp <- function(x, rate=1, log=FALSE){
-    h <- dbase("exp", log=log, x=x, rate=rate)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    ret[ind] <- if (log) {log(rate) + log(x)} else rate*x
-    ret
-}
-
-check.exp <- function(rate=1){
-    ret <- rep(TRUE, length(rate))
-    if (any(rate<0)) {warning("Negative rate parameter"); ret[rate<0] <- FALSE}
-    ret
-}
-
-mean.exp <- function(rate=1) { 1/rate }
-
-var.exp <- function(rate=1) { 1/rate^2 }
-
-### Weibull
-
-hweibull <- function (x, shape, scale = 1, log = FALSE)
-{
-    h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    if (log)
-        ret[ind] <- log(shape) + (shape-1)*log(x/scale) - log(scale)
-    else
-        ret[ind] <- shape * (x/scale)^(shape - 1)/scale
-    ret
-}
-
-Hweibull <- function (x, shape, scale = 1, log = FALSE)
-{
-    h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    if (log)
-        ret[ind] <- shape * log(x/scale)
-    else
-        ret[ind] <- (x/scale)^shape
-    ret
-}
-
-check.weibull <- function(shape, scale=1){
-    ret <- rep(TRUE, length(shape))
-    if (any(shape<0)) {warning("Negative shape parameter"); ret[shape<0] <- FALSE}
-    if (any(scale<0)) {warning("Negative scale parameter"); ret[scale<0] <- FALSE}
-    ret
-}
-
-mean.weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }
-
-var.weibull <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma(1 + 1/shape))^2) }
-
-
-### Weibull with proportional hazards
-## haz(alpha, lambda) for weibull PH is alpha * lam * x^{alpha-1}
-## haz(shape, scale) for weibull PH is shape * scale * x^{shape-1}
-
-dweibullPH <- function(x, shape, scale = 1, log=FALSE){
-    dweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
-}
-
-pweibullPH <- function(q, shape, scale = 1, lower.tail=TRUE, log.p=FALSE){
-    pweibull(q, shape=shape, scale=scale^{-1/shape}, lower.tail=lower.tail, log.p=log.p)
-}
-
-qweibullPH <- function(p, shape, scale = 1, lower.tail=TRUE, log.p=FALSE){
-    qweibull(p, shape=shape, scale=scale^{-1/shape}, lower.tail=lower.tail, log.p=log.p)
-}
-
-hweibullPH <- function(x, shape, scale = 1, log=FALSE){
-    hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
-}
-
-HweibullPH <- function(x, shape, scale=1, log=FALSE){
-    Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
-}
-
-rweibullPH <- function(n, shape, scale=1){
-    rweibull(n, shape=shape, scale=scale^{-1/shape})
-}
-
-## Gamma
-
-hgamma <- function(x, shape, rate=1, log=FALSE){
-    h <- dbase("gamma", log=log, x=x, shape=shape, rate=rate)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    ret[ind] <- dgamma(x, shape, rate) / pgamma(x, shape, rate, lower.tail=FALSE)
-    ret
-}
-
-Hgamma <- function(x, shape, rate=1, log=FALSE){
-    h <- dbase("gamma", log=log, x=x, shape=shape, rate=rate)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    ret[ind] <- - pgamma(x, shape, rate, lower.tail=FALSE, log.p=TRUE)
-    ret
-}
-
-check.gamma <- function(shape, rate=1){
-    ret <- rep(TRUE, length(shape))
-    if (any(shape<0)) {warning("Negative shape parameter"); ret[shape<0] <- FALSE}
-    if (any(rate<0)) {warning("Negative scale parameter"); ret[rate<0] <- FALSE}
-    ret
-}
-
-mean.gamma <- function(shape, rate=1) {shape / rate}
-
-var.gamma <- function(shape, rate=1) {shape / rate^2}
-
-## lognormal
-
-hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
-    h <- dbase("lnorm", log=log, x=x, meanlog=meanlog, sdlog=sdlog)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    ret[ind] <- dlnorm(x, meanlog, sdlog) / plnorm(x, meanlog, sdlog, lower.tail=FALSE)
-    ret
-}
-
-Hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
-    h <- dbase("lnorm", log=log, x=x, meanlog=meanlog, sdlog=sdlog)
-    for (i in seq_along(h)) assign(names(h)[i], h[[i]])
-    ret[ind] <- - plnorm(x, meanlog, sdlog, lower.tail=FALSE, log.p=TRUE)
-    ret
-}
-
-check.lnorm <- function(meanlog=0, sdlog=1){
-    ret <- rep(TRUE, length(meanlog))
-    if (any(sdlog<0)) {warning("Negative SD parameter"); ret[sdlog<0] <- FALSE}
-    ret
-}
-
-mean.lnorm <- function(meanlog=0, sdlog=1){
-    exp(meanlog + 0.5*sdlog^2)
-}
-
-var.lnorm <- function(meanlog=0, sdlog=1){
-    exp(2*meanlog + sdlog^2)*(exp(sdlog^2) - 1)
-}
-
-## Don't warn about NaNs when NaNs are produced.  This happens for
-## extreme parameter values during optimisation.
-
-dweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
-    ret <- suppressWarnings(dweibull(x=x, shape=shape, scale=scale, log=log))
-    ret
-}
-
-pweibull.quiet <- function(q, shape, scale = 1, lower.tail = TRUE, log.p = FALSE) {
-    ret <- suppressWarnings(pweibull(q=q, shape=shape, scale=scale, lower.tail=lower.tail, log.p=log.p))
-    ret
-}
-
-hweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
-  ret <- suppressWarnings(hweibull(x=x, shape=shape, scale=scale, log=log))
-  ret
-}
-
-rweibull.quiet <- rweibull
-
-hweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
-  ret <- suppressWarnings(hweibull(x=x, shape=shape, scale=scale, log=log))
-  ret
-}
-
-Hweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
-  ret <- suppressWarnings(Hweibull(x=x, shape=shape, scale=scale, log=log))
-  ret
-}
 
 ## suppresses NOTE from checker about variables created with "assign"
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
