@@ -1,9 +1,5 @@
-## exp(asinh(y))
-exph <- function(y)(y + sqrt(y^2 + 1))
-dexph <- function(y)(1 + y / sqrt(y^2 + 1))
-
 ## sinh(log(y))
-logh <- function(x)((x^2 - 1)/(2*x))
+logh <- function(x) { 0.5 * (x - 1/x) }
 
 ## Convert flexsurvreg fit to a survreg fit for Weibull, exponential
 ## or log normal distribution.  Doesn't currently support stratified
@@ -216,75 +212,133 @@ flexsurv.dists <- list(
 flexsurv.dists$exponential <- flexsurv.dists$exp
 flexsurv.dists$lognormal <- flexsurv.dists$lnorm
 
-minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, dlist, inits,
-                                 dfns, aux, mx, fixedpars=NULL) {
-    pars <- inits
-    npars <- length(pars)
-    pars[setdiff(1:npars, fixedpars)] <- optpars
+buildTransformer <- function(inits, nbpars, dlist) {
+    par.transform <-
+        lapply(seq_len(nbpars),
+               function(ind) {
+                   xform  <- dlist$inv.transforms[[ind]]
+                   function(pars) {
+                       xform(pars[[ind]])
+                   }
+               })
+    names(par.transform) <- names(inits)[seq_len(nbpars)]
+    function(pars) {
+        lapply(par.transform,
+               function(item, par) { item(par) },
+               pars)
+    }
+}
+
+buildAuxParms <- function(aux, dlist) {
+    aux.transform <- list()
+    for (ind in seq_along(aux)) {
+        name <- names(aux)[[ind]]
+        if (!(name %in% dlist$pars)) {
+            aux.transform[[name]] <- aux[[ind]]
+        }
+    }
+    aux.transform
+}
+
+logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
+                          inits, dfns, aux, mx, fixedpars=NULL) {
+    pars   <- inits
+    npars  <- length(pars)
     nbpars <- length(dlist$pars)
-    pars <- pars.dead <- pars.ndead <- as.list(pars)
-    dead <- Y[,"status"]==1
-    if (npars > nbpars) {
-        beta <- unlist(pars[(nbpars+1):npars])
-        for (i in dlist$pars){
-            pars[[i]] <- pars[[i]] + X[,mx[[i]],drop=FALSE] %*% beta[mx[[i]]]
-            pars.dead[[i]] <- pars[[i]][dead]
-            pars.ndead[[i]] <- pars[[i]][!dead]
+    insert.locations <- setdiff(seq_len(npars),
+                                fixedpars)
+    
+    ## which are the subjects with events
+    event <- Y[,"status"] == 1
+    event.times <- Y[event, "time1"]
+    left.censor <- Y[!event, "time2"]
+    right.censor <- Y[!event, "time1"]
+
+    event.weights <- weights[event]
+    no.event.weights <- weights[!event]
+    
+    par.transform <- buildTransformer(inits, nbpars, dlist)
+
+    aux.pars <- buildAuxParms(aux, dlist)
+
+    default.offset <- rep.int(0, length(event.times))
+    do.hazard <- any(bhazard > 0)
+
+    loglik <- rep.int(0, nrow(Y))
+    ## the ... here is to work around optim
+    function(optpars, ...) {
+
+        pars[insert.locations] <- optpars
+        raw.pars <- pars
+        pars <- as.list(pars)
+
+        pars.event <- pars.nevent <- pars
+        if (npars > nbpars) {
+            beta <- raw.pars[(nbpars+1):npars]
+            for (i in dlist$pars){
+                pars[[i]] <- pars[[i]] +
+                    X[,mx[[i]],drop=FALSE] %*% beta[mx[[i]]]
+                pars.event[[i]] <- pars[[i]][event]
+                pars.nevent[[i]] <- pars[[i]][!event]
+            }
         }
-    }
-    fnargs <- fnargs.dead <- fnargs.ndead <- list()
-    for (i in 1:nbpars){
-        fnargs[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars[[i]])
-        fnargs.dead[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars.dead[[i]])
-        fnargs.ndead[[names(pars)[i]]] <- dlist$inv.transforms[[i]](pars.ndead[[i]])
-    }
-    for (i in seq_along(aux)){
-        if (!(names(aux)[i] %in% dlist$pars)){
-            nx <- names(aux)[i]
-            fnargs[[nx]] <- fnargs.dead[[nx]] <- fnargs.ndead[[nx]] <- aux[[i]]
+
+        fnargs <- c(par.transform(pars),
+                    aux.pars)
+        fnargs.event <- c(par.transform(pars.event),
+                          aux.pars)
+        fnargs.nevent <- c(par.transform(pars.nevent),
+                           aux.pars)
+        
+        ## Generic survival model likelihood contributions
+        ## Observed deaths
+        dargs <- fnargs.event
+        dargs$x <- event.times
+        dargs$log <- TRUE
+        logdens <- do.call(dfns$d, dargs)
+        
+        ## Left censoring times
+        pmaxargs <- fnargs.nevent
+        pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
+        pmax <- do.call(dfns$p, pmaxargs)
+        pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
+        
+        ## Right censoring times
+        pargs <- fnargs.nevent
+        pargs$q <- right.censor
+        pmin <- do.call(dfns$p, pargs)
+        
+        ## Left-truncation
+        targs   <- fnargs
+        targs$q <- Y[,"start"]
+        pobs <- 1 - do.call(dfns$p, targs) # prob of being observed = 1 unless left-truncated
+
+        ## Hazard offset for relative survival models
+        if (do.hazard){
+            pargs   <- fnargs.event
+            pargs$q <- event.times
+            pminb   <- do.call(dfns$p, pargs)
+            loghaz  <- logdens - log(1 - pminb)
+            offseti <- log(1 + bhazard[event] / exp(loghaz)*weights[event])
+        } else {
+            offseti <- default.offset
         }
+        ## Express as vector of individual likelihood contributions
+        loglik[event] <- (logdens*event.weights) + offseti
+        loglik[!event] <- (log(pmax - pmin)*no.event.weights)
+        loglik <- loglik - log(pobs)*weights
+        
+        ret <- -sum(loglik)
+        attr(ret, "indiv") <- loglik
+        ret
     }
-    ## Generic survival model likelihood contributions
-    ## Observed deaths
-    dargs <- fnargs.dead
-    dargs$x <- Y[dead,"time1"]
-    dargs$log <- TRUE
-    logdens <- (do.call(dfns$d, dargs))
+}
 
-    ## Left censoring times
-    pmaxargs <- fnargs.ndead
-    pmaxargs$q <- Y[!dead,"time2"] # Inf if right-censored, giving pmax=1
-    pmax <- (do.call(dfns$p, pmaxargs))
-    pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
-
-    ## Right censoring times
-    pargs <- fnargs.ndead
-    pargs$q <- Y[!dead,"time1"]
-    pmin <- (do.call(dfns$p, pargs))
-
-    ## Left-truncation
-    targs <- fnargs
-    targs$q <- Y[,"start"]
-    pobs <- 1 - do.call(dfns$p, targs) # prob of being observed = 1 unless left-truncated
-
-    ## Hazard offset for relative survival models
-    if (any(bhazard>0)){
-        pargs <- fnargs.dead
-        pargs$q <- Y[dead,"time1"]
-        pminb <- do.call(dfns$p, pargs)
-        loghaz <- logdens - log(1 - pminb)
-        offseti <- log(1 + bhazard[dead] / exp(loghaz)*weights[dead])
-    } else offseti <- rep(0, length(logdens))
-
-    ## Express as vector of individual likelihood contributions
-    loglik <- numeric(nrow(Y))
-    loglik[dead] <- (logdens*weights[dead]) + offseti
-    loglik[!dead] <- (log(pmax - pmin)*weights[!dead])
-    loglik <- loglik - log(pobs)*weights
-
-    ret <- -sum(loglik)
-    attr(ret, "indiv") <- loglik
-    ret
+minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard,
+                                 dlist, inits,
+                                 dfns, aux, mx, fixedpars=NULL) {
+    logLikFactory(Y, X, weights, bhazard, dlist, inits,
+                  dfns, aux, mx, fixedpars=fixedpars)(optpars)
 }
 
 check.dlist <- function(dlist){
@@ -549,8 +603,10 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
 
     if ((is.logical(fixedpars) && fixedpars==TRUE) ||
         (is.numeric(fixedpars) && identical(fixedpars, 1:npars))) {
-        minusloglik <- minusloglik.flexsurv(inits, Y=Y, X=X, weights=weights, bhazard=bhazard,
-                                            dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx)
+        minusloglik <- minusloglik.flexsurv(inits, Y=Y, X=X,
+                                            weights=weights, bhazard=bhazard,
+                                            dlist=dlist, inits=inits,
+                                            dfns=dfns, aux=aux, mx=mx)
         res.t <- matrix(inits, ncol=1)
         inits.nat <- inits
         for (i in 1:nbpars)
@@ -567,11 +623,21 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
             optim.args$method <- "BFGS"
         }
         gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
-        optim.args <- c(optim.args, list(par=optpars, fn=minusloglik.flexsurv, gr=gr,
-                                         Y=Y, X=X, weights=weights, bhazard=bhazard, dlist=dlist,
-                                         inits=inits, dfns=dfns, aux=aux,
-                                         mx=mx, fixedpars=fixedpars,
-                                         hessian=TRUE))
+        optim.args <- c(optim.args,
+                        list(par=optpars,
+                             fn=logLikFactory(Y=Y, X=X,
+                                              weights=weights,
+                                              bhazard=bhazard,
+                                              inits=inits, dlist=dlist,
+                                              dfns=dfns,
+                                              aux=aux, mx=mx,
+                                              fixedpars=fixedpars),
+                             gr=gr,
+                             Y=Y, X=X, weights=weights,
+                             bhazard=bhazard, dlist=dlist,
+                             inits=inits, dfns=dfns, aux=aux,
+                             mx=mx, fixedpars=fixedpars,
+                             hessian=TRUE))
         opt <- do.call("optim", optim.args)
         est <- opt$par
         if (all(!is.na(opt$hessian)) && all(!is.nan(opt$hessian)) && all(is.finite(opt$hessian)) &&
