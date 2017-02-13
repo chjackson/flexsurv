@@ -4,8 +4,13 @@ Title: Flexible Parametric Survival and Multi-State Models
 Version: 1.0.3.9000
 Date: 2016-10-07
 Authors@R: c(person("Christopher", "Jackson",
-                    email="chris.jackson@mrc-bsu.cam.ac.uk",
-		    role=c("aut", "cre")))
+         email="chris.jackson@mrc-bsu.cam.ac.uk",
+         role=c("aut", "cre")),
+	   person("Paul", "Metcalfe",
+         role=c("ctb")),
+	   person("Jordan", "Amdahl",
+         role=c("ctb"))
+	   )
 Description: Flexible parametric models for time-to-event data,
     including the Royston-Parmar spline model, generalized gamma and
     generalized F distributions.  Any user-defined parametric
