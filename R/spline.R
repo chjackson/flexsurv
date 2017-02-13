@@ -27,8 +27,10 @@ dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE){
         ret[is.na(q)] <- NA
     }
     ind <- !is.na(q) & q > 0
-    q <- q[ind]; gamma <- gamma[ind,,drop=FALSE]
-    list(ret=ret, gamma=gamma, q=q, scale=scale, ind=ind)
+    q <- q[ind]
+    gamma <- gamma[ind,,drop=FALSE]
+    knots <- knots[ind,,drop=FALSE]
+    list(ret=ret, gamma=gamma, q=q, scale=scale, ind=ind, knots=knots)
 }
 
 dlink <- function(scale){
@@ -57,8 +59,11 @@ dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
         eeta <- exp(ldlink(scale)(eta))
         ret[ind][eeta==0] <- 0
         ret[ind][is.nan(eeta)] <- NaN
-        ind2 <- !(eeta==0 || is.nan(eeta))
-        x <- x[ind2]; gamma <- gamma[ind2,,drop=FALSE]; eeta <- eeta[ind2]
+        ind2 <- !(eeta==0 | is.nan(eeta))
+        x <- x[ind2]
+        gamma <- gamma[ind2,,drop=FALSE]
+        knots <- knots[ind2,,drop=FALSE] 
+        eeta <- eeta[ind2]
         ind <- ind & ind2
         dsum <- rowSums(dbasis(knots, tsfn(x, timescale)) * gamma)  # ds/dx
         ret[ind] <- dtsfn(x,timescale) * dsum * eeta
