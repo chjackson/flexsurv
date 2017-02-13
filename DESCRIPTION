@@ -3,11 +3,19 @@ Type: Package
 Title: Flexible Parametric Survival and Multi-State Models
 Version: 1.0.3.9000
 Date: 2016-10-07
-Author: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-Maintainer: Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-Description: Flexible parametric models for time-to-event data, including the Royston-Parmar spline model, generalized gamma and generalized F distributions.   Any user-defined parametric distribution can be fitted, given at least an R function defining the probability density or hazard.  There are also tools for fitting and predicting from fully parametric multi-state models.
+Authors@R: c(person("Christopher", "Jackson",
+                    email="chris.jackson@mrc-bsu.cam.ac.uk",
+		    role=c("aut", "cre")))
+Description: Flexible parametric models for time-to-event data,
+    including the Royston-Parmar spline model, generalized gamma and
+    generalized F distributions.  Any user-defined parametric
+    distribution can be fitted, given at least an R function defining
+    the probability density or hazard. There are also tools for
+    fitting and predicting from fully parametric multi-state models.
 License: GPL (>= 2)
-Depends: survival, R (>= 2.15.0)
+Depends:
+    survival,
+    R (>= 2.15.0)
 Imports:
     mstate (>= 0.2.10),
     muhaz,
@@ -15,10 +23,12 @@ Imports:
     deSolve,
     quadprog,
     Rcpp (>= 0.11.5)
-Suggests: eha,numDeriv,testthat,msm,ActuDistns,knitr,TH.data,colorspace
+Encoding: UTF-8
+Suggests:
+    eha,numDeriv,testthat,msm,ActuDistns,knitr,TH.data,colorspace
 URL: https://github.com/chjackson/flexsurv-dev
 BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr
-LazyLoad: yes
 LazyData: yes
 LinkingTo: Rcpp
+RoxygenNote: 5.0.1
