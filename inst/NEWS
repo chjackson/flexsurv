@@ -1,6 +1,22 @@
 -*- text -*-
 
 
+Version 1.1 (2017-??-??)
+-------------
+
+* Substantial speed improvements in fitting most of the built-in
+  models, from implementing their PDFs and CDFs in C++.  Thanks to
+  Paul Metcalfe for contributing this.
+
+* As a result the package now depends on Rcpp.
+
+* Documentation migrated to roxygen.  Thanks to Paul Metcalfe for the
+  contribution.
+
+* Restricted mean and mean included as built-in functions in
+  summary.flexsurvreg. Thanks to Jordan Amdahl for the contribution.
+
+
 Version 1.0.2 (2016-09-26)
 -------------
 

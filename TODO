@@ -2,8 +2,6 @@ Warnings spewed in vignette for weibull quiet
 
 Warn about survival times of zero (or stop=start)
 
-
-
 Incomprehensible error if survival times negative, at least in flexsurvspline
 
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
@@ -20,13 +18,6 @@ does 1/2 Surv indicator work, and TRUE/FALSE?  if so is n events reported correc
 
 
 OPTIONAL
-
-Migrate doc to roxygen - Rd2roxygen package will help this
-options(roxygen.comment = "##' ")   for ESS
-
-Generic (restricted) mean of distributions, integration if necessary.
-   See surv2sampleComp package
-Restricted SD in same way?
 
 Time dependent covs in summary.flexsurvreg
 
