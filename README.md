@@ -13,5 +13,5 @@ install.packages("flexsurv")
 
 ```r
 install.packages("devtools") # if devtools not already installed
-devtools::install_github('chjackson/flexsurv')
+devtools::install_github('chjackson/flexsurv-dev')
 ```
