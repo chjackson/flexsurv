@@ -42,9 +42,8 @@ Generic function to find the quantiles of a distribution, given the
 equivalent probability distribution function.
 }
 \details{
-This function is intended to enable users to define \code{"q"} functions
-for new distributions, in cases where the distribution function
-\code{pdist} is available analytically, but the quantile function is not.
+This function is used by default for custom distributions for which a
+quantile function is not provided.
 
 It works by finding the root of the equation \eqn{h(q) = pdist(q) - p = 0}.
 Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
@@ -64,4 +63,3 @@ qgeneric(pnorm, c(0.025, 0.975), mean=0, sd=1) # must name the arguments
 Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 }
 \keyword{distribution}
-
