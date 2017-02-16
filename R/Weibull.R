@@ -34,14 +34,13 @@ check.weibull <- function(shape, scale=1){
 }
 
 ##' @export
-mean.weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }
+mean_weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }
 
-##' @export
 var.weibull <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma(1 + 1/shape))^2) }
 
 ##' @export
-rmst.weibull = function(t, shape, scale=1, start=0){
-  rmst.generic(pweibull, t, start=start, shape=shape, scale=scale)
+rmst_weibull = function(t, shape, scale=1, start=0){
+  rmst_generic(pweibull, t, start=start, shape=shape, scale=scale)
 }
 
 ##' @export
@@ -110,13 +109,13 @@ qweibull.quiet <- function(p, shape, scale = 1, lower.tail = TRUE, log.p = FALSE
   ret
 }
 
-mean.weibull.quiet <- function(shape, scale=1) {
-  mean.weibull(shape=shape,scale=scale)
+mean_weibull.quiet <- function(shape, scale=1) {
+  mean_weibull(shape=shape,scale=scale)
 }
 
 var.weibull.quiet <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma(1 + 1/shape))^2) }
 
-rmst.weibull.quiet = function(t, shape, scale=1, start=0){
-  rmst.generic(pweibull.quiet, t, start=start, shape=shape, scale=scale)
+rmst_weibull.quiet = function(t, shape, scale=1, start=0){
+  rmst_generic(pweibull.quiet, t, start=start, shape=shape, scale=scale)
 }
 

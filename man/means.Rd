@@ -2,28 +2,28 @@
 % Please edit documentation in R/flexsurv-package.R
 \name{means}
 \alias{means}
-\alias{mean.exp}
-\alias{rmst.exp}
-\alias{mean.weibull}
-\alias{rmst.weibull}
-\alias{mean.weibullPH}
-\alias{rmst.weibullPH}
-\alias{mean.llogis}
-\alias{rmst.llogis}
-\alias{mean.lnorm}
-\alias{rmst.lnorm}
-\alias{mean.gamma}
-\alias{rmst.gamma}
-\alias{mean.gompertz}
-\alias{rmst.gompertz}
-\alias{mean.gengamma}
-\alias{rmst.gengamma}
-\alias{mean.gengamma.orig}
-\alias{rmst.gengamma.orig}
-\alias{mean.genf}
-\alias{rmst.genf}
-\alias{mean.genf.orig}
-\alias{rmst.genf.orig}
+\alias{mean_exp}
+\alias{rmst_exp}
+\alias{mean_weibull}
+\alias{rmst_weibull}
+\alias{mean_weibullPH}
+\alias{rmst_weibullPH}
+\alias{mean_llogis}
+\alias{rmst_llogis}
+\alias{mean_lnorm}
+\alias{rmst_lnorm}
+\alias{mean_gamma}
+\alias{rmst_gamma}
+\alias{mean_gompertz}
+\alias{rmst_gompertz}
+\alias{mean_gengamma}
+\alias{rmst_gengamma}
+\alias{mean_gengamma.orig}
+\alias{rmst_gengamma.orig}
+\alias{mean_genf}
+\alias{rmst_genf}
+\alias{mean_genf.orig}
+\alias{rmst_genf.orig}
 \title{Mean and restricted mean survival functions}
 \arguments{
 \item{t}{Vector of times to which rmst is evaluated}
@@ -60,7 +60,7 @@ generalized F [orig])}
 }
 \value{
 mean surival (functions beginning 'mean') or restricted mean survival
-(functions beginning 'rmst.').
+(functions beginning 'rmst_').
 }
 \description{
 Mean and restricted mean survival functions for distributions which are built

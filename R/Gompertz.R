@@ -122,3 +122,13 @@ Hgompertz <- function(x, shape, rate = 1, log = FALSE)
     if (log) ret[ind] <- log(ret[ind])
     ret
 }
+
+##' @export
+rmst_gompertz = function(t, shape, rate=1, start=0){
+  rmst_generic(pgompertz, t, start=start, shape=shape, rate=rate)
+}
+
+##' @export
+mean_gompertz = function(shape, rate = 1){
+  rmst_generic(pgompertz, Inf, start=0, shape=shape, rate=rate)
+}

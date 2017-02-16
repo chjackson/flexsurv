@@ -8,8 +8,6 @@
 \alias{rweibullPH}
 \alias{HweibullPH}
 \alias{hweibullPH}
-\alias{mean.weibullPH}
-\alias{rmst.weibullPH}
 \title{Weibull distribution in proportional hazards parameterisation}
 \arguments{
 \item{x, q}{Vector of quantiles.}

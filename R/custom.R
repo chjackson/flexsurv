@@ -10,8 +10,8 @@ form.dp <- function(dlist, dfns, integ.opts){
     name <- dlist$name
     hname <- paste0("h",name); Hname <- paste0("H",name)
     dname <- paste0("d",name); pname <- paste0("p",name)
-    rmstname <- paste0("rmst.",name)
-    meanname <- paste0("mean.",name)
+    rmstname <- paste0("rmst_",name)
+    meanname <- paste0("mean_",name)
     qname <- paste0("q",name)
     rname <- paste0("r",name)
     if (is.function(dfns$d)) d <- dfns$d
@@ -91,7 +91,7 @@ form.dp <- function(dlist, dfns, integ.opts){
       if (exists(rmstname)) rmst <- get(rmstname)
       else {
         message("Forming integrated rmst function...")
-        rmst <- function(t, start=0, ...) rmst.generic(p, t=t, start=start, ...) 
+        rmst <- function(t, start=0, ...) rmst_generic(p, t=t, start=start, ...) 
       }
     }
     if (!exists("meanf", inherits=FALSE)){

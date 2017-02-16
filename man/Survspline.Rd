@@ -8,8 +8,8 @@
 \alias{rsurvspline}
 \alias{hsurvspline}
 \alias{Hsurvspline}
-\alias{mean.survspline}
-\alias{rmst.survspline}
+\alias{mean_survspline}
+\alias{rmst_survspline}
 \title{Royston/Parmar spline survival distribution}
 \arguments{
 \item{x, q, t}{Vector of times.}

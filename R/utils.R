@@ -112,10 +112,12 @@ rbase <- function(dname, n, ...){
 ##' @keywords distribution
 ##' @examples
 ##' 
-##' rmst.lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138)
-##' rmst.generic(plnorm, 500, start=250, c(0.025, 0.975), meanlog=7.4225, sdlog = 1.1138) # must name the arguments
+##' rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138)
+##' rmst_generic(plnorm, 500, start=250, c(0.025, 0.975), meanlog=7.4225, sdlog = 1.1138)
+##' # must name the arguments
+##' 
 ##' @export
-rmst.generic <- function(pdist, t, start=0, matargs=NULL, ...)
+rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
 {
   args <- list(...)
   t_len <- length(t)

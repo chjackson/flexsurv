@@ -5,7 +5,7 @@
 ##' spline model.
 ##' 
 ##' @aliases dsurvspline psurvspline qsurvspline rsurvspline
-##' hsurvspline Hsurvspline mean.survspline rmst.survspline
+##' hsurvspline Hsurvspline mean_survspline rmst_survspline
 ##' @param x,q,t Vector of times.
 ##' @param p Vector of probabilities.
 ##' @param n Number of random numbers to simulate.
@@ -254,12 +254,14 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     as.numeric(ret)
 }
 
-rmst.survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0,start=0){
-  rmst.generic(psurvspline, t, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+##' @export
+rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0,start=0){
+  rmst_generic(psurvspline, t, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
 }
 
-mean.survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
-  rmst.generic(psurvspline, Inf, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+##' @export
+mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
+  rmst_generic(psurvspline, Inf, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
 }
 
 ##' Natural cubic spline basis
@@ -715,8 +717,8 @@ flexsurvspline <- function(formula, data, weights, bhazard, subset,
     hfn <- unroll.function(hsurvspline, gamma=0:(nk-1))
     Hfn <- unroll.function(Hsurvspline, gamma=0:(nk-1))
     qfn <- unroll.function(qsurvspline, gamma=0:(nk-1))
-    meanfn <- unroll.function(mean.survspline, gamma=0:(nk-1))
-    rmstfn <- unroll.function(rmst.survspline, gamma=0:(nk-1))
+    meanfn <- unroll.function(mean_survspline, gamma=0:(nk-1))
+    rmstfn <- unroll.function(rmst_survspline, gamma=0:(nk-1))
     Ddfn <- if (scale=="normal") NULL else unroll.function(DLdsurvspline, gamma=0:(nk-1))
     DSfn <- if (scale=="normal") NULL else unroll.function(DLSsurvspline, gamma=0:(nk-1))
     args <- c(list(formula=formula, data=data, dist=custom.fss,

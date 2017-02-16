@@ -116,7 +116,7 @@ NULL
 ##' application to modelling oral cancer survival for use in a health economic
 ##' evaluation of screening.
 ##' 
-##' @aliases GenF dgenf pgenf qgenf rgenf Hgenf hgenf mean.genf rmst.genf
+##' @aliases GenF dgenf pgenf qgenf rgenf Hgenf hgenf
 ##' @param x,q Vector of quantiles.
 ##' @param p Vector of probabilities.
 ##' @param n number of observations. If \code{length(n) > 1}, the length is
@@ -163,7 +163,7 @@ NULL
 dgenf <- function(x, mu=0, sigma=1, Q, P, log=FALSE) {
     dgenf_work(x, mu, sigma, Q, P, log)
 }
-
+##' @export
 pgenf <- function(q, mu=0, sigma=1, Q, P, lower.tail = TRUE, log.p = FALSE)
 {
     pgenf_work(q, mu, sigma, Q, P, lower.tail, log.p)
@@ -221,13 +221,13 @@ rgenf <- function(n, mu=0, sigma=1, Q, P)
 }
 
 ##' @export
-rmst.genf= function(t, mu, sigma, Q, P, start=0){
-  rmst.generic(pgenf, t, start=start, mu=mu, sigma=sigma, Q=Q, P=P)
+rmst_genf= function(t, mu, sigma, Q, P, start=0){
+  rmst_generic(pgenf, t, start=start, mu=mu, sigma=sigma, Q=Q, P=P)
 }
 
 ##' @export
-mean.genf = function(mu, sigma, Q, P){
-  rmst.generic(pgenf, Inf, start=0, mu=mu, sigma=sigma, Q=Q, P=P)
+mean_genf = function(mu, sigma, Q, P){
+  rmst_generic(pgenf, Inf, start=0, mu=mu, sigma=sigma, Q=Q, P=P)
 }
 
 ##' @export
@@ -287,6 +287,16 @@ rgenf.orig <- function(n, mu=0, sigma=1, s1, s2)
     ret
 }
 
+##' @export
+rmst_genf.orig= function(t, mu, sigma, s1, s2, start=0){
+  rmst_generic(pgenf.orig, t, start=start, mu=mu, sigma=sigma, s1=s1, s2=s2)
+}
+
+##' @export
+mean_genf.orig = function(mu, sigma, s1, s2){
+  rmst_generic(pgenf.orig, Inf, start=0, mu=mu, sigma=sigma, s1=s1, s2=s2)
+}
+
 check.genf.orig <- function(mu, sigma, s1, s2){
     ret <- rep(TRUE, length(mu))
     if (missing(s1)) stop("shape parameter \"s1\" not given")
@@ -302,7 +312,7 @@ check.genf.orig <- function(mu, sigma, s1, s2){
 ## Only defined for s2 > sigma
 ## mean for gengamma.orig will follow
 
-mean.genf.orig <- function(mu, sigma, s1, s2){
-    if (s2 <= sigma) NaN else exp(mu) * (s2/s1)^sigma * gamma(s1 + sigma)*gamma(s2 - sigma) / (gamma(s1)*gamma(s2))
-}
+#mean_genf.orig <- function(mu, sigma, s1, s2){
+#    if (s2 <= sigma) NaN else exp(mu) * (s2/s1)^sigma * gamma(s1 + sigma)*gamma(s2 - sigma) / (gamma(s1)*gamma(s2))
+#}
 

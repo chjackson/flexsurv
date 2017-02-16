@@ -124,10 +124,10 @@ NULL
 ##' is also provided analytically.  Mean and restricted means for other distributions
 ##' are calculated via numeric integration.
 ##' 
-##' @aliases mean.exp rmst.exp mean.weibull rmst.weibull mean.weibullPH rmst.weibullPH
-##' mean.llogis rmst.llogis mean.lnorm rmst.lnorm mean.gamma rmst.gamma mean.gompertz
-##' rmst.gompertz mean.gengamma rmst.gengamma mean.gengamma.orig rmst.gengamma.orig
-##' mean.genf rmst.genf mean.genf.orig rmst.genf.orig
+##' @aliases mean_exp rmst_exp mean_weibull rmst_weibull mean_weibullPH rmst_weibullPH
+##' mean_llogis rmst_llogis mean_lnorm rmst_lnorm mean_gamma rmst_gamma mean_gompertz
+##' rmst_gompertz mean_gengamma rmst_gengamma mean_gengamma.orig rmst_gengamma.orig
+##' mean_genf rmst_genf mean_genf.orig rmst_genf.orig
 ##' @param t Vector of times to which rmst is evaluated
 ##' @param start Optional left-truncation time or times.  The returned
 ##' restricted mean survival will be conditioned on survival up to
@@ -147,7 +147,7 @@ NULL
 ##' @param s1 Vector of first F shape parameters (generalized F [orig])
 ##' @param s2 vector of second F shape parameters (generalized F [orig])
 ##' @return mean surival (functions beginning 'mean') or restricted mean survival
-##' (functions beginning 'rmst.').
+##' (functions beginning 'rmst_').
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
 ##' @seealso
 ##' \code{\link{dexp}},\code{\link{dweibull}},\code{\link{dgamma}},\code{\link{dlnorm}},\code{\link{dgompertz}},\code{\link{dgengamma}},\code{\link{dgenf}}

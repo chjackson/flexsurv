@@ -8,8 +8,6 @@
 \alias{rgenf}
 \alias{Hgenf}
 \alias{hgenf}
-\alias{mean.genf}
-\alias{rmst.genf}
 \title{Generalized F distribution}
 \arguments{
 \item{x, q}{Vector of quantiles.}
