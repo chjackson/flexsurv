@@ -1088,7 +1088,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     dat <- x$data
     Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
     isfac <- sapply(Xraw,is.factor)
-    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean"))
+    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median"))
     if (is.null(newdata)){
         if (is.vector(X)) X <- matrix(X, nrow=1)
         if (x$ncovs > 0 && is.null(X)) {
@@ -1116,11 +1116,10 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
       if(!is.null(t)) warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
       # Type = mean same as RMST w/ time = Inf
       t = rep(Inf,length(start))
-      type = "rmst"
     }
     else if(type == "median"){
       if(!is.null(t)) warning("Median selected, but time specified.")
-      t = rep(1,length(start))
+      t = rep(0.5,length(start))
     }
     else if (is.null(t))
         t <- sort(unique(dat$Y[,"stop"]))
@@ -1164,7 +1163,8 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
             ly <- res.ci[,1]
             uy <-  res.ci[,2]
         }
-        ret[[i]] <- data.frame(time=t, est=y, row.names=NULL)
+        if(type %in% c("median","mean")) ret[[i]] <- data.frame(est=y, row.names=NULL)
+        else ret[[i]] <- data.frame(time=t, est=y, row.names=NULL)
         if (ci) { ret[[i]]$lcl <- ly; ret[[i]]$ucl <- uy}
     }
     if (x$ncovs>0) attr(ret,"X") <- X
