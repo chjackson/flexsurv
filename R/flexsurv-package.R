@@ -114,6 +114,47 @@
 ##' @name hazard
 NULL
 
+##' Mean and restricted mean survival functions
+##' 
+##' Mean and restricted mean survival functions for distributions which are built
+##' into flexsurv, and whose distribution functions are in base R.
+##' 
+##' For the exponential, Weibull, log-logistic, lognormal, and gamma, mean survival is
+##' provided analytically.  Restricted mean survival for the exponential distribution
+##' is also provided analytically.  Mean and restricted means for other distributions
+##' are calculated via numeric integration.
+##' 
+##' @aliases mean.exp rmst.exp mean.weibull rmst.weibull mean.weibullPH rmst.weibullPH
+##' mean.llogis rmst.llogis mean.lnorm rmst.lnorm mean.gamma rmst.gamma mean.gompertz
+##' rmst.gompertz mean.gengamma rmst.gengamma mean.gengamma.orig rmst.gengamma.orig
+##' mean.genf rmst.genf mean.genf.orig rmst.genf.orig
+##' @param t Vector of times to which rmst is evaluated
+##' @param start Optional left-truncation time or times.  The returned
+##' restricted mean survival will be conditioned on survival up to
+##' this time.
+##' @param rate Rate parameter (exponential and gamma)
+##' @param shape Shape parameter (Weibull, gamma, log-logistic, generalized gamma [orig],
+##' generalized F [orig])
+##' @param scale Scale parameter (Weibull, log-logistic, generalized gamma [orig],
+##' generalized F [orig])
+##' @param meanlog Mean on the log scale (log normal)
+##' @param sdlog Standard deviation on the log scale (log normal)
+##' @param mu Mean on the log scale (generalized gamma, generalized F)
+##' @param sigma Standard deviation on the log scale (generalized gamma, generalized F)
+##' @param Q Vector of first shape parameters (generalized gamma, generalized F)
+##' @param P Vector of second shape parameters (generalized F)
+##' @param k vector of shape parameters (generalized gamma [orig]).
+##' @param s1 Vector of first F shape parameters (generalized F [orig])
+##' @param s2 vector of second F shape parameters (generalized F [orig])
+##' @return mean surival (functions beginning 'mean') or restricted mean survival
+##' (functions beginning 'rmst.').
+##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##' @seealso
+##' \code{\link{dexp}},\code{\link{dweibull}},\code{\link{dgamma}},\code{\link{dlnorm}},\code{\link{dgompertz}},\code{\link{dgengamma}},\code{\link{dgenf}}
+##' @keywords distribution
+##' @name means
+NULL
+
 ##' Breast cancer survival data
 ##' 
 ##' Survival times of 686 patients with primary node positive breast cancer.

@@ -30,7 +30,7 @@
 ##' \eqn{\beta = -\gamma / a}.
 ##' 
 ##' @aliases WeibullPH dweibullPH pweibullPH qweibullPH rweibullPH HweibullPH
-##' hweibullPH
+##' hweibullPH mean.weibullPH rmst.weibullPH
 ##' @param x,q Vector of quantiles.
 ##' @param p Vector of probabilities.
 ##' @param n number of observations. If \code{length(n) > 1}, the length is
@@ -81,4 +81,14 @@ HweibullPH <- function(x, shape, scale=1, log=FALSE) {
 ##' @export
 rweibullPH <- function(n, shape, scale=1) {
     rweibull(n, shape=shape, scale=scale^{-1/shape})
+}
+
+##' @export
+rmst.weibullPH = function(t, shape, scale=1, start=0){
+  rmst.generic(pweibullPH, t, start=start, shape=shape, scale=scale)
+}
+
+##' @export
+mean.weibullPH = function(shape, scale=1){
+  mean.weibull(shape=shape, scale=scale^{-1/shape})
 }

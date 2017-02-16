@@ -116,7 +116,7 @@ NULL
 ##' application to modelling oral cancer survival for use in a health economic
 ##' evaluation of screening.
 ##' 
-##' @aliases GenF dgenf pgenf qgenf rgenf Hgenf hgenf
+##' @aliases GenF dgenf pgenf qgenf rgenf Hgenf hgenf mean.genf rmst.genf
 ##' @param x,q Vector of quantiles.
 ##' @param p Vector of probabilities.
 ##' @param n number of observations. If \code{length(n) > 1}, the length is
@@ -220,6 +220,15 @@ rgenf <- function(n, mu=0, sigma=1, Q, P)
     ret
 }
 
+##' @export
+rmst.genf= function(t, mu, sigma, Q, P, start=0){
+  rmst.generic(pgenf, t, start=start, mu=mu, sigma=sigma, Q=Q, P=P)
+}
+
+##' @export
+mean.genf = function(mu, sigma, Q, P){
+  rmst.generic(pgenf, Inf, start=0, mu=mu, sigma=sigma, Q=Q, P=P)
+}
 
 ##' @export
 dgenf.orig <- function(x, mu=0, sigma=1, s1, s2, log=FALSE) {

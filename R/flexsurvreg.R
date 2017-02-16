@@ -1118,6 +1118,10 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
       t = rep(Inf,length(start))
       type = "rmst"
     }
+    else if(type == "median"){
+      if(!is.null(t)) warning("Median selected, but time specified.")
+      t = rep(1,length(start))
+    }
     else if (is.null(t))
         t <- sort(unique(dat$Y[,"stop"]))
     if (length(start)==1)
@@ -1202,18 +1206,9 @@ summary.fns <- function(x, type){
                ret[t<start] <- 0
                ret
            },
-           "rmst" = function(t,start,...) {
-             t_len <- length(t)
-             ret <- numeric(t_len)
-             start_p = 1 - x$dfns$p(start,...)
-             for(i in seq_len(t_len)){
-               ret[i] <- integrate(
-                 function(end) (1 - x$dfns$p(end,...))/ start_p[i], start[i], t[i]
-               )$value
-             }
-             ret[t<start] <- 0
-             ret
-           })
+           "rmst" = function(t,start,...) x$dfns$rmst(t,start=start, ...),
+           "mean" = function(t,start,...) x$dfns$mean(...)
+    )
 }
 
 ##' @export

@@ -32,3 +32,7 @@ check.gamma <- function(shape, rate=1){
 mean.gamma <- function(shape, rate=1) {shape / rate}
 
 var.gamma <- function(shape, rate=1) {shape / rate^2}
+
+rmst.gamma = function(t, shape, rate=1, start=0){
+  rmst.generic(pgamma, t, start=start, shape=shape, rate=rate)
+}
