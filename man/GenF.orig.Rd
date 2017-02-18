@@ -2,12 +2,12 @@
 % Please edit documentation in R/GenF.R
 \name{GenF.orig}
 \alias{GenF.orig}
-\alias{Hgenf.orig}
 \alias{dgenf.orig}
-\alias{hgenf.orig}
 \alias{pgenf.orig}
 \alias{qgenf.orig}
 \alias{rgenf.orig}
+\alias{Hgenf.orig}
+\alias{hgenf.orig}
 \title{Generalized F distribution (original parameterisation)}
 \arguments{
 \item{x, q}{vector of quantiles.}
@@ -73,9 +73,6 @@ infinity, and includes a further new class of distributions with
 negative first shape parameter.  The original is provided here for
 the sake of completion and compatibility.
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \references{
 R. L. Prentice (1975). Discrimination among some parametric
 models. Biometrika 62(3):607-614.
@@ -84,5 +81,7 @@ models. Biometrika 62(3):607-614.
 \code{\link{GenF}}, \code{\link{GenGamma.orig}},
 \code{\link{GenGamma}}
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \keyword{distribution}
-

@@ -1,12 +1,12 @@
 ##' Royston/Parmar spline survival distribution
 ##' 
-##' Probability density, distribution, quantile, hazard and cumulative hazard
-##' function for the Royston/Parmar spline model.
+##' Probability density, distribution, quantile, random generation, hazard
+##' cumulative hazard, mean and restricted mean functions for the Royston/Parmar
+##' spline model.
 ##' 
-##' 
-##' @aliases dsurvspline psurvspline psurvspline qsurvspline rsurvspline
-##' hsurvspline Hsurvspline
-##' @param x,q Vector of times.
+##' @aliases dsurvspline psurvspline qsurvspline rsurvspline
+##' hsurvspline Hsurvspline mean_survspline rmst_survspline
+##' @param x,q,t Vector of times.
 ##' @param p Vector of probabilities.
 ##' @param n Number of random numbers to simulate.
 ##' @param gamma Parameters describing the baseline spline function, as
@@ -15,6 +15,9 @@
 ##' which case the parameters are common to all times.  Alternatively a matrix
 ##' may be supplied, with rows corresponding to different times, and columns
 ##' corresponding to \code{knots}.
+##' @param start Optional left-truncation time or times.  The returned
+##' restricted mean survival will be conditioned on survival up to
+##' this time.
 ##' @param beta Vector of covariate effects (deprecated).
 ##' @param X Matrix of covariate values (deprecated).
 ##' @param knots Locations of knots on the axis of log time, supplied in
@@ -251,7 +254,15 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     as.numeric(ret)
 }
 
+##' @export
+rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0,start=0){
+  rmst_generic(psurvspline, t, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+}
 
+##' @export
+mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
+  rmst_generic(psurvspline, Inf, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+}
 
 ##' Natural cubic spline basis
 ##' 
@@ -705,11 +716,14 @@ flexsurvspline <- function(formula, data, weights, bhazard, subset,
     rfn <- unroll.function(rsurvspline, gamma=0:(nk-1))
     hfn <- unroll.function(hsurvspline, gamma=0:(nk-1))
     Hfn <- unroll.function(Hsurvspline, gamma=0:(nk-1))
+    qfn <- unroll.function(qsurvspline, gamma=0:(nk-1))
+    meanfn <- unroll.function(mean_survspline, gamma=0:(nk-1))
+    rmstfn <- unroll.function(rmst_survspline, gamma=0:(nk-1))
     Ddfn <- if (scale=="normal") NULL else unroll.function(DLdsurvspline, gamma=0:(nk-1))
     DSfn <- if (scale=="normal") NULL else unroll.function(DLSsurvspline, gamma=0:(nk-1))
     args <- c(list(formula=formula, data=data, dist=custom.fss,
-                   dfns=list(d=dfn,p=pfn,r=rfn,h=hfn,H=Hfn,
-                   DLd=Ddfn,DLS=DSfn,deriv=!(scale=="normal")), aux=aux), list(...))
+                   dfns=list(d=dfn,p=pfn,r=rfn,h=hfn,H=Hfn,rmst=rmstfn,mean=meanfn, q=qfn,
+                             DLd=Ddfn,DLS=DSfn,deriv=!(scale=="normal")), aux=aux), list(...))
 
     ## Try an alternative initial value routine if the default one gives zero likelihood
     fpold <- args$fixedpars

@@ -2,6 +2,7 @@
 ### distributions.  Where possible, use more numerically stable
 ### formulae than d/(1-p) and -log(1-p)
 
+##' @export
 hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
     h <- dbase("lnorm", log=log, x=x, meanlog=meanlog, sdlog=sdlog)
     for (i in seq_along(h)) assign(names(h)[i], h[[i]])
@@ -9,6 +10,7 @@ hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
     ret
 }
 
+##' @export
 Hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
     h <- dbase("lnorm", log=log, x=x, meanlog=meanlog, sdlog=sdlog)
     for (i in seq_along(h)) assign(names(h)[i], h[[i]])
@@ -22,8 +24,14 @@ check.lnorm <- function(meanlog=0, sdlog=1){
     ret
 }
 
-mean.lnorm <- function(meanlog=0, sdlog=1){
+##' @export
+mean_lnorm <- function(meanlog=0, sdlog=1){
     exp(meanlog + 0.5*sdlog^2)
+}
+
+##' @export
+rmst_lnorm = function(t, meanlog=0, sdlog=1, start=0){
+  rmst_generic(plnorm, t, start=start, meanlog=meanlog, sdlog=sdlog)
 }
 
 var.lnorm <- function(meanlog=0, sdlog=1){

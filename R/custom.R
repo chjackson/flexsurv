@@ -10,12 +10,18 @@ form.dp <- function(dlist, dfns, integ.opts){
     name <- dlist$name
     hname <- paste0("h",name); Hname <- paste0("H",name)
     dname <- paste0("d",name); pname <- paste0("p",name)
+    rmstname <- paste0("rmst_",name)
+    meanname <- paste0("mean_",name)
+    qname <- paste0("q",name)
     rname <- paste0("r",name)
     if (is.function(dfns$d)) d <- dfns$d
     if (is.function(dfns$p)) p <- dfns$p    
     if (is.function(dfns$h)) h <- dfns$h
     if (is.function(dfns$H)) H <- dfns$H
     if (is.function(dfns$r)) r <- dfns$r
+    if (is.function(dfns$q)) q <- dfns$q
+    if (is.function(dfns$mean)) meanf <- dfns$mean
+    if (is.function(dfns$rmst)) rmst <- dfns$rmst
     if (!exists("h", inherits=FALSE)){
         if (exists(hname)) h <- get(hname)
         else {
@@ -62,6 +68,15 @@ form.dp <- function(dlist, dfns, integ.opts){
             }
         }
     }
+    if (!exists("q", inherits=FALSE)){
+      if (exists(pname)) q <- get(qname)
+      else {
+        # giving this another name to avoid scoping issues
+        # w/ name p also being an argument to q functions
+        pfun <- p
+        q <- function(p, ...) qgeneric(pfun, p)
+      } 
+    }
     if (!exists("d", inherits=FALSE)){
         if (exists(dname)) d <- get(dname)
         else { 
@@ -71,6 +86,20 @@ form.dp <- function(dlist, dfns, integ.opts){
                 else h(x,...) * (1 - p(x, ...))
             }
         }
+    }
+    if (!exists("rmst", inherits=FALSE)){
+      if (exists(rmstname)) rmst <- get(rmstname)
+      else {
+        message("Forming integrated rmst function...")
+        rmst <- function(t, start=0, ...) rmst_generic(p, t=t, start=start, ...) 
+      }
+    }
+    if (!exists("meanf", inherits=FALSE)){
+      if (exists(rmstname)) meanf <- get(meanname)
+      else {
+        message("Forming integrated mean function...")
+        meanf <- function(start=0, ...) rmst(t=Inf, start=start, ...)
+      }
     }
     if (!exists("r", inherits=FALSE)){
         if (exists(rname)) r <- get(rname)
@@ -88,9 +117,9 @@ form.dp <- function(dlist, dfns, integ.opts){
     else if (is.null(dfns$deriv) && exists(paste0("DLS",name)))
         DLS <- get(paste0("DLS",name))
     else DLS <- NULL
-
-    list(p=p, d=d, h=h, H=H, r=r, DLd=DLd, DLS=DLS,
-         deriv = !is.null(DLd) && !is.null(DLS))
+    
+    list(p=p, d=d, h=h, H=H, r=r, DLd=DLd, DLS=DLS, rmst=rmst, mean= meanf,
+         q=q, deriv = !is.null(DLd) && !is.null(DLS))
 }
 
 

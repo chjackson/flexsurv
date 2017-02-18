@@ -120,12 +120,19 @@ DLSllogis <- function(t, shape, scale){
     res
 }
 
-mean.llogis <- function(shape=1, scale=1){
+##' @export
+mean_llogis <- function(shape=1, scale=1){
     ifelse(shape > 1,
        {b <- pi/shape
         scale*b / sin(b)},
            NaN)          
 }
+
+##' @export
+rmst_llogis = function(t, shape=1, scale=1, start=0){
+  rmst_generic(pllogis, t, start=start, shape=shape, scale=scale)
+}
+
 
 var.llogis <- function(shape=1, scale=1){
     ifelse(shape > 2,

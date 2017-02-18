@@ -223,6 +223,16 @@ rgengamma <- function(n, mu=0, sigma=1, Q) {
     ret
 }
 
+##' @export
+rmst_gengamma = function(t, mu=0, sigma=1, Q, start=0){
+  rmst_generic(pgengamma, t, start=start, mu=mu, sigma=sigma, Q=Q)
+}
+
+##' @export
+mean_gengamma = function(mu=0, sigma=1, Q, start=0){
+  rmst_generic(pgengamma, Inf, start=0, mu=mu, sigma=sigma, Q=Q)
+}
+
 ### FIXME limiting value for x=0:  0 if bk >1, 1 if b=k=1, ... ? 
 
 ##' @export
@@ -279,6 +289,16 @@ rgengamma.orig <- function(n, shape, scale=1, k) {
     y <- w / shape  + log(scale)
     ret[ind] <- exp(y)
     ret
+}
+
+##' @export
+rmst_gengamma.orig = function(t, shape, scale=1, k, start=0){
+  rmst_generic(pgengamma.orig, t, start=start, shape=shape, scale=scale, k=k)
+}
+
+##' @export
+mean_gengamma.orig = function(shape, scale=1, k){
+  rmst_generic(pgengamma.orig, Inf, start=0, shape=shape, scale=scale, k=k)
 }
 
 check.gengamma.orig <- function(shape, scale, k){

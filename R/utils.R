@@ -79,14 +79,67 @@ rbase <- function(dname, n, ...){
 
 
 
+
+##' Generic function to find restricted mean survival of a distribution
+##' 
+##' Generic function to find the restricted mean of a distribution, given the
+##' equivalent probability distribution function using numeric intergration.
+##' 
+##' This function is used by default for custom distributions for which an
+##' rmst function is not provided.
+##' 
+##' This assumes a suitably smooth, continuous distribution.
+##' 
+##' @param pdist Probability distribution function, for example,
+##' \code{\link{pnorm}} for the normal distribution, which must be defined in
+##' the current workspace.  This should accept and return vectorised parameters
+##' and values.  It should also return the correct values for the entire real
+##' line, for example a positive distribution should have \code{pdist(x)==0}
+##' for \eqn{x<0}.
+##' @param t Vector of times to which rmst is evaluated
+##' @param start Optional left-truncation time or times.  The returned
+##' restricted mean survival will be conditioned on survival up to
+##' this time.
+##' @param matargs Character vector giving the elements of \code{...} which
+##' represent vector parameters of the distribution.  Empty by default.  When
+##' vectorised, these will become matrices.  This is used for the arguments
+##' \code{gamma} and \code{knots} in \code{\link{qsurvspline}}.
+##' @param ...  The remaining arguments define parameters of the distribution
+##' \code{pdist}.  These MUST be named explicitly.
+##' @return Vector of restricted means survival times of the distribution at
+##' \code{p}.
+##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##' @keywords distribution
+##' @examples
+##' 
+##' rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138)
+##' rmst_generic(plnorm, 500, start=250, c(0.025, 0.975), meanlog=7.4225, sdlog = 1.1138)
+##' # must name the arguments
+##' 
+##' @export
+rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
+{
+  args <- list(...)
+  t_len <- length(t)
+  ret <- numeric(t_len)
+  start_p = 1 - pdist(start,...)
+  for(i in seq_len(t_len)){
+    ret[i] <- integrate(
+      function(end) (1 - pdist(end,...))/ start_p[i], start[i], t[i]
+    )$value
+  }
+  ret[t<start] <- 0
+  if (any(is.nan(ret))) warning("NaNs produced")
+  ret
+}
+
 ##' Generic function to find quantiles of a distribution
 ##' 
 ##' Generic function to find the quantiles of a distribution, given the
 ##' equivalent probability distribution function.
 ##' 
-##' This function is intended to enable users to define \code{"q"} functions
-##' for new distributions, in cases where the distribution function
-##' \code{pdist} is available analytically, but the quantile function is not.
+##' This function is used by default for custom distributions for which a
+##' quantile function is not provided.
 ##' 
 ##' It works by finding the root of the equation \eqn{h(q) = pdist(q) - p = 0}.
 ##' Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
@@ -151,8 +204,13 @@ qgeneric <- function(pdist, p, matargs=NULL, ...)
     for (i in seq(along=args))
         args[[i]] <- rep(args[[i]], length.out=maxlen)
     for (i in seq(along=args.mat)){
-        if (is.matrix(args.mat[[i]]))
-            args.mat[[i]] <- apply(args.mat[[i]], 2, function(x)rep(x, length=maxlen))
+        if (is.matrix(args.mat[[i]])){
+            args.mat[[i]] <- matrix(
+              apply(args.mat[[i]], 2, function(x)rep(x, length=maxlen)),
+              ncol=ncol(args.mat[[i]]),
+              byrow=F
+            )
+        }
         else args.mat[[i]] <- matrix(args.mat[[i]], nrow=maxlen, ncol=length(args.mat[[i]]), byrow=TRUE)
     }
     p <- rep(p, length.out=maxlen)

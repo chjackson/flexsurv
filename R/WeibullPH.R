@@ -82,3 +82,13 @@ HweibullPH <- function(x, shape, scale=1, log=FALSE) {
 rweibullPH <- function(n, shape, scale=1) {
     rweibull(n, shape=shape, scale=scale^{-1/shape})
 }
+
+##' @export
+rmst_weibullPH = function(t, shape, scale=1, start=0){
+  rmst_generic(pweibullPH, t, start=start, shape=shape, scale=scale)
+}
+
+##' @export
+mean_weibullPH = function(shape, scale=1){
+  mean_weibull(shape=shape, scale=scale^{-1/shape})
+}

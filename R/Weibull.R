@@ -2,6 +2,7 @@
 ### distributions.  Where possible, use more numerically stable
 ### formulae than d/(1-p) and -log(1-p)
 
+##' @export
 hweibull <- function (x, shape, scale = 1, log = FALSE)
 {
     h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
@@ -13,6 +14,7 @@ hweibull <- function (x, shape, scale = 1, log = FALSE)
     ret
 }
 
+##' @export
 Hweibull <- function (x, shape, scale = 1, log = FALSE)
 {
     h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
@@ -31,12 +33,17 @@ check.weibull <- function(shape, scale=1){
     ret
 }
 
-mean.weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }
+##' @export
+mean_weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }
 
 var.weibull <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma(1 + 1/shape))^2) }
 
+##' @export
+rmst_weibull = function(t, shape, scale=1, start=0){
+  rmst_generic(pweibull, t, start=start, shape=shape, scale=scale)
+}
 
-
+##' @export
 hweibull <- function (x, shape, scale = 1, log = FALSE)
 {
     h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
@@ -48,6 +55,7 @@ hweibull <- function (x, shape, scale = 1, log = FALSE)
     ret
 }
 
+##' @export
 Hweibull <- function (x, shape, scale = 1, log = FALSE)
 {
     h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
@@ -95,3 +103,19 @@ Hweibull.quiet <- function(x, shape, scale = 1, log = FALSE) {
   ret <- suppressWarnings(Hweibull(x=x, shape=shape, scale=scale, log=log))
   ret
 }
+
+qweibull.quiet <- function(p, shape, scale = 1, lower.tail = TRUE, log.p = FALSE) {
+  ret <- suppressWarnings(qweibull(p=p, shape=shape, scale=scale, lower.tail=lower.tail, log.p=log.p))
+  ret
+}
+
+mean_weibull.quiet <- function(shape, scale=1) {
+  mean_weibull(shape=shape,scale=scale)
+}
+
+var.weibull.quiet <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma(1 + 1/shape))^2) }
+
+rmst_weibull.quiet = function(t, shape, scale=1, start=0){
+  rmst_generic(pweibull.quiet, t, start=start, shape=shape, scale=scale)
+}
+

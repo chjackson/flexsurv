@@ -18,8 +18,8 @@ test_that("llogis",{
         x <- seq(0, 10, by=0.001)
         lines(x, dllogis(x, shape=1.5, scale=1.2), lty=2)
     }
-    expect_equal(mean.llogis(shape=0.1, scale=0.2), NaN)
+    expect_equal(mean_llogis(shape=0.1, scale=0.2), NaN)
     expect_equal(var.llogis(shape=1.1, scale=0.2), NaN)
-    mean.llogis(shape=1.1, scale=0.2)
+    mean_llogis(shape=1.1, scale=0.2)
     var.llogis(shape=2.1, scale=0.2)
 })
