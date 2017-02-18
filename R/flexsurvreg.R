@@ -1093,8 +1093,11 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         if (is.vector(X)) X <- matrix(X, nrow=1)
         if (x$ncovs > 0 && is.null(X)) {
             ## if any continuous covariates, calculate fitted survival for "average" covariate value
-            if (!all(isfac))
-                X <- matrix(colMeans(model.matrix(x)) ,nrow=1)
+            if (!all(isfac)){
+                nd <- colMeans(model.matrix(x))
+                X <- matrix(nd ,nrow=1, dimnames=list(NULL,names(nd)))
+                attr(X, "newdata") <- as.data.frame(X)
+            }
             ## else calculate for all different factor groupings
             else {
                 X <- unique(model.matrix(x))
@@ -1102,6 +1105,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
                 nam <- as.matrix(unique(Xraw))
                 for (i in 1:ncol(nam)) nam[,i] <- paste(colnames(nam)[i], nam[,i], sep="=")
                 rownames(X) <- apply(nam, 1, paste, collapse=",")
+                attr(X, "newdata") <- unique(Xraw)
             }
         }
         else if (is.null(X)) X <- as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1))
@@ -1171,11 +1175,8 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     if (tidy) {
         ret <- do.call("rbind", ret)
         if (x$ncovs>0) {
-            if (!is.null(newdata)){
-                nd <- attr(X, "newdata")
-                covdf <- nd[rep(seq_len(nrow(nd)), each=length(t)), , drop=FALSE]
-            } else 
-                covdf <- unique(Xraw)[rep(seq_len(nrow(unique(Xraw))), each=length(t)), , drop=FALSE]
+            nd <- attr(X, "newdata")
+            covdf <- nd[rep(seq_len(nrow(nd)), each=length(t)), , drop=FALSE]
             rownames(ret) <- rownames(covdf) <- NULL
             ret <- cbind(ret, covdf)
         }
