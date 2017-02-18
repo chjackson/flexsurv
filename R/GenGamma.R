@@ -229,7 +229,7 @@ rmst_gengamma = function(t, mu=0, sigma=1, Q, start=0){
 }
 
 ##' @export
-mean_gengamma = function(mu=0, sigma=1, Q, start=0){
+mean_gengamma = function(mu=0, sigma=1, Q){
   rmst_generic(pgengamma, Inf, start=0, mu=mu, sigma=sigma, Q=Q)
 }
 

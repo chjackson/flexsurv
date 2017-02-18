@@ -260,8 +260,8 @@ rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard
 }
 
 ##' @export
-mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, start=0){
-  rmst_generic(psurvspline, Inf, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
+  rmst_generic(psurvspline, Inf, start=0, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
 }
 
 ##' Natural cubic spline basis

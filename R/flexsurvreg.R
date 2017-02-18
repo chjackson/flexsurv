@@ -1125,6 +1125,10 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
       if(!is.null(t)) warning("Median selected, but time specified.")
       t = rep(0.5,length(start))
     }
+    else if(type == "rmst"){
+        if (is.null(t))
+            t <- max(dat$Y[,"time1"])
+    }
     else if (is.null(t))
         t <- sort(unique(dat$Y[,"stop"]))
     if (length(start)==1)
