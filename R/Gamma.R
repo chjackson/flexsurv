@@ -3,6 +3,7 @@
 ### formulae than d/(1-p) and -log(1-p)
 
 ##' @export
+##' @rdname hazard
 hgamma <- function(x, shape, rate=1, log=FALSE){
     h <- dbase("gamma", log=log, x=x, shape=shape, rate=rate)
     for (i in seq_along(h)) assign(names(h)[i], h[[i]])
@@ -11,6 +12,7 @@ hgamma <- function(x, shape, rate=1, log=FALSE){
 }
 
 ##' @export
+##' @rdname hazard
 Hgamma <- function(x, shape, rate=1, log=FALSE){
     h <- dbase("gamma", log=log, x=x, shape=shape, rate=rate)
     for (i in seq_along(h)) assign(names(h)[i], h[[i]])
@@ -32,11 +34,13 @@ check.gamma <- function(shape, rate=1){
 }
 
 ##' @export
+##' @rdname means
 mean_gamma <- function(shape, rate=1) {shape / rate}
 
 var.gamma <- function(shape, rate=1) {shape / rate^2}
 
 ##' @export
+##' @rdname means
 rmst_gamma = function(t, shape, rate=1, start=0){
   rmst_generic(pgamma, t, start=start, shape=shape, rate=rate)
 }

@@ -3,6 +3,7 @@
 ### formulae than d/(1-p) and -log(1-p)
 
 ##' @export
+##' @rdname hazard
 hweibull <- function (x, shape, scale = 1, log = FALSE)
 {
     h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
@@ -15,6 +16,7 @@ hweibull <- function (x, shape, scale = 1, log = FALSE)
 }
 
 ##' @export
+##' @rdname hazard
 Hweibull <- function (x, shape, scale = 1, log = FALSE)
 {
     h <- dbase("weibull", log=log, x=x, shape=shape, scale=scale)
@@ -34,11 +36,13 @@ check.weibull <- function(shape, scale=1){
 }
 
 ##' @export
+##' @rdname means
 mean_weibull <- function(shape, scale=1) { scale * gamma(1 + 1/shape) }
 
 var.weibull <- function(shape, scale=1) { scale^2 * (gamma(1 + 2/shape) - (gamma(1 + 1/shape))^2) }
 
 ##' @export
+##' @rdname means
 rmst_weibull = function(t, shape, scale=1, start=0){
   rmst_generic(pweibull, t, start=start, shape=shape, scale=scale)
 }

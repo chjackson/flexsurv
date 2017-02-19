@@ -2,20 +2,28 @@
 % Please edit documentation in R/GenF.R
 \name{GenF}
 \alias{GenF}
+\alias{Hgenf}
 \alias{dgenf}
+\alias{hgenf}
 \alias{pgenf}
 \alias{qgenf}
 \alias{rgenf}
-\alias{Hgenf}
-\alias{hgenf}
 \title{Generalized F distribution}
+\usage{
+dgenf(x, mu = 0, sigma = 1, Q, P, log = FALSE)
+
+pgenf(q, mu = 0, sigma = 1, Q, P, lower.tail = TRUE, log.p = FALSE)
+
+Hgenf(x, mu = 0, sigma = 1, Q, P)
+
+hgenf(x, mu = 0, sigma = 1, Q, P)
+
+qgenf(p, mu = 0, sigma = 1, Q, P, lower.tail = TRUE, log.p = FALSE)
+
+rgenf(n, mu = 0, sigma = 1, Q, P)
+}
 \arguments{
 \item{x, q}{Vector of quantiles.}
-
-\item{p}{Vector of probabilities.}
-
-\item{n}{number of observations. If \code{length(n) > 1}, the length is
-taken to be the number required.}
 
 \item{mu}{Vector of location parameters.}
 
@@ -29,6 +37,11 @@ taken to be the number required.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{Vector of probabilities.}
+
+\item{n}{number of observations. If \code{length(n) > 1}, the length is
+taken to be the number required.}
 }
 \value{
 \code{dgenf} gives the density, \code{pgenf} gives the distribution
@@ -96,6 +109,9 @@ The parameters \code{Q} and \code{P} are usually called \eqn{q} and
 to avoid clashing with the conventional arguments \code{q} in the
 probability function and \code{p} in the quantile function.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \references{
 R. L. Prentice (1975). Discrimination among some parametric
 models. Biometrika 62(3):607-614.
@@ -111,7 +127,5 @@ improve prediction.  International Journal of Biostatistics 6(1):Article
 \seealso{
 \code{\link{GenF.orig}}, \code{\link{GenGamma}}
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \keyword{distribution}
+

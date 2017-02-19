@@ -2,20 +2,28 @@
 % Please edit documentation in R/GenGamma.R
 \name{GenGamma.orig}
 \alias{GenGamma.orig}
+\alias{Hgengamma.orig}
 \alias{dgengamma.orig}
+\alias{hgengamma.orig}
 \alias{pgengamma.orig}
 \alias{qgengamma.orig}
 \alias{rgengamma.orig}
-\alias{Hgengamma.orig}
-\alias{hgengamma.orig}
 \title{Generalized gamma distribution (original parameterisation)}
+\usage{
+dgengamma.orig(x, shape, scale = 1, k, log = FALSE)
+
+pgengamma.orig(q, shape, scale = 1, k, lower.tail = TRUE, log.p = FALSE)
+
+Hgengamma.orig(x, shape, scale = 1, k)
+
+hgengamma.orig(x, shape, scale = 1, k)
+
+qgengamma.orig(p, shape, scale = 1, k, lower.tail = TRUE, log.p = FALSE)
+
+rgengamma.orig(n, shape, scale = 1, k)
+}
 \arguments{
 \item{x, q}{vector of quantiles.}
-
-\item{p}{vector of probabilities.}
-
-\item{n}{number of observations. If \code{length(n) > 1}, the length is
-taken to be the number required.}
 
 \item{shape}{vector of ``Weibull'' shape parameters.}
 
@@ -27,6 +35,11 @@ taken to be the number required.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{vector of probabilities.}
+
+\item{n}{number of observations. If \code{length(n) > 1}, the length is
+taken to be the number required.}
 }
 \value{
 \code{dgengamma.orig} gives the density, \code{pgengamma.orig}
@@ -80,6 +93,9 @@ The generalized F distribution \code{\link{GenF.orig}}, and its similar
 alternative parameterisation \code{\link{GenF}}, extend the generalized
 gamma to four parameters.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \references{
 Stacy, E. W. (1962). A generalization of the gamma
 distribution.  Annals of Mathematical Statistics 33:1187-92.
@@ -95,7 +111,5 @@ distributions.  Technometrics 22(3):409-419.
 \code{\link{GenF}}, \code{\link{Lognormal}}, \code{\link{GammaDist}},
 \code{\link{Weibull}}.
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \keyword{distribution}
+

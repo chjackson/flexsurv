@@ -2,20 +2,28 @@
 % Please edit documentation in R/GenGamma.R
 \name{GenGamma}
 \alias{GenGamma}
+\alias{Hgengamma}
 \alias{dgengamma}
+\alias{hgengamma}
 \alias{pgengamma}
 \alias{qgengamma}
 \alias{rgengamma}
-\alias{Hgengamma}
-\alias{hgengamma}
 \title{Generalized gamma distribution}
+\usage{
+dgengamma(x, mu = 0, sigma = 1, Q, log = FALSE)
+
+pgengamma(q, mu = 0, sigma = 1, Q, lower.tail = TRUE, log.p = FALSE)
+
+Hgengamma(x, mu = 0, sigma = 1, Q)
+
+hgengamma(x, mu = 0, sigma = 1, Q)
+
+qgengamma(p, mu = 0, sigma = 1, Q, lower.tail = TRUE, log.p = FALSE)
+
+rgengamma(n, mu = 0, sigma = 1, Q)
+}
 \arguments{
 \item{x, q}{vector of quantiles.}
-
-\item{p}{vector of probabilities.}
-
-\item{n}{number of observations. If \code{length(n) > 1}, the length is
-taken to be the number required.}
 
 \item{mu}{Vector of ``location'' parameters.}
 
@@ -31,6 +39,11 @@ distribution \code{\link{dgamma}}. Constrained to be positive.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{vector of probabilities.}
+
+\item{n}{number of observations. If \code{length(n) > 1}, the length is
+taken to be the number required.}
 }
 \value{
 \code{dgengamma} gives the density, \code{pgengamma} gives the
@@ -85,6 +98,9 @@ in detail by Cox (2007).
 The generalized F distribution \code{\link{GenF}} extends the generalized
 gamma to four parameters.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \references{
 Prentice, R. L. (1974). A log gamma model and its maximum
 likelihood estimation. Biometrika 61(3):539-544.
@@ -107,7 +123,5 @@ Annals of Mathematical Statistics 33:1187-92
 \code{\link{GenGamma.orig}}, \code{\link{GenF}},
 \code{\link{Lognormal}}, \code{\link{GammaDist}}, \code{\link{Weibull}}.
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \keyword{distribution}
+

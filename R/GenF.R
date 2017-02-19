@@ -160,22 +160,26 @@ NULL
 ## Equation 2 in C.Cox (2008) is wrong, delta*beta*m1 not beta*m1 in first exponent in numerator
 
 ##' @export
+##' @rdname GenF
 dgenf <- function(x, mu=0, sigma=1, Q, P, log=FALSE) {
     dgenf_work(x, mu, sigma, Q, P, log)
 }
 ##' @export
+##' @rdname GenF
 pgenf <- function(q, mu=0, sigma=1, Q, P, lower.tail = TRUE, log.p = FALSE)
 {
     pgenf_work(q, mu, sigma, Q, P, lower.tail, log.p)
 }
 
 ##' @export
+##' @rdname GenF
 Hgenf <- function(x, mu=0, sigma=1, Q, P)
 {
     -log(pgenf(q=x, mu=mu, sigma=sigma, Q=Q, P=P, lower.tail=FALSE))
 }
 
 ##' @export
+##' @rdname GenF
 hgenf <- function(x, mu=0, sigma=1, Q, P)
 {
     dgenf(x=x, mu=mu, sigma=sigma, Q=Q, P=P) /
@@ -183,6 +187,7 @@ hgenf <- function(x, mu=0, sigma=1, Q, P)
 }
 
 ##' @export
+##' @rdname GenF
 qgenf <- function(p, mu=0, sigma=1, Q, P, lower.tail = TRUE, log.p = FALSE)
 {
     d <- dbase("genf", lower.tail=lower.tail, log=log.p, p=p, mu=mu, sigma=sigma, Q=Q, P=P)
@@ -202,6 +207,7 @@ qgenf <- function(p, mu=0, sigma=1, Q, P, lower.tail = TRUE, log.p = FALSE)
 }
 
 ##' @export
+##' @rdname GenF
 rgenf <- function(n, mu=0, sigma=1, Q, P)
 {
     r <- rbase("genf", n=n, mu=mu, sigma=sigma, Q=Q, P=P)
@@ -221,16 +227,19 @@ rgenf <- function(n, mu=0, sigma=1, Q, P)
 }
 
 ##' @export
+##' @rdname means
 rmst_genf= function(t, mu, sigma, Q, P, start=0){
   rmst_generic(pgenf, t, start=start, mu=mu, sigma=sigma, Q=Q, P=P)
 }
 
 ##' @export
+##' @rdname means
 mean_genf = function(mu, sigma, Q, P){
   rmst_generic(pgenf, Inf, start=0, mu=mu, sigma=sigma, Q=Q, P=P)
 }
 
 ##' @export
+##' @rdname GenF.orig
 dgenf.orig <- function(x, mu=0, sigma=1, s1, s2, log=FALSE) {
     d <- dbase("genf.orig", log=log, x=x, mu=mu, sigma=sigma, s1=s1, s2=s2)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
@@ -242,6 +251,7 @@ dgenf.orig <- function(x, mu=0, sigma=1, s1, s2, log=FALSE) {
 }
 
 ##' @export
+##' @rdname GenF.orig
 pgenf.orig <- function(q, mu=0, sigma=1, s1, s2, lower.tail = TRUE, log.p = FALSE)
 {
     d <- dbase("genf.orig", lower.tail=lower.tail, log=log.p, q=q, mu=mu, sigma=sigma, s1=s1, s2=s2)
@@ -255,12 +265,14 @@ pgenf.orig <- function(q, mu=0, sigma=1, s1, s2, lower.tail = TRUE, log.p = FALS
 }
 
 ##' @export
+##' @rdname GenF.orig
 Hgenf.orig <- function(x, mu=0, sigma=1, s1, s2)
 {
     -log(pgenf.orig(q=x, mu=mu, sigma=sigma, s1=s1, s2=s2, lower.tail=FALSE))
 }
 
 ##' @export
+##' @rdname GenF.orig
 hgenf.orig <- function(x, mu=0, sigma=1, s1, s2)
 {
     dgenf.orig(x=x, mu=mu, sigma=sigma, s1=s1, s2=s2) /
@@ -268,6 +280,7 @@ hgenf.orig <- function(x, mu=0, sigma=1, s1, s2)
 }
 
 ##' @export
+##' @rdname GenF.orig
 qgenf.orig <- function(p, mu=0, sigma=1, s1, s2, lower.tail = TRUE, log.p = FALSE)
 {
     d <- dbase("genf.orig", lower.tail=lower.tail, log=log.p, p=p, mu=mu, sigma=sigma, s1=s1, s2=s2)
@@ -278,6 +291,7 @@ qgenf.orig <- function(p, mu=0, sigma=1, s1, s2, lower.tail = TRUE, log.p = FALS
 }
 
 ##' @export
+##' @rdname GenF.orig
 rgenf.orig <- function(n, mu=0, sigma=1, s1, s2)
 {
     r <- rbase("genf.orig", n=n, mu=mu, sigma=sigma, s1=s1, s2=s2)
@@ -288,11 +302,13 @@ rgenf.orig <- function(n, mu=0, sigma=1, s1, s2)
 }
 
 ##' @export
+##' @rdname means
 rmst_genf.orig= function(t, mu, sigma, s1, s2, start=0){
   rmst_generic(pgenf.orig, t, start=start, mu=mu, sigma=sigma, s1=s1, s2=s2)
 }
 
 ##' @export
+##' @rdname means
 mean_genf.orig = function(mu, sigma, s1, s2){
   rmst_generic(pgenf.orig, Inf, start=0, mu=mu, sigma=sigma, s1=s1, s2=s2)
 }
@@ -311,6 +327,7 @@ check.genf.orig <- function(mu, sigma, s1, s2){
 ## currently undocumented and unused!
 ## Only defined for s2 > sigma
 ## mean for gengamma.orig will follow
+## TODO replace integrate version with this, check equal
 
 #mean_genf.orig <- function(mu, sigma, s1, s2){
 #    if (s2 <= sigma) NaN else exp(mu) * (s2/s1)^sigma * gamma(s1 + sigma)*gamma(s2 - sigma) / (gamma(s1)*gamma(s2))

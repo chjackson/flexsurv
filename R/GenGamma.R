@@ -173,22 +173,26 @@ NULL
 ### FIXME value for x = 0 
 
 ##' @export
+##' @rdname GenGamma
 dgengamma <- function(x, mu=0, sigma=1, Q, log=FALSE) {
     dgengamma_work(x, mu, sigma, Q, log)
 }
 
 ##' @export
+##' @rdname GenGamma
 pgengamma <- function(q, mu=0, sigma=1, Q, lower.tail = TRUE, log.p = FALSE) {
     pgengamma_work(q, mu, sigma, Q, lower.tail, log.p)
 }
 
 ##' @export
+##' @rdname GenGamma
 Hgengamma <- function(x, mu=0, sigma=1, Q)
 {
     -pgengamma(q=x, mu=mu, sigma=sigma, Q=Q, lower.tail=FALSE, log.p=TRUE)
 }
 
 ##' @export
+##' @rdname GenGamma
 hgengamma <- function(x, mu=0, sigma=1, Q)
 {
     dgengamma(x=x, mu=mu, sigma=sigma, Q=Q) /
@@ -196,6 +200,7 @@ hgengamma <- function(x, mu=0, sigma=1, Q)
 }
 
 ##' @export
+##' @rdname GenGamma
 qgengamma <- function(p, mu=0, sigma=1, Q, lower.tail = TRUE, log.p = FALSE)
 {
     d <- dbase("gengamma", lower.tail=lower.tail, log=log.p, p=p, mu=mu, sigma=sigma, Q=Q)
@@ -210,6 +215,7 @@ qgengamma <- function(p, mu=0, sigma=1, Q, lower.tail = TRUE, log.p = FALSE)
 }
 
 ##' @export
+##' @rdname GenGamma
 rgengamma <- function(n, mu=0, sigma=1, Q) {
     r <- rbase("gengamma", n=n, mu=mu, sigma=sigma, Q=Q)
     for (i in seq_along(r)) assign(names(r)[i], r[[i]])
@@ -224,11 +230,13 @@ rgengamma <- function(n, mu=0, sigma=1, Q) {
 }
 
 ##' @export
+##' @rdname means
 rmst_gengamma = function(t, mu=0, sigma=1, Q, start=0){
   rmst_generic(pgengamma, t, start=start, mu=mu, sigma=sigma, Q=Q)
 }
 
 ##' @export
+##' @rdname means
 mean_gengamma = function(mu=0, sigma=1, Q){
   rmst_generic(pgengamma, Inf, start=0, mu=mu, sigma=sigma, Q=Q)
 }
@@ -236,6 +244,7 @@ mean_gengamma = function(mu=0, sigma=1, Q){
 ### FIXME limiting value for x=0:  0 if bk >1, 1 if b=k=1, ... ? 
 
 ##' @export
+##' @rdname GenGamma.orig
 dgengamma.orig <- function(x, shape, scale=1, k, log=FALSE){
     d <- dbase("gengamma.orig", log=log, x=x, shape=shape, scale=scale, k=k)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
@@ -245,6 +254,7 @@ dgengamma.orig <- function(x, shape, scale=1, k, log=FALSE){
 }
 
 ##' @export
+##' @rdname GenGamma.orig
 pgengamma.orig <- function(q, shape, scale=1, k, lower.tail = TRUE, log.p = FALSE) {
     d <- dbase("gengamma.orig", lower.tail=lower.tail, log=log.p, q=q, shape=shape, scale=scale, k=k)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
@@ -258,12 +268,14 @@ pgengamma.orig <- function(q, shape, scale=1, k, lower.tail = TRUE, log.p = FALS
 }
 
 ##' @export
+##' @rdname GenGamma.orig
 Hgengamma.orig <- function(x, shape, scale=1, k)
 {
     -log(pgengamma.orig(q=x, shape=shape, scale=scale, k=k, lower.tail=FALSE))
 }
 
 ##' @export
+##' @rdname GenGamma.orig
 hgengamma.orig <- function(x, shape, scale=1, k)
 {
     dgengamma.orig(x=x, shape=shape, scale=scale, k=k) /
@@ -271,6 +283,7 @@ hgengamma.orig <- function(x, shape, scale=1, k)
 }
 
 ##' @export
+##' @rdname GenGamma.orig
 qgengamma.orig <- function(p, shape, scale=1, k, lower.tail = TRUE, log.p = FALSE)
 {
     d <- dbase("gengamma.orig", lower.tail=lower.tail, log=log.p, p=p, shape=shape, scale=scale, k=k)
@@ -282,6 +295,7 @@ qgengamma.orig <- function(p, shape, scale=1, k, lower.tail = TRUE, log.p = FALS
 }
 
 ##' @export
+##' @rdname GenGamma.orig
 rgengamma.orig <- function(n, shape, scale=1, k) {
     r <- rbase("gengamma.orig", n=n, shape=shape, scale=scale, k=k)
     for (i in seq_along(r)) assign(names(r)[i], r[[i]])
@@ -292,11 +306,13 @@ rgengamma.orig <- function(n, shape, scale=1, k) {
 }
 
 ##' @export
+##' @rdname means
 rmst_gengamma.orig = function(t, shape, scale=1, k, start=0){
   rmst_generic(pgengamma.orig, t, start=start, shape=shape, scale=scale, k=k)
 }
 
 ##' @export
+##' @rdname means
 mean_gengamma.orig = function(shape, scale=1, k){
   rmst_generic(pgengamma.orig, Inf, start=0, shape=shape, scale=scale, k=k)
 }

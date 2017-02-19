@@ -2,20 +2,30 @@
 % Please edit documentation in R/GenF.R
 \name{GenF.orig}
 \alias{GenF.orig}
+\alias{Hgenf.orig}
 \alias{dgenf.orig}
+\alias{hgenf.orig}
 \alias{pgenf.orig}
 \alias{qgenf.orig}
 \alias{rgenf.orig}
-\alias{Hgenf.orig}
-\alias{hgenf.orig}
 \title{Generalized F distribution (original parameterisation)}
+\usage{
+dgenf.orig(x, mu = 0, sigma = 1, s1, s2, log = FALSE)
+
+pgenf.orig(q, mu = 0, sigma = 1, s1, s2, lower.tail = TRUE,
+  log.p = FALSE)
+
+Hgenf.orig(x, mu = 0, sigma = 1, s1, s2)
+
+hgenf.orig(x, mu = 0, sigma = 1, s1, s2)
+
+qgenf.orig(p, mu = 0, sigma = 1, s1, s2, lower.tail = TRUE,
+  log.p = FALSE)
+
+rgenf.orig(n, mu = 0, sigma = 1, s1, s2)
+}
 \arguments{
 \item{x, q}{vector of quantiles.}
-
-\item{p}{vector of probabilities.}
-
-\item{n}{number of observations. If \code{length(n) > 1}, the length is
-taken to be the number required.}
 
 \item{mu}{Vector of location parameters.}
 
@@ -29,6 +39,11 @@ taken to be the number required.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{vector of probabilities.}
+
+\item{n}{number of observations. If \code{length(n) > 1}, the length is
+taken to be the number required.}
 }
 \value{
 \code{dgenf.orig} gives the density, \code{pgenf.orig} gives the
@@ -73,6 +88,9 @@ infinity, and includes a further new class of distributions with
 negative first shape parameter.  The original is provided here for
 the sake of completion and compatibility.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \references{
 R. L. Prentice (1975). Discrimination among some parametric
 models. Biometrika 62(3):607-614.
@@ -81,7 +99,5 @@ models. Biometrika 62(3):607-614.
 \code{\link{GenF}}, \code{\link{GenGamma.orig}},
 \code{\link{GenGamma}}
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \keyword{distribution}
+

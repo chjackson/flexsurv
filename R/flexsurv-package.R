@@ -116,8 +116,8 @@ NULL
 
 ##' Mean and restricted mean survival functions
 ##' 
-##' Mean and restricted mean survival functions for distributions which are built
-##' into flexsurv, and whose distribution functions are in base R.
+##' Mean and restricted mean survival time functions for distributions which are built
+##' into flexsurv.
 ##' 
 ##' For the exponential, Weibull, log-logistic, lognormal, and gamma, mean survival is
 ##' provided analytically.  Restricted mean survival for the exponential distribution
@@ -128,7 +128,7 @@ NULL
 ##' mean_llogis rmst_llogis mean_lnorm rmst_lnorm mean_gamma rmst_gamma mean_gompertz
 ##' rmst_gompertz mean_gengamma rmst_gengamma mean_gengamma.orig rmst_gengamma.orig
 ##' mean_genf rmst_genf mean_genf.orig rmst_genf.orig
-##' @param t Vector of times to which rmst is evaluated
+##' @param t Vector of times to which restricted mean survival time is evaluated
 ##' @param start Optional left-truncation time or times.  The returned
 ##' restricted mean survival will be conditioned on survival up to
 ##' this time.
@@ -146,7 +146,7 @@ NULL
 ##' @param k vector of shape parameters (generalized gamma [orig]).
 ##' @param s1 Vector of first F shape parameters (generalized F [orig])
 ##' @param s2 vector of second F shape parameters (generalized F [orig])
-##' @return mean surival (functions beginning 'mean') or restricted mean survival
+##' @return mean survival (functions beginning 'mean') or restricted mean survival
 ##' (functions beginning 'rmst_').
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
 ##' @seealso

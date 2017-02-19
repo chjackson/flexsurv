@@ -67,16 +67,19 @@ NULL
 ## shape/scale labelled wrong way round.
 
 ##' @export
+##' @rdname Gompertz
 dgompertz <- function(x, shape, rate=1, log=FALSE) {
     dgompertz_work(x, shape, rate, log)
 }
 
 ##' @export
+##' @rdname Gompertz
 pgompertz <- function(q, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {
     pgompertz_work(q, shape, rate, lower.tail, log.p)
 }
 
 ##' @export
+##' @rdname Gompertz
 qgompertz <- function(p, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {
     d <- dbase("gompertz", lower.tail=lower.tail, log=log.p, p=p, shape=shape, rate=rate)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
@@ -94,6 +97,7 @@ qgompertz <- function(p, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {
 }
 
 ##' @export
+##' @rdname Gompertz
 rgompertz <- function(n, shape = 1, rate = 1){
     r <- rbase("gompertz", n=n, shape=shape, rate=rate)
     for (i in seq_along(r)) assign(names(r)[i], r[[i]])
@@ -102,6 +106,7 @@ rgompertz <- function(n, shape = 1, rate = 1){
 }
 
 ##' @export
+##' @rdname Gompertz
 hgompertz <- function(x, shape, rate = 1, log = FALSE) 
 {
     h <- dbase("gompertz", log=log, x=x, shape=shape, rate=rate)
@@ -114,6 +119,7 @@ hgompertz <- function(x, shape, rate = 1, log = FALSE)
 }
 
 ##' @export
+##' @rdname Gompertz
 Hgompertz <- function(x, shape, rate = 1, log = FALSE) 
 {
     h <- dbase("gompertz", log=log, x=x, shape=shape, rate=rate)
@@ -124,11 +130,13 @@ Hgompertz <- function(x, shape, rate = 1, log = FALSE)
 }
 
 ##' @export
+##' @rdname means
 rmst_gompertz = function(t, shape, rate=1, start=0){
   rmst_generic(pgompertz, t, start=start, shape=shape, rate=rate)
 }
 
 ##' @export
+##' @rdname means
 mean_gompertz = function(shape, rate = 1){
   rmst_generic(pgompertz, Inf, start=0, shape=shape, rate=rate)
 }

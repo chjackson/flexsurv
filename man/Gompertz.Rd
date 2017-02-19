@@ -2,20 +2,28 @@
 % Please edit documentation in R/Gompertz.R
 \name{Gompertz}
 \alias{Gompertz}
+\alias{Hgompertz}
 \alias{dgompertz}
+\alias{hgompertz}
 \alias{pgompertz}
 \alias{qgompertz}
-\alias{hgompertz}
-\alias{Hgompertz}
 \alias{rgompertz}
 \title{The Gompertz distribution}
+\usage{
+dgompertz(x, shape, rate = 1, log = FALSE)
+
+pgompertz(q, shape, rate = 1, lower.tail = TRUE, log.p = FALSE)
+
+qgompertz(p, shape, rate = 1, lower.tail = TRUE, log.p = FALSE)
+
+rgompertz(n, shape = 1, rate = 1)
+
+hgompertz(x, shape, rate = 1, log = FALSE)
+
+Hgompertz(x, shape, rate = 1, log = FALSE)
+}
 \arguments{
 \item{x, q}{vector of quantiles.}
-
-\item{p}{vector of probabilities.}
-
-\item{n}{number of observations. If \code{length(n) > 1}, the length is
-taken to be the number required.}
 
 \item{shape, rate}{vector of shape and rate parameters.}
 
@@ -23,6 +31,11 @@ taken to be the number required.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{vector of probabilities.}
+
+\item{n}{number of observations. If \code{length(n) > 1}, the length is
+taken to be the number required.}
 }
 \value{
 \code{dgompertz} gives the density, \code{pgompertz} gives the
@@ -70,6 +83,9 @@ called \code{1 / scale} there is called the \code{shape} here. The
 terminology here is consistent with the exponential \code{\link{dexp}} and
 Weibull \code{\link{dweibull}} distributions in R.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \references{
 Stata Press (2007) Stata release 10 manual: Survival analysis
 and epidemiological tables.
@@ -77,7 +93,5 @@ and epidemiological tables.
 \seealso{
 \code{\link{dexp}}
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \keyword{distribution}
+
