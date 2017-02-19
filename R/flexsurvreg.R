@@ -1087,7 +1087,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     x <- object
     dat <- x$data
     Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
-    isfac <- sapply(Xraw,is.factor)
+    isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
     type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median"))
     if (is.null(newdata)){
         if (is.vector(X)) X <- matrix(X, nrow=1)
@@ -1112,6 +1112,10 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         else if (!is.matrix(X) || (is.matrix(X) && ncol(X) != x$ncoveffs)) {
             plural <- if (x$ncoveffs > 1) "s" else ""
             stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " element", plural)
+        }
+        else {
+            attr(X, "newdata") <- X
+            colnames(attr(X, "newdata")) <- colnames(model.matrix(x))
         }
     } else
         X <- form.model.matrix(object, as.data.frame(newdata))

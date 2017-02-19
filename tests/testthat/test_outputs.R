@@ -97,6 +97,6 @@ test_that("summary.flexsurvreg tidy output",{
 
     ## covariates but no newdata - covariate column should be included
     st <- summary.flexsurvreg(Model.1, tidy=TRUE, ci=FALSE)
-    expect_equal(st[1,"est"], 0.99723991647129, tol=1e-06)
+    expect_equal(st[1,"est"], 0.99604726078272, tol=1e-06)
     expect_equivalent(st[1,"agecat"], ">=65")
 })
