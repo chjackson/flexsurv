@@ -3,6 +3,7 @@
 #include <Rcpp.h>
 
 #include "distribution.h"
+#include "rep_len.h"
 
 namespace {
 
@@ -113,13 +114,15 @@ dgompertz_work(const Rcpp::NumericVector& x,
 	       const Rcpp::NumericVector& shape,
 	       const Rcpp::NumericVector& rate,
 	       const bool log) {
-  R_xlen_t size = std::max(x.size(),
-			   std::max(shape.size(),
-				    rate.size()));
+  if (x.size() == 0) { return x; }
   
-  return perhaps_exp(Rcpp::mapply(Rcpp::rep_len(x, size),
-				  Rcpp::rep_len(shape, size),
-				  Rcpp::rep_len(rate, size),
+  const R_xlen_t size = std::max(x.size(),
+				 std::max(shape.size(),
+					  rate.size()));
+  
+  return perhaps_exp(Rcpp::mapply(flexsurv::rep_len(x, size),
+				  flexsurv::rep_len(shape, size),
+				  flexsurv::rep_len(rate, size),
 				  gompertz::density()),
 		     log);
 }
@@ -131,20 +134,27 @@ pgompertz_work(const Rcpp::NumericVector& q,
 	       const Rcpp::NumericVector& rate,
 	       const bool lower_tail,
 	       const bool give_log) {
-  R_xlen_t size = std::max(q.size(),
-			   std::max(shape.size(),
-				    rate.size()));
-  return Rcpp::mapply(Rcpp::rep_len(q, size),
-		      Rcpp::rep_len(shape, size),
-		      Rcpp::rep_len(rate, size),
+  if (q.size() == 0) { return q; }
+  
+  const R_xlen_t size = std::max(q.size(),
+				 std::max(shape.size(),
+					  rate.size()));
+  return Rcpp::mapply(flexsurv::rep_len(q, size),
+		      flexsurv::rep_len(shape, size),
+		      flexsurv::rep_len(rate, size),
 		      gompertz::cdf(lower_tail, give_log));
 }
 
 // [[Rcpp::export(name="check.gompertz", rng=false)]]
 Rcpp::LogicalVector check_gompertz(const Rcpp::NumericVector& shape,
 				   const Rcpp::NumericVector& rate) {
+  if ( (0==shape.size()) && (0==rate.size()) ) {
+    Rcpp::LogicalVector null_result(0);
+    return null_result;
+  }
+
   const R_xlen_t size = shape.size();
   return !Rcpp::mapply(shape,
-		       Rcpp::rep_len(rate, size),
+		       flexsurv::rep_len(rate, size),
 		       gompertz::bad);
 }
