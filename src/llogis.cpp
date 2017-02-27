@@ -3,6 +3,7 @@
 #include <Rcpp.h>
 
 #include "distribution.h"
+#include "rep_len.h"
 
 namespace {
 
@@ -88,14 +89,17 @@ dllogis_work(const Rcpp::NumericVector& x,
 	     const Rcpp::NumericVector& shape,
 	     const Rcpp::NumericVector& scale,
 	     const bool log) {
-  R_xlen_t size
+
+  if (x.size() == 0) { return x; }
+  
+  const R_xlen_t size
     = std::max(x.size(),
 	       std::max(shape.size(),
 			scale.size()));
-	       
-  return perhaps_exp(Rcpp::mapply(Rcpp::rep_len(x, size),
-				  Rcpp::rep_len(shape, size),
-				  Rcpp::rep_len(scale, size),
+  
+  return perhaps_exp(Rcpp::mapply(flexsurv::rep_len(x, size),
+				  flexsurv::rep_len(shape, size),
+				  flexsurv::rep_len(scale, size),
 				  llogis::density()),
 		     log);
 }
@@ -107,22 +111,28 @@ pllogis_work(const Rcpp::NumericVector& q,
 	     const Rcpp::NumericVector& scale,
 	     const bool lower_tail,
 	     const bool give_log) {
-  R_xlen_t size
+  if (q.size() == 0) { return q; }
+  
+  const R_xlen_t size
     = std::max(q.size(),
 	       std::max(shape.size(),
 			scale.size()));
 
-  return mapply(Rcpp::rep_len(q, size),
-		Rcpp::rep_len(shape, size),
-		Rcpp::rep_len(scale, size),
+  return mapply(flexsurv::rep_len(q, size),
+		flexsurv::rep_len(shape, size),
+		flexsurv::rep_len(scale, size),
 		llogis::cdf(lower_tail, give_log));
 }
 
 // [[Rcpp::export(name="check.llogis", rng=false)]]
 Rcpp::LogicalVector check_llogis(const Rcpp::NumericVector& shape,
 				 const Rcpp::NumericVector& scale) {
+  if ( (0==shape.size()) && (0==scale.size()) ) {
+    Rcpp::LogicalVector null_result(0);
+    return null_result;
+  }
   const R_xlen_t size = shape.size();
   return !Rcpp::mapply(shape,
-		       Rcpp::rep_len(scale, size),
+		       flexsurv::rep_len(scale, size),
 		       llogis::bad);
 }
