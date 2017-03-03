@@ -16,12 +16,12 @@ test_that("flexsurvspline summary method",{
     expect_true(all(summ$est < summ$ucl))
     expect_true(all(summ$ucl < 1))
     expect_true(all(summ$lcl > 0))
-    summ <- summary(spl, type="survival", B=3, t=1:5)$`group=Good,foo=1`
-    expect_equal(summ$est[1], 0.9684014494284117, tol=1e-05)
-    summ <- summary(spl, type="cumhaz", B=3, t=1:5)$`group=Good,foo=1`
-    expect_equal(summ$est[1],  0.03210855719443461, tol=1e-05)
-    summ <- summary(spl, type="hazard", B=3, t=1:5)$`group=Good,foo=1`
-    expect_equal(summ$est[1],  0.04446356223043756, tol=1e-05)
+    summ <- summary(spl, type="survival", B=3, t=0:5)$`group=Good,foo=1`
+    expect_equal(summ$est[2], 0.9684014494284117, tol=1e-05)
+    summ <- summary(spl, type="cumhaz", B=3, t=0:5)$`group=Good,foo=1`
+    expect_equal(summ$est[2],  0.03210855719443461, tol=1e-05)
+    summ <- summary(spl, type="hazard", B=3, t=0:5)$`group=Good,foo=1`
+    expect_equal(summ$est[2],  0.04446356223043756, tol=1e-05)
 })
 
 if (interactive()){
