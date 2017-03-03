@@ -132,20 +132,20 @@ ldlink <- function(scale){
 ##' @export
 dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, log=FALSE){
     d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale)
-    for (i in seq_along(d)) assign(names(d)[i], d[[i]]); x <- q
+    for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
-        eta <- rowSums(basis(knots, tsfn(x, timescale)) * gamma) + as.numeric(X %*% beta) + offset # log cumulative hazard/odds
+        eta <- rowSums(basis(knots, tsfn(q, timescale)) * gamma) + as.numeric(X %*% beta) + offset # log cumulative hazard/odds
         eeta <- exp(ldlink(scale)(eta))
         ret[ind][eeta==0] <- 0
         ret[ind][is.nan(eeta)] <- NaN
         ind2 <- !(eeta==0 | is.nan(eeta))
-        x <- x[ind2]
+        q <- q[ind2]
         gamma <- gamma[ind2,,drop=FALSE]
         knots <- knots[ind2,,drop=FALSE] 
         eeta <- eeta[ind2]
-        ind <- ind & ind2
-        dsum <- rowSums(dbasis(knots, tsfn(x, timescale)) * gamma)  # ds/dx
-        ret[ind] <- dtsfn(x,timescale) * dsum * eeta
+        ind[ind] <- ind[ind] & ind2
+        dsum <- rowSums(dbasis(knots, tsfn(q, timescale)) * gamma)  # ds/dx
+        ret[ind] <- dtsfn(q,timescale) * dsum * eeta
         ## derivative of log cum haz cannot be negative by definition, but
         ## optimisation doesn't constrain gamma to respect this, so set
         ## likelihood to zero then (assuming at least one death)
@@ -249,7 +249,7 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     if (any(ind)){
         eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
         eeta <- hlink(scale)(eta)
-        ret[ind] <- dtsfn(x, timescale)[ind] * rowSums(dbasis(knots, tsfn(x, timescale))[ind] * gamma) * eeta
+        ret[ind] <- dtsfn(q, timescale) * rowSums(dbasis(knots, tsfn(q, timescale)) * gamma) * eeta
     }
     as.numeric(ret)
 }
