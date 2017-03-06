@@ -3,6 +3,7 @@
 #include <Rcpp.h>
 
 #include "distribution.h"
+#include "rep_len.h"
 #include "gengamma.h"
 #include "mapply.h"
 
@@ -112,17 +113,19 @@ dgenf_work(const Rcpp::NumericVector& x,
 	   const Rcpp::NumericVector& Q,
 	   const Rcpp::NumericVector& P,
 	   const bool log) {
-  R_xlen_t size
+  if (x.size() == 0) { return x; }
+
+  const R_xlen_t size
     = std::max(P.size(),
 	       std::max(std::max(sigma.size(),
 				 Q.size()),
 			std::max(x.size(),
 				 mu.size())));
-  return perhaps_exp(mapply(Rcpp::rep_len(x, size),
-			    Rcpp::rep_len(mu, size),
-			    Rcpp::rep_len(sigma, size),
-			    Rcpp::rep_len(Q, size),
-			    Rcpp::rep_len(P, size),
+  return perhaps_exp(mapply(flexsurv::rep_len(x, size),
+			    flexsurv::rep_len(mu, size),
+			    flexsurv::rep_len(sigma, size),
+			    flexsurv::rep_len(Q, size),
+			    flexsurv::rep_len(P, size),
 			    genf::density()),
 		     log);
 }
@@ -136,18 +139,20 @@ pgenf_work(const Rcpp::NumericVector& q,
 	   const Rcpp::NumericVector& P,
 	   const bool lower_tail,
 	   const bool give_log) {
-  R_xlen_t size
+  if (q.size() == 0) { return q; }
+  
+  const R_xlen_t size
     = std::max(P.size(),
 	       std::max(std::max(sigma.size(),
 				 Q.size()),
 			std::max(q.size(),
 				 mu.size())));
-
-  return mapply(Rcpp::rep_len(q, size),
-		Rcpp::rep_len(mu, size),
-		Rcpp::rep_len(sigma, size),
-		Rcpp::rep_len(Q, size),
-		Rcpp::rep_len(P, size),
+  
+  return mapply(flexsurv::rep_len(q, size),
+		flexsurv::rep_len(mu, size),
+		flexsurv::rep_len(sigma, size),
+		flexsurv::rep_len(Q, size),
+		flexsurv::rep_len(P, size),
 		genf::cdf(lower_tail, give_log));
 }
 
@@ -165,11 +170,18 @@ Rcpp::LogicalVector check_genf(const Rcpp::NumericVector& mu,
 			       const Rcpp::NumericVector& sigma,
 			       const Rcpp::NumericVector& Q,
 			       const Rcpp::NumericVector& P) {
-
+  if ( (0==mu.size()) &&
+       (0==sigma.size()) &&
+       (0==Q.size()) &&
+       (0==P.size()) ) {
+    Rcpp::LogicalVector null_result(0);
+    return null_result;
+  }
+  
   const R_xlen_t size = mu.size();
   return !mapply(mu,
-		 Rcpp::rep_len(sigma, size),
-		 Rcpp::rep_len(Q, size),
-		 Rcpp::rep_len(P, size),
+		 flexsurv::rep_len(sigma, size),
+		 flexsurv::rep_len(Q, size),
+		 flexsurv::rep_len(P, size),
 		 genf::bad);
 }
