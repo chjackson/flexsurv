@@ -1,12 +1,6 @@
-Warnings spewed in vignette for weibull quiet   
-
 Warn about survival times of zero (or stop=start)
 
-Incomprehensible error if survival times negative, at least in flexsurvspline
-
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
-
-compare with rstpm2 package
 
 predictions
 
@@ -25,7 +19,7 @@ Tidy up summary functions, including bootstrap, covariate handling.
 
 D can be non pos-def in QP (github #9). Worked around for now, but why does this happen?
 
-hsurvspline at x=0, currently zero, should it be limit as x reduces to 0?
+d/hsurvspline at x=0, currently zero, should it be limit as x reduces to 0?
 
 make plot/summary do baseline values of factor covs and mean of continuous
 
@@ -65,3 +59,5 @@ any role for pseudo-observations?  (residual plots? regressing functions of pars
 http://smm.sagepub.com/content/19/1/71.full.pdf+html
 
 piecewise exponential distribution
+
+compare with rstpm2 package

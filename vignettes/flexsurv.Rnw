@@ -725,6 +725,9 @@ and cumulative hazard.  (Note that since version 0.7, the
 but this example has been kept here for illustrative purposes.)
 \footnote{The \pkg{eha} package 
 may need to be detached first so that \pkg{flexsurv}'s built-in \code{hweibull} is used, which returns \code{NaN} if the parameter values are zero, rather than failing as \pkg{eha}'s currently does.}
+<<echo=FALSE>>=
+options(warn=-1)
+@ 
 <<>>=
 hweibullPH <- function(x, shape, scale = 1, log = FALSE){
     hweibull(x, shape = shape, scale = scale ^ {-1 / shape}, log = log)
@@ -744,6 +747,9 @@ fs6 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data = bc,
 fs6$res["scale", "est"] ^ {-1 / fs6$res["shape", "est"]}
 - fs6$res["groupMedium", "est"] / fs6$res["shape", "est"]
 - fs6$res["groupPoor", "est"] / fs6$res["shape", "est"]
+@ 
+<<echo=FALSE>>=
+options(warn=0)
 @ 
 The fitted model is the same as \code{fs1}, therefore the maximised likelihood is the same. 
 The parameter estimates of \code{fs6} can be transformed to those of \code{fs1} as shown. 

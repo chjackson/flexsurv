@@ -255,6 +255,9 @@ check.flexsurv.response <- function(Y){
     else if (attr(Y, "type") == "right")
         Y <- cbind(Y, start=0, stop=Y[,"time"], time1=Y[,"time"], time2=Inf)
     else stop("Survival object type \"", attr(Y, "type"), "\"", " not supported")
+    if (any(Y[,"time1"]<0)){
+        stop("Negative survival times in the data")
+    }
     Y
 }
 
