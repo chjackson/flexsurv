@@ -1158,14 +1158,13 @@ the exact event times enables much more flexible models, which
 \pkg{flexsurv} can fit. 
 
 \paragraph{Alternative time scales} 
-In semi-Markov (clock-reset) models, $q_{rs}(t)$ depends on the time
-$t$ since entry into the current state, but otherwise, the time since
-the beginning of the process is forgotten.  Any software to fit
-survival models can also fit this kind of multi-state model, as the 
-following sections will explain. 
+In semi-Markov (``clock-reset'') models, $q_{rs}(t)$ is defined as a 
+function of the time $t$ since entry into the current state.  Any 
+software to fit survival models can also fit this kind of multi-state model, as the following sections will explain. 
 
-In an inhomogeneous Markov (clock-forward) model, $t$ represents the
-time since the beginning of the process, but the intensity $q_{rs}(t)$
+In an inhomogeneous Markov model, $t$ represents the
+time since the beginning of the process (that is, a ``clock-forward'' 
+scale is used), but the intensity $q_{rs}(t)$
 does not depend further on $\mathcal{F}_t$.  Again, standard survival
 modelling software can be used, with the additional requirement that
 it can deal with left-truncation or \emph{counting process} data, which 
@@ -1175,6 +1174,11 @@ These approaches are equivalent for competing risks models, since
 there is at most one transition for each individual, so that the time
 since the beginning of the process equals the time spent in the
 current state.  Therefore no left-truncation is necessary.
+
+Note also that in a clock-reset model, the time since the beginning of
+the process may enter the model as a covariate.  Likewise, in a
+clock-forward model, the time spent in the current state may enter as
+a covariate, in which case the model is no longer Markov.
 
 \paragraph{Example} For illustration, consider a simple three-state
 example, previously studied by \citet{heng:paper}. Recipients of lung
