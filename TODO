@@ -1,5 +1,3 @@
-Warn about survival times of zero (or stop=start)
-
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
 predictions
@@ -20,6 +18,8 @@ Tidy up summary functions, including bootstrap, covariate handling.
 D can be non pos-def in QP (github #9). Worked around for now, but why does this happen?
 
 d/hsurvspline at x=0, currently zero, should it be limit as x reduces to 0?
+
+Warn about survival times of zero (or stop=start) which may be invalid for particular models and parameter values, but not always
 
 make plot/summary do baseline values of factor covs and mean of continuous
 

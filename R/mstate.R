@@ -925,7 +925,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     if (length(t)>1) stop("\"t\" must be a single number")
     for (i in seq_len(n)){
         sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
-                      start=i, M=M, tvar="trans", tcovs=tcovs, debug=FALSE)
+                      start=i, M=M, tvar=tvar, tcovs=tcovs, debug=FALSE)
         last.st <- sim$st[,ncol(sim$st)]
         res[i,] <- prop.table(table(factor(last.st, levels=seq_len(n))))
     }
@@ -1027,7 +1027,7 @@ totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
 {
     if (length(t)>1) stop("\"t\" must be a single number")
     sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
-                    start=start, M=M, tvar="trans", tcovs=tcovs, debug=FALSE)
+                    start=start, M=M, tvar=tvar, tcovs=tcovs, debug=FALSE)
     dt <- diff(t(cbind(sim$t, t)))
     st <- factor(t(sim$st), levels=1:nrow(trans))
     res <- tapply(dt, st, sum) / M
