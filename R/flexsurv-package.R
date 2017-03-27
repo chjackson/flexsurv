@@ -69,7 +69,7 @@
 ##' gamma distribution.  Statistics in Medicine 26:4252-4374
 ##' @keywords package
 ##' @importFrom Rcpp sourceCpp
-##' @useDynLib flexsurv
+##' @useDynLib flexsurv, .registration = TRUE
 ##' @import stats
 ##' @importFrom mstate msfit probtrans
 ##' @importFrom graphics plot lines
