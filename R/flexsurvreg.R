@@ -86,13 +86,13 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
         dargs$log <- TRUE
         logdens <- do.call(dfns$d, dargs)
         
-        ## Left censoring times
+        ## Left censoring times (upper bound for event time) 
         pmaxargs <- fnargs.nevent
         pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
         pmax <- do.call(dfns$p, pmaxargs)
         pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
         
-        ## Right censoring times
+        ## Right censoring times (lower bound for event time) 
         pargs <- fnargs.nevent
         pargs$q <- right.censor
         pmin <- do.call(dfns$p, pargs)
@@ -240,6 +240,17 @@ expand.summfn.args <- function(summfn){
     summfn2
 }
 
+### On entry:
+### event (status=1)            time1=event time
+### right-censoring (status=0)  time1=lower bound
+### left-censoring (status=2)   time1=upper bound 
+### interval-censoring (status=3)  time1=lower, time2=upper
+
+### On exit
+### time1=lower bound
+### time2=upper bound 
+### so meaning of time1,time2 reversed with left-censoring
+
 check.flexsurv.response <- function(Y){
     if (!inherits(Y, "Surv"))
         stop("Response must be a survival object")
@@ -249,7 +260,8 @@ check.flexsurv.response <- function(Y){
         Y <- cbind(Y, time=Y[,"stop"] - Y[,"start"], time1=Y[,"stop"], time2=Inf)
     else if (attr(Y, "type") == "interval"){
         Y[,"time2"][Y[,"status"]==0] <- Inf   # upper bound with right censoring 
-        Y[,"time2"][Y[,"status"]==2] <- -Inf  # 
+        Y[,"time2"][Y[,"status"]==2] <- Y[,"time1"][Y[,"status"]==2]
+        Y[,"time1"][Y[,"status"]==2] <- 0  # 
         Y <- cbind(Y, start=0, stop=Y[,"time1"], time=Y[,"time1"])
     }
     else if (attr(Y, "type") == "right")

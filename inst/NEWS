@@ -1,6 +1,13 @@
 -*- text -*-
 
 
+
+Version 1.1.1 (2017-03-27)
+-------------
+
+* Allow dynamic symbols in C code.
+
+
 Version 1.1 (2017-03-27)
 -------------
 
