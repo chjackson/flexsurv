@@ -23,8 +23,12 @@ namespace {
 	const double scale_q = shape * q;
 	return - rate * q * exprel(scale_q);
       } else {
-	// q is infinite (and positive)
-	return R_NegInf;
+        // If shape is negative, Gompertz reaches asymptote > 0
+        if (shape < 0) {
+          return shape / rate;
+        } else {
+          return R_NegInf;
+        }
       }
     }
     
