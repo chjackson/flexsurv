@@ -25,7 +25,7 @@ namespace {
       } else {
         // If shape is negative, Gompertz reaches asymptote > 0
         if (shape < 0) {
-          return shape / rate;
+          return rate / shape;
         } else {
           return R_NegInf;
         }
