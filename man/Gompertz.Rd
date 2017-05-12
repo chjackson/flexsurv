@@ -66,7 +66,7 @@ The probability distribution function is \deqn{F(x | a, b) = 1 - \exp(-b/a
 (e^{ax} - 1))}{F(x | a, b) = 1 - exp(-b/a (exp(ax) - 1))}
 
 Thus if \eqn{a} is negative, letting \eqn{x} tend to infinity shows that
-there is a non-zero probability \eqn{1 - \exp(b/a)}{1 - exp(b/a)} of living
+there is a non-zero probability \eqn{\exp(b/a)}{exp(b/a)} of living
 forever.  On these occasions \code{qgompertz} and \code{rgompertz} will
 return \code{Inf}.
 }
