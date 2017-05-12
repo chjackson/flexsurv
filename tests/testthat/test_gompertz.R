@@ -41,7 +41,11 @@ test_that("Gompertz with chance of living forever",{
     x <- c(0.8, 0.9, 0.97, 0.99)
     expect_equal(qgompertz(x, shape=shape, rate=rate), c(1.28150707286845, 2.4316450975351, Inf, Inf))
                                         # qgeneric(pgompertz, p=x, shape=shape, rate=rate) # won't work - needs smoothness
-    expect_equal(pgompertz(Inf, shape=shape, rate=rate), 1)
+    expect_equal(pgompertz(Inf, shape=shape, rate=rate, lower.tail = F), exp(rate/shape))
+    expect_equal(
+      pgompertz(Inf, shape=shape, rate=rate, lower.tail = F),
+      pgompertz(9999999, shape=shape, rate=rate, lower.tail = F)
+    )
 })
 
 test_that("Gompertz hazards",{
