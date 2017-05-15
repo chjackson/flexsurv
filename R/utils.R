@@ -121,6 +121,7 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
 {
   args <- list(...)
   t_len <- length(t)
+  if(length(start) == 1) start <- rep(start, length(t))
   ret <- numeric(t_len)
   start_p = 1 - pdist(start,...)
   for(i in seq_len(t_len)){
