@@ -69,7 +69,7 @@ form.dp <- function(dlist, dfns, integ.opts){
         }
     }
     if (!exists("q", inherits=FALSE)){
-      if (exists(pname)) q <- get(qname)
+      if (exists(qname)) q <- get(qname)
       else {
         # giving this another name to avoid scoping issues
         # w/ name p also being an argument to q functions
