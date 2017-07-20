@@ -62,7 +62,7 @@ Various different parameterisations of this distribution are
 used.  In the one used here, the interpretation of the parameters
 is the same as in the standard Weibull distribution
 (\code{\link{dweibull}}).  Like the Weibull, the survivor function
-is a transformation of \eqn{(x/b)^a} from the real line to [0,1],
+is a transformation of \eqn{(x/b)^a} from the non-negative real line to [0,1],
 but with a different link function.  Covariates on \eqn{b}
 represent time acceleration factors, or ratios of expected
 survival.

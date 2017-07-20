@@ -247,8 +247,9 @@ expand.summfn.args <- function(summfn){
 ### interval-censoring (status=3)  time1=lower, time2=upper
 
 ### On exit
-### time1=lower bound
-### time2=upper bound 
+### time1=lower bound or event time
+### time2=upper bound
+### start=left truncation time
 ### so meaning of time1,time2 reversed with left-censoring
 
 check.flexsurv.response <- function(Y){
@@ -783,7 +784,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if (missing(inits) && is.null(dlist$inits))
         stop("\"inits\" not supplied, and no function to estimate them found in the custom distribution list")
     if (missing(inits) || any(is.na(inits))){
-        yy <- ifelse(Y[,"status"]==3 & is.finite(Y[,"time2"]), (Y[,"time1"] + Y[,"time2"])/2, Y[,"time"])
+        yy <- ifelse(Y[,"status"]==3 & is.finite(Y[,"time2"]), (Y[,"time1"] + Y[,"time2"])/2, Y[,"time1"])
         wt <- yy*weights*length(yy)/sum(weights)
         dlist$inits <- expand.inits.args(dlist$inits)
         inits.aux <- c(aux, list(forms=forms, data=if(missing(data)) NULL else data, weights=temp$weights,

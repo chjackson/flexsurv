@@ -39,18 +39,18 @@ test_that("pmatrix.fs",{
     pmat <- pmatrix.fs(bexp.markov, t=c(5,10), trans=tmat)
     expect_equal(pmat$"5"[1,2], 0.267218506920585, tol=1e-06)
     pmat <- pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
-    expect_equal(pmat$"5"[1,2], 0.259087945965485, tol=1e-06)
+    expect_equal(pmat$"5"[1,2], 0.259065437633427, tol=1e-06)
 })
 
 test_that("totlos.fs",{
     tl <- totlos.fs(bexp.markov, t=c(5), trans=tmat)
     expect_equal(as.numeric(tl), c(2.89231556324412, 0, 0, 1.06822543404334, 2.77639174263866, 0, 1.03945900271255, 2.22360825736133, 5), tol=1e-06)
     tl <- totlos.fs(bexp.markov.cov, t=c(5), trans=tmat, newdata=list(x=1))
-    expect_equal(as.numeric(tl), c(2.76046751607392, 0, 0, 1.08873482833622, 2.64545247064533, 0, 1.15079765558986, 2.35454752935467, 5))
+    expect_equal(as.numeric(tl), c(2.76115934740386, 0, 0, 1.08844199049896, 2.64568022609759, 0, 1.15039866209718, 2.35431977390241, 5))
     tl <- totlos.fs(bexp.markov, t=c(5,10), trans=tmat)
-    expect_equal(as.numeric(tl[[1]]), c(2.8923155917139, 0, 0, 1.06822541852575, 2.77639172478672,  0, 1.03945898976035, 2.22360827521328, 5))
+    expect_equal(as.numeric(tl[[1]]), c(2.89231557124359, 0, 0, 1.06822540869797, 2.77639177178247, 0, 1.03945902005845, 2.22360822821753, 5))
     tl <- totlos.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
-    expect_equal(as.numeric(tl[[1]]),c(2.76046751607392, 0, 0, 1.08873482833622, 2.64545247064533, 0, 1.15079765558986, 2.35454752935467, 5))
+    expect_equal(as.numeric(tl[[1]]),c(2.76115934740386, 0, 0, 1.08844199049896, 2.64568022609759, 0, 1.15039866209718, 2.35431977390241, 5))
     attr(tl, "P")
 })
 

@@ -56,8 +56,6 @@ level, and the second contrast is ``turned on'' for the third level
 
 \code{"mean"} for mean survival.
 
-\code{"median"} for median survival.
-
 Ignored if \code{"fn"} is specified.}
 
 \item{fn}{Custom function of the parameters to summarise against time.
