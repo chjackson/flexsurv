@@ -521,7 +521,7 @@ compress.model.matrices <- function(mml){
 ##' or alternative values for each parameter) and return the results as a
 ##' vector.  The function \code{\link{Vectorize}} may be helpful for doing
 ##' this: see the example below.
-##' 
+
 ##' These functions may be in an add-on package (see below for an example) or
 ##' may be user-written.  If they are user-written they must be defined in the
 ##' global environment, or supplied explicitly through the \code{dfns} argument
@@ -1278,7 +1278,7 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 ##' functions of parameters.
 ##' 
 ##' 
-##' @param x A fitted model from \code{\link{flexsurvreg}}.
+##' @param x A fitted model from \code{\link{flexsurvreg}} (or \code{\link{flexsurvspline}}).
 ##' @param B Number of samples.
 ##' @param newdata Data frame or list containing the covariate values to
 ##' evaluate the parameters at.  If there are covariates in the model, at least
