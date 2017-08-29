@@ -8,7 +8,7 @@ normboot.flexsurvreg(x, B, newdata = NULL, X = NULL, transform = FALSE,
   raw = FALSE)
 }
 \arguments{
-\item{x}{A fitted model from \code{\link{flexsurvreg}}.}
+\item{x}{A fitted model from \code{\link{flexsurvreg}} (or \code{\link{flexsurvspline}}).}
 
 \item{B}{Number of samples.}
 

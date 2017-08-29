@@ -484,7 +484,9 @@ compress.model.matrices <- function(mml){
 ##' \code{\link{confint}} methods for \code{flexsurvreg} objects work on this
 ##' scale.} \item{coefficients}{The transformed maximum likelihood estimates,
 ##' as in \code{res.t}. Calling \code{coef()} on a \code{\link{flexsurvreg}}
-##' object simply returns this component.} \item{loglik}{Log-likelihood}
+##' object simply returns this component.} \item{loglik}{Log-likelihood. This will differ from Stata, where the sum of
+##' the log uncensored survival times is added to the log-likelihood in
+##' survival models, to remove dependency on the time scale.}
 ##' \item{logliki}{Vector of individual contributions to the log-likelihood}
 ##' \item{AIC}{Akaike's information criterion (-2*log likelihood + 2*number of
 ##' estimated parameters)} \item{cov}{Covariance matrix of the parameters, on
