@@ -1469,7 +1469,7 @@ that the individual is in state $r$ at time $t_0$.
 For a time-inhomogeneous Markov model, these are related to the transition
 intensities via the Kolmogorov forward equation
 \[ \frac{d P(t_0,t)}{dt} = P(t_0,t) Q(t) \] with initial condition
-$P() = I$ \citep{cox:miller}.  This can be solved numerically, as in
+$P(t_0,t_0) = I$ \citep{cox:miller}.  This can be solved numerically, as in
 \citet{titman:nonhomog}.  This is implemented in the function
 \code{pmatrix.fs}, using the \pkg{deSolve} package \citep{deSolve}.
 This returns the full transition probability matrix $P(t_0,t)$ from
