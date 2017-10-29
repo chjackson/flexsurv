@@ -99,11 +99,10 @@ tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 totlos.simfs(bexp, t=10, trans=tmat)
 totlos.simfs(bexp, t=1000, trans=tmat)
 }
-\author{
-Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
-}
 \seealso{
 \code{\link{pmatrix.simfs}},\code{\link{sim.fmsm}},\code{\link{msfit.flexsurvreg}}.
 }
+\author{
+Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
+}
 \keyword{models,survival}
-

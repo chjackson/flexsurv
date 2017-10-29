@@ -31,11 +31,10 @@ models are presented on the same scale as the covariate effects.  Note that
 any parameter in a distribution fitted by \code{\link{flexsurvreg}} or
 \code{\link{flexsurvreg}} may be an intercept in a regression model.
 }
-\author{
-C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
 \seealso{
 \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
 }
+\author{
+C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
 \keyword{models}
-

@@ -2,9 +2,9 @@
 % Please edit documentation in R/flexsurv-package.R
 \docType{package}
 \name{flexsurv-package}
+\alias{flexsurv-package}
 \alias{_PACKAGE}
 \alias{flexsurv}
-\alias{flexsurv-package}
 \title{flexsurv: Flexible parametric survival and multi-state models}
 \description{
 flexsurv: Flexible parametric models for time-to-event data, including the
@@ -58,9 +58,7 @@ methods in detail, and gives several worked examples.  A further vignette
 \bold{flexsurv-examples} gives a few more complicated examples, and users
 are encouraged to submit their own.
 }
-\author{
-Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
+
 \references{
 Jackson, C. (2016). flexsurv: A Platform for Parametric
 Survival Modeling in R. Journal of Statistical Software, 70(8), 1-33.
@@ -78,5 +76,15 @@ Cox, C., Chu, H., Schneider, M. F. and Muñoz, A. (2007).  Parametric
 survival analysis and taxonomy of hazard functions for the generalized
 gamma distribution.  Statistics in Medicine 26:4252-4374
 }
-\keyword{package}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/chjackson/flexsurv-dev}
+  \item Report bugs at \url{https://github.com/chjackson/flexsurv-dev/issues}
+}
 
+}
+\author{
+Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
+\keyword{package}

@@ -123,12 +123,11 @@ totlos.fs(bexp, t=c(5,10), trans=tmat)
 # distribution, the "semi-Markov" model there is the same as the Markov
 # model here
 }
-\author{
-Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
-}
 \seealso{
 \code{\link{totlos.simfs}}, \code{\link{pmatrix.fs}},
 \code{\link{msfit.flexsurvreg}}.
 }
+\author{
+Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
+}
 \keyword{models,survival}
-

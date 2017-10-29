@@ -114,12 +114,11 @@ wanting publication-quality graphs are advised to set up an empty plot with
 the desired axes first (e.g. with \code{plot(...,type="n",...)}), then use
 suitable \code{\link{lines}} functions to add lines.
 }
-\author{
-C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
 \seealso{
 \code{\link{flexsurvreg}}
 }
+\author{
+C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
 \keyword{hplot}
 \keyword{models}
-

@@ -2,10 +2,16 @@
 % Please edit documentation in R/GenF.R
 \name{GenF}
 \alias{GenF}
-\alias{Hgenf}
 \alias{dgenf}
-\alias{hgenf}
 \alias{pgenf}
+\alias{qgenf}
+\alias{rgenf}
+\alias{Hgenf}
+\alias{hgenf}
+\alias{dgenf}
+\alias{pgenf}
+\alias{Hgenf}
+\alias{hgenf}
 \alias{qgenf}
 \alias{rgenf}
 \title{Generalized F distribution}
@@ -109,9 +115,6 @@ The parameters \code{Q} and \code{P} are usually called \eqn{q} and
 to avoid clashing with the conventional arguments \code{q} in the
 probability function and \code{p} in the quantile function.
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \references{
 R. L. Prentice (1975). Discrimination among some parametric
 models. Biometrika 62(3):607-614.
@@ -127,5 +130,7 @@ improve prediction.  International Journal of Biostatistics 6(1):Article
 \seealso{
 \code{\link{GenF.orig}}, \code{\link{GenGamma}}
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \keyword{distribution}
-

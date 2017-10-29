@@ -129,9 +129,6 @@ model.
 Time-dependent covariates are not currently supported.  The covariate
 values are assumed to be constant through time for each fitted curve.
 }
-\author{
-C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
 \references{
 Mandel, M. (2013). "Simulation based confidence intervals for
 functions with complicated derivatives." The American Statistician (in
@@ -140,5 +137,7 @@ press).
 \seealso{
 \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
 }
+\author{
+C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
 \keyword{models}
-

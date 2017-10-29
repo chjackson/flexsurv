@@ -53,4 +53,3 @@ rmst_generic(plnorm, 500, start=250, c(0.025, 0.975), meanlog=7.4225, sdlog = 1.
 Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 }
 \keyword{distribution}
-

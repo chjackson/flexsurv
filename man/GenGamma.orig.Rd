@@ -2,10 +2,16 @@
 % Please edit documentation in R/GenGamma.R
 \name{GenGamma.orig}
 \alias{GenGamma.orig}
-\alias{Hgengamma.orig}
 \alias{dgengamma.orig}
-\alias{hgengamma.orig}
 \alias{pgengamma.orig}
+\alias{qgengamma.orig}
+\alias{rgengamma.orig}
+\alias{Hgengamma.orig}
+\alias{hgengamma.orig}
+\alias{dgengamma.orig}
+\alias{pgengamma.orig}
+\alias{Hgengamma.orig}
+\alias{hgengamma.orig}
 \alias{qgengamma.orig}
 \alias{rgengamma.orig}
 \title{Generalized gamma distribution (original parameterisation)}
@@ -93,9 +99,6 @@ The generalized F distribution \code{\link{GenF.orig}}, and its similar
 alternative parameterisation \code{\link{GenF}}, extend the generalized
 gamma to four parameters.
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \references{
 Stacy, E. W. (1962). A generalization of the gamma
 distribution.  Annals of Mathematical Statistics 33:1187-92.
@@ -111,5 +114,7 @@ distributions.  Technometrics 22(3):409-419.
 \code{\link{GenF}}, \code{\link{Lognormal}}, \code{\link{GammaDist}},
 \code{\link{Weibull}}.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \keyword{distribution}
-

@@ -217,9 +217,6 @@ splw2 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull")
 }
 
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \references{
 Royston, P. and Parmar, M. (2002).  Flexible parametric
 proportional-hazards and proportional-odds models for censored survival
@@ -238,6 +235,8 @@ general parametric distributions.
 fitted survival, hazards and cumulative hazards from models fitted by
 \code{\link{flexsurvspline}} and \code{\link{flexsurvreg}}.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \keyword{models}
 \keyword{survival}
-

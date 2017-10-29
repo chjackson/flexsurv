@@ -38,4 +38,3 @@ a flexible parametric multi-state model, at given covariate values.
 Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
 }
 \keyword{models,survival}
-

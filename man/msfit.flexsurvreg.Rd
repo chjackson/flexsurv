@@ -139,9 +139,6 @@ msfit.flexsurvreg(bexp.list, t=seq(0,12,by=0.1), trans=tmat)
 }
 
 }
-\author{
-C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
 \references{
 Liesbeth C. de Wreede, Marta Fiocco, Hein Putter (2011).
 \pkg{mstate}: An R Package for the Analysis of Competing Risks and
@@ -160,5 +157,7 @@ calling \pkg{mstate}.  These include \code{\link{pmatrix.fs}} and
 lengths of stay in states.  These are generally more efficient than going
 via \pkg{mstate}.
 }
+\author{
+C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
 \keyword{models}
-
