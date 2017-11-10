@@ -67,16 +67,16 @@ to convert these into functions with arguments \code{gamma0},
 of \code{gamma}, where \code{n = nk-1}, and with other arguments
 in the same format.
 }
+
 \examples{
 
 fn <- unroll.function(ncol, x=1:3)
 fn(1:3, 1:3, 1:3) # equivalent to...
 ncol(cbind(1:3,1:3,1:3))
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \seealso{
 \code{\link{flexsurvspline}},\code{\link{flexsurvreg}}
 }
-
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}

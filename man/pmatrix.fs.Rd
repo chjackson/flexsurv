@@ -107,12 +107,11 @@ tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 # BOS (state 2)
 pmatrix.fs(bexp, t=c(5,10), trans=tmat)
 }
-\author{
-Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
-}
 \seealso{
 \code{\link{pmatrix.simfs}}, \code{\link{totlos.fs}},
 \code{\link{msfit.flexsurvreg}}.
 }
+\author{
+Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
+}
 \keyword{models,survival}
-

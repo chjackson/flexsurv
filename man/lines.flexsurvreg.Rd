@@ -59,12 +59,11 @@ Add fitted survival (or hazard or cumulative hazard) curves from a
 \details{
 Equivalent to \code{\link{plot.flexsurvreg}(...,add=TRUE)}.
 }
-\author{
-C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
 \seealso{
 \code{\link{flexsurvreg}}
 }
+\author{
+C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
 \keyword{aplot}
 \keyword{models}
-

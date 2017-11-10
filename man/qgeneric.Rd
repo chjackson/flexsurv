@@ -63,4 +63,3 @@ qgeneric(pnorm, c(0.025, 0.975), mean=0, sd=1) # must name the arguments
 Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 }
 \keyword{distribution}
-

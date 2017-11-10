@@ -2,12 +2,18 @@
 % Please edit documentation in R/Gompertz.R
 \name{Gompertz}
 \alias{Gompertz}
-\alias{Hgompertz}
 \alias{dgompertz}
+\alias{pgompertz}
+\alias{qgompertz}
 \alias{hgompertz}
+\alias{Hgompertz}
+\alias{rgompertz}
+\alias{dgompertz}
 \alias{pgompertz}
 \alias{qgompertz}
 \alias{rgompertz}
+\alias{hgompertz}
+\alias{Hgompertz}
 \title{The Gompertz distribution}
 \usage{
 dgompertz(x, shape, rate = 1, log = FALSE)
@@ -83,9 +89,6 @@ called \code{1 / scale} there is called the \code{shape} here. The
 terminology here is consistent with the exponential \code{\link{dexp}} and
 Weibull \code{\link{dweibull}} distributions in R.
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \references{
 Stata Press (2007) Stata release 10 manual: Survival analysis
 and epidemiological tables.
@@ -93,5 +96,7 @@ and epidemiological tables.
 \seealso{
 \code{\link{dexp}}
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \keyword{distribution}
-

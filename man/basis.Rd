@@ -3,8 +3,8 @@
 \name{basis}
 \alias{basis}
 \alias{dbasis}
-\alias{dfss}
 \alias{fss}
+\alias{dfss}
 \title{Natural cubic spline basis}
 \usage{
 basis(knots, x)
@@ -34,9 +34,6 @@ survival models.
 \details{
 The exact formula for the basis is given in \code{\link{flexsurvspline}}.
 }
-\author{
-Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
-}
 \references{
 Royston, P. and Parmar, M. (2002).  Flexible parametric
 proportional-hazards and proportional-odds models for censored survival
@@ -46,5 +43,7 @@ effects. Statistics in Medicine 21(1):2175-2197.
 \seealso{
 \code{\link{flexsurvspline}}.
 }
+\author{
+Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+}
 \keyword{models}
-

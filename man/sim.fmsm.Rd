@@ -87,11 +87,10 @@ bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 sim.fmsm(bexp, M=10, t=5, trans=tmat)
 }
-\author{
-Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
-}
 \seealso{
 \code{\link{pmatrix.simfs}},\code{\link{totlos.simfs}}
 }
+\author{
+Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
+}
 \keyword{models,survival}
-

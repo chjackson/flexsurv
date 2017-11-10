@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // dgenf_work
 Rcpp::NumericVector dgenf_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const Rcpp::NumericVector& P, const bool log);
-RcppExport SEXP flexsurv_dgenf_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP, SEXP logSEXP) {
+RcppExport SEXP _flexsurv_dgenf_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP, SEXP logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
@@ -22,7 +22,7 @@ END_RCPP
 }
 // pgenf_work
 Rcpp::NumericVector pgenf_work(const Rcpp::NumericVector& q, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const Rcpp::NumericVector& P, const bool lower_tail, const bool give_log);
-RcppExport SEXP flexsurv_pgenf_work(SEXP qSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
+RcppExport SEXP _flexsurv_pgenf_work(SEXP qSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
@@ -38,7 +38,7 @@ END_RCPP
 }
 // check_genf
 Rcpp::LogicalVector check_genf(const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const Rcpp::NumericVector& P);
-RcppExport SEXP flexsurv_check_genf(SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP) {
+RcppExport SEXP _flexsurv_check_genf(SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
@@ -51,7 +51,7 @@ END_RCPP
 }
 // dgengamma_work
 Rcpp::NumericVector dgengamma_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const bool log);
-RcppExport SEXP flexsurv_dgengamma_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP logSEXP) {
+RcppExport SEXP _flexsurv_dgengamma_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
@@ -65,7 +65,7 @@ END_RCPP
 }
 // pgengamma_work
 Rcpp::NumericVector pgengamma_work(const Rcpp::NumericVector& q, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const bool lower_tail, const bool give_log);
-RcppExport SEXP flexsurv_pgengamma_work(SEXP qSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
+RcppExport SEXP _flexsurv_pgengamma_work(SEXP qSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
@@ -80,7 +80,7 @@ END_RCPP
 }
 // check_gengamma
 Rcpp::LogicalVector check_gengamma(const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q);
-RcppExport SEXP flexsurv_check_gengamma(SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP) {
+RcppExport SEXP _flexsurv_check_gengamma(SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type mu(muSEXP);
@@ -92,7 +92,7 @@ END_RCPP
 }
 // dgompertz_work
 Rcpp::NumericVector dgompertz_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate, const bool log);
-RcppExport SEXP flexsurv_dgompertz_work(SEXP xSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP logSEXP) {
+RcppExport SEXP _flexsurv_dgompertz_work(SEXP xSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
@@ -105,7 +105,7 @@ END_RCPP
 }
 // pgompertz_work
 Rcpp::NumericVector pgompertz_work(const Rcpp::NumericVector& q, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate, const bool lower_tail, const bool give_log);
-RcppExport SEXP flexsurv_pgompertz_work(SEXP qSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
+RcppExport SEXP _flexsurv_pgompertz_work(SEXP qSEXP, SEXP shapeSEXP, SEXP rateSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
@@ -119,7 +119,7 @@ END_RCPP
 }
 // check_gompertz
 Rcpp::LogicalVector check_gompertz(const Rcpp::NumericVector& shape, const Rcpp::NumericVector& rate);
-RcppExport SEXP flexsurv_check_gompertz(SEXP shapeSEXP, SEXP rateSEXP) {
+RcppExport SEXP _flexsurv_check_gompertz(SEXP shapeSEXP, SEXP rateSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
@@ -130,7 +130,7 @@ END_RCPP
 }
 // dllogis_work
 Rcpp::NumericVector dllogis_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& scale, const bool log);
-RcppExport SEXP flexsurv_dllogis_work(SEXP xSEXP, SEXP shapeSEXP, SEXP scaleSEXP, SEXP logSEXP) {
+RcppExport SEXP _flexsurv_dllogis_work(SEXP xSEXP, SEXP shapeSEXP, SEXP scaleSEXP, SEXP logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type x(xSEXP);
@@ -143,7 +143,7 @@ END_RCPP
 }
 // pllogis_work
 Rcpp::NumericVector pllogis_work(const Rcpp::NumericVector& q, const Rcpp::NumericVector& shape, const Rcpp::NumericVector& scale, const bool lower_tail, const bool give_log);
-RcppExport SEXP flexsurv_pllogis_work(SEXP qSEXP, SEXP shapeSEXP, SEXP scaleSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
+RcppExport SEXP _flexsurv_pllogis_work(SEXP qSEXP, SEXP shapeSEXP, SEXP scaleSEXP, SEXP lower_tailSEXP, SEXP give_logSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type q(qSEXP);
@@ -157,7 +157,7 @@ END_RCPP
 }
 // check_llogis
 Rcpp::LogicalVector check_llogis(const Rcpp::NumericVector& shape, const Rcpp::NumericVector& scale);
-RcppExport SEXP flexsurv_check_llogis(SEXP shapeSEXP, SEXP scaleSEXP) {
+RcppExport SEXP _flexsurv_check_llogis(SEXP shapeSEXP, SEXP scaleSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type shape(shapeSEXP);
@@ -168,7 +168,7 @@ END_RCPP
 }
 // exph
 Rcpp::NumericVector exph(const Rcpp::NumericVector& y);
-RcppExport SEXP flexsurv_exph(SEXP ySEXP) {
+RcppExport SEXP _flexsurv_exph(SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type y(ySEXP);
@@ -178,7 +178,7 @@ END_RCPP
 }
 // dexph
 Rcpp::NumericVector dexph(const Rcpp::NumericVector& y);
-RcppExport SEXP flexsurv_dexph(SEXP ySEXP) {
+RcppExport SEXP _flexsurv_dexph(SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type y(ySEXP);
@@ -188,7 +188,7 @@ END_RCPP
 }
 // basis_vector
 Rcpp::NumericVector basis_vector(const Rcpp::NumericVector& knots, const Rcpp::NumericVector& x);
-RcppExport SEXP flexsurv_basis_vector(SEXP knotsSEXP, SEXP xSEXP) {
+RcppExport SEXP _flexsurv_basis_vector(SEXP knotsSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -200,7 +200,7 @@ END_RCPP
 }
 // basis_matrix
 Rcpp::NumericMatrix basis_matrix(const Rcpp::NumericMatrix& knots, const Rcpp::NumericVector& x);
-RcppExport SEXP flexsurv_basis_matrix(SEXP knotsSEXP, SEXP xSEXP) {
+RcppExport SEXP _flexsurv_basis_matrix(SEXP knotsSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -212,7 +212,7 @@ END_RCPP
 }
 // dbasis_vector
 Rcpp::NumericVector dbasis_vector(const Rcpp::NumericVector& knots, const Rcpp::NumericVector& x);
-RcppExport SEXP flexsurv_dbasis_vector(SEXP knotsSEXP, SEXP xSEXP) {
+RcppExport SEXP _flexsurv_dbasis_vector(SEXP knotsSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -224,7 +224,7 @@ END_RCPP
 }
 // dbasis_matrix
 Rcpp::NumericMatrix dbasis_matrix(const Rcpp::NumericMatrix& knots, const Rcpp::NumericVector& x);
-RcppExport SEXP flexsurv_dbasis_matrix(SEXP knotsSEXP, SEXP xSEXP) {
+RcppExport SEXP _flexsurv_dbasis_matrix(SEXP knotsSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;

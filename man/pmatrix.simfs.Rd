@@ -100,12 +100,11 @@ pmatrix.simfs(bexp, t=10, trans=tmat)
 # an exponential distribution, the semi-Markov model is the same as the
 # Markov model.
 }
-\author{
-Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
-}
 \seealso{
 \code{\link{pmatrix.fs}},\code{\link{sim.fmsm}},\code{\link{totlos.simfs}},
 \code{\link{msfit.flexsurvreg}}.
 }
+\author{
+Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
+}
 \keyword{models,survival}
-

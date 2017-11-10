@@ -3,6 +3,7 @@
 \name{model.frame.flexsurvreg}
 \alias{model.frame.flexsurvreg}
 \alias{model.matrix.flexsurvreg}
+\alias{model.matrix.flexsurvreg}
 \title{Extract original data from \code{flexsurvreg} objects.}
 \usage{
 \method{model.frame}{flexsurvreg}(formula, ...)
@@ -38,12 +39,11 @@ argument (see above).
 \description{
 Extract the data from a model fitted with \code{flexsurvreg}.
 }
-\author{
-C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
 \seealso{
 \code{\link{flexsurvreg}}, \code{\link{model.frame}},
 \code{\link{model.matrix}}.
 }
+\author{
+C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
 \keyword{models}
-

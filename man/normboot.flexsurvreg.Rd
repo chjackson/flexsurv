@@ -52,9 +52,6 @@ functions of parameters.
     normboot.flexsurvreg(fite, B=10, newdata=list(age=0))  ## closer to...
     fite$res
 }
-\author{
-C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
-}
 \references{
 Mandel, M. (2013). "Simulation based confidence intervals for
 functions with complicated derivatives." The American Statistician (in
@@ -63,5 +60,7 @@ press).
 \seealso{
 \code{\link{summary.flexsurvreg}}
 }
+\author{
+C. H. Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
 \keyword{models}
-

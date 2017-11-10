@@ -37,4 +37,3 @@ polynomials.  Journal of the Royal Statistical Society, Series A 162:71-94.
 \code{\link{flexsurvspline}}
 }
 \keyword{datasets}
-
