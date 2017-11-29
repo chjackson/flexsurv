@@ -87,15 +87,17 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
         logdens <- do.call(dfns$d, dargs)
         
         ## Left censoring times (upper bound for event time) 
-        pmaxargs <- fnargs.nevent
-        pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
-        pmax <- do.call(dfns$p, pmaxargs)
-        pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
-        
+        if (any(!event)){
+            pmaxargs <- fnargs.nevent
+            pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
+            pmax <- do.call(dfns$p, pmaxargs)
+            pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
+            
         ## Right censoring times (lower bound for event time) 
-        pargs <- fnargs.nevent
-        pargs$q <- right.censor
-        pmin <- do.call(dfns$p, pargs)
+            pargs <- fnargs.nevent
+            pargs$q <- right.censor
+            pmin <- do.call(dfns$p, pargs)
+        }
         
         ## Left-truncation
         targs   <- fnargs
@@ -114,7 +116,8 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
         }
         ## Express as vector of individual likelihood contributions
         loglik[event] <- (logdens*event.weights) + offseti
-        loglik[!event] <- (log(pmax - pmin)*no.event.weights)
+        if (any(!event))
+            loglik[!event] <- (log(pmax - pmin)*no.event.weights)
         loglik <- loglik - log(pobs)*weights
         
         ret <- -sum(loglik)

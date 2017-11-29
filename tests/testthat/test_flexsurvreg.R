@@ -488,3 +488,17 @@ test_that("RMST/Mean/Median calculations are working",{
   )
   
 })
+
+test_that("No events in the data",{
+    set.seed(1)
+    tmin <- rexp(100, 1) 
+    tmax <- tmin + 0.1
+    mod <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="exponential")
+    expect_equal(mod$loglik, -337.9815, tol=1e-03)
+})
+
+test_that("No censoring in the data",{
+    bcev <- bc[bc$censrec==1,]
+    mod <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bcev, dist="weibull")
+    expect_equal(mod$loglik, -477.2455, tol=1e-03)
+})
