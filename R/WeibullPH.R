@@ -7,7 +7,7 @@
 ##' The Weibull distribution in proportional hazards parameterisation with
 ##' `shape' parameter a and `scale' parameter m has density given by
 ##' 
-##' \deqn{f(x) = m x^{a-1} exp(- m x^a) }
+##' \deqn{f(x) = a m x^{a-1} exp(- m x^a) }
 ##' 
 ##' cumulative distribution function \eqn{F(x) = 1 - exp( -m x^a )}, survivor
 ##' function \eqn{S(x) = exp( -m x^a )}, cumulative hazard \eqn{m x^a} and

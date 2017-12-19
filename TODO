@@ -1,3 +1,5 @@
+is logliki component of flexsurvreg objects the same as deviance residuals given by survreg?
+
 Ongoing problems with Hessian in Weibull models (see p metcalfe example)
 
 predictions
@@ -61,3 +63,5 @@ http://smm.sagepub.com/content/19/1/71.full.pdf+html
 piecewise exponential distribution
 
 compare with rstpm2 package
+
+Robust estimates of variance matrix?
