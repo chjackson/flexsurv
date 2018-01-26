@@ -2,7 +2,7 @@ Package: flexsurv
 Type: Package
 Title: Flexible Parametric Survival and Multi-State Models
 Version: 1.1.1
-Date: 2017-11-28
+Date: 2018-01-26
 Authors@R: c(person("Christopher", "Jackson",
          email="chris.jackson@mrc-bsu.cam.ac.uk",
          role=c("aut", "cre")),
@@ -30,7 +30,7 @@ Imports:
     Rcpp (>= 0.11.5)
 Encoding: UTF-8
 Suggests:
-    eha,numDeriv,testthat,msm,ActuDistns,knitr,TH.data,colorspace
+    eha,numDeriv,testthat,msm,knitr,TH.data,colorspace
 URL: https://github.com/chjackson/flexsurv-dev
 BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr

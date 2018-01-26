@@ -22,4 +22,9 @@ test_that("llogis",{
     expect_equal(var.llogis(shape=1.1, scale=0.2), NaN)
     mean_llogis(shape=1.1, scale=0.2)
     var.llogis(shape=2.1, scale=0.2)
+
+    x <- c(0.1,0.4,0.6,0.9)
+    expect_equal(pllogis(qllogis(p=x, lower.tail=FALSE), lower.tail=FALSE), x)
+    expect_equal(qlogis(p=x, lower.tail=TRUE), rev(qlogis(p=x, lower.tail=FALSE)))
+    
 })

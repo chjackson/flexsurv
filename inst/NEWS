@@ -2,10 +2,16 @@
 
 
 
-Version 1.1.1 (2017-03-27)
+Version 1.1.1 (2018-?? )
 -------------
 
 * Allow dynamic symbols in C code.
+
+* Bug fix for qllogis with lower.tail=FALSE.
+
+* Bug fix for likelihood when all events are observed.
+
+* Various minor code and doc fixes, see github commit history.
 
 
 Version 1.1 (2017-03-27)
