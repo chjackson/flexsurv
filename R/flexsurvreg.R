@@ -1091,9 +1091,9 @@ form.model.matrix <- function(object, newdata){
 ##' these model-based summaries against empirical summaries such as
 ##' Kaplan-Meier curves, to diagnose model fit.
 ##' 
-##' Confidence intervals are obtained by random sampling from the asymptotic
-##' normal distribution of the maximum likelihood estimates (see, e.g. Mandel
-##' (2013)).
+##' Confidence intervals are obtained by sampling randomly from the asymptotic
+##' normal distribution of the maximum likelihood estimates and then taking quantiles
+##' (see, e.g. Mandel (2013)).
 ##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
 ##' @seealso \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
 ##' @references Mandel, M. (2013). "Simulation based confidence intervals for

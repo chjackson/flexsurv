@@ -638,9 +638,9 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
         x <- x[[transi]]
         dat <- as.list(newdata)
     } else if (inherits(x, "flexsurvreg")) {
-        dat <- as.list(newdata[transi,])
+        dat <- as.list(newdata[transi,,drop=FALSE])
     }
-    for (i in tcovs) { dat[[i]] <- dat[[i]] + 0  } # t}
+    for (i in tcovs) { dat[[i]] <- dat[[i]] + t}
     dat <- as.data.frame(dat)
     X <- form.model.matrix(x, dat)
     beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
