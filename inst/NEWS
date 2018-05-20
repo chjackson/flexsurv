@@ -13,6 +13,9 @@ Version 1.1.1 (2018-?? )
 
 * Various minor code and doc fixes, see github commit history.
 
+* Bug fix for "ylim" argument in plot method for survival or
+  cumulative hazard
+
 
 Version 1.1 (2017-03-27)
 -------------

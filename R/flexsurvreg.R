@@ -1503,10 +1503,10 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
         ## If any continuous covariates, it is hard to define subgroups
         ## so just plot the population survival
         if (type=="survival") {
-            plot(survfit(form, data=mm), col=col.obs, lty=lty.obs, lwd=lwd.obs, ...)
+            plot(survfit(form, data=mm), col=col.obs, lty=lty.obs, lwd=lwd.obs, ylim=ylim, ...)
         }
         else if (type=="cumhaz") {
-            plot(survfit(form, data=mm), fun="cumhaz", col=col.obs, lty=lty.obs, lwd=lwd.obs, ...)
+            plot(survfit(form, data=mm), fun="cumhaz", col=col.obs, lty=lty.obs, lwd=lwd.obs, ylim=ylim, ...)
         }
         else if (type=="hazard") {
             muhaz.args <- list(...)[names(list(...)) %in% names(formals(muhaz))]
