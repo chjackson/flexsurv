@@ -116,9 +116,9 @@ The \code{\link{plot.flexsurvreg}} function can be used to quickly plot
 these model-based summaries against empirical summaries such as
 Kaplan-Meier curves, to diagnose model fit.
 
-Confidence intervals are obtained by random sampling from the asymptotic
-normal distribution of the maximum likelihood estimates (see, e.g. Mandel
-(2013)).
+Confidence intervals are obtained by sampling randomly from the asymptotic
+normal distribution of the maximum likelihood estimates and then taking quantiles
+(see, e.g. Mandel (2013)).
 }
 \description{
 Return fitted survival, cumulative hazard or hazard at a series of times

@@ -1109,7 +1109,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     dat <- x$data
     Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
     isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
-    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median"))
+    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median", "quantile"))
     if (is.null(newdata)){
         if (is.vector(X)) X <- matrix(X, nrow=1)
         if (x$ncovs > 0 && is.null(X)) {
@@ -1149,6 +1149,9 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     else if(type == "median"){
       if(!is.null(t)) warning("Median selected, but time specified.")
       t = rep(0.5,length(start))
+    }
+    else if(type == "quantile"){
+      t = rep(t,length(start))
     }
     else if(type == "rmst"){
         if (is.null(t))
@@ -1198,6 +1201,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         }
         if(type %in% c("median","mean")) ret[[i]] <- data.frame(est=y, row.names=NULL)
         else ret[[i]] <- data.frame(time=t, est=y, row.names=NULL)
+        if(type == "quantile")  ret[[i]] <- data.frame(quantile=t, est=y, row.names=NULL)
         if (ci) { ret[[i]]$lcl <- ly; ret[[i]]$ucl <- uy}
     }
     if (x$ncovs>0) attr(ret,"X") <- X
@@ -1224,6 +1228,12 @@ summary.fns <- function(x, type){
            "median" = function(start,...) {
              start_p = 1 - x$dfns$p(start,...)
              med_from_start = start_p/2
+             ret = x$dfns$q(med_from_start,...)
+           },
+           "quantile" = function(t=0.5, start,...) {
+             start_p = 1 - x$dfns$p(start,...)
+             # med_from_start = start_p/2
+             med_from_start = start_p * t
              ret = x$dfns$q(med_from_start,...)
            },
            "hazard" = function(t,start,...) {
