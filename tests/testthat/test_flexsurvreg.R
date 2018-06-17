@@ -502,3 +502,13 @@ test_that("No censoring in the data",{
     mod <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bcev, dist="weibull")
     expect_equal(mod$loglik, -477.2455, tol=1e-03)
 })
+
+test_that("summary type=quantile is consistent",{
+  expect_equal(summary(fitg, type='quantile', t=.5)[[1]][1,2]
+               ,summary(fitg, type='median')[[1]][1,1])
+})
+
+test_that("Errors in summary type=quantile",{
+  expect_error(summary(fitg, type='quantile', t=1.5), "Invalid survival value supplied")
+  expect_error(summary(fitg, type='quantile', t=-1.5), "Invalid survival value supplied")
+})

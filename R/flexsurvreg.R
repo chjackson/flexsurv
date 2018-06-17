@@ -1041,6 +1041,10 @@ form.model.matrix <- function(object, newdata){
 ##' 
 ##' \code{"mean"} for mean survival.
 ##' 
+##' \code{"median"} for median survival (equivalente to quantile 0.5).
+##' 
+##' \code{"quantile"} for quantiles.
+##' 
 ##' Ignored if \code{"fn"} is specified.
 ##' @param fn Custom function of the parameters to summarise against time.
 ##' This has optional first two arguments \code{t} representing time, and
@@ -1049,7 +1053,8 @@ form.model.matrix <- function(object, newdata){
 ##' vector of the same length as \code{t}.
 ##' @param t Times to calculate fitted values for. By default, these are the
 ##' sorted unique observation (including censoring) times in the data - for
-##' left-truncated datasets these are the "stop" times.
+##' left-truncated datasets these are the "stop" times. In case of \code{type="quantile"},
+##'  \code{t} is the survival to calculate times for.
 ##' @param start Optional left-truncation time or times.  The returned
 ##' survival, hazard or cumulative hazard will be conditioned on survival up to
 ##' this time.
@@ -1151,6 +1156,12 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
       t = rep(0.5,length(start))
     }
     else if(type == "quantile"){
+      if((any(t<0) | any(t>1))){
+        stop("Invalid survival value supplied")
+      }else if(is.null(t)){
+        warning("No survival quantile specified. Estimating median")
+        t = c(0.5)
+      }
       t = rep(t,length(start))
     }
     else if(type == "rmst"){
@@ -1232,8 +1243,7 @@ summary.fns <- function(x, type){
            },
            "quantile" = function(t=0.5, start,...) {
              start_p = 1 - x$dfns$p(start,...)
-             # med_from_start = start_p/2
-             med_from_start = start_p * t
+             med_from_start = start_p * (1-t)
              ret = x$dfns$q(med_from_start,...)
            },
            "hazard" = function(t,start,...) {
