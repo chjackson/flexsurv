@@ -1053,8 +1053,8 @@ form.model.matrix <- function(object, newdata){
 ##' vector of the same length as \code{t}.
 ##' @param t Times to calculate fitted values for. By default, these are the
 ##' sorted unique observation (including censoring) times in the data - for
-##' left-truncated datasets these are the "stop" times. In case of \code{type="quantile"},
-##'  \code{t} is the survival to calculate times for.
+##' left-truncated datasets these are the "stop" times.
+##' @param quantiles Survival quantiles to calculate times for.
 ##' @param start Optional left-truncation time or times.  The returned
 ##' survival, hazard or cumulative hazard will be conditioned on survival up to
 ##' this time.
@@ -1107,7 +1107,7 @@ form.model.matrix <- function(object, newdata){
 ##' @keywords models
 ##' @export
 summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL,
-                                t=NULL, start=0, ci=TRUE, B=1000, cl=0.95, tidy=FALSE,
+                                t=NULL, quantiles=0.5, start=0, ci=TRUE, B=1000, cl=0.95, tidy=FALSE,
                                 ...)
 {
     x <- object
@@ -1156,6 +1156,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
       t = rep(0.5,length(start))
     }
     else if(type == "quantile"){
+      t = quantiles
       if((any(t<0) | any(t>1))){
         stop("Invalid survival value supplied")
       }else if(is.null(t)){
