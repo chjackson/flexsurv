@@ -1041,6 +1041,10 @@ form.model.matrix <- function(object, newdata){
 ##' 
 ##' \code{"mean"} for mean survival.
 ##' 
+##' \code{"median"} for median survival (equivalente to quantile 0.5).
+##' 
+##' \code{"quantile"} for quantiles.
+##' 
 ##' Ignored if \code{"fn"} is specified.
 ##' @param fn Custom function of the parameters to summarise against time.
 ##' This has optional first two arguments \code{t} representing time, and
@@ -1050,6 +1054,7 @@ form.model.matrix <- function(object, newdata){
 ##' @param t Times to calculate fitted values for. By default, these are the
 ##' sorted unique observation (including censoring) times in the data - for
 ##' left-truncated datasets these are the "stop" times.
+##' @param quantiles Survival quantiles to calculate times for.
 ##' @param start Optional left-truncation time or times.  The returned
 ##' survival, hazard or cumulative hazard will be conditioned on survival up to
 ##' this time.
@@ -1102,14 +1107,14 @@ form.model.matrix <- function(object, newdata){
 ##' @keywords models
 ##' @export
 summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL,
-                                t=NULL, start=0, ci=TRUE, B=1000, cl=0.95, tidy=FALSE,
+                                t=NULL, quantiles=0.5, start=0, ci=TRUE, B=1000, cl=0.95, tidy=FALSE,
                                 ...)
 {
     x <- object
     dat <- x$data
     Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
     isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
-    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median"))
+    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median", "quantile"))
     if (is.null(newdata)){
         if (is.vector(X)) X <- matrix(X, nrow=1)
         if (x$ncovs > 0 && is.null(X)) {
@@ -1149,6 +1154,16 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     else if(type == "median"){
       if(!is.null(t)) warning("Median selected, but time specified.")
       t = rep(0.5,length(start))
+    }
+    else if(type == "quantile"){
+      t = quantiles
+      if((any(t<0) | any(t>1))){
+        stop("Invalid survival value supplied")
+      }else if(is.null(t)){
+        warning("No survival quantile specified. Estimating median")
+        t = c(0.5)
+      }
+      t = rep(t,length(start))
     }
     else if(type == "rmst"){
         if (is.null(t))
@@ -1198,6 +1213,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         }
         if(type %in% c("median","mean")) ret[[i]] <- data.frame(est=y, row.names=NULL)
         else ret[[i]] <- data.frame(time=t, est=y, row.names=NULL)
+        if(type == "quantile")  ret[[i]] <- data.frame(quantile=t, est=y, row.names=NULL)
         if (ci) { ret[[i]]$lcl <- ly; ret[[i]]$ucl <- uy}
     }
     if (x$ncovs>0) attr(ret,"X") <- X
@@ -1224,6 +1240,11 @@ summary.fns <- function(x, type){
            "median" = function(start,...) {
              start_p = 1 - x$dfns$p(start,...)
              med_from_start = start_p/2
+             ret = x$dfns$q(med_from_start,...)
+           },
+           "quantile" = function(t=0.5, start,...) {
+             start_p = 1 - x$dfns$p(start,...)
+             med_from_start = start_p * (1-t)
              ret = x$dfns$q(med_from_start,...)
            },
            "hazard" = function(t,start,...) {
