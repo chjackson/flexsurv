@@ -5,8 +5,8 @@
 \title{Summaries of fitted flexible survival models}
 \usage{
 \method{summary}{flexsurvreg}(object, newdata = NULL, X = NULL,
-  type = "survival", fn = NULL, t = NULL, start = 0, ci = TRUE,
-  B = 1000, cl = 0.95, tidy = FALSE, ...)
+  type = "survival", fn = NULL, t = NULL, quantiles = 0.5, start = 0,
+  ci = TRUE, B = 1000, cl = 0.95, tidy = FALSE, ...)
 }
 \arguments{
 \item{object}{Output from \code{\link{flexsurvreg}} or
@@ -56,9 +56,9 @@ level, and the second contrast is ``turned on'' for the third level
 
 \code{"mean"} for mean survival.
 
-\code{"median"} for median survival (equivalente to quantile 0.5).
+\code{"median"} for median survival (alternative to \code{type="quantile"} with \code{quantiles=0.5}).
 
-\code{"quantile"} for quantiles.
+\code{"quantile"} for quantiles of the survival time distribution.
 
 Ignored if \code{"fn"} is specified.}
 
@@ -70,8 +70,9 @@ vector of the same length as \code{t}.}
 
 \item{t}{Times to calculate fitted values for. By default, these are the
 sorted unique observation (including censoring) times in the data - for
-left-truncated datasets these are the "stop" times. In case of \code{type="quantile"},
- \code{t} is the survival to calculate times for.}
+left-truncated datasets these are the "stop" times.}
+
+\item{quantiles}{If \code{type="quantile"}, this specifies the quantiles of the survival time distribution to return estimates for.}
 
 \item{start}{Optional left-truncation time or times.  The returned
 survival, hazard or cumulative hazard will be conditioned on survival up to

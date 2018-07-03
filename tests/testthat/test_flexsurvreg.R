@@ -512,6 +512,6 @@ test_that("summary type=quantile is consistent",{
 })
 
 test_that("Errors in summary type=quantile",{
-  expect_error(summary(fitg, type='quantile', quantiles=1.5), "Invalid survival value supplied")
-  expect_error(summary(fitg, type='quantile', quantiles=-.5), "Invalid survival value supplied")
+  expect_error(summary(fitg, type='quantile', quantiles=1.5), "Quantiles should not be less than 0 or greater than 1")
+  expect_error(summary(fitg, type='quantile', quantiles=-.5), "Quantiles should not be less than 0 or greater than 1")
 })
