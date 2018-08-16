@@ -1167,14 +1167,6 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
     fn <- expand.summfn.args(fn)
     fncall <- list(t,start)
     beta <- if (x$ncovs==0) 0 else x$res[x$covpars,"est"]
-    if (ncol(X) != length(beta)){
-        ## don't think we should ever reach here - error should be caught in newdata or X
-        isare <- if(length(beta)==1) "is" else "are"
-        plural <- if(ncol(X)==1) "" else "s"
-        pluralc <- if(length(beta)==1) "" else "s"
-        stop("Supplied X has ", ncol(X), " column",plural," but there ",isare," ",
-             length(beta), " covariate effect", pluralc)
-    }
     dlist <- x$dlist
     ret <- vector(nrow(X), mode="list")
     if(!is.null(newdata)){
