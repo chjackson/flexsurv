@@ -207,7 +207,7 @@ qgengamma <- function(p, mu=0, sigma=1, Q, lower.tail = TRUE, log.p = FALSE)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     p[Q<0] <- 1 - p[Q<0]
     ret[ind] <- numeric(sum(ind))
-    ret[ind][Q==0] <- qlnorm(p[Q==0], mu[Q==0], 1/sigma[Q==0]^2)
+    ret[ind][Q==0] <- qlnorm(p[Q==0], mu[Q==0], sigma[Q==0])
     qn0 <- Q!=0
     p <- p[qn0]; mu <- mu[qn0]; sigma <- sigma[qn0]; Q <- Q[qn0]
     ret[ind][qn0] <- exp(mu + sigma*(log(Q^2*qgamma(p, 1/Q^2, 1)) / Q))

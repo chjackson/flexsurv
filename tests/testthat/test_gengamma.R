@@ -44,12 +44,13 @@ test_that("Generalized gamma reductions: q",{
     expect_equal(qgengamma(p=0.25, mu=0, sigma=1, Q=1), qgeneric(pgengamma, p=0.25, mu=0, sigma=1, Q=1))
     expect_equal(qgengamma(p=0, mu=0, sigma=1, Q=1), 0)
     expect_equal(qgengamma(p=0.25, mu=0, sigma=1, Q=0), qlnorm(p=0.25, meanlog=0, sdlog=1))
+    expect_equal(qgengamma(p=0.25, mu=0, sigma=1.2, Q=0), qlnorm(p=0.25, meanlog=0, sdlog=1.2))
     expect_equal(qgengamma(p=0.25, mu=0.1, sigma=1.2, Q=1), qweibull(p=0.25, scale=exp(0.1), shape=1/1.2))
     expect_equal(qgengamma(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1, Q=1), mu=0, sigma=1, Q=1),
          c(0,0,0,1,2,3,4))
     expect_equal(qgengamma(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1, Q=-1), mu=0, sigma=1, Q=-1),
          c(0,0,0,1,2,3,4))
-    expect_equal(qlnorm(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1, Q=0), meanlog=0, sdlog=1),
+    expect_equal(qlnorm(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1.2, Q=0), meanlog=0, sdlog=1.2),
          c(0,0,0,1,2,3,4))
     expect_equal(qlnorm(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1, Q=0, log=TRUE), meanlog=0, sdlog=1, log=TRUE),
          c(0,0,0,1,2,3,4))
