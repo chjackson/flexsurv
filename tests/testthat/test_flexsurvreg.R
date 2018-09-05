@@ -516,3 +516,14 @@ test_that("Errors in summary type=quantile",{
   expect_error(summary(fitg, type='quantile', quantiles=1.5), "Quantiles should not be less than 0 or greater than 1")
   expect_error(summary(fitg, type='quantile', quantiles=-.5), "Quantiles should not be less than 0 or greater than 1")
 })
+
+test_that("SEs in summary function",{
+    expect_true(is.numeric(summary(fitg, se=TRUE)[[1]]$se))
+})
+
+test_that("summary type `link`",{
+    expect_equal(summary(fitg, type="link")[["factor(rx)=1"]]$est, 
+                 fitg$res["scale","est"])
+    expect_equal(summary(fitg, type="link")[["factor(rx)=2"]]$est, 
+                 exp(fitg$res.t["scale","est"] + fitg$res.t["factor(rx)2","est"]))
+})

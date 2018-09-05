@@ -210,7 +210,8 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X[i,,drop=FALSE], transform=FALSE)
         basepars <- as.list(as.data.frame(basepars.mat))
         fncall[dlist$pars] <- basepars
-        fncall$location <- x$dlist$location
+        if (type=="link")
+            x$aux$location <- x$dlist$location
         for (j in seq_along(x$aux)){
             fncall[[names(x$aux)[j]]] <- x$aux[[j]]
         }
@@ -274,7 +275,7 @@ summary.fns <- function(x, type){
            },
            "rmst" = function(t,start,...) x$dfns$rmst(t,start=start, ...),
            "mean" = function(t,start,...) x$dfns$mean(...),
-           "link" = function(...) {
+           "link" = function(...){
                args <- list(...)
                args[[args$location]]
            }
@@ -395,9 +396,9 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
     res
 }
 
-### Compute CIs for survival, cumulative hazard or hazard at supplied
-### times t and covariates X, using random sample of size B from the
-### assumed MVN distribution of MLEs.
+### Compute CIs for survival, cumulative hazard, hazard, or user
+### defined function, at supplied times t and covariates X, using
+### random sample of size B from the assumed MVN distribution of MLEs.
 
 normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B){
     sim <- normboot.flexsurvreg(x, B, newdata=newdata, X=X)
@@ -411,7 +412,6 @@ normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B){
                 fncall[[x$dlist$pars[j]]] <- sim[[k]][i,j]
             for (j in seq_along(x$aux))
                 fncall[[names(x$aux)[j]]] <- x$aux[[j]]
-            fncall$location <- x$dlist$location
             ret[k,i,] <- do.call(fn, fncall)
         }
     }
