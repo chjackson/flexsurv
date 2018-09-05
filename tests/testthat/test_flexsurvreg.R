@@ -183,6 +183,7 @@ test_that("Errors in summary function",{
     expect_error(summary(fitg, start=1:2, ci=FALSE), "length of \"start\"")
 })
 
+
 test_that("Model fit with covariates and simulated data",{
     x <- rnorm(500,0,1)
     sim <- rgenf(500, 1.5 - 0.2*x, 1, -0.4, 0.6)
