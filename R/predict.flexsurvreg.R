@@ -53,7 +53,7 @@ predict.flexsurvreg <- function(object,
     if (type=="response") stype <- "mean"
     if (type %in% c("lp", "linear")) stype <- "link"
     multi_output <- (type=="quantile") && (length(p) > 1)
-    if (stype %in% c("mean", "quantile", "link")){
+    if (stype %in% c("mean", "quantile", "link")){ # may not need this line 
         res <- summary.flexsurvreg(object=object, newdata=newdata, type=stype,
                                    quantiles=p, ci=(interval=="confidence"), se=se.fit,
                                    tidy=!multi_output)
