@@ -260,7 +260,7 @@ summary.fns <- function(x, type){
            },
            "quantile" = function(t=0.5, start,...) {
              start_p = 1 - x$dfns$p(start,...)
-             med_from_start = start_p * (1-t)
+             med_from_start = start_p * t
              ret = x$dfns$q(med_from_start,...)
            },
            "hazard" = function(t,start,...) {
