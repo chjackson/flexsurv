@@ -26,16 +26,20 @@
 ##' 
 ##' @seealso \code{\link{summary.flexsurvreg}}
 ##'
-##' @return TODO document format 
+##' @return TODO document format
+##'
+##' @importFrom tidyr unnest
+##' @importFrom tibble tibble
 ##'
 ##' @examples ## TODO document extraction with tidyverse tools
 ##'
+##' \dontrun{
 ##' fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist="gengamma")
 ##' predict(fitg)
 ##' predict(fitg, type="quantile", p=0.5)
 ##' library(tidyverse) # TODO sort out deps
 ##' predict(fitg, type="quantile", p=c(0.1, 0.9))
-##' 
+##' }
 predict.flexsurvreg <- function(object,
                                 newdata,
                                 type="response",
