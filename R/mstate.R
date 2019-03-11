@@ -257,8 +257,17 @@ pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
         ntr <- length(x) # number of allowed transitions
         if (ntr != length(na.omit(as.vector(trans)))) stop(sprintf("x is a list of %s flexsurvreg objects, but trans indicates %s transitions", ntr, length(na.omit(as.vector(trans)))))
         basepar <- matrix(nrow=ntr, ncol=length(x[[1]]$dlist$pars), dimnames=list(NULL,x[[1]]$dlist$pars))
+        newdata <- as.data.frame(newdata)
         for (i in 1:ntr){
-            X <- if (x[[i]]$ncovs==0) matrix(0) else form.model.matrix(x[[i]], as.data.frame(newdata))
+            if (x[[i]]$ncovs==0)
+                X <- matrix(0)
+            else {
+                if(nrow(newdata) == 1L) {
+                    X <- form.model.matrix(x[[i]], as.data.frame(newdata))
+                } else if(nrow(newdata) == ntr){
+                    X <- form.model.matrix(x[[i]], as.data.frame(newdata[i, ,drop = FALSE]))
+                } else stop(sprintf("`newdata` has %s rows. It must either have one row, or one row for each of the %s allowed transitions",nrow(newdata),ntr))
+              }
             beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
             basepar[i,] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
         }

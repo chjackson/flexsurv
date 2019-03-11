@@ -2,7 +2,7 @@
 
 
 
-Version 1.1.1 (2018-?? )
+Version 1.1.1 (2019-?? )
 -------------
 
 * Allow dynamic symbols in C code.
@@ -15,6 +15,10 @@ Version 1.1.1 (2018-?? )
 
 * Bug fix for "ylim" argument in plot method for survival or
   cumulative hazard
+
+* Allow different covariates per transition in multi-state models
+  supplied as a list of flexsurvreg objects.  Thanks to David
+  McAllister for the contribution.
 
 
 Version 1.1 (2017-03-27)
