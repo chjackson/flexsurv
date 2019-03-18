@@ -2,19 +2,26 @@
 
 
 
-Version 1.1.1 (2018-?? )
+Version 1.1.1 (2019-03-18)
 -------------
 
-* Allow dynamic symbols in C code.
+* New type="quantiles" and type="link" for summary.flexsurvreg.
+  Thanks to Leonardo Marques for the contribution.  
+
+* Allow different covariates per transition in multi-state models
+  supplied as a list of flexsurvreg objects.  Thanks to David
+  McAllister for the contribution.
 
 * Bug fix for qllogis with lower.tail=FALSE.
 
 * Bug fix for likelihood when all events are observed.
 
-* Various minor code and doc fixes, see github commit history.
-
 * Bug fix for "ylim" argument in plot method for survival or
-  cumulative hazard
+  cumulative hazard.
+
+* Allow dynamic symbols in C code.
+
+* Various other minor code and doc fixes, see github commit history.
 
 
 Version 1.1 (2017-03-27)

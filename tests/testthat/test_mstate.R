@@ -18,6 +18,7 @@ test_that("msfit.flexsurvreg",{
 })
 
 ## With covariates
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(1)
 bosms3$x <- rnorm(nrow(bosms3))
 bexp.cov <- flexsurvreg(Surv(years, status) ~ trans + x, data=bosms3, dist="exp")
@@ -37,9 +38,9 @@ test_that("Errors in msfit.flexsurvreg",{
 
 test_that("pmatrix.fs",{
     pmat <- pmatrix.fs(bexp.markov, t=c(5,10), trans=tmat)
-    expect_equal(pmat$"5"[1,2], 0.267218506920585, tol=1e-06)
+    expect_equal(pmat$"5"[1,2], 0.267218506920585, tol=1e-04)
     pmat <- pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
-    expect_equal(pmat$"5"[1,2], 0.259065437633427, tol=1e-06)
+    expect_equal(pmat$"5"[1,2], 0.259065437633427, tol=1e-04)
 })
 
 test_that("totlos.fs",{
@@ -92,6 +93,14 @@ test_that("list format in output functions", {
 
     pmatrix.fs(bweim.list, t=5, trans=tmat)
     pmatrix.fs(bweim.list, t=c(5,10), trans=tmat)
+
+   
+    pmat1 <- pmatrix.fs(bweic.list, t=c(5,10), trans=tmat, newdata=list(x=-1))
+    pmat3 <- pmatrix.fs(bweic.list, t=c(5,10), trans=tmat, newdata=list(x=c(-1,-1,-1)))
+    expect_equal(pmat1[[1]], pmat3[[1]])
+
+    expect_error(pmatrix.fs(bweic.list, t=c(5,10), trans=tmat, newdata=list(x=c(-1,-1))),
+                 "must either have one row, or one row for each of the 3 allowed transitions")
 
     pmatrix.fs(bln.markov, t=5, trans=tmat)
 
