@@ -1,5 +1,6 @@
 context("flexsurvspline model fits")
 
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(11082012)
 bc$foo <- factor(sample(1:3, nrow(bc), replace=TRUE))
 

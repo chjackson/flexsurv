@@ -18,6 +18,7 @@ test_that("msfit.flexsurvreg",{
 })
 
 ## With covariates
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(1)
 bosms3$x <- rnorm(nrow(bosms3))
 bexp.cov <- flexsurvreg(Surv(years, status) ~ trans + x, data=bosms3, dist="exp")
