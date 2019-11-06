@@ -86,3 +86,36 @@ test_that("Gives errors",{
     expect_warning(qgenf(0.1, 1, -2, 1, 0), "Negative")
     expect_warning(rgenf(4, 1, -2, 1, 1), "Negative")
 })
+
+test_that("Avoid underflow in pgenf",{
+    mu <- 7.495875 
+    sigma <- 0.35362
+    Q <- 0.4572124
+    P <- 16.68415
+
+    tmp <- Q * Q + 2*P
+    delta <- sqrt(tmp)
+    s1 <- 2 / (tmp + Q*delta)
+    s2 <- 2 / (tmp - Q*delta)
+
+    xlow <- 80
+    expw <- xlow^(delta/sigma) * exp(-mu*delta/sigma)
+    pbeta(s2/(s2 + s1*expw), s2, s1, lower.tail=FALSE) # underflows 
+    pbeta(s1*expw/(s2 + s1*expw), s1, s2, lower.tail=TRUE) # works 
+    expect_equal(pgenf(xlow, mu, sigma, Q, P), 0.03214437, tol=1e-05)
+
+    xmid <- 3000
+    expw <- xmid^(delta/sigma) * exp(-mu*delta/sigma)
+    pbeta(s2/(s2 + s1*expw), s2, s1, lower.tail=FALSE)
+    pbeta(s1*expw/(s2 + s1*expw), s1, s2, lower.tail=TRUE) # both work
+    expect_equal(pgenf(xmid, mu, sigma, Q, P), 0.7276473, tol=1e-05)
+
+    xhi <- 1e+5
+    expw <- xhi^(delta/sigma) * exp(-mu*delta/sigma)
+    pbeta(s2/(s2 + s1*expw), s2, s1, lower.tail=FALSE) # works 
+    pbeta(s1*expw/(s2 + s1*expw), s1, s2, lower.tail=TRUE) # underflows
+    expect_equal(pgenf(xhi, mu, sigma, Q, P), 0.9933716, tol=1e-05)
+})
+
+## When x is small, thus s2/(s2 + s1*expw) is close to 1, use second pbeta construction 
+## When x is high, thus s2/(s2 + s1*expw) is close to 0, use first pbeta construction 

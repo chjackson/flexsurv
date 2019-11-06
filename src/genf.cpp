@@ -96,7 +96,14 @@ namespace {
         const double s2 = 2 / (tmp - Q*delta);
         const double expw = std::pow(q, delta/sigma) *
 	  std::exp(-mu*delta/sigma);
-	return R::pbeta(s2/(s2 + s1*expw), s2, s1, !lower_tail, give_log);
+	const double qb = s2/(s2 + s1*expw);
+	// two alternative constructions to avoid underflow 
+	if (qb > 0.99){
+	    const double qb2 = s1*expw/(s2 + s1*expw);
+	    return R::pbeta(qb2, s1, s2, lower_tail, give_log);
+	} else { 
+	    return R::pbeta(qb, s2, s1, !lower_tail, give_log);
+	}
       }
     private:
       bool lower_tail;
