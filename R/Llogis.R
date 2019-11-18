@@ -14,7 +14,7 @@
 ##' \deqn{h(x | a, b) = (a/b) (x/b)^{a-1} / (1 + (x/b)^a)}
 ##' 
 ##' for \eqn{x>0}. The hazard is decreasing for shape \eqn{a\leq 1}{a
-##' >= 1}, and unimodal for \eqn{a > 1}.
+##' <= 1}, and unimodal for \eqn{a > 1}.
 ##' 
 ##' The probability distribution function is \deqn{F(x | a, b) = 1 - 1
 ##' / (1 + (x/b)^a)}
