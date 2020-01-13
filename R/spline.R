@@ -561,9 +561,13 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' If \code{"normal"}, \eqn{-\Phi^{-1}(S(t))}{-InvPhi(S(t))} is modelled as a
 ##' spline function, where \eqn{\Phi^{-1}()}{InvPhi()} is the inverse normal
 ##' distribution function \code{\link{qnorm}}.
+##'
 ##' @param timescale If \code{"log"} (the default) the log cumulative hazard
 ##' (or alternative) is modelled as a spline function of log time.  If
-##' \code{"identity"}, it is modelled as a spline function of time.
+##' \code{"identity"}, it is modelled as a spline function of time, however
+##' this model would not satisfy the desirable property that the cumulative hazard
+##' (or alternative) should approach 0 at time zero. 
+##' 
 ##' @param ...  Any other arguments to be passed to or through
 ##' \code{\link{flexsurvreg}}, for example, \code{anc}, \code{inits},
 ##' \code{fixedpars}, \code{weights}, \code{subset}, \code{na.action}, and any
