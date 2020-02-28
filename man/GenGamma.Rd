@@ -8,12 +8,6 @@
 \alias{rgengamma}
 \alias{Hgengamma}
 \alias{hgengamma}
-\alias{dgengamma}
-\alias{pgengamma}
-\alias{Hgengamma}
-\alias{hgengamma}
-\alias{qgengamma}
-\alias{rgengamma}
 \title{Generalized gamma distribution}
 \usage{
 dgengamma(x, mu = 0, sigma = 1, Q, log = FALSE)
@@ -71,7 +65,7 @@ probability density function
 
 \deqn{f(x | \mu, \sigma, Q) = \frac{|Q|(Q^{-2})^{Q^{-2}}}{\sigma x
 \Gamma(Q^{-2})} \exp(Q^{-2}(Qw - \exp(Qw)))}{ f(x | mu, sigma, Q) = |Q|
-(Q^{-2})^{Q^{-2}} / / (sigma * x * Gamma(Q^{-2})) exp(Q^{-2}*(Q*w -
+(Q^{-2})^{Q^{-2}} / (sigma * x * Gamma(Q^{-2})) exp(Q^{-2}*(Q*w -
 exp(Q*w)))}
 
 This parameterisation is preferred to the original

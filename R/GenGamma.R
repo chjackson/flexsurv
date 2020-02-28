@@ -92,7 +92,7 @@ NULL
 ##' 
 ##' \deqn{f(x | \mu, \sigma, Q) = \frac{|Q|(Q^{-2})^{Q^{-2}}}{\sigma x
 ##' \Gamma(Q^{-2})} \exp(Q^{-2}(Qw - \exp(Qw)))}{ f(x | mu, sigma, Q) = |Q|
-##' (Q^{-2})^{Q^{-2}} / / (sigma * x * Gamma(Q^{-2})) exp(Q^{-2}*(Q*w -
+##' (Q^{-2})^{Q^{-2}} / (sigma * x * Gamma(Q^{-2})) exp(Q^{-2}*(Q*w -
 ##' exp(Q*w)))}
 ##' 
 ##' This parameterisation is preferred to the original
