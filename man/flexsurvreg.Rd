@@ -5,9 +5,24 @@
 \alias{flexsurv.dists}
 \title{Flexible parametric regression for time-to-event data}
 \usage{
-flexsurvreg(formula, anc = NULL, data, weights, bhazard, subset, na.action,
-  dist, inits, fixedpars = NULL, dfns = NULL, aux = NULL, cl = 0.95,
-  integ.opts = NULL, sr.control = survreg.control(), ...)
+flexsurvreg(
+  formula,
+  anc = NULL,
+  data,
+  weights,
+  bhazard,
+  subset,
+  na.action,
+  dist,
+  inits,
+  fixedpars = NULL,
+  dfns = NULL,
+  aux = NULL,
+  cl = 0.95,
+  integ.opts = NULL,
+  sr.control = survreg.control(),
+  ...
+)
 }
 \arguments{
 \item{formula}{A formula expression in conventional R linear modelling

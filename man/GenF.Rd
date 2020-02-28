@@ -8,12 +8,6 @@
 \alias{rgenf}
 \alias{Hgenf}
 \alias{hgenf}
-\alias{dgenf}
-\alias{pgenf}
-\alias{Hgenf}
-\alias{hgenf}
-\alias{qgenf}
-\alias{rgenf}
 \title{Generalized F distribution}
 \usage{
 dgenf(x, mu = 0, sigma = 1, Q, P, log = FALSE)

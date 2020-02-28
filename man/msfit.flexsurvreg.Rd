@@ -4,8 +4,15 @@
 \alias{msfit.flexsurvreg}
 \title{Cumulative intensity function for parametric multi-state models}
 \usage{
-msfit.flexsurvreg(object, t, newdata = NULL, variance = TRUE,
-  tvar = "trans", trans, B = 1000)
+msfit.flexsurvreg(
+  object,
+  t,
+  newdata = NULL,
+  variance = TRUE,
+  tvar = "trans",
+  trans,
+  B = 1000
+)
 }
 \arguments{
 \item{object}{Output from \code{\link{flexsurvreg}} or

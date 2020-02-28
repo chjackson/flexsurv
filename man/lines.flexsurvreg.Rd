@@ -4,10 +4,24 @@
 \alias{lines.flexsurvreg}
 \title{Add fitted flexible survival curves to a plot}
 \usage{
-\method{lines}{flexsurvreg}(x, newdata = NULL, X = NULL,
-  type = "survival", t = NULL, est = TRUE, ci = NULL, B = 1000,
-  cl = 0.95, col = "red", lty = 1, lwd = 2, col.ci = NULL,
-  lty.ci = 2, lwd.ci = 1, ...)
+\method{lines}{flexsurvreg}(
+  x,
+  newdata = NULL,
+  X = NULL,
+  type = "survival",
+  t = NULL,
+  est = TRUE,
+  ci = NULL,
+  B = 1000,
+  cl = 0.95,
+  col = "red",
+  lty = 1,
+  lwd = 2,
+  col.ci = NULL,
+  lty.ci = 2,
+  lwd.ci = 1,
+  ...
+)
 }
 \arguments{
 \item{x}{Output from \code{\link{flexsurvreg}}, representing a fitted

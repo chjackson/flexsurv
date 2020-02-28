@@ -11,14 +11,6 @@
 \alias{hweibull}
 \alias{Hweibull}
 \alias{hazard}
-\alias{hexp}
-\alias{Hexp}
-\alias{hweibull}
-\alias{Hweibull}
-\alias{hgamma}
-\alias{Hgamma}
-\alias{hlnorm}
-\alias{Hlnorm}
 \title{Hazard and cumulative hazard functions}
 \usage{
 hexp(x, rate = 1, log = FALSE)

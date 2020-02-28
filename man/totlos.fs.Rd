@@ -5,8 +5,18 @@
 \title{Total length of stay in particular states for a fully-parametric,
 time-inhomogeneous Markov multi-state model}
 \usage{
-totlos.fs(x, trans, t = 1, newdata = NULL, ci = FALSE, tvar = "trans",
-  sing.inf = 1e+10, B = 1000, cl = 0.95, ...)
+totlos.fs(
+  x,
+  trans,
+  t = 1,
+  newdata = NULL,
+  ci = FALSE,
+  tvar = "trans",
+  sing.inf = 1e+10,
+  B = 1000,
+  cl = 0.95,
+  ...
+)
 }
 \arguments{
 \item{x}{A model fitted with \code{\link{flexsurvreg}}.  See

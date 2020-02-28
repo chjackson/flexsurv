@@ -5,9 +5,20 @@
 \title{Expected total length of stay in specific states, from a fully-parametric,
 semi-Markov multi-state model}
 \usage{
-totlos.simfs(x, trans, t = 1, start = 1, newdata = NULL, ci = FALSE,
-  tvar = "trans", tcovs = NULL, group = NULL, M = 1e+05, B = 1000,
-  cl = 0.95)
+totlos.simfs(
+  x,
+  trans,
+  t = 1,
+  start = 1,
+  newdata = NULL,
+  ci = FALSE,
+  tvar = "trans",
+  tcovs = NULL,
+  group = NULL,
+  M = 1e+05,
+  B = 1000,
+  cl = 0.95
+)
 }
 \arguments{
 \item{x}{A model fitted with \code{\link{flexsurvreg}}.  See
