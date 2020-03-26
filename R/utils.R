@@ -215,7 +215,6 @@ qgeneric <- function(pdist, p, matargs=NULL, ...)
         else args.mat[[i]] <- matrix(args.mat[[i]], nrow=maxlen, ncol=length(args.mat[[i]]), byrow=TRUE)
     }
     p <- rep(p, length.out=maxlen)
-
     ret[p < 0 | p > 1] <- NaN
     ind <- (p > 0 & p < 1)
     if (any(ind)) {

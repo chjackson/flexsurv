@@ -92,7 +92,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
             pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
             pmax <- do.call(dfns$p, pmaxargs)
             pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
-            
+
         ## Right censoring times (lower bound for event time) 
             pargs <- fnargs.nevent
             pargs$q <- right.censor
@@ -796,6 +796,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
                                  control=sr.control,
                                  counting=(attr(model.extract(m, "response"), "type")=="counting")
                                  ))
+
         auto.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=inits.aux)
         if (!missing(inits) && any(is.na(inits))) inits[is.na(inits)] <- auto.inits[is.na(inits)]
         else inits <- auto.inits

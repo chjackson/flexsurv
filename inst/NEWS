@@ -23,10 +23,6 @@ Version 1.1.1 (2019-03-18)
 
 * Various other minor code and doc fixes, see github commit history.
 
-* Allow different covariates per transition in multi-state models
-  supplied as a list of flexsurvreg objects.  Thanks to David
-  McAllister for the contribution.
-
 
 Version 1.1 (2017-03-27)
 -------------

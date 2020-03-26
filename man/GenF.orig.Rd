@@ -8,12 +8,6 @@
 \alias{rgenf.orig}
 \alias{Hgenf.orig}
 \alias{hgenf.orig}
-\alias{dgenf.orig}
-\alias{pgenf.orig}
-\alias{Hgenf.orig}
-\alias{hgenf.orig}
-\alias{qgenf.orig}
-\alias{rgenf.orig}
 \title{Generalized F distribution (original parameterisation)}
 \usage{
 dgenf.orig(x, mu = 0, sigma = 1, s1, s2, log = FALSE)

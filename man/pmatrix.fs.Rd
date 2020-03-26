@@ -5,8 +5,8 @@
 \title{Transition probability matrix from a fully-parametric, time-inhomogeneous
 Markov multi-state model}
 \usage{
-pmatrix.fs(x, trans, t = 1, newdata = NULL, ci = FALSE, tvar = "trans",
-  sing.inf = 1e+10, B = 1000, cl = 0.95, ...)
+pmatrix.fs(x, trans, t = 1, newdata = NULL, ci = FALSE,
+  tvar = "trans", sing.inf = 1e+10, B = 1000, cl = 0.95, ...)
 }
 \arguments{
 \item{x}{A model fitted with \code{\link{flexsurvreg}}.  See

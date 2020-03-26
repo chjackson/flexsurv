@@ -4,11 +4,11 @@
 \alias{plot.flexsurvreg}
 \title{Plots of fitted flexible survival models}
 \usage{
-\method{plot}{flexsurvreg}(x, newdata = NULL, X = NULL, type = "survival",
-  fn = NULL, t = NULL, start = 0, est = TRUE, ci = NULL, B = 1000,
-  cl = 0.95, col.obs = "black", lty.obs = 1, lwd.obs = 1, col = "red",
-  lty = 1, lwd = 2, col.ci = NULL, lty.ci = 2, lwd.ci = 1,
-  ylim = NULL, add = FALSE, ...)
+\method{plot}{flexsurvreg}(x, newdata = NULL, X = NULL,
+  type = "survival", fn = NULL, t = NULL, start = 0, est = TRUE,
+  ci = NULL, B = 1000, cl = 0.95, col.obs = "black", lty.obs = 1,
+  lwd.obs = 1, col = "red", lty = 1, lwd = 2, col.ci = NULL,
+  lty.ci = 2, lwd.ci = 1, ylim = NULL, add = FALSE, ...)
 }
 \arguments{
 \item{x}{Output from \code{\link{flexsurvreg}} or

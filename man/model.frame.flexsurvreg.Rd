@@ -3,7 +3,6 @@
 \name{model.frame.flexsurvreg}
 \alias{model.frame.flexsurvreg}
 \alias{model.matrix.flexsurvreg}
-\alias{model.matrix.flexsurvreg}
 \title{Extract original data from \code{flexsurvreg} objects.}
 \usage{
 \method{model.frame}{flexsurvreg}(formula, ...)

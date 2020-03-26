@@ -8,23 +8,19 @@
 \alias{rgengamma.orig}
 \alias{Hgengamma.orig}
 \alias{hgengamma.orig}
-\alias{dgengamma.orig}
-\alias{pgengamma.orig}
-\alias{Hgengamma.orig}
-\alias{hgengamma.orig}
-\alias{qgengamma.orig}
-\alias{rgengamma.orig}
 \title{Generalized gamma distribution (original parameterisation)}
 \usage{
 dgengamma.orig(x, shape, scale = 1, k, log = FALSE)
 
-pgengamma.orig(q, shape, scale = 1, k, lower.tail = TRUE, log.p = FALSE)
+pgengamma.orig(q, shape, scale = 1, k, lower.tail = TRUE,
+  log.p = FALSE)
 
 Hgengamma.orig(x, shape, scale = 1, k)
 
 hgengamma.orig(x, shape, scale = 1, k)
 
-qgengamma.orig(p, shape, scale = 1, k, lower.tail = TRUE, log.p = FALSE)
+qgengamma.orig(p, shape, scale = 1, k, lower.tail = TRUE,
+  log.p = FALSE)
 
 rgengamma.orig(n, shape, scale = 1, k)
 }

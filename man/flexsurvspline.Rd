@@ -4,8 +4,9 @@
 \alias{flexsurvspline}
 \title{Flexible survival regression using the Royston/Parmar spline model.}
 \usage{
-flexsurvspline(formula, data, weights, bhazard, subset, k = 0, knots = NULL,
-  bknots = NULL, scale = "hazard", timescale = "log", ...)
+flexsurvspline(formula, data, weights, bhazard, subset, k = 0,
+  knots = NULL, bknots = NULL, scale = "hazard", timescale = "log",
+  ...)
 }
 \arguments{
 \item{formula}{A formula expression in conventional R linear modelling
@@ -86,7 +87,9 @@ distribution function \code{\link{qnorm}}.}
 
 \item{timescale}{If \code{"log"} (the default) the log cumulative hazard
 (or alternative) is modelled as a spline function of log time.  If
-\code{"identity"}, it is modelled as a spline function of time.}
+\code{"identity"}, it is modelled as a spline function of time, however
+this model would not satisfy the desirable property that the cumulative hazard
+(or alternative) should approach 0 at time zero.}
 
 \item{...}{Any other arguments to be passed to or through
 \code{\link{flexsurvreg}}, for example, \code{anc}, \code{inits},

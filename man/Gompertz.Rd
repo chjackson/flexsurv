@@ -8,12 +8,6 @@
 \alias{hgompertz}
 \alias{Hgompertz}
 \alias{rgompertz}
-\alias{dgompertz}
-\alias{pgompertz}
-\alias{qgompertz}
-\alias{rgompertz}
-\alias{hgompertz}
-\alias{Hgompertz}
 \title{The Gompertz distribution}
 \usage{
 dgompertz(x, shape, rate = 1, log = FALSE)

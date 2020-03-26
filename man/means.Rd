@@ -21,28 +21,10 @@
 \alias{mean_weibull}
 \alias{rmst_weibull}
 \alias{means}
-\alias{mean_exp}
-\alias{rmst_exp}
-\alias{mean_weibull}
-\alias{rmst_weibull}
 \alias{mean_weibullPH}
 \alias{rmst_weibullPH}
 \alias{mean_llogis}
 \alias{rmst_llogis}
-\alias{mean_lnorm}
-\alias{rmst_lnorm}
-\alias{mean_gamma}
-\alias{rmst_gamma}
-\alias{mean_gompertz}
-\alias{rmst_gompertz}
-\alias{mean_gengamma}
-\alias{rmst_gengamma}
-\alias{mean_gengamma.orig}
-\alias{rmst_gengamma.orig}
-\alias{mean_genf}
-\alias{rmst_genf}
-\alias{mean_genf.orig}
-\alias{rmst_genf.orig}
 \title{Mean and restricted mean survival functions}
 \usage{
 mean_exp(rate = 1)
