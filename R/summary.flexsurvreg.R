@@ -419,7 +419,7 @@ normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B){
 }
 
 cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
-    if (any(is.na(x$res[,2])) || (B==0))
+    if (all(is.na(x$res[,2])) || (B==0))
         ret <- array(NA, dim=c(length(t), 2))
     else {
         ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
