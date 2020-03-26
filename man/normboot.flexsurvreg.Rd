@@ -4,8 +4,14 @@
 \alias{normboot.flexsurvreg}
 \title{Simulate from the asymptotic normal distribution of parameter estimates.}
 \usage{
-normboot.flexsurvreg(x, B, newdata = NULL, X = NULL,
-  transform = FALSE, raw = FALSE)
+normboot.flexsurvreg(
+  x,
+  B,
+  newdata = NULL,
+  X = NULL,
+  transform = FALSE,
+  raw = FALSE
+)
 }
 \arguments{
 \item{x}{A fitted model from \code{\link{flexsurvreg}} (or \code{\link{flexsurvspline}}).}

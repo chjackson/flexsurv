@@ -12,15 +12,13 @@
 \usage{
 dgenf.orig(x, mu = 0, sigma = 1, s1, s2, log = FALSE)
 
-pgenf.orig(q, mu = 0, sigma = 1, s1, s2, lower.tail = TRUE,
-  log.p = FALSE)
+pgenf.orig(q, mu = 0, sigma = 1, s1, s2, lower.tail = TRUE, log.p = FALSE)
 
 Hgenf.orig(x, mu = 0, sigma = 1, s1, s2)
 
 hgenf.orig(x, mu = 0, sigma = 1, s1, s2)
 
-qgenf.orig(p, mu = 0, sigma = 1, s1, s2, lower.tail = TRUE,
-  log.p = FALSE)
+qgenf.orig(p, mu = 0, sigma = 1, s1, s2, lower.tail = TRUE, log.p = FALSE)
 
 rgenf.orig(n, mu = 0, sigma = 1, s1, s2)
 }

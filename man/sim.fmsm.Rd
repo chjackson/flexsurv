@@ -4,8 +4,17 @@
 \alias{sim.fmsm}
 \title{Simulate paths through a fully parametric semi-Markov multi-state model}
 \usage{
-sim.fmsm(x, trans, t, newdata = NULL, start = 1, M = 10,
-  tvar = "trans", tcovs = NULL, debug = FALSE)
+sim.fmsm(
+  x,
+  trans,
+  t,
+  newdata = NULL,
+  start = 1,
+  M = 10,
+  tvar = "trans",
+  tcovs = NULL,
+  debug = FALSE
+)
 }
 \arguments{
 \item{x}{A model fitted with \code{\link{flexsurvreg}}. See

@@ -4,10 +4,22 @@
 \alias{summary.flexsurvreg}
 \title{Summaries of fitted flexible survival models}
 \usage{
-\method{summary}{flexsurvreg}(object, newdata = NULL, X = NULL,
-  type = "survival", fn = NULL, t = NULL, quantiles = 0.5,
-  start = 0, ci = TRUE, se = FALSE, B = 1000, cl = 0.95,
-  tidy = FALSE, ...)
+\method{summary}{flexsurvreg}(
+  object,
+  newdata = NULL,
+  X = NULL,
+  type = "survival",
+  fn = NULL,
+  t = NULL,
+  quantiles = 0.5,
+  start = 0,
+  ci = TRUE,
+  se = FALSE,
+  B = 1000,
+  cl = 0.95,
+  tidy = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{Output from \code{\link{flexsurvreg}} or

@@ -4,9 +4,19 @@
 \alias{flexsurvspline}
 \title{Flexible survival regression using the Royston/Parmar spline model.}
 \usage{
-flexsurvspline(formula, data, weights, bhazard, subset, k = 0,
-  knots = NULL, bknots = NULL, scale = "hazard", timescale = "log",
-  ...)
+flexsurvspline(
+  formula,
+  data,
+  weights,
+  bhazard,
+  subset,
+  k = 0,
+  knots = NULL,
+  bknots = NULL,
+  scale = "hazard",
+  timescale = "log",
+  ...
+)
 }
 \arguments{
 \item{formula}{A formula expression in conventional R linear modelling

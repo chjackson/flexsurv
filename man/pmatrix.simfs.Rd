@@ -5,8 +5,18 @@
 \title{Transition probability matrix from a fully-parametric, semi-Markov
 multi-state model}
 \usage{
-pmatrix.simfs(x, trans, t = 1, newdata = NULL, ci = FALSE,
-  tvar = "trans", tcovs = NULL, M = 1e+05, B = 1000, cl = 0.95)
+pmatrix.simfs(
+  x,
+  trans,
+  t = 1,
+  newdata = NULL,
+  ci = FALSE,
+  tvar = "trans",
+  tcovs = NULL,
+  M = 1e+05,
+  B = 1000,
+  cl = 0.95
+)
 }
 \arguments{
 \item{x}{A model fitted with \code{\link{flexsurvreg}}.  See
