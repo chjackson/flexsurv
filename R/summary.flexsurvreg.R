@@ -215,6 +215,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
         for (j in seq_along(x$aux)){
             fncall[[names(x$aux)[j]]] <- x$aux[[j]]
         }
+
         y <- do.call(fn, fncall)
         if (ci){
             res.ci <- cisumm.flexsurvreg(x, t, start, X[i,,drop=FALSE], fn=fn, B=B, cl=cl)

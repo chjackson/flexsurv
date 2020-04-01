@@ -118,6 +118,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
         loglik[event] <- (logdens*event.weights) + offseti
         if (any(!event))
             loglik[!event] <- (log(pmax - pmin)*no.event.weights)
+
         loglik <- loglik - log(pobs)*weights
         
         ret <- -sum(loglik)
@@ -1079,4 +1080,32 @@ logLik.flexsurvreg <- function(object, ...){
 ##' @export
 coef.flexsurvreg <- function(object, ...){
     object$coefficients
+}
+
+
+##' Number of observations contributing to a fitted flexible survival model
+##' 
+##' Number of observations contributing to a fitted flexible survival model
+##' 
+##' This matches the behaviour of the \code{nobs} method for \code{\link[survival]{survreg}} objects, including both censored and uncensored observations.
+##'
+##' @param object Output from \code{\link{flexsurvreg}} or
+##' \code{\link{flexsurvspline}}, representing a fitted survival model object.
+##' 
+##' @param ... Further arguments passed to or from other methods.  Currently
+##' unused.
+##' 
+##' @return This returns the \code{mod$N} component of the fitted
+##' model object \code{mod}.  See \code{\link{flexsurvreg}},
+##' \code{\link{flexsurvspline}} for full documentation of all components.
+##' 
+##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
+##' 
+##' @seealso \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.
+##' 
+##' @keywords models
+##' 
+##' @export
+nobs.flexsurvreg <- function(object, ...){
+    object$N
 }

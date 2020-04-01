@@ -12,15 +12,13 @@
 \usage{
 dgengamma.orig(x, shape, scale = 1, k, log = FALSE)
 
-pgengamma.orig(q, shape, scale = 1, k, lower.tail = TRUE,
-  log.p = FALSE)
+pgengamma.orig(q, shape, scale = 1, k, lower.tail = TRUE, log.p = FALSE)
 
 Hgengamma.orig(x, shape, scale = 1, k)
 
 hgengamma.orig(x, shape, scale = 1, k)
 
-qgengamma.orig(p, shape, scale = 1, k, lower.tail = TRUE,
-  log.p = FALSE)
+qgengamma.orig(p, shape, scale = 1, k, lower.tail = TRUE, log.p = FALSE)
 
 rgengamma.orig(n, shape, scale = 1, k)
 }

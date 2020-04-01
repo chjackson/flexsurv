@@ -12,15 +12,13 @@
 \usage{
 dgengamma(x, mu = 0, sigma = 1, Q, log = FALSE)
 
-pgengamma(q, mu = 0, sigma = 1, Q, lower.tail = TRUE,
-  log.p = FALSE)
+pgengamma(q, mu = 0, sigma = 1, Q, lower.tail = TRUE, log.p = FALSE)
 
 Hgengamma(x, mu = 0, sigma = 1, Q)
 
 hgengamma(x, mu = 0, sigma = 1, Q)
 
-qgengamma(p, mu = 0, sigma = 1, Q, lower.tail = TRUE,
-  log.p = FALSE)
+qgengamma(p, mu = 0, sigma = 1, Q, lower.tail = TRUE, log.p = FALSE)
 
 rgengamma(n, mu = 0, sigma = 1, Q)
 }
