@@ -61,7 +61,7 @@ safer way to model covariates on ancillary parameters is through the
 
 \code{\link{survreg}} users should also note that the function
 \code{strata()} is ignored, so that any covariates surrounded by
-\code{strata()} are applied to the location parameter.}
+\code{strata()} are applied to the location parameter.  Likewise the function \code{frailty()} is not handled.}
 
 \item{anc}{An alternative and safer way to model covariates on ancillary
 parameters, that is, parameters other than the main location parameter of

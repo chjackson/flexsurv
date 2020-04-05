@@ -174,12 +174,18 @@ check.dlist <- function(dlist){
 
 check.formula <- function(formula, dlist){
     if (!inherits(formula,"formula")) stop("\"formula\" must be a formula object")
+    labs <- attr(terms(formula), "term.labels")
     if (!("strata" %in% dlist$pars)){
-        labs <- attr(terms(formula), "term.labels")
         strat <- grep("strata\\((.+)\\)",labs)
         if (any(strat)){
             cov <- gsub("strata\\((.+)\\)","\\1",labs[strat[1]])
             warning("Ignoring \"strata\" function: interpreting \"",cov, "\" as a covariate on \"", dlist$location, "\"")
+        }
+    }
+    if (!("frailty" %in% dlist$pars)){
+        fra <- grep("frailty\\((.+)\\)",labs)
+        if (any(fra)){
+            warning("frailty models are not supported and behaviour of frailty() is undefined")
         }
     }
 }
@@ -341,7 +347,8 @@ compress.model.matrices <- function(mml){
 ##' 
 ##' \code{\link{survreg}} users should also note that the function
 ##' \code{strata()} is ignored, so that any covariates surrounded by
-##' \code{strata()} are applied to the location parameter.
+##' \code{strata()} are applied to the location parameter.  Likewise the function \code{frailty()} is not handled.
+##' 
 ##' @param anc An alternative and safer way to model covariates on ancillary
 ##' parameters, that is, parameters other than the main location parameter of
 ##' the distribution.  This is a named list of formulae, with the name of each
@@ -797,7 +804,6 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
                                  control=sr.control,
                                  counting=(attr(model.extract(m, "response"), "type")=="counting")
                                  ))
-
         auto.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=inits.aux)
         if (!missing(inits) && any(is.na(inits))) inits[is.na(inits)] <- auto.inits[is.na(inits)]
         else inits <- auto.inits
