@@ -29,7 +29,7 @@ buildAuxParms <- function(aux, dlist) {
     aux.transform
 }
 
-logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
+logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
                           inits, dfns, aux, mx, fixedpars=NULL) {
     pars   <- inits
     npars  <- length(pars)
@@ -99,10 +99,15 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
             pmin <- do.call(dfns$p, pargs)
         }
         
-        ## Left-truncation
         targs   <- fnargs
+        ## Left-truncation
         targs$q <- Y[,"start"]
-        pobs <- 1 - do.call(dfns$p, targs) # prob of being observed = 1 unless left-truncated
+        plower <- do.call(dfns$p, targs)
+
+        ## Right-truncation
+        targs$q <- rtrunc
+        pupper <- do.call(dfns$p, targs)
+        pobs <- pupper - plower # prob of being observed = 1 - 0 if no truncation 
 
         ## Hazard offset for relative survival models
         if (do.hazard){
@@ -127,10 +132,10 @@ logLikFactory <- function(Y, X=0, weights, bhazard, dlist,
     }
 }
 
-minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard,
+minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, 
                                  dlist, inits,
                                  dfns, aux, mx, fixedpars=NULL) {
-    logLikFactory(Y, X, weights, bhazard, dlist, inits,
+    logLikFactory(Y, X, weights, bhazard, rtrunc, dlist, inits,
                   dfns, aux, mx, fixedpars=fixedpars)(optpars)
 }
 
@@ -360,8 +365,12 @@ compress.model.matrices <- function(mml){
 ##' \code{formula}.  If not given, the variables should be in the working
 ##' environment.
 ##' @param weights Optional variable giving case weights.
+##' 
 ##' @param bhazard Optional variable giving expected hazards for relative
 ##' survival models.
+##'
+##' @param rtrunc Optional variable giving individual-specific right-truncation times.  Used for analysing data with "retrospective ascertainment".  For example, suppose we want to estimate the distribution of the time from onset of a disease to death, but have only observed cases known to have died by the current date.   In this case, times from onset to death for individuals in the data are right-truncated by the current date minus the onset date.   Predicted survival times for new cases can then be described by an un-truncated version of the fitted distribution.
+##' 
 ##' @param subset Vector of integers or logicals specifying the subset of the
 ##' observations to be used in the fit.
 ##' @param na.action a missing-data filter function, applied after any 'subset'
@@ -714,7 +723,7 @@ compress.model.matrices <- function(mml){
 ##' ## should give same answer
 ##' 
 ##' @export
-flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.action, dist,
+flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subset, na.action, dist,
                         inits, fixedpars=NULL, dfns=NULL, aux=NULL, cl=0.95,
                         integ.opts=NULL, sr.control=survreg.control(), ...)
 {
@@ -761,7 +770,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     ## m <- make.model.frame(call, formula, data, weights, subset, na.action, ancnames)
 
     ## Make model frame
-    indx <- match(c("formula", "data", "weights", "bhazard", "subset", "na.action"), names(call), nomatch = 0)
+    indx <- match(c("formula", "data", "weights", "bhazard", "rtrunc", "subset", "na.action"), names(call), nomatch = 0)
     if (indx[1] == 0)
         stop("A \"formula\" argument is required")
     temp <- call[c(1, indx)]
@@ -787,6 +796,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if (is.null(weights)) weights <- m$"(weights)" <- rep(1, nrow(X))
     bhazard <- model.extract(m, "bhazard")
     if (is.null(bhazard)) bhazard <- rep(0, nrow(X))
+    rtrunc <- model.extract(m, "rtrunc")
+    if (is.null(rtrunc)) rtrunc <- rep(Inf, nrow(X))
     dat <- list(Y=Y, m=m, mml=mml)
     ncovs <- length(attr(m, "covnames.orig"))
 
@@ -839,7 +850,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if ((is.logical(fixedpars) && fixedpars==TRUE) ||
         (is.numeric(fixedpars) && identical(fixedpars, 1:npars))) {
         minusloglik <- minusloglik.flexsurv(inits, Y=Y, X=X,
-                                            weights=weights, bhazard=bhazard,
+                                            weights=weights, bhazard=bhazard, rtrunc=rtrunc, 
                                             dlist=dlist, inits=inits,
                                             dfns=dfns, aux=aux, mx=mx)
         res.t <- matrix(inits, ncol=1)
@@ -863,13 +874,14 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
                              fn=logLikFactory(Y=Y, X=X,
                                               weights=weights,
                                               bhazard=bhazard,
+                                              rtrunc=rtrunc, 
                                               inits=inits, dlist=dlist,
                                               dfns=dfns,
                                               aux=aux, mx=mx,
                                               fixedpars=fixedpars),
                              gr=gr,
                              Y=Y, X=X, weights=weights,
-                             bhazard=bhazard, dlist=dlist,
+                             bhazard=bhazard, rtrunc=rtrunc, dlist=dlist,
                              inits=inits, dfns=dfns, aux=aux,
                              mx=mx, fixedpars=fixedpars,
                              hessian=TRUE))
@@ -903,7 +915,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
             ## theoretically could also do logit SE(g(x) = exp(x)/(1 + exp(x))) = g'(x) SE(x);  g'(x) = exp(x)/(1 + exp(x))^2
             ## or any interval scale (dglogit) as in msm
         }
-        minusloglik <- minusloglik.flexsurv(res.t[,"est"], Y=Y, X=X, weights=weights, bhazard=bhazard,
+        minusloglik <- minusloglik.flexsurv(res.t[,"est"], Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, 
                                             dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx)
         ret <- list(res=res, res.t=res.t, cov=cov, coefficients=res.t[,"est"],
                     npars=length(est), fixedpars=fixedpars, optpars=setdiff(1:npars, fixedpars),
@@ -922,7 +934,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, subset, na.ac
     if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
         && (dfns$deriv) ) {
         if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
-        ret$deriv.test <- deriv.test(optpars, Y, X, weights, bhazard, dlist, inits, dfns, aux, mx, fixedpars)
+        ret$deriv.test <- deriv.test(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars)
     }
     class(ret) <- "flexsurvreg"
     ret

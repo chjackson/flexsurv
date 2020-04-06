@@ -209,6 +209,57 @@ table(progc, progf)
 }
 @ 
 
+
+
+\section{Right truncation: retrospective ascertainment}
+
+Suppose we want to estimate the distribution of the time
+from onset of a disease to death, but have only observed cases known
+to have died by the current date.   In this case, times from onset to
+death for individuals in the data are \emph{right-truncated} by the current
+date minus the onset date.   Predicted survival times for new cases
+can then be described by an un-truncated version of the fitted
+distribution.   Denote the time from onset to death as the
+\emph{delay} time. 
+
+This is illustrated in the following simulated example.   Suppose
+individual onset times are uniformly distributed between 0 and 30
+days.   Their delay times are generated from a Gamma distribution. 
+
+<<>>=
+set.seed(1)
+nsim <- 10000
+onsetday <- runif(nsim, 0, 30) 
+deathday <- onsetday + rgamma(nsim, shape=1.5, rate=1/10)
+@ 
+
+The data are examined at 40 days.   Therefore we do not observe people
+who have died after this time.    For each individual in the observed
+data, their delay time is right-truncated by 40 days minus their
+onset day, since their delay times cannot be greater than this if they
+are included in the data.   The right-truncation point is
+specified by the variable \code{rtrunc} in the data. 
+
+<<>>=
+datt <- data.frame(delay = deathday - onsetday,
+                   event = rep(1, nsim),
+                   rtrunc = 40 - onsetday)
+datt <- datt[datt$delay < datt$rtrunc, ] 
+@ 
+
+The truncated Gamma model is fitted with \code{flexsurvreg} by
+specifying individual-specific truncation points in the argument
+\code{rtrunc}. The fitted model reproduces the gamma parameters that
+were used to simulate the data.  After fitting the model, we can use
+the fitted model to predict the mean time to death - this is
+approximately the shape / rate of the untruncated gamma distribution.
+
+<<>>=
+fitt <- flexsurvreg(Surv(delay, event) ~ 1, data=datt, rtrunc = rtrunc, dist="gamma")
+fitt
+summary(fitt, t=1, fn = mean_gamma)
+@ 
+
 \bibliography{flexsurv}
 
 \end{document} 

@@ -318,6 +318,14 @@ expected mortality rate in the \code{bhazard} argument to
 specified, as in standard \proglang{R} modelling functions, using \code{weights}
 or \code{subset} arguments.
 
+In versions of \pkg{flexsurv} since April 2020, models with
+individual-specific right-truncation times are also supported.   
+These are used for situations with ``retrospective ascertainment'',
+where cases are only included in the data if they have died by a
+specific time.   These models are specified through an argument \code{rtrunc} to
+\code{flexsurvreg} that names the variable with the truncation times.
+See the Supplementary Examples vignette for a worked example. 
+
 
 \subsection{Built-in models}
 \label{sec:builtin}

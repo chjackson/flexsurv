@@ -1,5 +1,10 @@
 -*- text -*-
 
+Version 1.2 (TODO)
+-------------
+
+* Individual-level right-truncation times supported with new "rtrunc"
+  argument to flexsurvreg.
 
 
 Version 1.1.1 (2019-03-18)
