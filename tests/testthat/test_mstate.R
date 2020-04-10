@@ -25,9 +25,11 @@ bexp.cov <- flexsurvreg(Surv(years, status) ~ trans + x, data=bosms3, dist="exp"
 bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
 
 test_that("newdata in msfit.flexsurvreg",{
-    msfit.flexsurvreg(bexp.cov, newdata=list(x=1), t=c(0,5,10), trans=tmat, variance=FALSE)
-    msfit.flexsurvreg(bexp.cov, newdata=list(x=2), t=c(0,5,10), trans=tmat, variance=FALSE)
-    msfit.flexsurvreg(bexp.cov, newdata=list(x=c(1,2,3)), t=c(0,5,10), trans=tmat, variance=FALSE)
+    expect_error({
+        msfit.flexsurvreg(bexp.cov, newdata=list(x=1), t=c(0,5,10), trans=tmat, variance=FALSE)
+        msfit.flexsurvreg(bexp.cov, newdata=list(x=2), t=c(0,5,10), trans=tmat, variance=FALSE)
+        msfit.flexsurvreg(bexp.cov, newdata=list(x=c(1,2,3)), t=c(0,5,10), trans=tmat, variance=FALSE)
+    }, NA)
 })
 
 test_that("Errors in msfit.flexsurvreg",{
@@ -56,18 +58,22 @@ test_that("totlos.fs",{
 })
 
 test_that("pmatrix.simfs",{
-    pmatrix.simfs(bexp, t=5, trans=tmat, M=100)
-    pmatrix.simfs(bwei, t=5, trans=tmat, M=100)
-    pmatrix.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
+    expect_error({
+        pmatrix.simfs(bexp, t=5, trans=tmat, M=100)
+        pmatrix.simfs(bwei, t=5, trans=tmat, M=100)
+        pmatrix.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
+    }, NA)
 })
 
 test_that("totlos.simfs",{
-    totlos.simfs(bexp, t=5, trans=tmat, M=100)
-    totlos.simfs(bwei, t=5, trans=tmat, M=100)
-    totlos.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
-    totlos.simfs(bexp, t=5, trans=tmat, M=100)
-    totlos.simfs(bwei, t=5, trans=tmat, M=100)
-    totlos.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
+    expect_error({
+        totlos.simfs(bexp, t=5, trans=tmat, M=100)
+        totlos.simfs(bwei, t=5, trans=tmat, M=100)
+        totlos.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
+        totlos.simfs(bexp, t=5, trans=tmat, M=100)
+        totlos.simfs(bwei, t=5, trans=tmat, M=100)
+        totlos.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
+    }, NA)
 })
 
 ### List format for independent transition-specific models

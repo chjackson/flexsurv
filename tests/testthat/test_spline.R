@@ -105,23 +105,23 @@ test_that("Spline proportional hazards models reduce to Weibull",{
     expect_equal(fit$loglik, wei.base$loglik[1])
 })
 
-test_that("Spline proportional odds models reduce to log-logistic",{
-    if (is.element("eha", installed.packages()[,1])) {
-        library(eha)
-        custom.llogis <- list(name="llogis",
-                              pars=c("shape","scale"),
-                              location="scale",
-                              transforms=c(log, log),
-                              inv.transforms=c(exp, exp),
-                              inits=function(t){ c(1, median(t)) })
-        fitll <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist=custom.llogis)
-        fitsp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, scale="odds")
-        expect_equal(fitsp$loglik, fitll$loglik)
-        expect_equal(1/fitll$res["scale",1]^fitll$res["shape",1], exp(fitsp$res["gamma0",1]), tol=1e-02)
-        expect_equal(fitsp$res["gamma1",1], fitll$res["shape",1], tol=1e-02)
-        detach("package:eha")
-    }
-})
+if (is.element("eha", installed.packages()[,1])) {
+  test_that("Spline proportional odds models reduce to log-logistic",{
+          library(eha)
+          custom.llogis <- list(name="llogis",
+                                pars=c("shape","scale"),
+                                location="scale",
+                                transforms=c(log, log),
+                                inv.transforms=c(exp, exp),
+                                inits=function(t){ c(1, median(t)) })
+          fitll <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist=custom.llogis)
+          fitsp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, scale="odds")
+          expect_equal(fitsp$loglik, fitll$loglik)
+          expect_equal(1/fitll$res["scale",1]^fitll$res["shape",1], exp(fitsp$res["gamma0",1]), tol=1e-02)
+          expect_equal(fitsp$res["gamma1",1], fitll$res["shape",1], tol=1e-02)
+          detach("package:eha")
+  })
+}
 
 test_that("Spline normal models reduce to log-normal",{
     fitln <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist="lnorm")
@@ -168,10 +168,12 @@ test_that("Spline models with weighting",{
 })
 
 test_that("Spline models with relative survival",{
+  expect_error({
     bc$bh <- rep(0.01, nrow(bc))
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, bhazard=bh)
 #    wei <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibullPH", bhazard=bh)
 #    expect_equal(spl$loglik, wei$loglik, tol=1e-06)
+  }, NA)
 })
 
 test_that("flexsurvspline results match stpm in Stata",{

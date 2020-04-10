@@ -43,13 +43,13 @@ test_that("Analytic derivatives match numeric",{
     expect_lt(deriv_error(fitg), err)
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz")
     expect_lt(deriv_error(fitg), err)
-    fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz", method="Nelder-Mead")
+    suppressWarnings({fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz", method="Nelder-Mead")})
     expect_lt(deriv_error(fitg), err)
     fitg # With derivs, finds wrong MLE if initialize shape at zero, so default to 0.001 instead.
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ factor(ovarian$rx) + factor(ovarian$resid.ds), dist="gompertz")
     expect_lt(deriv_error(fitg), err)
     ov2 <- ovarian[ovarian$futime>200,]
-    fitg <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="gompertz") # truncation
+    suppressWarnings({fitg <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="gompertz")}) # truncation
     expect_lt(deriv_error(fitg), err)
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ shape(factor(ovarian$resid.ds)), dist="gompertz")
     expect_lt(deriv_error(fitg), err)
@@ -59,7 +59,7 @@ test_that("Analytic derivatives match numeric",{
 
     
 ## fixedpars
-    fitg <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="gompertz", fixedpars=2)
+    suppressWarnings({fitg <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="gompertz", fixedpars=2)})
     expect_lt(deriv_error(fitg), err)
 
     fitl <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx) + factor(ov2$resid.ds), dist="llogis", fixedpars=2)

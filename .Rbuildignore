@@ -26,3 +26,5 @@ tests/test_extra.R
 ^\.Rproj\.user$
 R/predict.flexsurvreg.R
 man/predict.flexsurvreg.Rd
+^\.travis\.yml$
+^codecov\.yml$

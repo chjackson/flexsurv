@@ -32,7 +32,14 @@ Imports:
     tibble
 Encoding: UTF-8
 Suggests:
-    eha,numDeriv,testthat,msm,knitr,TH.data,colorspace
+    eha,
+    numDeriv,
+    testthat,
+    msm,
+    knitr,
+    TH.data,
+    colorspace,
+    covr
 URL: https://github.com/chjackson/flexsurv-dev
 BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr
