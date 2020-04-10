@@ -3,7 +3,7 @@ flexsurv-dev
 
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.com/jrdnmdhl/flexsurv-dev.svg?branch=master)](https://travis-ci.com/jrdnmdhl/flexsurv-dev)
-[![Coveralls test coverage](https://coveralls.io/repos/github/jrdnmdhl/flexsurv-dev/badge.svg)](https://coveralls.io/r/jrdnmdhl/flexsurv-dev?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/jrdnmdhl/flexsurv-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/jrdnmdhl/flexsurv-dev?branch=master)
 <!-- badges: end -->
 
 The development repository for the [flexsurv](http://cran.r-project.org/package=flexsurv) R package for parametric survival modelling.
