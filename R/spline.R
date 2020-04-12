@@ -533,8 +533,12 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' \code{formula}.  If not given, the variables should be in the working
 ##' environment.
 ##' @param weights Optional variable giving case weights.
+##' 
 ##' @param bhazard Optional variable giving expected hazards for relative
 ##' survival models.
+##'
+##' @param rtrunc Optional variable giving individual right-truncation times (see \code{\link{flexsurvreg}}).   Note this is has not been tested properly in \code{flexsurvspline}.
+##' 
 ##' @param subset Vector of integers or logicals specifying the subset of the
 ##' observations to be used in the fit.
 ##' @param k Number of knots in the spline. The default \code{k=0} gives a
@@ -643,14 +647,14 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' }
 ##' 
 ##' @export
-flexsurvspline <- function(formula, data, weights, bhazard, subset,
+flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
                            k=0, knots=NULL, bknots=NULL, scale="hazard", timescale="log", ...){
     ## Get response matrix from the formula.  Only need this to obtain
     ## default knots.  Largely copied from flexsurvreg - ideally
     ## should be in separate function, but can't make scoping work.
 
     call <- match.call()
-    indx <- match(c("formula", "data", "weights", "bhazard", "subset", "na.action"), names(call), nomatch = 0)
+    indx <- match(c("formula", "data", "weights", "bhazard", "rtrunc", "subset", "na.action"), names(call), nomatch = 0)
     if (indx[1] == 0)
         stop("A \"formula\" argument is required")
     temp <- call[c(1, indx)]
@@ -732,13 +736,14 @@ flexsurvspline <- function(formula, data, weights, bhazard, subset,
     ## Try an alternative initial value routine if the default one gives zero likelihood
     fpold <- args$fixedpars
     args$fixedpars <- TRUE
+    args$weights <- temp$weights
+    args$bhazard <- temp$bhazard
+    args$rtrunc <- temp$rtrunc
+    args$subset <- temp$subset
     if (is.infinite(do.call("flexsurvreg", args)$loglik)){
         args$dist$inits <- flexsurv.splineinits.cox
     }
     args$fixedpars <- fpold
-    args$weights <- temp$weights
-    args$bhazard <- temp$bhazard
-    args$subset <- temp$subset
 
     ret <- do.call("flexsurvreg", args) # faff to make ... args work within functions
     ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale))

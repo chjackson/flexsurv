@@ -780,6 +780,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     temp[["formula"]] <- f2
     if (missing(data)) temp[["data"]] <- environment(formula)
     m <- eval(temp, parent.frame())
+
     m <- droplevels(m) # remove unused factor levels after subset applied
     attr(m,"covnames") <- attr(f2, "covnames") # for "newdata" in summary
     attr(m,"covnames.orig") <- intersect(colnames(m), attr(f2, "covnames.orig")) # for finding factors in plot method
