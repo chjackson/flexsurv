@@ -39,7 +39,7 @@ Suggests:
     knitr,
     TH.data,
     colorspace,
-    covr
+    covr (<= 2.2.2)
 URL: https://github.com/chjackson/flexsurv-dev
 BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr

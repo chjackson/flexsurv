@@ -4,6 +4,7 @@ language: R
 cache: packages
 install:
 - R -e 'install.packages("devtools")'
+- R -e 'devtools::install_version("covr", version = "2.2.2")'
 - R -e 'devtools::install_deps(dep = T)'
 script:
 - R CMD build .
