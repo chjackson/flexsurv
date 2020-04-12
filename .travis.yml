@@ -7,7 +7,7 @@ install:
 - R -e 'devtools::install_deps(dep = T)'
 script:
 - R CMD build .
-- R CMD check
+- R CMD check *tar.gz
 - Rscript -e 'devtools::test()'
 after_success:
   - Rscript -e 'covr::codecov()'
