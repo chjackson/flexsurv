@@ -38,8 +38,7 @@ Suggests:
     msm,
     knitr,
     TH.data,
-    colorspace,
-    covr
+    colorspace
 URL: https://github.com/chjackson/flexsurv-dev
 BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr
