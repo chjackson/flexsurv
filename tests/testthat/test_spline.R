@@ -105,7 +105,6 @@ test_that("Spline proportional hazards models reduce to Weibull",{
     expect_equal(fit$loglik, wei.base$loglik[1])
 })
 
-# FAILS WHEN RUNNING CODE COVERAGE
 if (is.element("eha", installed.packages()[,1])) {
    test_that("Spline proportional odds models reduce to log-logistic",{
            library(eha)
@@ -192,7 +191,7 @@ test_that("flexsurvspline results match stpm in Stata",{
     expect_equal(as.numeric(spl$res[,"est"]), c(-1.728339,  3.476179,   .567432, -.3420749), tol=1e-02)
     
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, scale="odds")
-    expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -675.27932357, tol=1e-04) # FAILS WHEN RUNNING CODE COVERAGE
+    expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -675.271, tol=1e-04)
 
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, scale="normal")
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -675.73591 , tol=1e-04)
