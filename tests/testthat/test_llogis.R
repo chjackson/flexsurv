@@ -2,8 +2,10 @@ context("Log-logistic distribution")
 
 test_that("llogis",{
     x <- c(0.1, 0.2, 0.7)
-    if (require("eha"))
-        expect_equal(dllogis(x, shape=0.1, scale=0.2), eha::dllogis(x, shape=0.1, scale=0.2))
+    suppressWarnings({
+        if (require("eha"))
+            expect_equal(dllogis(x, shape=0.1, scale=0.2), eha::dllogis(x, shape=0.1, scale=0.2))
+    })
     expect_equal(qllogis(x, shape=0.1, scale=0.2), qgeneric(pllogis, p=x, shape=0.1, scale=0.2))
     expect_equal(x, pllogis(qllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2))
     expect_equal(x, 1 - exp(-Hllogis(qllogis(x, shape=0.1, scale=0.2), shape=0.1, scale=0.2)))

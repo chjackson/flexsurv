@@ -7,8 +7,8 @@ expect_error(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dat
 
 test_that("Generalized gamma fit",{
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma")
-    print(fitg)
-    print(fitg, digits=4)
+    # print(fitg)
+    # print(fitg, digits=4)
     fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="gengamma")
     ovarian2 <- ovarian
     fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian2, dist="gengamma")
@@ -171,7 +171,6 @@ test_that("Summary function: alternative ways to supply covariates",{
 
 test_that("summary with CIs",{
     summ <- summary(fitg, newdata=data.frame(rx=1), B=2, type="survival")
-    print(summ)
     expect_true(all(unlist(summ[[1]][,2:4]) <= 1))
     expect_true(all(unlist(summ[[1]][,2:4]) >= 0))
 })
@@ -215,14 +214,17 @@ test_that("Model fit with covariates and simulated data",{
     sim <- rgengamma(500, 1.5 + 2*x3, 1, -0.4)
     dead <- as.numeric(sim<=30)
     simt <- ifelse(sim<=30, sim, 30)
-    fit <- flexsurvreg(Surv(simt, dead) ~ x3, dist="gengamma", control=list(maxit=10000))
-    fit <- flexsurvreg(Surv(simt, dead) ~ x + x2 + x3, dist="gengamma", control=list(maxit=10000))
-    fit <- flexsurvreg(Surv(simt, dead)[1:100] ~ x[1:100] + x2[1:100], dist="gengamma", control=list(maxit=10000), method="BFGS")
-    fit <- flexsurvreg(Surv(simt, dead)[1:100] ~ x[1:100], dist="gengamma", control=list(maxit=10000))
-    fit
+    expect_error({
+      fit <- flexsurvreg(Surv(simt, dead) ~ x3, dist="gengamma", control=list(maxit=10000))
+      fit <- flexsurvreg(Surv(simt, dead) ~ x + x2 + x3, dist="gengamma", control=list(maxit=10000))
+      fit <- flexsurvreg(Surv(simt, dead)[1:100] ~ x[1:100] + x2[1:100], dist="gengamma", control=list(maxit=10000), method="BFGS")
+      fit <- flexsurvreg(Surv(simt, dead)[1:100] ~ x[1:100], dist="gengamma", control=list(maxit=10000))
+    }, NA)
 })
 
 test_that("Covariates on ancillary parameters",{
+  
+  expect_error({
     set.seed(11082012)
     x3 <- rnorm(1500,0,1)
     x4 <- rnorm(1500,0,1)
@@ -232,7 +234,6 @@ test_that("Covariates on ancillary parameters",{
     simt <- ifelse(sim<=30, sim, 30)
 
     fit <- flexsurvreg(Surv(simt, dead) ~ sigma(x3), dist="gengamma", control=list(maxit=10000))
-    fit
     cl <- confint(fit)
 
     ## Cov on ancillary, not on location
@@ -250,6 +251,7 @@ test_that("Covariates on ancillary parameters",{
     ## More than one ancillary parameter with covariates
     flexsurvreg(Surv(simt, dead) ~ x3 + sigma(x3) + sigma(x4) + Q(x5), dist="gengamma")
     x <- flexsurvreg(Surv(simt, dead) ~ x3, anc=list(sigma=~x3+x4, Q=~x5), dist="gengamma")
+  }, NA)
 })
 
 test_that("Various errors",{
@@ -277,15 +279,19 @@ test_that("Various errors",{
 })
 
 test_that("Calling flexsurvreg from within a function",{
+  
+  expect_error({
     f <- function(){
         ovarian2 <- ovarian
         fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian2, dist="gengamma")
         fitg <- flexsurvreg(formula = Surv(ovarian2$futime, ovarian2$fustat) ~ factor(ovarian2$rx), dist="gengamma",method="Nelder-Mead")
     }
     f()
+  }, NA)
 })
 
 test_that("Calling flexsurvreg from a function within a function",{
+  expect_error({
     f <- function(){
         ovarian2 <- ovarian
         g <- function(){
@@ -295,6 +301,7 @@ test_that("Calling flexsurvreg from a function within a function",{
         g()
     }
     f()
+  }, NA)
 })
 
 ## Left-truncation.
@@ -395,10 +402,10 @@ test_that("Relative survival", {
                                  c(1, median(t[t>0]) / log(2))
                              })
 
-#     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH), fixedpars=TRUE)
-
-    fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH))
-    fs6bd <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
+    suppressWarnings({  # warnings from temporary overflow during optimisation 
+      fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH))
+      fs6bd <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
+    })
     
     expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tol=1e-05)
     expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tol=1e-05)
@@ -441,8 +448,9 @@ test_that("RMST/Mean/Median calculations are working",{
   fs2 = flexsurvreg(Surv(rectime, censrec)~group ,dist="exp",data=bc)
   fs3 = flexsurvreg(Surv(rectime, censrec)~group ,dist="llogis",data=bc)
   fs4 = flexsurvreg(Surv(rectime, censrec)~group ,dist="lnorm",data=bc)
-  fs5 = flexsurvreg(Surv(rectime, censrec)~group ,dist="gamma",data=bc)
-  
+  suppressWarnings({  # warnings from temporary overflow during optimisation 
+    fs5 = flexsurvreg(Surv(rectime, censrec)~group ,dist="gamma",data=bc)
+  })
   res1 = summary(fs1,t=c(Inf),start=0,type="rmst")
   res2 = summary(fs1,type="mean")
   
