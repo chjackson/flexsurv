@@ -6,7 +6,8 @@
 \alias{bosms3}
 \alias{bosms4}
 \title{Bronchiolitis obliterans syndrome after lung transplants}
-\format{A data frame containing a sequence of observed or censored
+\format{
+A data frame containing a sequence of observed or censored
 transitions to the next stage of severity or death.  It is grouped
 by patient and includes histories of 204 patients.  All patients
 start in state 1 (no BOS) at six months after transplant, and may
@@ -25,7 +26,8 @@ or potential ending state of the transition \cr \code{Tstart} \tab
 0 if the transition to state \code{to} was censored (for example, if the
 patient was observed to move to a competing state) \cr \code{trans} \tab
 (factor) \tab Number of the transition \code{from}-\code{to} in the set of
-all \code{ntrans} allowed transitions, numbered from 1 to \code{ntrans}.  }}
+all \code{ntrans} allowed transitions, numbered from 1 to \code{ntrans}.  }
+}
 \source{
 Papworth Hospital, U.K.
 }

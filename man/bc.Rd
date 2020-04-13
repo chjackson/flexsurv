@@ -4,12 +4,14 @@
 \name{bc}
 \alias{bc}
 \title{Breast cancer survival data}
-\format{A data frame with 686 rows.  \tabular{rll}{ \code{censrec} \tab
+\format{
+A data frame with 686 rows.  \tabular{rll}{ \code{censrec} \tab
 (numeric) \tab 1=dead, 0=censored \cr \code{rectime} \tab (numeric) \tab
 Time of death or censoring in days\cr \code{group} \tab (numeric) \tab
 Prognostic group: \code{"Good"},\code{"Medium"} or \code{"Poor"}, \cr \tab
 \tab from a regression model developed by Sauerbrei and Royston (1999).\cr
-}}
+}
+}
 \source{
 German Breast Cancer Study Group, 1984-1989.  Used as a reference
 dataset for the spline-based survival model of Royston and Parmar (2002),

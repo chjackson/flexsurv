@@ -28,3 +28,5 @@ R/predict.flexsurvreg.R
 man/predict.flexsurvreg.Rd
 ^\.travis\.yml$
 ^codecov\.yml$
+\.gcda
+\.gcno

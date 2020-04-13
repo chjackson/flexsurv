@@ -9,6 +9,7 @@ flexsurvspline(
   data,
   weights,
   bhazard,
+  rtrunc,
   subset,
   k = 0,
   knots = NULL,
@@ -63,6 +64,11 @@ environment.}
 
 \item{bhazard}{Optional variable giving expected hazards for relative
 survival models.}
+
+\item{rtrunc}{Optional variable giving individual right-truncation times (see \code{\link{flexsurvreg}}).  Note that these models can suffer from weakly identifiable parameters and
+badly-behaved likelihood functions, and it is advised to compare
+convergence for different initial values by supplying different
+\code{inits} arguments to \code{flexsurvspline}.}
 
 \item{subset}{Vector of integers or logicals specifying the subset of the
 observations to be used in the fit.}

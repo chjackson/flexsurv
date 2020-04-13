@@ -81,7 +81,12 @@ environment.}
 \item{bhazard}{Optional variable giving expected hazards for relative
 survival models.}
 
-\item{rtrunc}{Optional variable giving individual-specific right-truncation times.  Used for analysing data with "retrospective ascertainment".  For example, suppose we want to estimate the distribution of the time from onset of a disease to death, but have only observed cases known to have died by the current date.   In this case, times from onset to death for individuals in the data are right-truncated by the current date minus the onset date.   Predicted survival times for new cases can then be described by an un-truncated version of the fitted distribution.}
+\item{rtrunc}{Optional variable giving individual-specific right-truncation times.  Used for analysing data with "retrospective ascertainment".  For example, suppose we want to estimate the distribution of the time from onset of a disease to death, but have only observed cases known to have died by the current date.   In this case, times from onset to death for individuals in the data are right-truncated by the current date minus the onset date.   Predicted survival times for new cases can then be described by an un-truncated version of the fitted distribution.
+
+These models can suffer from weakly identifiable parameters and
+badly-behaved likelihood functions, and it is advised to compare
+convergence for different initial values by supplying different
+\code{inits} arguments to \code{flexsurvreg}.}
 
 \item{subset}{Vector of integers or logicals specifying the subset of the
 observations to be used in the fit.}
