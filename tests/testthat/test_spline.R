@@ -47,21 +47,20 @@ test_that("Basic flexsurvspline, Weibull, no covs",{
     expect_equal(-873.207054864145, spl$loglik, tol=1e-06)
 })
 
-# FAILS WHEN RUNNING CODE COVERAGE
-# test_that("Basic flexsurvspline, one knot, best fitting in paper",{
-#     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="odds")
-#     expect_equal(spl$loglik, -788.981901798638, tol=1e-06)  # FAILS WHEN RUNNING CODE COVERAGE
-#     expect_equal(spl$loglik  +   sum(log(bc$recyrs[bc$censrec==1])), -615.49431514184, tol=1e-06) # FAILS WHEN RUNNING CODE COVERAGE
-#     expect_equal(spl$AIC  +   sum(log(bc$recyrs[bc$censrec==1])), 1761.45139087546, tol=1e-06) # FAILS WHEN RUNNING CODE COVERAGE
+test_that("Basic flexsurvspline, one knot, best fitting in paper",{
+     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="odds")
+     expect_equal(spl$loglik, -788.981901798638, tol=1e-05) 
+     expect_equal(spl$loglik  +   sum(log(bc$recyrs[bc$censrec==1])), -615.49431514184, tol=1e-05)
+     expect_equal(spl$AIC  +   sum(log(bc$recyrs[bc$censrec==1])), 1761.45139087546, tol=1e-05)
 #     #results from the paper
-#     expect_equal(as.numeric(coef(spl))[1:3], c(-3.451, 2.915, 0.191), tol=1e-03) # FAILS WHEN RUNNING CODE COVERAGE
-#     expect_equal(as.numeric(spl$res[1:3,"se"]), c(0.203, 0.298, 0.044), tol=1e-03)
-#     if (interactive()) {
-#         plot(spl)
-#         plot(spl, type="cumhaz")
-#         plot(spl, type="haz")
-#     }
-# })
+     expect_equal(as.numeric(coef(spl))[1:3], c(-3.451, 2.915, 0.191), tol=1e-03) 
+     expect_equal(as.numeric(spl$res[1:3,"se"]), c(0.203, 0.298, 0.044), tol=1e-03)
+     if (interactive()) {
+         plot(spl)
+         plot(spl, type="cumhaz")
+         plot(spl, type="haz")
+     }
+})
 
 test_that("Spline models with hazard and normal scales",{
     splh <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="hazard")
@@ -107,23 +106,23 @@ test_that("Spline proportional hazards models reduce to Weibull",{
 })
 
 # FAILS WHEN RUNNING CODE COVERAGE
-# if (is.element("eha", installed.packages()[,1])) {
-#   test_that("Spline proportional odds models reduce to log-logistic",{
-#           library(eha)
-#           custom.llogis <- list(name="llogis",
-#                                 pars=c("shape","scale"),
-#                                 location="scale",
-#                                 transforms=c(log, log),
-#                                 inv.transforms=c(exp, exp),
-#                                 inits=function(t){ c(1, median(t)) })
-#           fitll <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist=custom.llogis)
-#           fitsp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, scale="odds")
-#           expect_equal(fitsp$loglik, fitll$loglik)
-#           expect_equal(1/fitll$res["scale",1]^fitll$res["shape",1], exp(fitsp$res["gamma0",1]), tol=1e-02)
-#           expect_equal(fitsp$res["gamma1",1], fitll$res["shape",1], tol=1e-02)
-#           detach("package:eha")
-#   })
-# }
+if (is.element("eha", installed.packages()[,1])) {
+   test_that("Spline proportional odds models reduce to log-logistic",{
+           library(eha)
+           custom.llogis <- list(name="llogis",
+                                 pars=c("shape","scale"),
+                                 location="scale",
+                                 transforms=c(log, log),
+                                 inv.transforms=c(exp, exp),
+                                 inits=function(t){ c(1, median(t)) })
+           fitll <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist=custom.llogis)
+           fitsp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, scale="odds")
+           expect_equal(fitsp$loglik, fitll$loglik)
+           expect_equal(1/fitll$res["scale",1]^fitll$res["shape",1], exp(fitsp$res["gamma0",1]), tol=1e-02)
+           expect_equal(fitsp$res["gamma1",1], fitll$res["shape",1], tol=1e-02)
+           detach("package:eha")
+   })
+}
 
 test_that("Spline normal models reduce to log-normal",{
     fitln <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist="lnorm")
@@ -172,9 +171,12 @@ test_that("Spline models with weighting",{
 test_that("Spline models with relative survival",{
   expect_error({
     bc$bh <- rep(0.01, nrow(bc))
-    spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, bhazard=bh)
-#    wei <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibullPH", bhazard=bh)
-#    expect_equal(spl$loglik, wei$loglik, tol=1e-06)
+    a <- 0.1; b <- 0.2
+    iniw <- c(a, b^(-a))
+    inis <- c(-a*log(b), a)
+    spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, bhazard=bh, inits=inis, fixedpars=TRUE)
+    wei <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibullPH", bhazard=bh, inits=iniw, fixedpars=TRUE)
+    expect_equal(spl$loglik, wei$loglik, tol=1e-05)
   }, NA)
 })
 
@@ -190,7 +192,7 @@ test_that("flexsurvspline results match stpm in Stata",{
     expect_equal(as.numeric(spl$res[,"est"]), c(-1.728339,  3.476179,   .567432, -.3420749), tol=1e-02)
     
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, scale="odds")
-    # expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -675.271, tol=1e-04) # FAILS WHEN RUNNING CODE COVERAGE
+    expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -675.27932357, tol=1e-04) # FAILS WHEN RUNNING CODE COVERAGE
 
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, scale="normal")
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -675.73591 , tol=1e-04)

@@ -402,8 +402,7 @@ test_that("Relative survival", {
                                  c(1, median(t[t>0]) / log(2))
                              })
 
-#     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH), fixedpars=TRUE)
-    suppressWarnings({
+    suppressWarnings({  # warnings from temporary overflow during optimisation 
       fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH))
       fs6bd <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
     })
@@ -449,7 +448,7 @@ test_that("RMST/Mean/Median calculations are working",{
   fs2 = flexsurvreg(Surv(rectime, censrec)~group ,dist="exp",data=bc)
   fs3 = flexsurvreg(Surv(rectime, censrec)~group ,dist="llogis",data=bc)
   fs4 = flexsurvreg(Surv(rectime, censrec)~group ,dist="lnorm",data=bc)
-  suppressWarnings({
+  suppressWarnings({  # warnings from temporary overflow during optimisation 
     fs5 = flexsurvreg(Surv(rectime, censrec)~group ,dist="gamma",data=bc)
   })
   res1 = summary(fs1,t=c(Inf),start=0,type="rmst")
