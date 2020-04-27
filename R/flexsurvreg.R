@@ -107,6 +107,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         ## Right-truncation
         targs$q <- rtrunc
         pupper <- do.call(dfns$p, targs)
+        pupper[rtrunc==Inf] <- 1 # in case the user's function doesn't already do this
         pobs <- pupper - plower # prob of being observed = 1 - 0 if no truncation 
 
         ## Hazard offset for relative survival models
