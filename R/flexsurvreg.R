@@ -136,8 +136,9 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
 minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, 
                                  dlist, inits,
                                  dfns, aux, mx, fixedpars=NULL) {
-    logLikFactory(Y, X, weights, bhazard, rtrunc, dlist, inits,
-                  dfns, aux, mx, fixedpars=fixedpars)(optpars)
+    logLikFactory(Y=Y, X=X, weights=weights, bhazard=bhazard,
+                  rtrunc=rtrunc, dlist=dlist, inits=inits,
+                  dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)(optpars)
 }
 
 check.dlist <- function(dlist){
@@ -941,7 +942,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
         && (dfns$deriv) ) {
         if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
-        ret$deriv.test <- deriv.test(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars)
+        ret$deriv.test <- deriv.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
     }
     class(ret) <- "flexsurvreg"
     ret
