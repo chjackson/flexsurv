@@ -1388,14 +1388,9 @@ Any parametric distribution can be employed in a multi-state model, just as for 
 survival models, with \code{flexsurvreg}.  Spline models may also be
 fitted with \code{flexsurvspline}, and if hazards are assumed
 proportional, they are expected to give similar results to the Cox
-model.  A restriction (currently even when fitting a list of models) 
-is that all transition-specific models must be
-from the same parametric family.  Though to enable a mixture of
-simpler and more complex models, we could choose a very flexible
-family, such as the generalized gamma or a spline, and use the
-\code{fixedpars} argument to \code{flexsurvreg} to fix parameters for
-certain transitions at values for which the flexible family collapses
-to a simpler one (e.g., \S\ref{sec:builtin}, Table \ref{tab:spline}).  
+model.  Since \pkg{flexsurv} version 1.2, different parametric
+families can be used for different transitions, though in earlier 
+versions, the same family had to be used. 
 \end{sloppypar}
 
 \subsection{Obtaining cumulative transition-specific hazards}

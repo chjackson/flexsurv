@@ -4,7 +4,13 @@ Version 1.2 (TODO)
 -------------
 
 * Individual-level right-truncation times supported with new "rtrunc"
-  argument to flexsurvreg.
+  argument to flexsurvreg and flexsurvspline.
+
+* Different parametric families are now supported for different
+  transitions in multi-state models.
+
+* Hence the return value from pars.fmsm is now a list rather than a matrix,
+  even if the model family is the same for each transition.
 
 
 Version 1.1.1 (2019-03-18)

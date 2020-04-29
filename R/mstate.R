@@ -220,14 +220,11 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
     res
 }
 
-## Matrix with ntrans rows, npars columns giving transition-specific
-## baseline parameters at given covariate values
-
 
 
 ##' Transition-specific parameters in a flexible parametric multi-state model
 ##' 
-##' Matrix of maximum likelihood estimates of transition-specific parameters in
+##' List of maximum likelihood estimates of transition-specific parameters in
 ##' a flexible parametric multi-state model, at given covariate values.
 ##' 
 ##' 
@@ -238,25 +235,32 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
 ##' \code{x} can also be a list of \code{\link{flexsurvreg}} models, with one
 ##' component for each permitted transition in the multi-state model, as
 ##' illustrated in \code{\link{msfit.flexsurvreg}}.
+##' 
 ##' @param trans Matrix indicating allowed transitions.  See
 ##' \code{\link{msfit.flexsurvreg}}.
+##' 
 ##' @param newdata A data frame specifying the values of covariates in the
 ##' fitted model, other than the transition number.  See
 ##' \code{\link{msfit.flexsurvreg}}.
+##' 
 ##' @param tvar Variable in the data representing the transition type. Not
 ##' required if \code{x} is a list of models.
-##' @return A matrix with one row for each permitted transition, and one column
-##' for each parameter of the parametric distribution that generates each event
-##' in the multi-state model.
+##' 
+##' @return A list with one component for each permitted transition. Each component
+##' has one element for each parameter of the parametric distribution that generates
+##' the corresponding event in the multi-state model.
+##' 
 ##' @author Christopher Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}.
+##' 
 ##' @keywords models,survival
+##' 
 ##' @export
 pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
 {
     if (is.flexsurvlist(x)){
         ntr <- length(x) # number of allowed transitions
         if (ntr != length(na.omit(as.vector(trans)))) stop(sprintf("x is a list of %s flexsurvreg objects, but trans indicates %s transitions", ntr, length(na.omit(as.vector(trans)))))
-        basepar <- matrix(nrow=ntr, ncol=length(x[[1]]$dlist$pars), dimnames=list(NULL,x[[1]]$dlist$pars))
+        basepar <- vector(ntr, mode="list")
         newdata <- as.data.frame(newdata)
         for (i in 1:ntr){
             if (x[[i]]$ncovs==0)
@@ -269,18 +273,19 @@ pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
                 } else stop(sprintf("`newdata` has %s rows. It must either have one row, or one row for each of the %s allowed transitions",nrow(newdata),ntr))
               }
             beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
-            basepar[i,] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
+            basepar[[i]] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
         }
     } else if (inherits(x, "flexsurvreg")) {
         newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
         X <- form.model.matrix(x, newdata)   
         basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
+        basepar <- split(basepar, seq(length=nrow(basepar)))
+        basepar <- lapply(basepar, function(y){names(y) <- x$dlist$pars; y})
+
     } else
         stop("expected x to be a flexsurvreg object or list of flexsurvreg objects") 
     basepar
 }
-
-## TODO allow time dependent covs when computing the hazard.
 
 
 
@@ -380,14 +385,14 @@ pmatrix.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     ntr <- sum(!is.na(trans))
     n <- nrow(trans)
     dp <- function(t, y, parms, ...){
-        if (is.flexsurvlist(x)) x <- x[[1]] 
         P <- matrix(y, nrow=n, ncol=n)
         haz <- numeric(n)
         for (i in 1:ntr){
+            xi <- if (is.flexsurvlist(x)) x[[i]] else x 
             hcall <- list(x=t)
-            for (j in seq(along=x$dlist$pars))
-                hcall[[x$dlist$pars[j]]] <- parms$par[i,j]
-            haz[i] <- do.call(x$dfns$h, hcall)
+            for (j in seq(along=xi$dlist$pars))
+                hcall[[xi$dlist$pars[j]]] <- parms$par[[i]][j]
+            haz[i] <- do.call(xi$dfns$h, hcall)
         }
         Q <- haz[trans]
         Q[is.na(Q)] <- 0
@@ -536,14 +541,15 @@ totlos.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     n <- nrow(trans)
     nsq <- n*n
     dp <- function(t, y, parms, ...){
-        if (is.flexsurvlist(x)) x <- x[[1]] 
         P <- matrix(y[nsq + 1:nsq], nrow=n, ncol=n)
         haz <- numeric(n)
         for (i in 1:ntr){
+            xi <- if (is.flexsurvlist(x)) x[[i]] else x 
+
             hcall <- list(x=t)
-            for (j in seq(along=x$dlist$pars))
-                hcall[[x$dlist$pars[j]]] <- parms$par[i,j]
-            haz[i] <- do.call(x$dfns$h, hcall)
+            for (j in seq(along=xi$dlist$pars))
+                hcall[[xi$dlist$pars[j]]] <- parms$par[[i]][j]
+            haz[i] <- do.call(xi$dfns$h, hcall)
         }
         Q <- haz[trans]
         Q[is.na(Q)] <- 0
@@ -743,8 +749,7 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tco
     if (length(start)==1) start <- rep(start, M)
     else if (length(start)!=M) stop("length of start should be 1 or M=",M)
 
-    basepars.mat <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
-    xbase <- if (is.flexsurvlist(x)) x[[1]] else x
+    basepars.all <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
 
     nst <- nrow(trans)
     ## TODO only need a max time if model is transient, else if absorbing, can allocate these up front
@@ -766,10 +771,12 @@ sim.fmsm <- function(x, trans, t, newdata=NULL, start=1, M=10, tvar="trans", tco
                 t.trans1 <- matrix(0, nrow=ni, ncol=length(transi))
                 ## simulate times to all potential destination states
                 for (j in seq_along(transi)) {         
+                    xbase <- if (is.flexsurvlist(x)) x[[transi[j]]] else x
                     if (length(tcovs)>0){
                         basepars <- form.basepars.tcovs(x, transi[j], newdata, tcovs, cur.t.out)
                     } else 
-                        basepars <- as.list(as.data.frame(basepars.mat)[transi[j],])
+                        basepars <- as.list(basepars.all[[transi[j]]])
+
                     fncall <- c(list(n=ni), basepars, xbase$aux)
                     if (is.null(xbase$dfns$r)) stop("No random sampling function found for this model")
                     t.trans1[,j] <- do.call(xbase$dfns$r, fncall)
