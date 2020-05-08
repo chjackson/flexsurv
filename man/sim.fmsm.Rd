@@ -6,7 +6,7 @@
 \usage{
 sim.fmsm(
   x,
-  trans,
+  trans = NULL,
   t,
   newdata = NULL,
   start = 1,

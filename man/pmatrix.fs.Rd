@@ -7,14 +7,16 @@ Markov multi-state model}
 \usage{
 pmatrix.fs(
   x,
-  trans,
+  trans = NULL,
   t = 1,
   newdata = NULL,
+  condstates = NULL,
   ci = FALSE,
   tvar = "trans",
   sing.inf = 1e+10,
   B = 1000,
   cl = 0.95,
+  tidy = FALSE,
   ...
 )
 }
@@ -36,6 +38,10 @@ for.}
 \item{newdata}{A data frame specifying the values of covariates in the
 fitted model, other than the transition number.  See
 \code{\link{msfit.flexsurvreg}}.}
+
+\item{condstates}{Instead of the unconditional probability of being in state \eqn{s} at time \eqn{t} given state \eqn{r} at time 0, return the probability conditional on being in a particular subset of states at time \eqn{t}.  This subset is specified in the \code{condstates} argument.
+
+This is used, for example, in competing risks situations, e.g. if the competing states are death or recovery from a disease, and we want to compute the probability a patient has died, given they have died or recovered.   If these are absorbing states, then as \eqn{t} increases, this converges to the case fatality ratio.  To compute this, set \eqn{t} to a very large number, \code{Inf} will not work.}
 
 \item{ci}{Return a confidence interval calculated by simulating from the
 asymptotic normal distribution of the maximum likelihood estimates.  Turned
@@ -59,11 +65,12 @@ accuracy.}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
 
+\item{tidy}{If TRUE then return the results as a tidy data frame}
+
 \item{...}{Arguments passed to \code{\link{ode}} in \pkg{deSolve}.}
 }
 \value{
-The transition probability matrix, if \code{t} is of length 1, or a
-list of matrices if \code{t} is longer.
+The transition probability matrix, if \code{t} is of length 1.  If \code{t} is longer, return a list of matrices, or a data frame if \code{tidy} is TRUE. 
 
 If \code{ci=TRUE}, each element has attributes \code{"lower"} and
 \code{"upper"} giving matrices of the corresponding confidence limits.

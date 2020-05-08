@@ -26,12 +26,12 @@ fitted model, other than the transition number.  See
 required if \code{x} is a list of models.}
 }
 \value{
-A matrix with one row for each permitted transition, and one column
-for each parameter of the parametric distribution that generates each event
-in the multi-state model.
+A list with one component for each permitted transition. Each component
+has one element for each parameter of the parametric distribution that generates
+the corresponding event in the multi-state model.
 }
 \description{
-Matrix of maximum likelihood estimates of transition-specific parameters in
+List of maximum likelihood estimates of transition-specific parameters in
 a flexible parametric multi-state model, at given covariate values.
 }
 \author{
