@@ -430,6 +430,8 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
             hcall <- list(x=t)
             for (j in seq(along=xi$dlist$pars))
                 hcall[[xi$dlist$pars[j]]] <- parms$par[[i]][j]
+            for (j in seq(along=xi$aux))
+                hcall[[names(xi$aux)[j]]] <- xi$aux[[j]]
             haz[i] <- do.call(xi$dfns$h, hcall)
         }
         Q <- haz[trans]
@@ -442,7 +444,8 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
     basepar <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
-    res <- ode(y=diag(nst), times=c(0,t), func=dp, parms=list(par=basepar), ...)[-1,-1]
+    auxpar <- lapply(x, function(x)x$aux)
+    res <- ode(y=diag(nst), times=c(0,t), func=dp, parms=list(par=basepar, aux=auxpar), ...)[-1,-1]
     if (is.null(condstates)) condstates <- 1:nst
     condstates <- state_nums(condstates, x)
     if (any(condstates > nst)) stop(sprintf("all `condstates` should be in 1 to %s",nst))
