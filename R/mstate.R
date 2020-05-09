@@ -840,7 +840,7 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
                     if (length(tcovs)>0){
                         basepars <- form.basepars.tcovs(x, transi[j], newdata, tcovs, cur.t.out)
                     } else 
-                        basepars <- as.list(basepars.all[[transi[j]]])
+                        basepars <- as.list(as.data.frame(basepars.all[[transi[j]]]))
 
                     fncall <- c(list(n=ni), basepars, xbase$aux)
                     if (is.null(xbase$dfns$r)) stop("No random sampling function found for this model")
