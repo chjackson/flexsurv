@@ -7,7 +7,7 @@ time-inhomogeneous Markov multi-state model}
 \usage{
 totlos.fs(
   x,
-  trans,
+  trans = NULL,
   t = 1,
   newdata = NULL,
   ci = FALSE,

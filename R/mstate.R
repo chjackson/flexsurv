@@ -279,8 +279,9 @@ pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
         newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
         X <- form.model.matrix(x, newdata)   
         basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
-        basepar <- split(basepar, seq(length=nrow(basepar)))
-        basepar <- lapply(basepar, function(y){names(y) <- x$dlist$pars; y})
+        ntrans <- length(na.omit(as.vector(trans)))
+        basepar <- split(basepar, seq(length=ntrans))
+        basepar <- lapply(basepar, function(y){y <- matrix(y,nrow=1); colnames(y) <- x$dlist$pars; y})
 
     } else
         stop("expected x to be a flexsurvreg object or list of flexsurvreg objects") 
@@ -444,7 +445,7 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
     basepar <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
-    auxpar <- lapply(x, function(x)x$aux)
+    auxpar <- if (!is.flexsurvlist(x)) x$aux else lapply(x, function(x)x$aux)
     res <- ode(y=diag(nst), times=c(0,t), func=dp, parms=list(par=basepar, aux=auxpar), ...)[-1,-1]
     if (is.null(condstates)) condstates <- 1:nst
     condstates <- state_nums(condstates, x)
@@ -627,7 +628,7 @@ totlos.fs <- function(x, trans=NULL, t=1, newdata=NULL, ci=FALSE,
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
     basepar <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
-    auxpar <- lapply(x, function(x)x$aux)
+    auxpar <- if (!is.flexsurvlist(x)) x$aux else lapply(x, function(x)x$aux)
     init <- cbind(matrix(0, nrow=n, ncol=n), diag(n))
     res <- ode(y=init, times=c(0,t), func=dp, parms=list(par=basepar,aux=auxpar), ...)[-1,-1]
     res.t <- lapply(split(res,1:nt), function(x)matrix(x[1:nsq],nrow=n))
@@ -892,7 +893,7 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
 ##'
 ##' @param simfs Output from \code{\link{sim.fmsm}} representing simulated histories from a multi-state model.
 ##'
-##' @value Data frame with four columns giving transition start state, transition end state, transition name and the time taken by the transition.
+##' @return Data frame with four columns giving transition start state, transition end state, transition name and the time taken by the transition.
 ##'
 ##' Note that formatting simulated transition histories in this way loses the information on which transitions come from which individuals. 
 ##' 
@@ -1214,6 +1215,15 @@ default_transnames <- function(flist, trans){
     res
 }
         
+##' Construct a multi-state model from a set of parametric survival models
+##'
+##' @param ... Objects returned by \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}} representing fitted survival models.
+##'
+##' @param trans A matrix of integers specifying which models correspond to which transitions.  The \eqn{r,s} entry is \code{i} if the \eqn{i}th argument specified in \code{...} is the model for the state \eqn{r} to state \eqn{s} transition.
+##'
+##' @return A list containing the objects given in \code{...}, and with attributes \code{"trans"} and \code{"statenames"} defining the transition structure matrix and state names, and with list components named to describe the transitions they correspond to.  If any of the arguments in \code{...} are named, then these are used to define the transition names, otherwise default names are chosen based on the state names. 
+##' 
+##' @export
 fmsm <- function(..., trans){
     flist <- list(...)
     if (!is.flexsurvlist(flist))
