@@ -596,8 +596,12 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
 ##' # distribution, the "semi-Markov" model there is the same as the Markov
 ##' # model here
 ##' @export
-totlos.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
+totlos.fs <- function(x, trans=NULL, t=1, newdata=NULL, ci=FALSE,
                        tvar="trans", sing.inf=1e+10, B=1000, cl=0.95, ...){
+    if (is.null(trans)) {
+        if (!is.null(attr(x, "trans"))) trans <- attr(x, "trans")
+        else stop("`trans` not supplied and not found in `x`")
+    }
     ntr <- sum(!is.na(trans))
     n <- nrow(trans)
     nsq <- n*n
@@ -610,6 +614,7 @@ totlos.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
             hcall <- list(x=t)
             for (j in seq(along=xi$dlist$pars))
                 hcall[[xi$dlist$pars[j]]] <- parms$par[[i]][j]
+            hcall <- c(hcall, parms$aux[[i]])
             haz[i] <- do.call(xi$dfns$h, hcall)
         }
         Q <- haz[trans]
@@ -622,8 +627,9 @@ totlos.fs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     nt <- length(t)
     if (nt<1) stop("number of times should be at least one")
     basepar <- pars.fmsm(x=x, trans=trans, newdata=newdata, tvar=tvar)
+    auxpar <- lapply(x, function(x)x$aux)
     init <- cbind(matrix(0, nrow=n, ncol=n), diag(n))
-    res <- ode(y=init, times=c(0,t), func=dp, parms=list(par=basepar), ...)[-1,-1]
+    res <- ode(y=init, times=c(0,t), func=dp, parms=list(par=basepar,aux=auxpar), ...)[-1,-1]
     res.t <- lapply(split(res,1:nt), function(x)matrix(x[1:nsq],nrow=n))
     res.p <- lapply(split(res,1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
     names(res.t) <- names(res.p) <- t
