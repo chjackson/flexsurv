@@ -898,9 +898,9 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
         if (debug) { cat("\n") }
     }
     res <- list(st=unname(res.st), t=unname(res.t))
-    if (tidy) res <- simfs_bytrans(res)
     attr(res, "trans") <- trans
     attr(res, "statenames") <- attr(x, "statenames")
+    if (tidy) res <- simfs_bytrans(res)
     res  # TODO set S3 class and adapt methods 
 }
 
@@ -939,7 +939,10 @@ simfs_bytrans <- function(simfs){
     suball$start <- state_names(suball$start, simfs)
     suball$end <- state_names(suball$end, simfs)
     suball$trans <- paste(suball$start, suball$end, sep="-")
+    rownames(suball) <- NULL
     res <- suball[,c("id","start","end","trans","time","delay")]
+    attr(res, "trans") <- trans
+    attr(res, "statenames") <- attr(simfs, "statenames")
     res[order(res$id),]
 }
 

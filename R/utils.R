@@ -239,7 +239,7 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
             args <- c(args, args.mat, args.scalar)
             (do.call(pdist, args) - p)
         }
-        ptmp <- rstpm2::vuniroot(h, interval, tol=.Machine$double.eps, extendInt="yes")$root
+        ptmp <- rstpm2::vuniroot(h, interval, tol=.Machine$double.eps, extendInt="yes", maxiter=10000)$root
         ret[ind] <- ptmp
     }
     if (any(is.nan(ret))) warning("NaNs produced")
