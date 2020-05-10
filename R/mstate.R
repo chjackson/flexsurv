@@ -774,26 +774,39 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
 ##' corresponding to the \code{i}th transition in \code{trans}.  This is a more
 ##' efficient way to fit a multi-state model, but only valid if the parameters
 ##' are different between different transitions.
+##'
 ##' @param trans Matrix indicating allowed transitions.  See
 ##' \code{\link{msfit.flexsurvreg}}.
+##'
 ##' @param t Time, or vector of times for each of the \code{M} individuals, to
 ##' simulate trajectories until.
+##'
 ##' @param newdata A data frame specifying the values of covariates in the
 ##' fitted model, other than the transition number.  See
 ##' \code{\link{msfit.flexsurvreg}}.
+##'
 ##' @param start Starting state, or vector of starting states for each of the
 ##' \code{M} individuals.
+##'
 ##' @param M Number of individual trajectories to simulate.
+##'
 ##' @param tvar Variable in the data representing the transition type. Not
 ##' required if \code{x} is a list of models.
+##'
 ##' @param tcovs Names of "predictable" time-dependent covariates in
 ##' \code{newdata}, i.e. those whose values change at the same rate as time.
 ##' Age is a typical example.  During simulation, their values will be updated
 ##' after each transition time, by adding the current time to the value
 ##' supplied in \code{newdata}.  This assumes the covariate is measured in the
 ##' same unit as time. \code{tcovs} is supplied as a character vector.
+##'
+##' @param tidy If \code{TRUE} then the simulated data are returned as a tidy data frame with one row per simulated transition.  See \code{\link{simfs_bytrans}} for a function to rearrange the data into this format if it was simulated in non-tidy format. 
+##' 
 ##' @param debug Print intermediate outputs: for development use.
-##' @return A list of two matrices named \code{st} and \code{t}.  The rows of
+##' 
+##' @return If \code{tidy=TRUE}, a data frame with one row for each simulated transition, giving the individual ID \code{id}, start state \code{start}, end state \code{end}, transition label \code{trans}, time of the transition since the start of the process (\code{time}), and time since the previous transition (\code{delay}).
+##'
+##' If \code{tidy=FALSE}, a list of two matrices named \code{st} and \code{t}.  The rows of
 ##' each matrix represent simulated individuals.  The columns of \code{t}
 ##' contain the times when the individual changes state, to the corresponding
 ##' states in \code{st}.
@@ -802,16 +815,20 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
 ##' times. The last column of \code{t} represents either the time when the
 ##' individual moves to an absorbing state, or right-censoring in a transient
 ##' state at the time given in the \code{t} argument to \code{sim.fmsm}.
+##' 
 ##' @author Christopher Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}.
+##' 
 ##' @seealso \code{\link{pmatrix.simfs}},\code{\link{totlos.simfs}}
+##' 
 ##' @keywords models,survival
+##' 
 ##' @examples
 ##' 
 ##' bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp")
 ##' tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 ##' sim.fmsm(bexp, M=10, t=5, trans=tmat)
 ##' @export
-sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans", tcovs=NULL, debug=FALSE){
+sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans", tcovs=NULL, tidy=FALSE, debug=FALSE){
     if (is.null(trans)) {
         if (!is.null(attr(x, "trans"))) trans <- attr(x, "trans")
         else stop("`trans` not supplied and not found in `x`")
@@ -881,7 +898,8 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
         if (debug) { cat("\n") }
     }
     res <- list(st=unname(res.st), t=unname(res.t))
-    attr(res, "trans") <- attr(x, "trans")
+    if (tidy) res <- simfs_bytrans(res)
+    attr(res, "trans") <- trans
     attr(res, "statenames") <- attr(x, "statenames")
     res  # TODO set S3 class and adapt methods 
 }
@@ -895,8 +913,6 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
 ##'
 ##' @return Data frame with four columns giving transition start state, transition end state, transition name and the time taken by the transition.
 ##'
-##' Note that formatting simulated transition histories in this way loses the information on which transitions come from which individuals. 
-##' 
 ##' @export
 ##' 
 simfs_bytrans <- function(simfs){
@@ -912,7 +928,9 @@ simfs_bytrans <- function(simfs){
         for (j in 1:(ncol(simfs$st)-1)){
             sub <- (simfs$st[,j] == start[i] & simfs$st[,j+1] %in% endi)
             subj <- data.frame(end = simfs$st[sub,j+1],
-                               time = simfs$t[sub,j+1] - simfs$t[sub,j])
+                               time = simfs$t[sub,j+1],
+                               delay = simfs$t[sub,j+1] - simfs$t[sub,j],
+                               id = which(sub))
             subi <- rbind(subi, subj)
         }
         subi$start <- start[i]
@@ -921,7 +939,8 @@ simfs_bytrans <- function(simfs){
     suball$start <- state_names(suball$start, simfs)
     suball$end <- state_names(suball$end, simfs)
     suball$trans <- paste(suball$start, suball$end, sep="-")
-    suball[,c("start","end","trans","time")]
+    res <- suball[,c("id","start","end","trans","time","delay")]
+    res[order(res$id),]
 }
 
 

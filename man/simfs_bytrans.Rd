@@ -11,8 +11,6 @@ simfs_bytrans(simfs)
 }
 \value{
 Data frame with four columns giving transition start state, transition end state, transition name and the time taken by the transition.
-
-Note that formatting simulated transition histories in this way loses the information on which transitions come from which individuals.
 }
 \description{
 Reformat simulated multi-state data with one row per simulated transition
