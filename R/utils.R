@@ -149,19 +149,22 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
 ##' 
 ##' This assumes a suitably smooth, continuous distribution.
 ##' 
-##' An identical function is provided in the \pkg{msm} package.
-##' 
 ##' @param pdist Probability distribution function, for example,
 ##' \code{\link{pnorm}} for the normal distribution, which must be defined in
 ##' the current workspace.  This should accept and return vectorised parameters
 ##' and values.  It should also return the correct values for the entire real
 ##' line, for example a positive distribution should have \code{pdist(x)==0}
 ##' for \eqn{x<0}.
+##' 
 ##' @param p Vector of probabilities to find the quantiles for.
+##' 
 ##' @param matargs Character vector giving the elements of \code{...} which
 ##' represent vector parameters of the distribution.  Empty by default.  When
 ##' vectorised, these will become matrices.  This is used for the arguments
 ##' \code{gamma} and \code{knots} in \code{\link{qsurvspline}}.
+##'
+##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{qsurvspline}}. 
+##' 
 ##' @param ...  The remaining arguments define parameters of the distribution
 ##' \code{pdist}.  These MUST be named explicitly.
 ##' 
@@ -174,15 +177,19 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
 ##' arguments \code{lbound} and \code{ubound} respectively, and these will be
 ##' returned if \code{p} is 0 or 1 respectively.  Defaults to \code{-Inf} and
 ##' \code{Inf} respectively.
+##' 
 ##' @return Vector of quantiles of the distribution at \code{p}.
+##' 
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##' 
 ##' @keywords distribution
+##' 
 ##' @examples
 ##' 
 ##' qnorm(c(0.025, 0.975), 0, 1)
 ##' qgeneric(pnorm, c(0.025, 0.975), mean=0, sd=1) # must name the arguments
 ##' @export
-qgeneric <- function(pdist, p, matargs=NULL, ...)
+qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
 {
     args <- list(...)
     if (is.null(args$log.p)) args$log.p <- FALSE
@@ -196,8 +203,10 @@ qgeneric <- function(pdist, p, matargs=NULL, ...)
     ret[p == 1] <- args$ubound
     ## args containing vector params of the distribution (e.g. gamma and knots in dsurvspline)
     args.mat <- args[matargs]
-    args[c(matargs,"lower.tail","log.p","lbound","ubound")] <- NULL
-    ## Other args assumed to contain scalar params of the distribution.
+    ## Arguments that cannot be vectorised 
+    args.scalar <- args[scalarargs]
+    args[c(matargs,scalarargs,"lower.tail","log.p","lbound","ubound")] <- NULL
+    ## Other args assumed to contain vectorisable parameters of the distribution.
     ## Replicate all to their maximum length, along with p 
     matlen <- if(is.null(matargs)) NULL else sapply(args.mat, function(x){if(is.matrix(x))nrow(x) else 1})
     veclen <- sapply(args, length)
@@ -219,22 +228,18 @@ qgeneric <- function(pdist, p, matargs=NULL, ...)
     ind <- (p > 0 & p < 1)
     if (any(ind)) {
         hind <- seq(along=p)[ind]
+        n <- length(p[ind])
+        ptmp <- numeric(n)
+        interval <- matrix(rep(c(-1, 1), n), ncol=2, byrow=TRUE)
         h <- function(y) {
-            args <- lapply(args, function(x)x[hind[i]])
-            args.mat <- lapply(args.mat, function(x)x[hind[i],])
-            p <- p[hind[i]]
+            args <- lapply(args, function(x)x[hind])
+            args.mat <- lapply(args.mat, function(x)x[hind,])
+            p <- p[hind]
             args$q <- y
-            args <- c(args, args.mat)
+            args <- c(args, args.mat, args.scalar)
             (do.call(pdist, args) - p)
         }
-        ptmp <- numeric(length(p[ind]))
-        for (i in 1:length(p[ind])) {
-            interval <- c(-1, 1)
-            while (h(interval[1])*h(interval[2]) >= 0) {
-                interval <- interval + c(-1,1)*0.5*(interval[2]-interval[1])
-            }
-            ptmp[i] <- uniroot(h, interval, tol=.Machine$double.eps)$root
-        }
+        ptmp <- rstpm2::vuniroot(h, interval, tol=.Machine$double.eps, extendInt="yes")$root
         ret[ind] <- ptmp
     }
     if (any(is.nan(ret))) warning("NaNs produced")

@@ -28,6 +28,7 @@ Imports:
     deSolve,
     quadprog,
     Rcpp (>= 0.11.5),
+    rstpm2,
     tidyr,
     tibble
 Encoding: UTF-8

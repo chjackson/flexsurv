@@ -81,12 +81,13 @@ NULL
 ## TODO put in h,H functions
 ## TODO more special value handling
 
-dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE){
+dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE){
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
     if(!is.matrix(knots)) knots <- matrix(knots, nrow=1)
     lg <- nrow(gamma)
     nret <- max(length(q), lg)
     q <- rep(q, length=nret)
+    offset <- rep(offset, length=nret)
 
     gamma <- apply(gamma, 2, rep, length=nret)
     knots <- apply(knots, 2, rep, length=nret)
@@ -106,9 +107,10 @@ dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE){
     }
     ind <- !is.na(q) & q > 0
     q <- q[ind]
+    offset <- offset[ind]
     gamma <- gamma[ind,,drop=FALSE]
     knots <- knots[ind,,drop=FALSE]
-    list(ret=ret, gamma=gamma, q=q, scale=scale, ind=ind, knots=knots)
+    list(ret=ret, gamma=gamma, q=q, scale=scale, ind=ind, knots=knots, offset=offset)
 }
 
 dlink <- function(scale){
@@ -131,7 +133,7 @@ ldlink <- function(scale){
 
 ##' @export
 dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, log=FALSE){
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         eta <- rowSums(basis(knots, tsfn(q, timescale)) * gamma) + as.numeric(X %*% beta) + offset # log cumulative hazard/odds
@@ -179,12 +181,13 @@ Slink <- function(scale){
 
 ##' @export
 psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE){
-    d <- dbase.survspline(q=q, gamma=gamma, knots=knots, scale=scale)
+    d <- dbase.survspline(q=q, gamma=gamma, knots=knots, scale=scale, offset=offset)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
         surv <- Slink(scale)(eta)
         ret[ind] <- as.numeric(1 - surv)
+
         ret[ind][q==0] <- 0
         ret[ind][q==Inf] <- 1
     }
@@ -197,7 +200,7 @@ psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 qsurvspline <- function(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE){
     if (log.p) p <- exp(p)
     if (!lower.tail) p <- 1 - p
-    qgeneric(psurvspline, p=p, matargs=c("gamma","knots"), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, offset=offset)
+    qgeneric(psurvspline, p=p, matargs=c("gamma","knots"), scalarargs=c("scale","timescale"), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, offset=offset)
 }
 
 ##' @export
@@ -221,7 +224,7 @@ Hlink <- function(scale){
 ##' @export
 Hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
     match.arg(scale, c("hazard","odds","normal"))
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
@@ -244,7 +247,7 @@ hlink <- function(scale){
 hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
 ## value for x=0?  currently zero, should it be limit as x reduces to 0? 
     match.arg(scale, c("hazard","odds","normal"))
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset

@@ -66,10 +66,10 @@ test_that("Spline distribution functions",{
     ## value for x=0?  currently zero, should it be limit as x reduces to 0? 
     expect_equal(hsurvspline(0, g, knots=k), 0)
     
-    ## TODO special value handling and vectorisation for d function
     if(0){
         bc$foo <- factor(sample(1:3, nrow(bc), replace=TRUE))
         spl <- flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=0)
+        system.time(hist(rsurvspline(1000, gamma=c(log(1 / b^a), a)), prob=TRUE))
         system.time(hist(rsurvspline(10000, gamma=c(log(1 / b^a), a)), prob=TRUE))
         x <- 1:50
         lines(x, dweibull(x, a, b))

@@ -4,7 +4,7 @@
 \alias{qgeneric}
 \title{Generic function to find quantiles of a distribution}
 \usage{
-qgeneric(pdist, p, matargs = NULL, ...)
+qgeneric(pdist, p, matargs = NULL, scalarargs = NULL, ...)
 }
 \arguments{
 \item{pdist}{Probability distribution function, for example,
@@ -20,6 +20,8 @@ for \eqn{x<0}.}
 represent vector parameters of the distribution.  Empty by default.  When
 vectorised, these will become matrices.  This is used for the arguments
 \code{gamma} and \code{knots} in \code{\link{qsurvspline}}.}
+
+\item{scalarargs}{Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{qsurvspline}}.}
 
 \item{...}{The remaining arguments define parameters of the distribution
 \code{pdist}.  These MUST be named explicitly.
@@ -51,8 +53,6 @@ Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
 found using \code{\link{uniroot}}.
 
 This assumes a suitably smooth, continuous distribution.
-
-An identical function is provided in the \pkg{msm} package.
 }
 \examples{
 
