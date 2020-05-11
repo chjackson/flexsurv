@@ -17,7 +17,8 @@ totlos.simfs(
   group = NULL,
   M = 1e+05,
   B = 1000,
-  cl = 0.95
+  cl = 0.95,
+  cores = NULL
 )
 }
 \arguments{
@@ -70,6 +71,8 @@ to calculate variances.  Decrease for greater speed at the expense of
 accuracy.}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
+
+\item{cores}{Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing.}
 }
 \value{
 The expected total time spent in each state (or group of states

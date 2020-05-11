@@ -15,7 +15,8 @@ pmatrix.simfs(
   tcovs = NULL,
   M = 1e+05,
   B = 1000,
-  cl = 0.95
+  cl = 0.95,
+  cores = NULL
 )
 }
 \arguments{
@@ -58,10 +59,12 @@ transition probabilities.  Users should adjust this to obtain the required
 precision.}
 
 \item{B}{Number of simulations from the normal asymptotic distribution used
-to calculate variances.  Decrease for greater speed at the expense of
+to calculate confidence limits.  Decrease for greater speed at the expense of
 accuracy.}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
+
+\item{cores}{Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing.}
 }
 \value{
 The transition probability matrix.  If \code{ci=TRUE}, there are

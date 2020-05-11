@@ -415,7 +415,7 @@ state_names <- function(state, object){
 ##' @export
 pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
                        condstates = NULL, ci=FALSE,
-                       tvar="trans", sing.inf=1e+10, B=1000, cl=0.95,
+                       tvar="trans", sing.inf=1e+10, B=1000, cl=0.95, 
                        tidy=FALSE, ...){
     if (is.null(trans)) {
         if (!is.null(attr(x, "trans"))) trans <- attr(x, "trans")
@@ -458,7 +458,7 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
     res <- lapply(split(res,1:nt), to_pmatrix)
     names(res) <- t
     if (ci){
-        resci <- bootci.fmsm(x, B, nt*nst*nst, match.call(), cl)
+        resci <- bootci.fmsm(x, B, nt*nst*nst, match.call(), cl, cores=NULL)
         resl <- lapply(split(resci[1,],rep(1:nt, each=nst*nst)), function(x)matrix(x,nrow=nst,dimnames=dimnames(trans)))
         resu <- lapply(split(resci[2,],rep(1:nt, each=nst*nst)), function(x)matrix(x,nrow=nst,dimnames=dimnames(trans)))
         names(resl) <- names(resu) <- t
@@ -947,35 +947,58 @@ simfs_bytrans <- function(simfs){
 }
 
 
-### Generic CIs for multi-state output functions.
-### Replace the parameters in the fitted model object with a draw from the MVN distribution of the MLEs
-### Then calls the output function again on this tweaked model object, with ci=FALSE. Repeat B times.
-
-bootci.fmsm <- function(x, B, ncols, fncall, cl){
-    res.rep <- array(NA_real_, dim=c(B, ncols))
+##' Bootstrap confidence intervals for multi-state model output functions
+##'
+##' Calculate a confidence interval by repeatedly replacing the parameters in the fitted model object with a draw from the multivariate normal distribution of the maximum likelihood estimates, then recalculating the output function.
+##'
+##' @param x
+##'
+##' @param B Number of parameter draws to use
+##'
+##' @param ncols TODO LISTIFY RESULTS. can't we determine this automatically if it's a vector/matrix
+##'
+##' @param fncall Function to bootstrap the results of
+##'
+##' @param cl Width of symmetric confidence interval, by default 0.95 
+##'
+##' @param cores Number of cores to use for parallel processing.
+##'
+##' @return TODO LIST if fncall returns a list/matrix/df, or a matrix if it returns a vector.  
+##' 
+bootci.fmsm <- function(x, B, ncols, fncall, cl, cores=NULL){
     fncall$ci <- FALSE
+    if (is.null(cores) || cores==1) parallel <- FALSE else parallel <- TRUE
     if (is.flexsurvlist(x)){
         sim <- vector("list", length(x))
         for (j in seq_along(x)){
             sim[[j]] <- normboot.flexsurvreg(x=x[[j]], B=B, raw=TRUE, transform=TRUE)
         }
-        for (i in 1:B){
-            x.rep <- x
-            for (j in seq_along(x))
-                x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
-            fncall$x <- x.rep
-            resi <- eval(fncall)
-            ## "P" attribute needed for totlos.fs. need to extend if ever return any other results as attributes.
-            res.rep[i,] <- c(unlist(resi), unlist(attr(resi, "P")))
-        }
     } else {
         sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
-        for (i in 1:B){
-            x.rep <- x
+    }        
+    boot_fn <- function(i){
+        x.rep <- x
+        if (is.flexsurvlist(x)){
+            for (j in seq_along(x))
+                x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
+        } else
             x.rep$res.t[,"est"] <- sim[i,]
-            fncall$x <- x.rep
-            resi <- eval(fncall)
-            res.rep[i,] <- c(unlist(resi), unlist(attr(resi, "P")))
+        fncall$x <- x.rep
+        fncall$cores <- NULL
+        resi <- eval(fncall)
+        c(unlist(resi), unlist(attr(resi, "P")))
+    }
+    if (parallel) {
+        cid <- parallel::makeCluster(cores)
+        parallel::clusterExport(cl=cid, varlist=ls(.GlobalEnv))
+        res.rep.list <- parallel::parLapply(cid, seq_len(B), boot_fn)
+        parallel::stopCluster(cid)
+        res.rep <- do.call("rbind", res.rep.list)
+    } else {
+        res.rep <- array(NA_real_, dim=c(B, ncols))
+        for (i in 1:B){
+            ## "P" attribute needed for totlos.fs. need to extend if ever return any other results as attributes.
+            res.rep[i,] <- boot_fn(i)
         }
     }
     resci <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
@@ -1038,10 +1061,15 @@ bootci.fmsm <- function(x, B, ncols, fncall, cl){
 ##' @param M Number of individuals to simulate in order to approximate the
 ##' transition probabilities.  Users should adjust this to obtain the required
 ##' precision.
+##' 
 ##' @param B Number of simulations from the normal asymptotic distribution used
-##' to calculate variances.  Decrease for greater speed at the expense of
+##' to calculate confidence limits.  Decrease for greater speed at the expense of
 ##' accuracy.
+##' 
 ##' @param cl Width of symmetric confidence intervals, relative to 1.
+##'
+##' @param cores Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing. 
+##' 
 ##' @return The transition probability matrix.  If \code{ci=TRUE}, there are
 ##' attributes \code{"lower"} and \code{"upper"} giving matrices of the
 ##' corresponding confidence limits.  These are formatted for printing but may
@@ -1070,7 +1098,7 @@ bootci.fmsm <- function(x, B, ncols, fncall, cl){
 ##' # Markov model.
 ##' @export
 pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
-                          tvar="trans", tcovs=NULL, M=100000, B=1000, cl=0.95)
+                          tvar="trans", tcovs=NULL, M=100000, B=1000, cl=0.95, cores=NULL)
 {
     n <- nrow(trans)
     res <- matrix(0, nrow=n, ncol=n)
@@ -1082,7 +1110,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
         res[i,] <- prop.table(table(factor(last.st, levels=seq_len(n))))
     }
     if (ci){
-        resci <- bootci.fmsm(x, B, n*n, match.call(), cl)
+        resci <- bootci.fmsm(x, B, n*n, match.call(), cl, cores)
         resl <- matrix(resci[1,], nrow=n)
         resu <- matrix(resci[2,], nrow=n)
         attr(res, "lower") <- resl
@@ -1156,6 +1184,9 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
 ##' to calculate variances.  Decrease for greater speed at the expense of
 ##' accuracy.
 ##' @param cl Width of symmetric confidence intervals, relative to 1.
+##'
+##' @param cores Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing. 
+##'
 ##' @return The expected total time spent in each state (or group of states
 ##' given by \code{group}) up to time \code{t}, and corresponding confidence
 ##' intervals if requested.
@@ -1175,7 +1206,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
 ##' totlos.simfs(bexp, t=1000, trans=tmat)
 ##' @export
 totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
-                          tvar="trans", tcovs=NULL, group=NULL, M=100000, B=1000, cl=0.95)
+                          tvar="trans", tcovs=NULL, group=NULL, M=100000, B=1000, cl=0.95, cores=NULL)
 {
     if (length(t)>1) stop("\"t\" must be a single number")
     sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
@@ -1190,7 +1221,7 @@ totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
         res <- tapply(res, group, sum)
     }
     if (ci){
-        resci <- bootci.fmsm(x, B, length(res), match.call(), cl)
+        resci <- bootci.fmsm(x, B, length(res), match.call(), cl, cores)
         resl <- resci[1,]
         resu <- resci[2,]
         names(resl) <- names(resu) <- t

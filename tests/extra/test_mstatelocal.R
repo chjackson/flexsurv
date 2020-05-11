@@ -70,6 +70,15 @@ test_that("bootstrap CIs in multi state models",{
     pmatrix.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=10, ci=TRUE, B=3)
     totlos.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=10, ci=TRUE, B=3)
 
+    ## with multi core. 
+    if (interactive()){
+        system.time(    pmatrix.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=100000, ci=TRUE, B=100, cores=2))
+        system.time(    pmatrix.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=100000, ci=TRUE, B=100, cores=1))
+    }
+    pmatrix.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=100, ci=TRUE, B=3, cores=2)
+
+    totlos.simfs(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=10, ci=TRUE, B=3)
+
     bwei.list <- bweic.list <- bweim.list <- bexpc.list <- vector(3, mode="list")
     for (i in 1:3) {
         bwei.list[[i]] <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==i),
@@ -88,6 +97,18 @@ test_that("bootstrap CIs in multi state models",{
     pmatrix.fs(bweim.list, t=5, trans=tmat, ci=TRUE, B=10)
     pmatrix.fs(bweim.list, t=c(5,10), trans=tmat, ci=TRUE, B=10)
     totlos.fs(bweim.list, t=5, trans=tmat, ci=TRUE, B=10)
+
+        totlos.simfs(bwei.list, t=5, trans=tmat, M=10, ci=TRUE, B=10)
+    totlos.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), ci=TRUE, B=10)
+    pmatrix.simfs(bwei.list, t=5, trans=tmat, M=100, ci=TRUE, B=10)
+    pmatrix.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), ci=TRUE, B=1
+
+})
+
+test_that("bootstrap CIs in multi state models with parallel processing",{
+    bosms3$x <- rnorm(nrow(bosms3))
+    bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
+
 })
 
 ## Qualitative comparisons for msfit variance between list, non-list
