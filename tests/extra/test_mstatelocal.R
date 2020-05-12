@@ -1,14 +1,13 @@
 context("Local multi-state modelling tests")
 
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
+bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
+bwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + shape(trans), data=bosms3, dist="weibull") 
 
 if (require("msm")){
     Q3 <- rbind(c(0,1,1),c(0,0,1),c(0,0,0))
     bos3$years <- bos3$time / 365.25
     bmsm <- msm(state ~ years, subject=ptnum, data=bos3, exacttimes=TRUE, qmatrix=Q3)
-
-    bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
-    bwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + shape(trans), data=bosms3, dist="weibull") 
 
     test_that("flexsurv exponential model matches msm",{
         fs.q <- as.numeric(exp(coef(bexp)[1] + c(0, coef(bexp)[2:3])))
@@ -61,9 +60,10 @@ test_that("ODE method matches Aalen-Johansen",{
     ## normal resampling.
 })
 
+bosms3$x <- rnorm(nrow(bosms3))
+bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
+
 test_that("bootstrap CIs in multi state models",{
-    bosms3$x <- rnorm(nrow(bosms3))
-    bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
     pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1), ci=TRUE, B=3)
     totlos.fs(bexp.markov, t=c(5), trans=tmat, ci=TRUE, B=5)
     tl <- totlos.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1), ci=TRUE, B=5)
@@ -120,3 +120,30 @@ if (0) {
     ms1$varHaz[21:30,] # these cross-correlations take B=1000 to visibly converge
     ms2$varHaz[21:30,]
 }
+
+
+load_all("../..")
+
+
+test_that("Generic bootstrap CI function: a single model", {
+
+    rm(summfn); gc()
+    summfn <- function(x, ci=FALSE, B=3, sample=FALSE) {
+        resp <- pmatrix.fs(x, trans=tmat, t=10)
+        rest <- totlos.fs(x, trans=tmat, t=20)
+        foo <- summary(x, fun="mean", t=1)
+        res <- list(resp, rest, foo)
+        if (ci) {
+            bootlist <- bootci.fmsm(x, B=B, fncall=match.call(), sample=sample)
+            attr(res, "ci") <- bootlist
+        } 
+        res
+    }
+
+    totlos.fs(x, trans=tmat, t=c(10,20))
+
+    summfn(bexp)
+    summfn(bexp, ci=TRUE)
+    summfn(bexp, ci=TRUE, sample=TRUE, B=10)
+
+})
