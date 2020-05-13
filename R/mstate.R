@@ -458,7 +458,7 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
     res <- lapply(split(res,1:nt), to_pmatrix)
     names(res) <- t
     if (ci){
-        resci <- bootci.fmsm(x, B, match.call(), cl=cl, cores=NULL)
+        resci <- bootci.fmsm(x, B, fn=pmatrix.fs, cl=cl, ci=FALSE, cores=NULL, trans=trans, t=t, newdata=newdata, condstates=condstates, tvar=tvar, sing.inf=sing.inf, tidy=tidy, ...)
         resl <- lapply(split(resci[1,],rep(1:nt, each=nst*nst)), function(x)matrix(x,nrow=nst,dimnames=dimnames(trans)))
         resu <- lapply(split(resci[2,],rep(1:nt, each=nst*nst)), function(x)matrix(x,nrow=nst,dimnames=dimnames(trans)))
         names(resl) <- names(resu) <- t
@@ -640,7 +640,7 @@ totlos.fs <- function(x, trans=NULL, t=1, newdata=NULL, ci=FALSE,
     res.p <- lapply(split(res,1:nt), function(x)matrix(x[nsq + 1:nsq],nrow=n))
     names(res.t) <- names(res.p) <- t
     if (ci){
-        resci <- bootci.fmsm(x, B, fncall=match.call(), attrs="P", cl=cl)
+        resci <- bootci.fmsm(x, B, fn=totlos.fs, attrs="P", cl=cl, ci=FALSE, trans=trans, t=t, newdata=newdata, tvar=tvar, sing.inf=sing.inf, ...)
         tind <- rep(rep(1:nt,each=n*n), 2)
         res.tl <- lapply(split(resci[1,],tind), function(x)matrix(x[1:nsq],nrow=n))
         res.tu <- lapply(split(resci[2,],tind), function(x)matrix(x[1:nsq],nrow=n))
@@ -961,9 +961,9 @@ simfs_bytrans <- function(simfs){
 ##'
 ##' @param B Number of parameter draws to use
 ##'
-##' @param fncall Function call to bootstrap the results of.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.  This will typically be the function that \code{bootci.fmsm} is being called from.  See the example below. 
+##' @param fn Function to bootstrap the results of.  It must have an argument named `code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below. 
 ##'
-##' @param attrs Any attributes of the result of \code{fncall} which we want confidence intervals for.  These will be unlisted, if possible, and appended to the result vector. 
+##' @param attrs Any attributes of the value returned from \code{fn} which we want confidence intervals for.  These will be unlisted, if possible, and appended to the result vector. 
 ##'
 ##' @param sample If \code{TRUE} then the bootstrap sample itself is returned.  If \code{FALSE} then the quantiles of the sample are returned giving a confidence interval. 
 ##' 
@@ -971,53 +971,37 @@ simfs_bytrans <- function(simfs){
 ##'
 ##' @param cores Number of cores to use for parallel processing.
 ##'
+##' @param ... Additional arguments to pass to \code{fn}.
+##'
 ##' @return A matrix with two rows, giving the upper and lower confidence limits respectively.  Each row is a vector of the same length as the unlisted result of the function corresponding to \code{fncall}.
 ##'
 ##' @examples
 ##'
 ##' ## How to use bootci.msm
 ##' 
-##' ## Write a function with one argument (here called x) giving a fitted model,
+##' ## Write a function with one argument called x giving a fitted model,
 ##' ## and returning some results of the model.  The results may be in any form.   
 ##'
 ##' tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 ##' bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 ##' 
-##' summfn <- function(x){
-##'  resp <-  pmatrix.fs(x, trans=tmat, t=10)
-##'  rest <- totlos.fs(x, trans=tmat, t=20)
+##' summfn <- function(x, t){
+##'  resp <-  pmatrix.fs(x, trans=tmat, t=t)
+##'  rest <- totlos.fs(x, trans=tmat, t=t)
 ##'  list(resp, rest)
 ##' }
 ##'
-##' ## Now extend the function to include an argument "ci", that defaults to FALSE.
-##' ## When this argument is TRUE, bootci.msm is called on the model object x,
-##' ## specifying the desired number of bootstrap iterations B, and including the
-##' ## special third argument match.call(), which allows the current function to be
-##' ## called repeatedly for alternative parameter values drawn from the multivariate
-##' ## normal distribution of the MLE. The resulting confidence interval is returned
-##' ## in "bootlist", and appended to the results of "summfn".
-##'
-##' summfn <- function(x, ci=FALSE){
-##'  resp <-  pmatrix.fs(x, trans=tmat, t=10)
-##'  rest <- totlos.fs(x, trans=tmat, t=20)
-##'  res <- list(resp, rest)
-##'  if (ci) {
-##'       bootlist <- bootci.fmsm(x, B=3, fncall=match.call())
-##'       attr(res, "ci") <- bootlist
-##'  } 
-##'  res
-##' }
-##'
-##' ## Finally evaluate the function to obtain the confidence interval
+##' ## Use bootci.msm to obtain the confidence interval
 ##' ## The matrix columns are in the order of the unlisted results of the original
 ##' ## summfn.  You will have to rearrange them into the format that you want.
+##' ## If summfn has any extra arguments, in this case \code{t}, make sure they are
+##' ## passed through via the ... argument to bootci.fmsm
 ##'
-##' summfn(bexp)
-##' summfn(bexp, ci=TRUE)
+##' bootci.fmsm(bexp, B=3, fn=summfn, t=10)
+##' bootci.fmsm(bexp, B=3, fn=summfn, t=5)
 ##'
 ##' @export
-bootci.fmsm <- function(x, B, fncall, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE){
-    fncall$ci <- FALSE
+bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE, ...){
     if (is.null(cores) || cores==1) parallel <- FALSE else parallel <- TRUE
     if (is.flexsurvlist(x)){
         sim <- vector("list", length(x))
@@ -1026,17 +1010,21 @@ bootci.fmsm <- function(x, B, fncall, cl=0.95, attrs=NULL, cores=NULL, sample=FA
         }
     } else {
         sim <- normboot.flexsurvreg(x=x, B=B, raw=TRUE, transform=TRUE)
-    }        
-    boot_fn <- function(i){
+    }
+
+    boot_fn <- function(i, fn, ...){
         x.rep <- x
         if (is.flexsurvlist(x)){
             for (j in seq_along(x))
                 x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
         } else
             x.rep$res.t[,"est"] <- sim[i,]
-        fncall$x <- x.rep
-        fncall$cores <- NULL
-        resi <- eval(fncall)
+#        fncall$x <- x.rep
+#        fncall$cores <- NULL
+        args <- list(...)
+        args$x <- x.rep
+        resi <- do.call(fn, args)
+#        resi <- eval(fncall)
         resivec <- unlist(resi)
         if (!is.numeric(resivec)) stop("boot_fn returns a non-numeric result")
         c(resivec, unlist(attributes(resi)[attrs]))
@@ -1044,13 +1032,13 @@ bootci.fmsm <- function(x, B, fncall, cl=0.95, attrs=NULL, cores=NULL, sample=FA
     if (parallel) {
         cid <- parallel::makeCluster(cores)
         parallel::clusterExport(cl=cid, varlist=ls(.GlobalEnv))
-        res.rep.list <- parallel::parLapply(cid, seq_len(B), boot_fn)
+        res.rep.list <- parallel::parLapply(cid, seq_len(B), boot_fn, fn=fn, ...)
         parallel::stopCluster(cid)
         res.rep <- do.call("rbind", res.rep.list)
     } else {
         res.rep <- vector(B, mode="list")
         for (i in 1:B){
-            res.rep[[i]] <- boot_fn(i)
+            res.rep[[i]] <- boot_fn(i,fn,...)
         }
         res.rep <- do.call(rbind, lapply(res.rep, as.numeric))
     }
@@ -1165,7 +1153,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
         res[i,] <- prop.table(table(factor(last.st, levels=seq_len(n))))
     }
     if (ci){
-        resci <- bootci.fmsm(x, B, match.call(), cl=cl, cores=cores)
+        resci <- bootci.fmsm(x, B, fn=pmatrix.simfs, ci=FALSE, cl=cl, cores=cores, trans=trans, t=t, newdata=newdata, tvar=tvar, tcovs=tcovs, M=M)
         resl <- matrix(resci[1,], nrow=n)
         resu <- matrix(resci[2,], nrow=n)
         attr(res, "lower") <- resl
@@ -1276,7 +1264,7 @@ totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
         res <- tapply(res, group, sum)
     }
     if (ci){
-        resci <- bootci.fmsm(x, B, match.call(), cl=cl, cores=cores)
+        resci <- bootci.fmsm(x, B, fn=totlos.simfs, ci=FALSE, cl=cl, cores=cores, trans=trans, t=t, start=start, newdata=newdata, tvar=tvar, tcovs=tcovs, group=group, M=M)
         resl <- resci[1,]
         resu <- resci[2,]
         names(resl) <- names(resu) <- t

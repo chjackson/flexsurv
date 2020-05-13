@@ -7,11 +7,12 @@
 bootci.fmsm(
   x,
   B,
-  fncall,
+  fn,
   cl = 0.95,
   attrs = NULL,
   cores = NULL,
-  sample = FALSE
+  sample = FALSE,
+  ...
 )
 }
 \arguments{
@@ -20,15 +21,17 @@ bootci.fmsm(
 
 \item{B}{Number of parameter draws to use}
 
-\item{fncall}{Function call to bootstrap the results of.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.  This will typically be the function that \code{bootci.fmsm} is being called from.  See the example below.}
+\item{fn}{Function to bootstrap the results of.  It must have an argument named `code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below.}
 
 \item{cl}{Width of symmetric confidence interval, by default 0.95}
 
-\item{attrs}{Any attributes of the result of \code{fncall} which we want confidence intervals for.  These will be unlisted, if possible, and appended to the result vector.}
+\item{attrs}{Any attributes of the value returned from \code{fn} which we want confidence intervals for.  These will be unlisted, if possible, and appended to the result vector.}
 
 \item{cores}{Number of cores to use for parallel processing.}
 
 \item{sample}{If \code{TRUE} then the bootstrap sample itself is returned.  If \code{FALSE} then the quantiles of the sample are returned giving a confidence interval.}
+
+\item{...}{Additional arguments to pass to \code{fn}.}
 }
 \value{
 A matrix with two rows, giving the upper and lower confidence limits respectively.  Each row is a vector of the same length as the unlisted result of the function corresponding to \code{fncall}.
@@ -40,42 +43,25 @@ Calculate a confidence interval for a model output by repeatedly replacing the p
 
 ## How to use bootci.msm
 
-## Write a function with one argument (here called x) giving a fitted model,
+## Write a function with one argument called x giving a fitted model,
 ## and returning some results of the model.  The results may be in any form.   
 
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 
-summfn <- function(x){
- resp <-  pmatrix.fs(x, trans=tmat, t=10)
- rest <- totlos.fs(x, trans=tmat, t=20)
+summfn <- function(x, t){
+ resp <-  pmatrix.fs(x, trans=tmat, t=t)
+ rest <- totlos.fs(x, trans=tmat, t=t)
  list(resp, rest)
 }
 
-## Now extend the function to include an argument "ci", that defaults to FALSE.
-## When this argument is TRUE, bootci.msm is called on the model object x,
-## specifying the desired number of bootstrap iterations B, and including the
-## special third argument match.call(), which allows the current function to be
-## called repeatedly for alternative parameter values drawn from the multivariate
-## normal distribution of the MLE. The resulting confidence interval is returned
-## in "bootlist", and appended to the results of "summfn".
-
-summfn <- function(x, ci=FALSE){
- resp <-  pmatrix.fs(x, trans=tmat, t=10)
- rest <- totlos.fs(x, trans=tmat, t=20)
- res <- list(resp, rest)
- if (ci) {
-      bootlist <- bootci.fmsm(x, B=3, fncall=match.call())
-      attr(res, "ci") <- bootlist
- } 
- res
-}
-
-## Finally evaluate the function to obtain the confidence interval
+## Use bootci.msm to obtain the confidence interval
 ## The matrix columns are in the order of the unlisted results of the original
 ## summfn.  You will have to rearrange them into the format that you want.
+## If summfn has any extra arguments, in this case \code{t}, make sure they are
+## passed through via the ... argument to bootci.fmsm
 
-summfn(bexp)
-summfn(bexp, ci=TRUE)
+bootci.fmsm(bexp, B=3, fn=summfn, t=10)
+bootci.fmsm(bexp, B=3, fn=summfn, t=5)
 
 }

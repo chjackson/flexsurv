@@ -61,6 +61,7 @@ test_that("ODE method matches Aalen-Johansen",{
 })
 
 bosms3$x <- rnorm(nrow(bosms3))
+bexp.markov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
 
 test_that("bootstrap CIs in multi state models",{
@@ -105,11 +106,6 @@ test_that("bootstrap CIs in multi state models",{
 
 })
 
-test_that("bootstrap CIs in multi state models with parallel processing",{
-    bosms3$x <- rnorm(nrow(bosms3))
-    bexp.markov.cov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + x, data=bosms3, dist="exp")
-
-})
 
 ## Qualitative comparisons for msfit variance between list, non-list
 if (0) { 
