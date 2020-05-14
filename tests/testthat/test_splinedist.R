@@ -75,3 +75,75 @@ test_that("Spline distribution functions",{
         lines(x, dweibull(x, a, b))
     }
 })
+
+
+spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1)
+gamma <- spl$res[c("gamma0","gamma1","gamma2"), "est"]
+
+gamma_mat <- rbind(gamma, gamma*1.1)
+gamma0_vec <- gamma_mat[,"gamma0"]
+gamma1_vec <- gamma_mat[,"gamma1"]
+gamma2_vec <- gamma_mat[,"gamma2"]
+
+spl2 <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=2)
+gamma2k <- spl2$res[c("gamma0","gamma1","gamma2","gamma3"), "est"]
+k2 <- spl2$knots
+
+spl3 <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=3)
+gamma3k <- spl3$res[c("gamma0","gamma1","gamma2","gamma3","gamma4"), "est"]
+k3 <- spl3$knots
+
+test_that("fixed-knot convenience wrappers",{
+
+    gamma0 <- gamma["gamma0"]; gamma1 <- gamma["gamma1"]; gamma2 <- gamma["gamma2"]
+    expect_equal(mean_survspline(gamma=gamma, knots=spl$knots, scale=spl$scale),
+                 mean_survspline1(gamma0, gamma1, gamma2, knots=spl$knots, scale=spl$scale))
+    ## note mean_ functions can't be vectorised 
+    expect_is(summary(spl, fn=mean_survspline1, t=1, ci=FALSE), "list")
+    
+    expect_equal(psurvspline(1, gamma, knots=spl$knots, scale=spl$scale),
+                 psurvspline1(1, gamma0, gamma1, gamma2, knots=spl$knots, scale=spl$scale))
+    expect_equal( psurvspline(1, gamma_mat, knots=spl$knots, scale=spl$scale),
+                 psurvspline1(1, gamma0_vec, gamma1_vec, gamma2_vec, knots=spl$knots, scale=spl$scale))
+    
+    expect_equal(hsurvspline(1, gamma, knots=spl$knots, scale=spl$scale),
+                 hsurvspline1(1, gamma0, gamma1, gamma2, knots=spl$knots, scale=spl$scale))
+    
+    expect_equal(Hsurvspline(1, gamma, knots=spl$knots, scale=spl$scale),
+                 Hsurvspline1(1, gamma0, gamma1, gamma2, knots=spl$knots, scale=spl$scale))
+
+    expect_equal(hsurvspline(1, gamma_mat, knots=spl$knots, scale=spl$scale),
+                 hsurvspline1(1, gamma0_vec, gamma1_vec, gamma2_vec, knots=spl$knots, scale=spl$scale))
+
+    expect_equal(Hsurvspline(1, gamma_mat, knots=spl$knots, scale=spl$scale),
+                 Hsurvspline1(1, gamma0_vec, gamma1_vec, gamma2_vec, knots=spl$knots, scale=spl$scale))
+
+    gamma0 <- gamma2k["gamma0"]; gamma1 <- gamma2k["gamma1"]; gamma2 <- gamma2k["gamma2"]; gamma3 <- gamma2k["gamma3"]
+    expect_equal(psurvspline(1, gamma2k, knots=k2),
+                 psurvspline2(1, gamma0, gamma1, gamma2, gamma3, knots=k2))
+    expect_equal(dsurvspline(1, gamma2k, knots=k2, scale=spl$scale),
+                 dsurvspline2(1, gamma0, gamma1, gamma2, gamma3, knots=k2))
+    expect_equal(qsurvspline(0.4, gamma2k, knots=k2, scale=spl$scale),
+                 qsurvspline2(0.4, gamma0, gamma1, gamma2, gamma3, knots=k2))
+    expect_equal(qsurvspline(0.4, gamma2k, knots=k2, lower.tail=FALSE),
+                 qsurvspline2(0.4, gamma0, gamma1, gamma2, gamma3, knots=k2, lower.tail=FALSE))
+
+    set.seed(1); r1 <- rsurvspline(10, gamma2k, knots=k2)
+    set.seed(1); r2 <- rsurvspline2(10, gamma0, gamma1, gamma2, gamma3, knots=k2)
+    expect_equal(r1, r2)
+
+    gamma4 <- 0.01; gamma3k <- c(gamma2k, gamma4)
+    expect_equal(psurvspline(1, gamma3k, knots=k3, scale=spl$scale),
+                 psurvspline3(1, gamma0, gamma1, gamma2, gamma3, gamma4, knots=k3))
+    expect_equal(dsurvspline(1, gamma3k, knots=k3, scale=spl$scale),
+                 dsurvspline3(1, gamma0, gamma1, gamma2, gamma3, gamma4, knots=k3))
+    expect_equal(qsurvspline(0.4, gamma3k, knots=k3, scale=spl$scale),
+                 qsurvspline3(0.4, gamma0, gamma1, gamma2, gamma3, gamma4, knots=k3))
+    expect_equal(qsurvspline(0.4, gamma3k, knots=k3, lower.tail=FALSE),
+                 qsurvspline3(0.4, gamma0, gamma1, gamma2, gamma3, gamma4, knots=k3, lower.tail=FALSE))
+
+    set.seed(1); r1 <- rsurvspline(10, gamma3k, knots=k3)
+    set.seed(1); r2 <- rsurvspline3(10, gamma0, gamma1, gamma2, gamma3, gamma4, knots=k3)
+    expect_equal(r1, r2)
+
+})

@@ -25,7 +25,18 @@ Version 1.2 (TODO)
 
 * "tidy" argument to sim.fmsm for returning simulations in tidy data
   frame format with one row per transition, and associated function
-  simfs_bytrans. 
+  simfs_bytrans.
+
+* Bootstrapping function bootci.fmsm made available for users to get
+  confidence intervals / distributions for their own flexsurv model
+  output functions.
+
+* Parallel processing capability for bootstrap confidence intervals.
+
+* Distribution and mean functions for the Royston-Parmar model named
+  like dsurvspline2, psurvspline4 and so on, with one argument per
+  parameter, rather than all parameters collected in a single
+  argument, going up to 7 knots / 9 parameters.
 
 * Return value from pars.fmsm is now a list rather than a matrix, even
   if the model family is the same for each transition.

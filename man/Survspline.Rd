@@ -11,12 +11,102 @@
 \alias{mean_survspline}
 \alias{rmst_survspline}
 \title{Royston/Parmar spline survival distribution}
+\usage{
+dsurvspline(
+  x,
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0,
+  log = FALSE
+)
+
+psurvspline(
+  q,
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
+
+qsurvspline(
+  p,
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0,
+  lower.tail = TRUE,
+  log.p = FALSE
+)
+
+rsurvspline(
+  n,
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0
+)
+
+Hsurvspline(
+  x,
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0
+)
+
+hsurvspline(
+  x,
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0
+)
+
+rmst_survspline(
+  t,
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0,
+  start = 0
+)
+
+mean_survspline(
+  gamma,
+  beta = 0,
+  X = 0,
+  knots = c(-10, 10),
+  scale = "hazard",
+  timescale = "log",
+  offset = 0
+)
+}
 \arguments{
 \item{x, q, t}{Vector of times.}
-
-\item{p}{Vector of probabilities.}
-
-\item{n}{Number of random numbers to simulate.}
 
 \item{gamma}{Parameters describing the baseline spline function, as
 described in \code{\link{flexsurvspline}}.  This may be supplied as a
@@ -24,10 +114,6 @@ vector with number of elements equal to the length of \code{knots}, in
 which case the parameters are common to all times.  Alternatively a matrix
 may be supplied, with rows corresponding to different times, and columns
 corresponding to \code{knots}.}
-
-\item{start}{Optional left-truncation time or times.  The returned
-restricted mean survival will be conditioned on survival up to
-this time.}
 
 \item{beta}{Vector of covariate effects (deprecated).}
 
@@ -59,6 +145,14 @@ and log-normal respectively.  The scale must be common to all times.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{Vector of probabilities.}
+
+\item{n}{Number of random numbers to simulate.}
+
+\item{start}{Optional left-truncation time or times.  The returned
+restricted mean survival will be conditioned on survival up to
+this time.}
 }
 \value{
 \code{dsurvspline} gives the density, \code{psurvspline} gives the
@@ -75,9 +169,9 @@ numerical root-finding involved in \code{qsurvspline}, it is slow compared
 to typical random number generation functions.
 }
 \description{
-Probability density, distribution, quantile, random generation, hazard
+Probability density, distribution, quantile, random generation, hazard, 
 cumulative hazard, mean and restricted mean functions for the Royston/Parmar
-spline model.
+spline model.   These functions have all parameters of the distribution collecte together in a single argument \code{gamma}.  For the equivalent functions with one argument per parameter, see \code{\link{Survsplinek}}.
 }
 \examples{
 

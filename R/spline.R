@@ -1,25 +1,33 @@
 ##' Royston/Parmar spline survival distribution
 ##' 
-##' Probability density, distribution, quantile, random generation, hazard
+##' Probability density, distribution, quantile, random generation, hazard, 
 ##' cumulative hazard, mean and restricted mean functions for the Royston/Parmar
-##' spline model.
+##' spline model.   These functions have all parameters of the distribution collecte together in a single argument \code{gamma}.  For the equivalent functions with one argument per parameter, see \code{\link{Survsplinek}}. 
 ##' 
 ##' @aliases dsurvspline psurvspline qsurvspline rsurvspline
 ##' hsurvspline Hsurvspline mean_survspline rmst_survspline
+##' 
 ##' @param x,q,t Vector of times.
+##'
 ##' @param p Vector of probabilities.
+##'
 ##' @param n Number of random numbers to simulate.
+##'
 ##' @param gamma Parameters describing the baseline spline function, as
 ##' described in \code{\link{flexsurvspline}}.  This may be supplied as a
 ##' vector with number of elements equal to the length of \code{knots}, in
 ##' which case the parameters are common to all times.  Alternatively a matrix
 ##' may be supplied, with rows corresponding to different times, and columns
 ##' corresponding to \code{knots}.
+##'
 ##' @param start Optional left-truncation time or times.  The returned
 ##' restricted mean survival will be conditioned on survival up to
 ##' this time.
+##'
 ##' @param beta Vector of covariate effects (deprecated).
+##'
 ##' @param X Matrix of covariate values (deprecated).
+##'
 ##' @param knots Locations of knots on the axis of log time, supplied in
 ##' increasing order.  Unlike in \code{\link{flexsurvspline}}, these include
 ##' the two boundary knots.  If there are no additional knots, the boundary
@@ -131,6 +139,7 @@ ldlink <- function(scale){
 
 ## probability density function.
 
+##' @rdname Survspline
 ##' @export
 dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, log=FALSE){
     d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset)
@@ -179,6 +188,7 @@ Slink <- function(scale){
 
 ## cumulative distribution function
 
+##' @rdname Survspline
 ##' @export
 psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE){
     d <- dbase.survspline(q=q, gamma=gamma, knots=knots, scale=scale, offset=offset)
@@ -196,6 +206,7 @@ psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     ret
 }
 
+##' @rdname Survspline
 ##' @export
 qsurvspline <- function(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE){
     if (log.p) p <- exp(p)
@@ -203,6 +214,7 @@ qsurvspline <- function(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     qgeneric(psurvspline, p=p, matargs=c("gamma","knots"), scalarargs=c("scale","timescale"), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, offset=offset)
 }
 
+##' @rdname Survspline
 ##' @export
 rsurvspline <- function(n, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
     if (length(n) > 1) n <- length(n)
@@ -221,6 +233,7 @@ Hlink <- function(scale){
 
 ## cumulative hazard function
 
+##' @rdname Survspline
 ##' @export
 Hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
     match.arg(scale, c("hazard","odds","normal"))
@@ -243,6 +256,7 @@ hlink <- function(scale){
 
 ## hazard function
 
+##' @rdname Survspline
 ##' @export
 hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
 ## value for x=0?  currently zero, should it be limit as x reduces to 0? 
@@ -257,11 +271,13 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
     as.numeric(ret)
 }
 
+##' @rdname Survspline
 ##' @export
 rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, start=0){
   rmst_generic(psurvspline, t, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
 }
 
+##' @rdname Survspline
 ##' @export
 mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
   rmst_generic(psurvspline, Inf, start=0, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
@@ -276,9 +292,12 @@ mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 ##' The exact formula for the basis is given in \code{\link{flexsurvspline}}.
 ##' 
 ##' @aliases basis dbasis fss dfss
+##' 
 ##' @param knots Vector of knot locations in increasing order, including the
 ##' boundary knots at the beginning and end.
+##' 
 ##' @param x Vector of ordinates to compute the basis for.
+##' 
 ##' @return A matrix with one row for each ordinate and one column for each
 ##' knot.
 ##' 
@@ -752,7 +771,7 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
     args$fixedpars <- fpold
 
     ret <- do.call("flexsurvreg", args) # faff to make ... args work within functions
-    ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale))
+    ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale, timescale=timescale))
     ret$call <- call
     class(ret) <- "flexsurvreg"
     ret
