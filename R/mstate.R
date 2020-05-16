@@ -267,9 +267,9 @@ pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
                 X <- matrix(0)
             else {
                 if(nrow(newdata) == 1L) {
-                    X <- form.model.matrix(x[[i]], as.data.frame(newdata))
+                    X <- form.model.matrix(x[[i]], as.data.frame(newdata), na.action=na.omit)
                 } else if(nrow(newdata) == ntr){
-                    X <- form.model.matrix(x[[i]], as.data.frame(newdata[i, ,drop = FALSE]))
+                    X <- form.model.matrix(x[[i]], as.data.frame(newdata[i, ,drop = FALSE]), na.action=na.omit)
                 } else stop(sprintf("`newdata` has %s rows. It must either have one row, or one row for each of the %s allowed transitions",nrow(newdata),ntr))
               }
             beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
@@ -277,7 +277,7 @@ pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
         }
     } else if (inherits(x, "flexsurvreg")) {
         newdata <- form.msm.newdata(x, newdata=newdata, tvar=tvar, trans=trans)
-        X <- form.model.matrix(x, newdata)   
+        X <- form.model.matrix(x, newdata, na.action=na.omit)
         basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
         ntrans <- length(na.omit(as.vector(trans)))
         basepar <- split(basepar, seq(length=ntrans))
@@ -730,7 +730,7 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
     }
     for (i in tcovs) { dat[[i]] <- dat[[i]] + t}
     dat <- as.data.frame(dat)
-    X <- form.model.matrix(x, dat)
+    X <- form.model.matrix(x, dat, na.action=na.omit)
     beta <- if (x$ncovs==0) 0 else x$res.t[x$covpars,"est"]
     basepars.mat <- add.covs(x, x$res.t[x$dlist$pars,"est"], beta, X, transform=FALSE)
     as.list(as.data.frame(basepars.mat))

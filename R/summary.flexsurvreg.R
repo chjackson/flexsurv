@@ -88,6 +88,7 @@
 ##' @param tidy If \code{TRUE}, then the results are returned as a tidy data
 ##' frame instead of a list.  This can help with using the \pkg{ggplot2}
 ##' package to compare summaries for different covariate values.
+##' @param na.action Function determinining what should be done with missing values in \code{newdata}.  If \code{na.pass} (the default) then summaries of \code{NA} are produced for missing covariate values.  If \code{na.omit}, then missing values are dropped, the behaviour of \code{summary.flexsurvreg} before \code{flexsurv} version 1.2.
 ##' @param ... Further arguments passed to or from other methods.  Currently
 ##' unused.
 ##' @return If \code{tidy=FALSE}, a list with one component for each unique
@@ -122,7 +123,7 @@
 ##' @export
 summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL,
                                 t=NULL, quantiles=0.5, start=0, ci=TRUE, se=FALSE,
-                                B=1000, cl=0.95, tidy=FALSE,
+                                B=1000, cl=0.95, tidy=FALSE, na.action=na.pass,
                                 ...)
 {
     x <- object
@@ -159,7 +160,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", f
             colnames(attr(X, "newdata")) <- colnames(model.matrix(x))
         }
     } else
-        X <- form.model.matrix(object, as.data.frame(newdata))
+        X <- form.model.matrix(object, as.data.frame(newdata), na.action=na.action)
     
     if(type == "mean"){
       if(!is.null(t)) warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")

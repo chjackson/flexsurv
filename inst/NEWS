@@ -41,6 +41,11 @@ Version 1.2 (TODO)
 * Return value from pars.fmsm is now a list rather than a matrix, even
   if the model family is the same for each transition.
 
+* summary.flexsurvreg given a new argument "na.action" to control
+  whether missing values in "newdata" are dropped.  Defaults to
+  producing summaries of NA when there are missing values, while
+  previously missing values were dropped.
+
 
 Version 1.1.1 (2019-03-18)
 -------------

@@ -357,6 +357,7 @@ test_that("Interval censoring",{
     fs3 <- flexsurvreg(Surv(tmin, tmax, status, type="interval") ~ 1, dist="weibull")
     expect_equal(fs1$loglik, fs3$loglik)
 
+    
 })
 
 test_that("inits",{

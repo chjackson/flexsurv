@@ -981,7 +981,7 @@ print.flexsurvreg <- function(x, ...)
         "\nAIC = ", x$AIC, "\n\n", sep="")
 }
 
-form.model.matrix <- function(object, newdata){
+form.model.matrix <- function(object, newdata, na.action=na.pass){
     mfo <- model.frame(object)
 
     ## If required covariate missing, give a slightly more informative error message than, e.g.
@@ -997,7 +997,7 @@ form.model.matrix <- function(object, newdata){
     ## as in predict.lm
     tt <- attr(mfo, "terms")
     Terms <- delete.response(tt)
-    mf <- model.frame(Terms, newdata, xlev = .getXlevels(tt, mfo))
+    mf <- model.frame(Terms, newdata, xlev = .getXlevels(tt, mfo), na.action=na.action)
     if (!is.null(cl <- attr(Terms, "dataClasses")))
         .checkMFClasses(cl, mf)
 
