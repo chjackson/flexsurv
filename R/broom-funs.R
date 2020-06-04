@@ -4,7 +4,7 @@
 #'
 #' @param x Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.
 #'
-#' @param conf.int Logical. Should confidence intervals be returned? Default is \code{TRUE}.
+#' @param conf.int Logical. Should confidence intervals be returned? Default is \code{FALSE}.
 #'
 #' @param conf.level The confidence level to use for the confidence interval if \code{conf.int = TRUE}. Default is \code{0.95}.
 #'
@@ -42,8 +42,8 @@
 #' tidy(fitg)
 #' tidy(fitg, pars = "coefs", transform = "coefs.exp")
 #'
-tidy.flexsurvreg <- function(x, pars = "all", transform = "none",
-                             conf.int = TRUE, conf.level = 0.95, ...)
+tidy.flexsurvreg <- function(x, conf.int = FALSE, conf.level = 0.95,
+                             pars = "all", transform = "none", ...)
 {
   assertthat::assert_that(is.logical(conf.int))
 

@@ -6,15 +6,19 @@
 \usage{
 \method{tidy}{flexsurvreg}(
   x,
+  conf.int = FALSE,
+  conf.level = 0.95,
   pars = "all",
   transform = "none",
-  conf.int = TRUE,
-  conf.level = 0.95,
   ...
 )
 }
 \arguments{
 \item{x}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.}
+
+\item{conf.int}{Logical. Should confidence intervals be returned? Default is \code{FALSE}.}
+
+\item{conf.level}{The confidence level to use for the confidence interval if \code{conf.int = TRUE}. Default is \code{0.95}.}
 
 \item{pars}{Character vector for one of \code{"all"}, \code{"coefs"}, or \code{"baseline"} for all parameters, covariate effects (i.e. regression betas), or baseline distribution paramaters, respectively. Default is \code{"all"}.}
 
@@ -27,10 +31,6 @@ Users can specify one or both types of transformations:
 }
 
 See \code{Details} for a more complete explanation.}
-
-\item{conf.int}{Logical. Should confidence intervals be returned? Default is \code{TRUE}.}
-
-\item{conf.level}{The confidence level to use for the confidence interval if \code{conf.int = TRUE}. Default is \code{0.95}.}
 
 \item{...}{Not currently used.}
 }
