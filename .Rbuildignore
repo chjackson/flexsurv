@@ -24,8 +24,6 @@ tests/extra
 tests/test_extra.R
 ^.*\.Rproj$
 ^\.Rproj\.user$
-R/predict.flexsurvreg.R
-man/predict.flexsurvreg.Rd
 ^\.travis\.yml$
 ^codecov\.yml$
 \.gcda

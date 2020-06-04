@@ -9,7 +9,9 @@ Authors@R: c(person("Christopher", "Jackson",
 	   person("Paul", "Metcalfe",
          role=c("ctb")),
 	   person("Jordan", "Amdahl",
-         role=c("ctb"))
+         role=c("ctb")),
+         person("Matthew T.", "Warkentin",
+         role = c("ctb"))
 	   )
 Description: Flexible parametric models for time-to-event data,
     including the Royston-Parmar spline model, generalized gamma and
@@ -22,24 +24,27 @@ Depends:
     survival,
     R (>= 2.15.0)
 Imports:
+    assertthat,
+    deSolve,
+    generics,
     mstate (>= 0.2.10),
     muhaz,
     mvtnorm,
-    deSolve,
     quadprog,
     Rcpp (>= 0.11.5),
     rstpm2,
-    tidyr,
-    tibble
+    purrr,
+    tibble,
+    tidyr
 Encoding: UTF-8
 Suggests:
+    colorspace,
     eha,
+    knitr,
+    msm,
     numDeriv,
     testthat,
-    msm,
-    knitr,
-    TH.data,
-    colorspace
+    TH.data
 URL: https://github.com/chjackson/flexsurv-dev
 BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr

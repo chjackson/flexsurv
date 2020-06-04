@@ -1,108 +1,160 @@
-##' Prediction from flexible survival models
-##'
-##' Predict outcomes from flexible survival models at the covariate values given in \code{"newdata"}.
-##'
-##' @inheritParams summary.flexsurvreg
-##'
-##' @param newdata Data frame containing covariate values to produce fitted
-##' values for, or a list that can be coerced to such a data frame.  There
-##' must be a column for every covariate in the model formula, and one row for
-##' every combination of covariates the fitted values are wanted for.  If this is
-##' omitted, then the original data used to fit the model are used, extracted by
-##' \code{model.frame(object)}. 
-##'
-##' @param type \code{"response"} for mean survival
-##'
-##' \code{"quantile"} for quantiles of the survival distribution specified by \code{p}
-##'
-##' \code{"link"} for fitted values of the location parameter, analogous to the linear predictor in generalized linear models.   \code{type="lp"} and \code{type="linear"} are synonyms.
-##'
-##' @param interval Return a confidence interval \code{interval="confidence"}.
-##' 
-##' @param se.fit Return standard errors
-##'
-##' @param p vector of quantiles to return when \code{type="quantile"}
-##'
-##' @param tidy If \code{TRUE} then a tidyverse-friendly format is returned.  This is a tibble with one row per individual in \code{newdata}.  If multiple predictions are requested per individual (e.g. multiple quantiles) then list columns are returned.    If \code{FALSE} then a data frame with one row per individual and prediction is returned. 
-##'
-##' @param return_covs If \code{FALSE} (the default) then covariates are removed from the returned data, to match the behaviour of standard predict functions such as \code{\link{predict.lm}}.  If \code{TRUE}, then columns for the covariates are included in the returned data, which may be helpful for post-processing the results.
-##'
-##' @seealso \code{\link{summary.flexsurvreg}}
-##'
-##' @return If \code{tidy=TRUE} then a tibble with one row per individual in \code{newdatata}.  If multiple quantities are predicted per individual, then list columns are returned, see, e.g. \url{https://r4ds.had.co.nz/many-models.html#list-columns-1}.   If \code{tidy=FALSE}, then a data frame with one row per individual and prediction is returned. 
-##'
-##' @importFrom tidyr unnest
-##' 
-##' @importFrom tibble tibble
-##'
-##' @examples ## TODO as well as just examples of running the functions, document extraction with tidyverse tools for the examples that return list columns. 
-##'
-##' \dontrun{
-##' fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist="gengamma")
-##'
-##' ## Simplest prediction: mean or median, for covariates defined by original dataset
-##' predict(fitg)
-##' predict(fitg, type="quantile", p=0.5)
-##' predict(fitg, return_covs=TRUE)
-##'
-##' ## Simple prediction for user-defined covariate values
-##' predict(fitg, newdata=list(age=c(40, 50, 60)))
-##' predict(fitg, type="quantile", p=0.5, newdata=list(age=c(40,50,60)))
-##'
-##' ## Predict multiple quantiles 
-##' require(tibble) 
-##' require(tidyr) # TODO declare dependencies in DESCRIPTION, decide if Imports or Suggests
-##' predict(fitg, type="quantile", p=c(0.1, 0.9))
-##'
-##' ## Multiple quantiles and multiple covariate values
-##' 
-##' }
+#' Predictions from flexible survival models
+#'
+#' Predict outcomes from flexible survival models at the covariate values specified in \code{newdata}.
+#'
+#' @param object Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.
+#'
+#' @param newdata Data frame containing covariate values at which to produce fitted values. There must be a column for every covariate in the model formula used to fit \code{object}, and one row for every combination of covariate values at which to obtain the fitted predictions.
+#'
+#' If \code{newdata} is omitted, then the original data used to fit the model are used, as extracted by \code{model.frame(object)}.
+#'
+#' @param type Character vector for the type of predictions desired.
+#'
+#' * \code{"response"} for mean survival (the default)
+#'
+#' * \code{"quantile"} for quantiles of the survival distribution specified by \code{p}
+#'
+#' * \code{"rmst"} for restricted mean survival time
+#'
+#' * \code{"survival"} for survival probabilities
+#'
+#' * \code{"cumhaz"} for cumulative hazards
+#'
+#' * \code{"hazard"} for hazards
+#'
+#' * \code{"link"} for fitted values of the location parameter, analogous to the linear predictor in generalized linear models (\code{type = "lp"} and \code{type = "linear"} are acceptable synonyms)
+#'
+#' @param times Vector of time horizons at which to compute fitted values. Only applies when \code{type} is \code{"survival"}, \code{"cumhaz"}, \code{"hazard"}, or \code{"rmst"}. Will be silently ignored for all other types.
+#'
+#' If not specified, predictions for \code{"survival"}, \code{"cumhaz"}, and \code{"hazard"} will be made at each observed event time in \code{model.frame(object)}.
+#'
+#' For \code{"rmst"}, when \code{times} is not specified predictions will be made at the maximum observed event time from the data used to fit \code{object}. Specifying \code{times = Inf} is valid, and will return mean survival (equal to \code{type = "response"}).
+#'
+#' @param conf.int Logical. Should confidence intervals be returned? Default is \code{FALSE}.
+#'
+#' @param conf.level Width of symmetric confidence intervals, relative to 1.
+#'
+#' @param se.fit Logical. Should standard errors of fitted values be returned? Default is \code{FALSE}.
+#'
+#' @param p Vector of quantiles at which to return fitted values when \code{type = "quantile"}. Default is \code{c(0.1, 0.9)}.
+#'
+#' @param ... Not currently used.
+#'
+#' @return A numeric vector, if a single value per covariate pattern is requested. Otherwise, a \code{\link{tibble}} containing a single list-column of data frames containing the multiple quantitites, with one data frame per covariate pattern observed in \code{newdata}.
+#'
+#' The dimensions of each data frame in the list-column will be the same and depend on the supplied arguments to \code{predict}. Columns are added when confidence intervals or standard errors are requested, and columns indicating the time horizon or quantile for predictions, if multiple quantity predictions are made. Rows are added for each value of \code{times} or \code{p} requested.
+#'
+#' @seealso \code{\link{summary.flexsurvreg}}, \code{\link{residuals.flexsurvreg}}
+#'
+#' @importFrom tibble tibble
+#' @importFrom stats predict
+#'
+#' @md
+#'
+#' @export
+#'
+#' @examples
+#'
+#' fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "gengamma")
+#'
+#' ## Simplest prediction: mean or median, for covariates defined by original dataset
+#' predict(fitg)
+#' predict(fitg, type = "quantile", p = 0.5)
+#'
+#' ## Simple prediction for user-defined covariate values
+#' predict(fitg, newdata = data.frame(age = c(40, 50, 60)))
+#' predict(fitg, type = "quantile", p = 0.5, newdata = data.frame(age = c(40,50,60)))
+#'
+#' ## Predict multiple quantiles and unnest
+#' require(tidyr)
+#' pr <- predict(fitg, type = "survival", times = c(600, 800))
+#' tidyr::unnest(pr, .pred)
+#'
 predict.flexsurvreg <- function(object,
                                 newdata,
-                                type="response",
-                                interval="none",
-                                se.fit=FALSE,
+                                type = "response",
+                                times,
+                                conf.int = FALSE,
+                                conf.level = 0.95,
+                                se.fit = FALSE,
                                 p = c(0.1, 0.9),
-                                tidy=TRUE,
-                                return_covs=FALSE
+                                ...
                                 )
 {
-    if (missing(newdata))
-        newdata <- model.frame(object)
-    type <- match.arg(type, c("response", "quantile", "link", "lp", "linear"))
-    interval <- match.arg(interval, c("none", "confidence"))
-    stype <- type
-    if (type=="response") stype <- "mean"
-    if (type %in% c("lp", "linear")) stype <- "link"
-    multi_output <- (type=="quantile") && (length(p) > 1)
-    if (stype %in% c("mean", "quantile", "link")){ # may not need this line 
-        res <- summary.flexsurvreg(object=object, newdata=newdata, type=stype,
-                                   quantiles=p, ci=(interval=="confidence"), se=se.fit,
-                                   tidy=!multi_output)
-    }
-    else res <- NULL
-    rename <- function(x){
-        ## If depend on tidyverse stuff could use dplyr::rename. Should only add dependencies where necessary, though if we are making list columns, we could assume the user is willing to load tidyverse to deal with them.
-        oldnames <- c("est", "se",       "lcl",       "ucl")
-        newnames  <- c("pred","std_error","pred_lower","pred_upper")
-        for (i in seq_along(x))
-            names(x)[names(x)==oldnames[i]] <- newnames[i]
-        x
-    }
-    if (multi_output){ ## TODO nicer way in purrr I expect, learning exercise for me...
-        res <- lapply(res, rename)
-        res2 <- vector(ncol(res[[1]]), mode = "list")
-        for (i in seq_along(res2))
-            res2[[i]] <- lapply(res, function(x)x[,i])
-        res2 <- do.call(tibble, res2) # TODO This bit's currently broken
-        names(res2) <- names(res[[1]])
-        res <- if (tidy) res2 else tidyr::unnest(res2)
+    if (missing(newdata)) newdata <- model.frame(object)
+
+    assertthat::assert_that(inherits(newdata, "data.frame"),
+                            msg = "`newdata` must inherit class `data.frame`")
+    assertthat::assert_that(is.logical(conf.int), is.logical(se.fit))
+    assertthat::assert_that(all(is.numeric(p), p <= 1, p >=0),
+                            msg = "`p` should be a vector of quantiles between 0 and 1")
+
+    if (conf.int) assertthat::assert_that(is.numeric(conf.level),
+                                          conf.level > 0, conf.level < 1,
+                                          length(conf.level) == 1,
+                                          msg = "`conf.level` must be length one and between 0 and 1")
+
+    type <- match.arg(type, c("response", "quantile", "link", "lp", "linear",
+                              "survival", "cumhaz", "hazard", "rmst"))
+
+    stype <- switch(
+        type,
+        response = "mean",
+        lp = "link",
+        linear = "link",
+        type # all others keep their type
+    )
+
+    if (stype %in% c("survival", "cumhaz", "hazard")) {
+        if (missing(times)) times <- object$data$Y[, 1][order(object$data$Y[, 1])]
+        assertthat::assert_that(all(is.numeric(times), times > 0),
+                                msg = "`times` must be a vector of positive real-valued numbers.")
+    } else if (stype == "rmst" && !missing(times)) {
+        assertthat::assert_that(all(is.numeric(times), times > 0),
+                                msg = "`times` must be a vector of positive real-valued numbers.")
     } else {
-        res <- rename(res)
+        times <- NULL
     }
-    if (!return_covs){
-        covnames <- attr(model.frame(object),"covnames.orig")
-        res[,covnames] <- NULL
+
+    nest_output <- ((stype == "quantile" && length(p) > 1) |
+                        (stype %in% c("survival", "cumhaz", "hazard", "rmst") &&
+                        length(times) > 1) | conf.int | se.fit)
+
+    lone_pred <- (stype %in% c("survival", "cumhaz", "hazard", "rmst") &
+                      length(times) == 1) | (stype %in% c("quantile") &
+                                                 length(p) == 1) & !conf.int &
+        !se.fit
+
+    res <- summary(object = object, newdata = newdata, type = stype,
+                   quantiles = p, t = times,
+                   ci = conf.int, cl = conf.level, se = se.fit,
+                   tidy = FALSE)
+
+    res <- rename_tidy(unname(res))
+
+    if (nest_output) {
+        res <- tibble::tibble(.pred = res)
+    } else if (lone_pred) {
+        res <- unlist(res)
+        res <- unname(res[names(res)==".pred"])
+    } else {
+        res <- unname(unlist(res))
     }
     res
+}
+
+rename_tidy <- function(x){
+    names_map <- data.frame(
+        old_names = c("time", "quantile", "est", "se", "lcl", "ucl"),
+        new_names  = c(".time", ".quantile", ".pred",
+                        ".std_error", ".pred_lower", ".pred_upper")
+    )
+
+    x <- lapply(x, function (x) {
+        for (i in seq_along(names_map$old_names)) {
+            colnames(x)[colnames(x)==names_map$old_names[i]] <- names_map$new_names[i]
+        }
+        x
+    })
+    x
 }
