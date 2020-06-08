@@ -51,9 +51,9 @@ For \code{"rmst"}, when \code{times} is not specified predictions will be made a
 \item{...}{Not currently used.}
 }
 \value{
-A numeric vector, if a single value per covariate pattern is requested. Otherwise, a \code{\link{tibble}} containing a single list-column of data frames containing the multiple quantitites, with one data frame per covariate pattern observed in \code{newdata}.
+A \code{\link{tibble}} with same number of rows as \code{newdata} and in the same order. If multiple predictions are requested, a \code{\link{tibble}} containing a single list-column of data frames.
 
-The dimensions of each data frame in the list-column will be the same and depend on the supplied arguments to \code{predict}. Columns are added when confidence intervals or standard errors are requested, and columns indicating the time horizon or quantile for predictions, if multiple quantity predictions are made. Rows are added for each value of \code{times} or \code{p} requested.
+For the list-column of data frames - the dimensions of each data frame will be identical. Rows are added for each value of \code{times} or \code{p} requested.
 }
 \description{
 Predict outcomes from flexible survival models at the covariate values specified in \code{newdata}.

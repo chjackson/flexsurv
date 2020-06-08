@@ -40,9 +40,9 @@
 #'
 #' @param ... Not currently used.
 #'
-#' @return A numeric vector, if a single value per covariate pattern is requested. Otherwise, a \code{\link{tibble}} containing a single list-column of data frames containing the multiple quantitites, with one data frame per covariate pattern observed in \code{newdata}.
+#' @return A \code{\link{tibble}} with same number of rows as \code{newdata} and in the same order. If multiple predictions are requested, a \code{\link{tibble}} containing a single list-column of data frames.
 #'
-#' The dimensions of each data frame in the list-column will be the same and depend on the supplied arguments to \code{predict}. Columns are added when confidence intervals or standard errors are requested, and columns indicating the time horizon or quantile for predictions, if multiple quantity predictions are made. Rows are added for each value of \code{times} or \code{p} requested.
+#' For the list-column of data frames - the dimensions of each data frame will be identical. Rows are added for each value of \code{times} or \code{p} requested.
 #'
 #' @seealso \code{\link{summary.flexsurvreg}}, \code{\link{residuals.flexsurvreg}}
 #'
@@ -118,12 +118,7 @@ predict.flexsurvreg <- function(object,
 
     nest_output <- ((stype == "quantile" && length(p) > 1) |
                         (stype %in% c("survival", "cumhaz", "hazard", "rmst") &&
-                        length(times) > 1) | conf.int | se.fit)
-
-    lone_pred <- (stype %in% c("survival", "cumhaz", "hazard", "rmst") &
-                      length(times) == 1) | (stype %in% c("quantile") &
-                                                 length(p) == 1) & !conf.int &
-        !se.fit
+                        length(times) > 1))
 
     res <- summary(object = object, newdata = newdata, type = stype,
                    quantiles = p, t = times,
@@ -132,19 +127,16 @@ predict.flexsurvreg <- function(object,
 
     res <- rename_tidy(unname(res))
 
-    if (nest_output) {
-        res <- tibble::tibble(.pred = res)
-    } else if (lone_pred) {
-        res <- unlist(res)
-        res <- unname(res[names(res)==".pred"])
-    } else {
-        res <- unname(unlist(res))
+    res <- tibble::tibble(.pred = res)
+
+    if (!nest_output) {
+        res <- tidyr::unnest(res, .pred)
     }
     res
 }
 
 rename_tidy <- function(x){
-    names_map <- data.frame(
+    names_map <- tibble::tibble(
         old_names = c("time", "quantile", "est", "se", "lcl", "ucl"),
         new_names  = c(".time", ".quantile", ".pred",
                         ".std_error", ".pred_lower", ".pred_upper")

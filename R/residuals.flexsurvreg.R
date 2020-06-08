@@ -27,7 +27,7 @@ residuals.flexsurvreg <- function(object, type = "response", ...)
   type <- match.arg(type, "response")
 
   obs_surv <- unname(object$data$Y[, 1])
-  fit_surv <- predict(object, type = type)
+  fit_surv <- predict(object, type = type)$.pred
 
   res <- obs_surv - fit_surv
   res
