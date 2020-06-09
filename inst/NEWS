@@ -21,7 +21,7 @@ Version 1.2 (TODO)
 * pmatrix.fs can now calculate transition probabilities conditionally
   on the the transition being to one of a subset of the states.
 
-* "tidy" argument to pmatrix.fs for tidy data frame output. 
+* "tidy" argument to pmatrix.fs for tidy data frame output.
 
 * "tidy" argument to sim.fmsm for returning simulations in tidy data
   frame format with one row per transition, and associated function
@@ -46,12 +46,16 @@ Version 1.2 (TODO)
   producing summaries of NA when there are missing values, while
   previously missing values were dropped.
 
+* S3 methods have been added for the generics defined in the broom package. These functions turn model objects into tidy data frames. The new functions are tidy.flexsurvreg, glance.flexsurvreg, and augment.flexsurvreg.
+
+* S3 methods have been added for the predict and residuals generics. Currently, residuals.flexsurvreg has limited support for residual types. predict.flexsurvreg has full support for all model outcomes supported by summary.flexsurvreg.
+
 
 Version 1.1.1 (2019-03-18)
 -------------
 
 * New type="quantiles" and type="link" for summary.flexsurvreg.
-  Thanks to Leonardo Marques for the contribution.  
+  Thanks to Leonardo Marques for the contribution.
 
 * Allow different covariates per transition in multi-state models
   supplied as a list of flexsurvreg objects.  Thanks to David
@@ -75,7 +79,7 @@ Version 1.1 (2017-03-27)
 * Substantial speed improvements in fitting most of the built-in
   models, from implementing their PDFs and CDFs in C++.  Thanks to
   Paul Metcalfe for contributing this.  Results may therefore differ
-  from previous versions in edge cases. 
+  from previous versions in edge cases.
 
 * As a result the package now depends on Rcpp.
 
@@ -157,7 +161,7 @@ Version 0.7 (2015-11-13)
   (github issue #7).  The behaviour here should now be like predict.lm,
   e.g. variables in newdata that were originally factors should be
   supplied as factor or character, not numeric.
-  
+
 * Fix of bug that prevented plots being drawn by categorical
   covariates by default.
 
@@ -167,10 +171,10 @@ Version 0.7 (2015-11-13)
 * Fix of bugs with subsetting in flexsurvspline (github issue #6).
 
 
-Version 0.6 (2015-04-13) 
+Version 0.6 (2015-04-13)
 -----------
 
-* CRAN release.  Also includes the changes from Version 0.5.1. 
+* CRAN release.  Also includes the changes from Version 0.5.1.
 
 * Full support for multi-state models fitted as a list of
   independent transition-specific models.
@@ -287,7 +291,7 @@ Output functions:
   intervals.
 
 * "start" argument defaults to 0 for all prediction times in
-  summary.flexsurvreg. 
+  summary.flexsurvreg.
 
 * Bug fix in summary.flexsurvreg for left-truncated models, which was
   returning probabilities > 1 before the truncation time.
@@ -298,10 +302,10 @@ Output functions:
 * Accept vector X in summary.flexsurvreg, and give informative error
   if X in wrong format.  Thanks to Mark Danese.
 
-* Extra arguments can be passed to both muhaz and plot.muhaz in 
+* Extra arguments can be passed to both muhaz and plot.muhaz in
   plot.flexsurvreg(...,type="hazard",...)
 
-Printed output: 
+Printed output:
 
 * Use format() not signif() for printing flexsurvreg objects, to avoid
   spurious zero significant figures. Thanks to Kenneth Chen.
@@ -310,7 +314,7 @@ Printed output:
   for parameters optimised on natural or log scales (which includes
   all built-in distributions).
 
-Distribution functions: 
+Distribution functions:
 
 * Bug fix in rgengamma for Q=0 (log-normal) and sigma not equal to 1.
 

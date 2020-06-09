@@ -183,6 +183,8 @@ generics::glance
 #'
 #' @param ... Additional arguments. Not currently used.
 #'
+#' @details If neither of \code{data} or \code{newdata} are specified, then \code{model.frame(x)} will be used. It is worth noting that \code{model.frame(x)} will include a \code{\link{Surv}} object and not the original time-to-event variables used when fitting the \code{flexsurvreg} object. If the original data is desired, specify \code{data}.
+#'
 #' @return A \code{\link{tibble}} containing \code{data} or \code{newdata} and possible additional columns:
 #'
 #' * \code{.fitted} Fitted values of model
@@ -206,8 +208,7 @@ augment.flexsurvreg <- function(x, data = NULL, newdata = NULL,
                                 type.residuals = "response", ...)
 {
   if (is.null(data) && is.null(newdata)) {
-    stop("Must specify either `data` or `newdata` argument.",
-         call. = FALSE)
+    data <- model.frame(x)
   }
 
   type.predict <- match.arg(type.predict, c("response"))
