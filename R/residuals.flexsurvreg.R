@@ -1,8 +1,9 @@
-c#' Calculate residuals for a flexible survival models
+#' Calculate residuals for flexible survival models
 #'
 #' Calculates residuals for \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}} model fits.
 #'
 #' @param object Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.
+#' 
 #' @param type Character string for the type of residual desired. Currently only \code{"response"} is supported. More residual types may become available in future versions.
 #'
 #' @param ... Not currently used.
