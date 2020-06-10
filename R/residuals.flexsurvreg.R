@@ -1,4 +1,4 @@
-#' Calculate residuals for a flexible survival models
+c#' Calculate residuals for a flexible survival models
 #'
 #' Calculates residuals for \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}} model fits.
 #'
@@ -7,7 +7,7 @@
 #'
 #' @param ... Not currently used.
 #'
-#' @details Residuals of \code{type = "response"} are calculated as the difference between the observed survival and the covariate-specific predicted mean survival from \code{\link{predict.flexsurvreg}}.
+#' @details Residuals of \code{type = "response"} are calculated as the naive difference between the observed survival and the covariate-specific predicted mean survival from \code{\link{predict.flexsurvreg}}, ignoring whether the event time is observed or censored. 
 #'
 #' @return Numeric vector with the same length as \code{nobs(object)}.
 #'

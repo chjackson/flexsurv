@@ -46,9 +46,16 @@ Version 1.2 (TODO)
   producing summaries of NA when there are missing values, while
   previously missing values were dropped.
 
-* S3 methods have been added for the generics defined in the broom package. These functions turn model objects into tidy data frames. The new functions are tidy.flexsurvreg, glance.flexsurvreg, and augment.flexsurvreg.
+* S3 methods have been added for the generics defined in the broom
+  package.  These functions create tidy data frames containing the
+  results of fitted models.  The new functions are tidy.flexsurvreg,
+  glance.flexsurvreg, and augment.flexsurvreg.
 
-* S3 methods have been added for the predict and residuals generics. Currently, residuals.flexsurvreg has limited support for residual types. predict.flexsurvreg has full support for all model outcomes supported by summary.flexsurvreg.
+* S3 methods have been added for the predict and residuals
+  generics. predict.flexsurvreg has full support for all model
+  outcomes supported by summary.flexsurvreg.  residuals.flexsurvreg
+  currently only supports a naive difference between observed survival and
+  predicted mean, neglecting censoring.
 
 
 Version 1.1.1 (2019-03-18)
