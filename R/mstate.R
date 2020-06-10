@@ -1,13 +1,11 @@
 ### FUNCTIONS FOR MULTI-STATE MODELLING 
 
-# in the future:
-#  \pkg{flexsurv} makes the \code{msfit} function generic, defines
-#  the default method to be \code{\link[mstate]{msfit}} from \pkg{mstate},
-#  and adds this new method for flexsurvreg objects.
-#S3method(msfit, default)
-#S3method(msfit, flexsurvreg)
-#msfit <- function(object, ...) UseMethod("msfit")
-#msfit.default <- function(object, ...) mstate::msfit(object, ...)
+is.flexsurvlist <- function(x){
+    is.list(x) &&
+        (length(x) > 0) && 
+            inherits(x[[1]], "flexsurvreg") && 
+                all(sapply(x, inherits, "flexsurvreg"))
+}
 
 form.msm.newdata <- function(x, newdata=NULL, tvar="trans", trans){
     tr <- sort(unique(na.omit(as.vector(trans))))
@@ -704,13 +702,6 @@ absorbing <- function(trans){
 
 transient <- function(trans){
     which(apply(trans, 1, function(x)any(!is.na(x))))
-}
-
-is.flexsurvlist <- function(x){
-    is.list(x) &&
-        (length(x) > 0) && 
-            inherits(x[[1]], "flexsurvreg") && 
-                all(sapply(x, inherits, "flexsurvreg"))
 }
 
 ## Handle predictable time-dependent covariates in simulating from
