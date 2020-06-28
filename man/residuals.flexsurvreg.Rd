@@ -2,7 +2,7 @@
 % Please edit documentation in R/residuals.flexsurvreg.R
 \name{residuals.flexsurvreg}
 \alias{residuals.flexsurvreg}
-\title{Calculate residuals for a flexible survival models}
+\title{Calculate residuals for flexible survival models}
 \usage{
 \method{residuals}{flexsurvreg}(object, type = "response", ...)
 }
@@ -20,7 +20,7 @@ Numeric vector with the same length as \code{nobs(object)}.
 Calculates residuals for \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}} model fits.
 }
 \details{
-Residuals of \code{type = "response"} are calculated as the difference between the observed survival and the covariate-specific predicted mean survival from \code{\link{predict.flexsurvreg}}.
+Residuals of \code{type = "response"} are calculated as the naive difference between the observed survival and the covariate-specific predicted mean survival from \code{\link{predict.flexsurvreg}}, ignoring whether the event time is observed or censored.
 }
 \examples{
 

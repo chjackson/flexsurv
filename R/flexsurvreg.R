@@ -141,6 +141,23 @@ minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc,
                   dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)(optpars)
 }
 
+parse.dist <- function(dist){
+    if (is.character(dist)) {
+        # Added: case insensitve matching of distributions
+        # Step 1: Use match.arg on lowercase argument, dists.
+        # Step 2: Use match to get index in distribution list from
+        # value obtained in step 1, and grab corresponding element.
+        dist <- match.arg(tolower(dist), tolower(names(flexsurv.dists)))
+        dist <- names(flexsurv.dists)[match(dist,tolower(names(flexsurv.dists)))]
+        dlist <- flexsurv.dists[[dist]]
+    }
+    else if (is.list(dist)) {
+        dlist <- check.dlist(dist)
+    }
+    else stop("\"dist\" should be a string for a built-in distribution, or a list for a custom distribution")
+    dlist
+}
+
 check.dlist <- function(dlist){
     ## put tests in testthat
     if (is.null(dlist$name)) stop("\"name\" element of custom distribution list not given")
@@ -736,19 +753,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
 {
     call <- match.call()
     if (missing(dist)) stop("Distribution \"dist\" not specified")
-    if (is.character(dist)) {
-        # Added: case insensitve matching of distributions
-        # Step 1: Use match.arg on lowercase argument, dists.
-        # Step 2: Use match to get index in distribution list from
-        # value obtained in step 1, and grab corresponding element.
-        dist <- match.arg(tolower(dist), tolower(names(flexsurv.dists)))
-        dist <- names(flexsurv.dists)[match(dist,tolower(names(flexsurv.dists)))]
-        dlist <- flexsurv.dists[[dist]]
-    }
-    else if (is.list(dist)) {
-        dlist <- check.dlist(dist)
-    }
-    else stop("\"dist\" should be a string for a built-in distribution, or a list for a custom distribution")
+    dlist <- parse.dist(dist)
     dfns <- form.dp(dlist, dfns, integ.opts)
     parnames <- dlist$pars
     ancnames <- setdiff(parnames, dlist$location)
