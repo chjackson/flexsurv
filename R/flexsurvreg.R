@@ -214,6 +214,14 @@ check.formula <- function(formula, dlist){
     }
 }
 
+check.fixedpars <- function(fixedpars, npars) {
+    if (!is.null(fixedpars) && !is.logical(fixedpars) &&
+        (!is.numeric(fixedpars) || any(!(fixedpars %in% 1:npars)))){
+        dots <- if(npars>2) "...," else ""
+        stop("fixedpars must be TRUE/FALSE or a vector of indices in 1,",dots,npars)
+    }
+}
+
 ancpar.formula <- function(formula, par){
     labs <- attr(terms(formula), "term.labels")
     pattern <- paste0(par,"\\((.+)\\)")
@@ -854,11 +862,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     }
     names(inits) <- c(parnames, colnames(X))
 
-    if (!is.null(fixedpars) && !is.logical(fixedpars) &&
-        (!is.numeric(fixedpars) || any(!(fixedpars %in% 1:npars)))){
-        dots <- if(npars>2) "...," else ""
-        stop("fixedpars must be TRUE/FALSE or a vector of indices in 1,",dots,npars)
-    }
+    check.fixedpars(fixedpars, npars)
 
     if ((is.logical(fixedpars) && fixedpars==TRUE) ||
         (is.numeric(fixedpars) && identical(fixedpars, 1:npars))) {

@@ -3,8 +3,13 @@
 Version 1.2 (TODO)
 -------------
 
-* Individual-level right-truncation times supported with new "rtrunc"
-  argument to flexsurvreg and flexsurvspline.
+* More features for right-truncated data.  Individual-level
+  right-truncation times supported with new "rtrunc" argument to
+  flexsurvreg and flexsurvspline.  A comparable non-parametric
+  estimator for right-truncated data is provided in a new function,
+  "survrtrunc".  Alternative parametric estimators, which make use
+  of the time of an initiating event, are provided in a new function,
+  "flexsurvrtrunc".
 
 * Different parametric families are now supported for different
   transitions in multi-state models.
@@ -21,7 +26,7 @@ Version 1.2 (TODO)
 * pmatrix.fs can now calculate transition probabilities conditionally
   on the the transition being to one of a subset of the states.
 
-* "tidy" argument to pmatrix.fs for tidy data frame output.
+* "tidy" argument to pmatrix.fs for tidy data frame output. 
 
 * "tidy" argument to sim.fmsm for returning simulations in tidy data
   frame format with one row per transition, and associated function
@@ -56,6 +61,8 @@ Version 1.2 (TODO)
   outcomes supported by summary.flexsurvreg.  residuals.flexsurvreg
   currently only supports a naive difference between observed survival and
   predicted mean, neglecting censoring.
+
+
 
 
 Version 1.1.1 (2019-03-18)
