@@ -6,7 +6,8 @@
 ##'
 ##' @param t Vector of observed times from an initial event to a final event.
 ##'
-##' @param rtrunc Individual-specific right truncation points, so that each individual's survival time \code{t} would not have been observed if it was greater than the corresponding element of \code{rtrunc}.
+##' @param rtrunc Individual-specific right truncation points, so that each individual's survival time \code{t} would not have been observed if it was greater than the corresponding element of \code{rtrunc}.   If any of these are greater than \code{tmax}, then the actual individual-level truncation point for these individuals is taken to be \code{tmax}.
+##' 
 ##' @param tmax Maximum possible time to event that could have been observed.
 ##'
 ##' @param data Data frame to find \code{t} and \code{rtrunc} in.  If not supplied, these should be in the working environment.
@@ -80,6 +81,7 @@ survrtrunc <- function(t, rtrunc, tmax, data=NULL, conf.type="log", conf.int=0.9
     t <- eval(substitute(t), data, parent.frame())
     rtrunc <- eval(substitute(rtrunc), data, parent.frame())
     check_survrtrunc(t, rtrunc, tmax)
+    rtrunc[rtrunc > tmax] <- tmax
     X <- tmax - rtrunc
     trev <- tmax - t 
     event <- rep(1, length(X))
@@ -96,7 +98,6 @@ survrtrunc <- function(t, rtrunc, tmax, data=NULL, conf.type="log", conf.int=0.9
 
 check_survrtrunc <- function(t, rtrunc, tmax) {
     if (!all(t <= rtrunc)) stop("Not all `t` are <= `rtrunc`")
-    if (!all(rtrunc <= tmax)) stop("Not all `rtrunc` are <= `tmax`")
     if (!all(t <= tmax)) stop("Not all `t` are <= `tmax`")
 }
 
