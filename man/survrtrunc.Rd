@@ -79,6 +79,7 @@ plot(sf, conf.int=TRUE)
 sfnaive <- survfit(Surv(T) ~ 1, data=dat)
 lines(sfnaive, conf.int=TRUE, lty=2, col="red")
 
+
 }
 \references{
 D. Lynden-Bell (1971)  A method of allowing for known observational selection in small samples applied to 3CR quasars. Monthly Notices of the Royal Astronomical Society, 155:95–118.

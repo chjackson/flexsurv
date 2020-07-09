@@ -131,12 +131,12 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
         inits[i] <- dlist$transforms[[i]](inits[i])
     }
     inits[nbpars+1] <- log(inits[nbpars+1])
-    optinds <- setdiff(1:npars, fixedpars)
-    optpars <- inits[optinds]
+    optpars <- setdiff(1:npars, fixedpars)
+    optvals <- inits[optpars]
 
     fixed <- length(fixedpars)==npars
     if (!fixed) { 
-        opt <- optim(optpars,
+        opt <- optim(optvals,
                      frtrunc_loglik_factory(inits=inits,tinit=tinit, tdelay=tdelay, tmax=tmax,
                                             method=method, dlist=dlist, dfns=dfns, fixedpars=fixedpars),
                      control=optim_control, hessian=TRUE) 
@@ -145,8 +145,9 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
         se <- sqrt(diag(covar))
         loglik <- - opt$value
     } else {
+        opt <- NULL
         est <- inits
-        se <- NA
+        se <- covar <- NA
         loglik <- frtrunc_loglik_factory(inits=inits, tinit=tinit, tdelay=tdelay, tmax=tmax,
                                  method=method,dlist=dlist, dfns=dfns, fixedpars=fixedpars)(inits)
     }
@@ -158,7 +159,7 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
 
     res <- matrix(nrow=npars, ncol=ncol(est.opt),
                   dimnames=list(names(inits), colnames(est.opt)))
-    res[optinds,] <- est.opt
+    res[optpars,] <- est.opt
     res[fixedpars,"estlog"] <- inits[fixedpars]
     res <- as.data.frame(res)
     res$ucl <- res$lcl <- res$est <- numeric(npars)
@@ -170,8 +171,43 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
     }    
     res$pars <- c(dlist$pars, "theta")
     est <- res[,c("pars","est","lcl","ucl","estlog","selog")]
-    list(est, loglik=loglik)
+    npars <- length(optpars)
+    res <- list(call=match.call(),
+                res=est,
+                loglik=loglik,
+                data=data.frame(t=tdelay, tinit=tinit, rtrunc=rtrunc),
+                dfns=dfns,
+                dlist=dlist,
+                ncovs=0,
+                cov=covar,
+                opt=opt,
+                optpars=optpars,
+                fixedpars=fixedpars,
+                npars=npars,
+                AIC = 2*loglik + 2*npars,
+                res.t=est)
+    class(res) <- "flexsurvrtrunc"
+    res
 }
+
+##' @export
+print.flexsurvrtrunc <- function(x, ...)
+{
+    cat("Call:\n")
+    dput(x$call)
+    cat("\n")
+    if (x$npars > 0) {
+        res <- x$res
+        cat ("Estimates: \n")
+        args <- list(...)
+        if (is.null(args$digits)) args$digits <- 3
+        f <- do.call("format", c(list(x=res), args))
+        print(f, print.gap=2, quote=FALSE, na.print="")
+    }
+    cat("\nLog-likelihood = ", x$loglik, ", df = ", x$npars,
+        "\nAIC = ", x$AIC, "\n\n", sep="")
+}
+
 
 
 frtrunc_loglik_factory <- function(inits, tinit, tdelay, tmax, method, dlist, dfns, fixedpars){

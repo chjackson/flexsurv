@@ -58,15 +58,19 @@
 ##' \code{"link"} for the fitted value of the location parameter (i.e. the "linear predictor")
 ##' 
 ##' Ignored if \code{"fn"} is specified.
+##' 
 ##' @param fn Custom function of the parameters to summarise against time.
 ##' This has optional first two arguments \code{t} representing time, and
 ##' \code{start} representing left-truncation points, and any remaining
 ##' arguments must be parameters of the distribution.  It should return a
 ##' vector of the same length as \code{t}.
+##' 
 ##' @param t Times to calculate fitted values for. By default, these are the
 ##' sorted unique observation (including censoring) times in the data - for
 ##' left-truncated datasets these are the "stop" times.
+##' 
 ##' @param quantiles If \code{type="quantile"}, this specifies the quantiles of the survival time distribution to return estimates for.
+##' 
 ##' @param start Optional left-truncation time or times.  The returned
 ##' survival, hazard or cumulative hazard will be conditioned on survival up to
 ##' this time.
@@ -77,8 +81,11 @@
 ##' trajectory for a single individual.  This is why the default \code{start}
 ##' time was changed for version 0.4 of \pkg{flexsurv} - this was previously a
 ##' vector of the start times observed in the data.
+##' 
 ##' @param ci Set to \code{FALSE} to omit confidence intervals.
+##' 
 ##' @param se Set to \code{TRUE} to include standard errors.
+##' 
 ##' @param B Number of simulations from the normal asymptotic distribution of
 ##' the estimates used to calculate confidence intervals or standard errors.
 ##' Decrease for greater
@@ -421,7 +428,7 @@ normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B){
 }
 
 cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
-    if (all(is.na(x$res[,2])) || (B==0))
+    if (all(is.na(x$cov)) || (B==0))
         ret <- array(NA, dim=c(length(t), 2))
     else {
         ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
@@ -432,7 +439,7 @@ cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
 }
 
 sesumm.flexsurvreg <- function(x, t, start, X, fn, B=1000) {
-    if (any(is.na(x$res[,2])) || (B==0))
+  if (all(is.na(x$cov)) || (B==0))
         ret <- numeric(length(t))
     else {
         ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)

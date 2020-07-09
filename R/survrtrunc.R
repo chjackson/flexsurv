@@ -32,7 +32,7 @@
 ##' Define \eqn{X} as the time of the initial event, \eqn{Y} as the time of the final event, then we wish to determine the distribution of \eqn{T = Y- X}.
 ##'
 ##' Observations are only recorded if \eqn{Y \leq t_{max}}.  Then the distribution of \eqn{T} in the resulting sample is right-truncated by \code{rtrunc} \eqn{ = t_{max} - X}. 
-##'
+##' 
 ##' Equivalently, the distribution of \eqn{t_{max} - T} is left-truncated, since it is only observed if \eqn{t_{max} - T \geq X}.  Then the standard Kaplan-Meier type estimator as implemented in \code{\link[survival]{survfit}} is used (as described by Lynden-Bell, 1971) and the results transformed back.
 ##'
 ##' This situation might happen in a disease epidemic, where \eqn{X} is the date of disease onset for an individual, \eqn{Y} is the date of death, and we wish to estimate the distribution of the time \eqn{T} from onset to death, given we have only observed people who have died by the date \eqn{t_{max}}.
@@ -68,6 +68,7 @@
 ##' sfnaive <- survfit(Surv(T) ~ 1, data=dat)
 ##' lines(sfnaive, conf.int=TRUE, lty=2, col="red")
 ##'
+##' 
 ##' @references
 ##'
 ##' D. Lynden-Bell (1971)  A method of allowing for known observational selection in small samples applied to 3CR quasars. Monthly Notices of the Royal Astronomical Society, 155:95–118.
