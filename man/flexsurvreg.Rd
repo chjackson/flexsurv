@@ -22,6 +22,7 @@ flexsurvreg(
   cl = 0.95,
   integ.opts = NULL,
   sr.control = survreg.control(),
+  hessian = TRUE,
   ...
 )
 }
@@ -207,6 +208,9 @@ its cumulative version.  For example,
 \item{sr.control}{For the models which use \code{\link{survreg}} to find
 the maximum likelihood estimates (Weibull, exponential, log-normal), this
 list is passed as the \code{control} argument to \code{\link{survreg}}.}
+
+\item{hessian}{Calculate the covariances and confidence intervals for the 
+parameters. Defaults to \code{TRUE}.}
 
 \item{...}{Optional arguments to the general-purpose optimisation routine
 \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the

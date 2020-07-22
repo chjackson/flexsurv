@@ -222,6 +222,24 @@ check.fixedpars <- function(fixedpars, npars) {
     }
 }
 
+anc_from_formula <- function(formula, anc, dlist, 
+                             msg = "\"anc\" must be a list of formulae") { 
+    parnames <- dlist$pars
+    ancnames <- setdiff(parnames, dlist$location)
+    if (is.null(anc)){
+        anc <- vector(mode="list", length=length(ancnames))
+        names(anc) <- ancnames
+        for (i in ancnames){
+            anc[[i]] <- ancpar.formula(formula, i)
+        }
+    }
+    else {
+        if (!is.list(anc) || !all(sapply(anc, function(x)inherits(x, "formula"))))
+            stop(msg)
+    }
+    anc
+}
+
 ancpar.formula <- function(formula, par){
     labs <- attr(terms(formula), "term.labels")
     pattern <- paste0(par,"\\((.+)\\)")
@@ -510,9 +528,11 @@ compress.model.matrices <- function(mml){
 ##' its cumulative version.  For example,
 ##' 
 ##' \code{integ.opts = list(rel.tol=1e-12)}
+##' 
 ##' @param sr.control For the models which use \code{\link{survreg}} to find
 ##' the maximum likelihood estimates (Weibull, exponential, log-normal), this
 ##' list is passed as the \code{control} argument to \code{\link{survreg}}.
+##' 
 ##' @param ... Optional arguments to the general-purpose optimisation routine
 ##' \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the
 ##' default in \code{\link{flexsurvreg}}, but this can be changed, for example
@@ -525,6 +545,10 @@ compress.model.matrices <- function(mml){
 ##' If the optimisation takes a long time, intermediate steps can be printed
 ##' using the \code{trace} argument of the control list. See
 ##' \code{\link{optim}} for details.
+##' 
+##' @param hessian Calculate the covariances and confidence intervals for the 
+##' parameters. Defaults to \code{TRUE}. 
+##' 
 ##' @return A list of class \code{"flexsurvreg"} containing information about
 ##' the fitted model.  Components of interest to users may include:
 ##' \item{call}{A copy of the function call, for use in post-processing.}
@@ -757,27 +781,18 @@ compress.model.matrices <- function(mml){
 ##' @export
 flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subset, na.action, dist,
                         inits, fixedpars=NULL, dfns=NULL, aux=NULL, cl=0.95,
-                        integ.opts=NULL, sr.control=survreg.control(), ...)
+                        integ.opts=NULL, sr.control=survreg.control(), hessian=TRUE, ...)
 {
     call <- match.call()
     if (missing(dist)) stop("Distribution \"dist\" not specified")
     dlist <- parse.dist(dist)
     dfns <- form.dp(dlist, dfns, integ.opts)
     parnames <- dlist$pars
-    ancnames <- setdiff(parnames, dlist$location)
 
     check.formula(formula, dlist)
-    if (is.null(anc)){
-        anc <- vector(mode="list", length=length(ancnames))
-        names(anc) <- ancnames
-        for (i in ancnames){
-            anc[[i]] <- ancpar.formula(formula, i)
-        }
-    }
-    else {
-        if (!is.list(anc) || !all(sapply(anc, function(x)inherits(x, "formula"))))
-            stop("\"anc\" must be a list of formulae")
-    }
+    anc <- anc_from_formula(formula, anc, dlist)
+    
+    ancnames <- setdiff(parnames, dlist$location)
     forms <- c(location=get.locform(formula, ancnames), anc)
     names(forms)[[1]] <- dlist$location
 
@@ -901,10 +916,10 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                              bhazard=bhazard, rtrunc=rtrunc, dlist=dlist,
                              inits=inits, dfns=dfns, aux=aux,
                              mx=mx, fixedpars=fixedpars,
-                             hessian=TRUE))
+                             hessian=hessian))
         opt <- do.call("optim", optim.args)
         est <- opt$par
-        if (all(!is.na(opt$hessian)) && all(!is.nan(opt$hessian)) && all(is.finite(opt$hessian)) &&
+        if (hessian && all(!is.na(opt$hessian)) && all(!is.nan(opt$hessian)) && all(is.finite(opt$hessian)) &&
             all(eigen(opt$hessian)$values > 0))
         {
             cov <- solve(opt$hessian); se <- sqrt(diag(cov))
@@ -914,7 +929,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
             ucl <- est + qnorm(1 - (1-cl)/2)*se
         }
         else {
-            warning("Optimisation has probably not converged to the maximum likelihood - Hessian is not positive definite. ")
+            if (hessian) 
+                warning("Optimisation has probably not converged to the maximum likelihood - Hessian is not positive definite. ")
             cov <- lcl <- ucl <- se <- NA
         }
         res <- cbind(est=inits, lcl=NA, ucl=NA, se=NA)
@@ -990,7 +1006,7 @@ print.flexsurvreg <- function(x, ...)
         "\nAIC = ", x$AIC, "\n\n", sep="")
 }
 
-form.model.matrix <- function(object, newdata, na.action=na.pass){
+form.model.matrix <- function(object, newdata, na.action=na.pass, forms=NULL){
     mfo <- model.frame(object)
 
     ## If required covariate missing, give a slightly more informative error message than, e.g.
@@ -1009,12 +1025,12 @@ form.model.matrix <- function(object, newdata, na.action=na.pass){
     mf <- model.frame(Terms, newdata, xlev = .getXlevels(tt, mfo), na.action=na.action)
     if (!is.null(cl <- attr(Terms, "dataClasses")))
         .checkMFClasses(cl, mf)
-
-    forms <- object$all.formulae
-    mml <- vector(mode="list", length=length(object$dlist$pars))
+    if (is.null(forms))
+        forms <- object$all.formulae
+    mml <- vector(mode="list", length=length(forms))
     names(mml) <- names(forms)
     forms[[1]] <- delete.response(terms(forms[[1]]))
-    for (i in names(forms)){
+    for (i in seq_along(forms)){
         mml[[i]] <- model.matrix(forms[[i]], mf)
     }
     X <- compress.model.matrices(mml)
