@@ -9,7 +9,7 @@ survrtrunc(t, rtrunc, tmax, data = NULL, conf.type = "log", conf.int = 0.95)
 \arguments{
 \item{t}{Vector of observed times from an initial event to a final event.}
 
-\item{rtrunc}{Individual-specific right truncation points, so that each individual's survival time \code{t} would not have been observed if it was greater than the corresponding element of \code{rtrunc}.}
+\item{rtrunc}{Individual-specific right truncation points, so that each individual's survival time \code{t} would not have been observed if it was greater than the corresponding element of \code{rtrunc}.   If any of these are greater than \code{tmax}, then the actual individual-level truncation point for these individuals is taken to be \code{tmax}.}
 
 \item{tmax}{Maximum possible time to event that could have been observed.}
 

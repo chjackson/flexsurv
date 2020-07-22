@@ -148,7 +148,7 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
         opt <- NULL
         est <- inits
         se <- covar <- NA
-        loglik <- frtrunc_loglik_factory(inits=inits, tinit=tinit, tdelay=tdelay, tmax=tmax,
+        loglik <- - frtrunc_loglik_factory(inits=inits, tinit=tinit, tdelay=tdelay, tmax=tmax,
                                  method=method,dlist=dlist, dfns=dfns, fixedpars=fixedpars)(inits)
     }
     if (!is.numeric(cl) || length(cl)>1 || !(cl>0) || !(cl<1))
@@ -184,7 +184,7 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
                 optpars=optpars,
                 fixedpars=fixedpars,
                 npars=npars,
-                AIC = 2*loglik + 2*npars,
+                AIC = -2*loglik + 2*npars,
                 res.t=est)
     class(res) <- "flexsurvrtrunc"
     res
