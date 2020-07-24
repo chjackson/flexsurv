@@ -62,7 +62,8 @@ Version 1.2 (TODO)
   currently only supports a naive difference between observed survival and
   predicted mean, neglecting censoring.
 
-
+* Case weights accounted for in nonparametric survival and cumulative
+   hazard estimates in plot.flexsurvreg.  Thanks to https://github.com/andbe. 
 
 
 Version 1.1.1 (2019-03-18)
