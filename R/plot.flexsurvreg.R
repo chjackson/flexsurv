@@ -73,11 +73,17 @@
 ##' nonparametric hazard estimates.  The \code{min.time} and \code{max.time}
 ##' options to \code{\link[muhaz]{muhaz}} may sometimes need to be changed from
 ##' the defaults.
+##' 
 ##' @note Some standard plot arguments such as \code{"xlim","xlab"} may not
 ##' work.  This function was designed as a quick check of model fit.  Users
 ##' wanting publication-quality graphs are advised to set up an empty plot with
 ##' the desired axes first (e.g. with \code{plot(...,type="n",...)}), then use
 ##' suitable \code{\link{lines}} functions to add lines.
+##'
+##' If case weights were used to fit the model, these are used when producing
+##' nonparametric estimates of survival and cumulative hazard, but not for
+##' the hazard estimates. 
+##' 
 ##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
 ##' @seealso \code{\link{flexsurvreg}}
 ##' @keywords models hplot
@@ -111,10 +117,10 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
         ## If any continuous covariates, it is hard to define subgroups
         ## so just plot the population survival
         if (type=="survival") {
-            plot(survfit(form, data=mm), col=col.obs, lty=lty.obs, lwd=lwd.obs, ylim=ylim, ...)
+            plot(survfit(form, data=mm, weights=dat$m$`(weights)`), col=col.obs, lty=lty.obs, lwd=lwd.obs, ylim=ylim, ...)
         }
         else if (type=="cumhaz") {
-            plot(survfit(form, data=mm), fun="cumhaz", col=col.obs, lty=lty.obs, lwd=lwd.obs, ylim=ylim, ...)
+            plot(survfit(form, data=mm, weights=dat$m$`(weights)`), fun="cumhaz", col=col.obs, lty=lty.obs, lwd=lwd.obs, ylim=ylim, ...)
         }
         else if (type=="hazard") {
             muhaz.args <- list(...)[names(list(...)) %in% names(formals(muhaz))]
