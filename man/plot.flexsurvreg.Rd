@@ -133,6 +133,10 @@ work.  This function was designed as a quick check of model fit.  Users
 wanting publication-quality graphs are advised to set up an empty plot with
 the desired axes first (e.g. with \code{plot(...,type="n",...)}), then use
 suitable \code{\link{lines}} functions to add lines.
+
+If case weights were used to fit the model, these are used when producing
+nonparametric estimates of survival and cumulative hazard, but not for
+the hazard estimates.
 }
 \seealso{
 \code{\link{flexsurvreg}}
