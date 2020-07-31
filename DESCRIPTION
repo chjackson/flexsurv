@@ -27,6 +27,7 @@ Imports:
     assertthat,
     deSolve,
     generics,
+    magrittr,
     mstate (>= 0.2.10),
     muhaz,
     mvtnorm,
@@ -35,7 +36,9 @@ Imports:
     rstpm2,
     purrr,
     tibble,
-    tidyr
+    tidyr,
+    dplyr,
+    tidyselect
 Encoding: UTF-8
 Suggests:
     colorspace,
