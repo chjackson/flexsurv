@@ -23,7 +23,7 @@
 ##' The model is fitted by maximum likelihood, either directly or by using an
 ##' expectation-maximisation (EM) algorithm, by wrapping
 ##' \code{\link{flexsurvreg}} to compute the likelihood or to implement the E
-##' and M steps.   EM is not currently supported if there are covariates.
+##' and M steps.
 ##'
 ##'
 ##' @param formula Survival model formula.  The left hand side is a \code{Surv}
@@ -89,6 +89,8 @@
 ##'   If \code{fixedpars=TRUE} then all parameters will be fixed and the
 ##'   function simply calculates the log-likelihood at the initial values.
 ##'
+##'   Not currently supported when using the EM algorithm.
+##'
 ##' @param dfns List of lists of user-defined distribution functions, one for
 ##'   each mixture component.  Each list component is specified as the
 ##'   \code{dfns} argument of \code{\link{flexsurvreg}}.
@@ -98,7 +100,7 @@
 ##'   currenly supported if there are no covariates.
 ##'
 ##' @param em.control List of settings to control EM algorithm fitting.  The
-##'   only options currently supported are
+##'   only options currently available are
 ##'
 ##'   \code{trace} set to 1 to print the parameter estimates at each iteration
 ##'   of the EM algorithm
@@ -109,6 +111,14 @@
 ##'   \code{sqrt(.Machine$double.eps)}.
 ##'
 ##'   For example, \code{em.control = list(trace=1, reltol=1e-12)}.
+##'
+##' @param optim.control List of options to pass as the \code{control} argument
+##'   to \code{\link{optim}},  which is used by \code{method="direct"} or in the
+##'   M step of \code{method="em"}.  By default, this uses \code{fnscale=10000}
+##'   and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
+##'   being estimated, unless the user specifies these options explicitly.
+##'
+##'   
 
 ##' @inheritParams flexsurvreg
 ##'
@@ -130,7 +140,9 @@ flexsurvmix <- function(formula, data, event, dists,
                         pformula=NULL, anc=NULL, 
                         initp=NULL, inits=NULL, 
                         fixedpars=NULL, dfns=NULL,
-                        method="direct", em.control=NULL, 
+                        method="direct", 
+                        em.control=NULL, 
+                        optim.control=NULL,
                         aux=NULL, 
                         sr.control=survreg.control(), 
                         integ.opts, ...){
@@ -275,6 +287,15 @@ flexsurvmix <- function(formula, data, event, dists,
     names(theta_inits[[k]]) <- dlists[[k]]$pars
     names(cov_inits[[k]]) <- colnames(X[[k]])
   }
+  ## Transform initial values to log or logit scale for optimisation, if needed. 
+  inits_probs <- initp
+  inits_alpha <- qlogis(inits_probs[2:K])
+  inits_covp <- rep( rep(0,ncovsp), K-1)   # order by covariate within probability
+  names(inits_covp) <- sprintf("prob%s(%s)", rep(2:K, each=ncovsp), rep(colnames(Xp), K-1))
+  inits_theta <- numeric()
+  for (k in 1:K){
+    inits_theta <- c(inits_theta, par.transform(theta_inits[[k]], dlists[[k]]), cov_inits[[k]])
+  }
   
   loglik_flexsurvmix <- function(parsopt, ...){
     pars <- inits_all
@@ -325,34 +346,36 @@ flexsurvmix <- function(formula, data, event, dists,
     attr(res, "indiv") <- logliki
     res
   }
-  
-  parnames <- c(paste0("prob",1:K), unlist(lapply(dlists, function(x)x$pars)))
+  # Parameter dictionary to be completed with the estimates
+  res <- data.frame(component = c(evnames, rep(evnames[1:(K-1)], each=ncovsp),  rep(evnames, ncparsl)), 
+                    dist = c(rep("",nppars+1), rep(dists, ncparsl)), 
+                    terms = c(paste0("prob",1:K),  names(inits_covp),  names(inits_theta)),
+                    parclass = c("prob", parclass), 
+                    baseorcov = c("pbase", baseorcov), 
+                    parcov = c("", parcov))
+  inits_all <- c(inits_alpha, inits_covp, inits_theta)
+  if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
+  optpars <- setdiff(seq_len(npars), fixedpars)
+  fixed <- !any(optpars)
+  inits_opt <- inits_all[optpars]
+  if (any(fixedpars) && (method=="em")){
+    method <- "direct"
+    if (any(optpars)) 
+      warning("Optimisation with some parameters fixed not currently supported with EM algorithm, switching to direct likelihood maximisation")
+  }
+  if (is.null(optim.control$fnscale))
+    optim.control$fnscale <- 10000
   
   if (method=="direct"){
-    ## Transform initial values to log or logit scale for optimisation, if needed. 
-    inits_alpha <- qlogis(initp[2:K])
-    inits_covp <- rep( rep(0,ncovsp), K-1)   # order by covariate within probability
-    names(inits_covp) <- sprintf("prob%s(%s)", rep(2:K, each=ncovsp), rep(colnames(Xp), K-1))
-    inits_theta <- numeric()
-    for (k in 1:K){
-      inits_theta <- c(inits_theta, par.transform(theta_inits[[k]], dlists[[k]]), cov_inits[[k]])
-    }
-    inits_all <- c(inits_alpha, inits_covp, inits_theta)
-    
-    if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
-    optpars <- setdiff(seq_len(npars), fixedpars)
-    inits_opt <- inits_all[optpars]
-        
     if (any(optpars)){
-      ## Do optimisation   
-      ## TODO opt control doc
+      if (is.null(optim.control$ndeps)) 
+        optim.control$ndeps = rep(1e-06, length(inits_opt))
       opt <- optim(inits_opt, loglik_flexsurvmix, hessian=TRUE, method="BFGS",
-                   control=list(fnscale=10000, ndeps=rep(1e-06, length(inits_opt))), ...)
-      opt$fixed <- FALSE
+                   control=optim.control, ...)
     } else {
-      opt <- list(par=inits_all, value=loglik_flexsurvmix(inits_all), fixed=TRUE)
+      opt <- list(par=inits_all, value=loglik_flexsurvmix(inits_all))
     }
-    logliki <- attr(loglik_flexsurvmix(opt$par), "indiv")
+    logliki <- -attr(loglik_flexsurvmix(opt$par), "indiv")
     
     ## Transform mixing probs back to natural scale for presentation 
     opt_all <- inits_all
@@ -371,22 +394,12 @@ flexsurvmix <- function(formula, data, event, dists,
     ## Build tidy data frame of results with one row per parameter. Includes an
     ## extra row for the probability of the first event (defined as 1 - sum of
     ## rest)
-    res <- data.frame(component=c(evnames, 
-                                  rep(evnames[1:(K-1)], each=ncovsp),
-                                  rep(evnames, ncparsl)),
-                      dist=c(rep("",nppars+1), 
-                             rep(dists, ncparsl)),
-                      terms = c(paste0("prob",1:K),
-                                names(inits_covp),
-                                names(inits_theta)),
+    res <- cbind(res, data.frame(
                       est = c(res_alpha, res_covp, unlist(res_cpars)),
-                      est.t = c(NA, opt_all),
-                      parclass = c("prob", parclass), 
-                      baseorcov = c("pbase", baseorcov), 
-                      parcov = c("", parcov))
+                      est.t = c(NA, opt_all)))
                       
     loglik <- - opt$value
-    if (!opt$fixed)
+    if (!fixed)
       cov <- solve(opt$hessian)
   }
   
@@ -395,14 +408,28 @@ flexsurvmix <- function(formula, data, event, dists,
     if (is.null(em.control$reltol)) em.control$reltol <- sqrt(.Machine$double.eps)
     converged <- FALSE
     iter <- 0
+    alpha <- inits_alpha
+    covp <- inits_covp 
+    theta <- theta_inits
+    
     while (!converged) {  
       ## E step
+      alphamat <- matrix(c(0,alpha), nrow=nobs, ncol=K, byrow=TRUE)  # by individual 
+      if (ncovsp>0){
+        for (k in 2:K){ 
+          cpinds <- (k-2)*ncovsp + 1:ncovsp
+          alphamat[,k] <- alpha[k-1] + Xp %*% covp[cpinds] 
+        }
+      }
+      pmat <- exp(alphamat)
+      pmat <- pmat / rowSums(pmat)
+      
       llmat <- matrix(nrow=nobs, ncol=K)
       for (k in 1:K) {
         fs <- flexsurvreg(formula=formula, data=data, dist=dists[k], anc=anc[[k]], inits=theta[[k]], fixedpars=TRUE) 
         llmat[,k] <-  fs$logliki
       }
-      alphap <- exp(llmat) * matrix(alpha, nrow=nobs, ncol=K, byrow=TRUE)
+      alphap <- exp(llmat) * pmat
       w <- alphap  / rowSums(alphap) # probability that each observation belongs to each component
       for (k in 1:K) {
         w[!is.na(event) & event==k, k] <- 1
@@ -411,45 +438,70 @@ flexsurvmix <- function(formula, data, event, dists,
       w
       
       ## M step
+      
+      ## estimate component probs and covariate effects on them
+      #alpha <- colMeans(w)
+      loglik_p_em <- function(pars){
+        alphamat <- matrix(c(0,pars[1:(K-1)]), nrow=nobs, ncol=K, byrow=TRUE)
+        if (ncovsp > 0) { 
+          for (k in 2:K){  
+            cpinds <- K - 1 + (k-2)*ncovsp + 1:ncovsp
+            alphamat[,k] <- alphamat[,k-1] + Xp %*% pars[cpinds] 
+          }
+        }
+        pmat <- exp(alphamat)
+        pmat <- pmat / rowSums(pmat)
+        -sum(w*log(pmat))
+      }
+
+      #  if setting a control argument here in  the future, note ndeps has  to be different  
+      # length from others. 
+      parsp <- optim(c(alpha,covp), loglik_p_em, method="BFGS")
+      alpha <- parsp$par[1:(K-1)]
+      probs <- c(1-sum(plogis(alpha)), plogis(alpha))
+      covp <- if (ncovsp>0) parsp$par[K:nppars] else NULL
+      
       ## call flexsurvreg for each component on weighted dataset to estimate component-specific pars 
       thetanew <- vector(K, mode="list")
       ll <- numeric(K)
       
       for (k in 1:K) {
+        if (is.null(optim.control$ndeps)) 
+          optim.control$ndeps = rep(1e-06, length(theta[[k]]))
         fs <- do.call("flexsurvreg",  # need do.call to avoid environment faff with supplying weights
                       list(formula=formula, data=data, dist=dists[k], 
                            anc=anc[[k]], inits=theta[[k]], weights=w[,k], 
                            subset=w[,k]>0, hessian=FALSE,
-                           control=list(ndeps=rep(1e-12,2))))
+                           control=optim.control))
         ll[k] <- fs$loglik
         thetanew[[k]] <- fs$res[,"est"]
       }
       
-      alpha <- colMeans(w)
       theta <- thetanew
       logliknew <- sum(ll)
       if (iter > 0)
         converged <-  (abs(logliknew / loglik - 1) <= em.control$reltol)
       loglik <- logliknew
-      est <- c(alpha, unlist(theta))
-      est.t <- c(qlogis(alpha), unlist(parlist.transform(theta,dlists)))
-      res <- data.frame(component=c(1:K, rep(1:K, ncparsl)),
-                        dist=c(rep("",K), rep(dists, ncparsl)),
-                        terms=parnames,
-                        est=est, est.t=est.t)
+      est <- c(probs, covp, unlist(theta))
+      est.t <- c(NA, alpha, covp, unlist(parlist.transform(theta,dlists)))
       if (is.numeric(em.control$trace) && em.control$trace > 0)
-        print(res)
+        print(est)
       iter <- iter + 1
     }
-    loglik <- loglik_flexsurvmix(est.t[-K])
-    cov <- solve(numDeriv::hessian(loglik_flexsurvmix, est.t[-K]))
+    res <- cbind(res, 
+                 data.frame(est=est, est.t=est.t))
+    ll <- loglik_flexsurvmix(est.t[-1])
+    loglik <- -as.numeric(ll)
+    logliki <- -attr(ll, "indiv")
+    cov <- solve(numDeriv::hessian(loglik_flexsurvmix, est.t[-1]))
+    opt <- NULL
   }
   
   ## Add standard errors to results data frame, given covariance matrix.
   ## var ( 1 - p1 - p2 - .. ) = var(p1) + var(p2) - cov(p1,p2) - ...
   res$fixed <- c(NA, rep(FALSE, npars))
   res$fixed[1 + fixedpars] <- TRUE
-  if (!opt$fixed){
+  if (!fixed){
     covp <- cov[1:(K-1), 1:(K-1), drop=FALSE]
     sepk <- sqrt(sum(diag(covp)) - sum(covp[lower.tri(covp)]))
     res$se <- rep(NA, npars+1)

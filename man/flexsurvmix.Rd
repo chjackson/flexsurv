@@ -17,6 +17,7 @@ flexsurvmix(
   dfns = NULL,
   method = "direct",
   em.control = NULL,
+  optim.control = NULL,
   aux = NULL,
   sr.control = survreg.control(),
   integ.opts,
@@ -85,7 +86,9 @@ times.}
   in the same way as in \code{\link{flexsurvreg}}.
 
   If \code{fixedpars=TRUE} then all parameters will be fixed and the
-  function simply calculates the log-likelihood at the initial values.}
+  function simply calculates the log-likelihood at the initial values.
+
+  Not currently supported when using the EM algorithm.}
 
 \item{dfns}{List of lists of user-defined distribution functions, one for
 each mixture component.  Each list component is specified as the
@@ -96,7 +99,7 @@ the EM algorithm, or \code{"direct"} for direct maximisation.  EM is only
 currenly supported if there are no covariates.}
 
 \item{em.control}{List of settings to control EM algorithm fitting.  The
-  only options currently supported are
+  only options currently available are
 
   \code{trace} set to 1 to print the parameter estimates at each iteration
   of the EM algorithm
@@ -107,6 +110,12 @@ currenly supported if there are no covariates.}
   \code{sqrt(.Machine$double.eps)}.
 
   For example, \code{em.control = list(trace=1, reltol=1e-12)}.}
+
+\item{optim.control}{List of options to pass as the \code{control} argument
+to \code{\link{optim}},  which is used by \code{method="direct"} or in the
+M step of \code{method="em"}.  By default, this uses \code{fnscale=10000}
+and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
+being estimated, unless the user specifies these options explicitly.}
 
 \item{aux}{A named list of other arguments to pass to custom distribution
 functions.  This is used, for example, by \code{\link{flexsurvspline}} to
@@ -167,7 +176,7 @@ is unknown when follow-up ends and the time is right-censored.
 The model is fitted by maximum likelihood, either directly or by using an
 expectation-maximisation (EM) algorithm, by wrapping
 \code{\link{flexsurvreg}} to compute the likelihood or to implement the E
-and M steps.   EM is not currently supported if there are covariates.
+and M steps.
 }
 \references{
 Larson, M. G., & Dinse, G. E. (1985). A mixture model for the
