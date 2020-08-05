@@ -11,6 +11,7 @@ flexsurvmix(
   dists,
   pformula = NULL,
   anc = NULL,
+  partial_events = NULL,
   initp = NULL,
   inits = NULL,
   fixedpars = NULL,
@@ -26,10 +27,40 @@ flexsurvmix(
 }
 \arguments{
 \item{formula}{Survival model formula.  The left hand side is a \code{Surv}
-object specified as in \code{\link{flexsurvreg}}.  Any covariates on the
-right hand side of this formula will be placed on the location parameter
-for every component-specific distribution.  Different covariates may be
-supplied on different components using the \code{anc} argument.}
+  object specified as in \code{\link{flexsurvreg}}.  Any covariates on the
+  right hand side of this formula will be placed on the location parameter
+  for every component-specific distribution.  Different covariates may be
+  supplied on different components using the \code{anc} argument.
+
+  Alternatively, \code{formula} may be a list of formulae, with one
+  component for each alternative event.  This may be used to specify
+  different covariates on the location parameter for different components.
+
+  A list of formulae may also be used to indicate that for particular
+  individuals, different events may be observed in different ways, with
+  different censoring mechanisms.  Each  list component specifies the data
+  and censoring scheme for that mixture component.
+
+  For example, suppose we are studying people admitted to hospital,and the
+  competing states are death in hospital and discharge from hospital.  At
+  time t we know that a particular individual is still alive, but we do not
+  know whether they are still in hospital, or have been discharged.  In this
+  case, if the individual were to die in hospital, their death time would be
+  right censored at t.  If the individual will be (or has been) discharged
+  before death, their discharge time is completely unknown, thus
+  interval-censored on (0,Inf). Therefore,  we need to store different event
+  time and status variables in the data for different alternative events.
+  This is specified here as
+
+  \code{formula = list("discharge" = 
+                         Surv(t1di, t2di, type="interval2"), 
+                       "death" = 
+                         Surv(t1de, status_de))}
+
+  where for this individual, 
+  \code{(t1di, t2di) = (0, Inf)}
+  and
+  \code{(t1de, status_de)  = (t, 0)}.}
 
 \item{data}{Data frame containing variables mentioned in \code{formula},
 \code{event} and \code{anc}.}
@@ -67,6 +98,25 @@ component is treated as the baseline.}
   Covariates on the location parameter may also be supplied here instead of
   in \code{formula}.  Supplying them in \code{anc} allows some components
   but not others to have covariates on their location parameter.}
+
+\item{partial_events}{List specifying the factor levels of \code{event}
+  which indicate knowledge that an individual will not experience particular
+  events, but may experience others.   The names of the list indicate codes
+  that indicate partial knowledge for some individuals.  The list component
+  is a vector, which must be a subset of \code{levels(event)} defining the
+  events that a person with the corresponding event code may experience.
+
+  For example, suppose there are three alternative events called
+  \code{"disease1"},\code{"disease2"} and \code{"disease3"}, and for some
+  individuals we know that they will not experience \code{"disease2"}, but
+  they may experience the other two events.  In that case we must create a
+  new factor level, called, for example \code{"disease1or3"}, and set the
+  value of \code{event} to be \code{"disease1or3"} for those individuals.
+  Then we use the \code{"partial_events"} argument to tell
+  \code{flexsurvmix} what the potential events are for individuals with this
+  new factor level.
+
+  \code{partial_events = list("disease1or3" = c("disease1","disease3"))}}
 
 \item{initp}{Initial values for component membership probabilities.  By
 default, these are assumed to be equal for each component.}
