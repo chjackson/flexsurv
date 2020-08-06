@@ -29,8 +29,9 @@ flexsurvmix(
 \item{formula}{Survival model formula.  The left hand side is a \code{Surv}
   object specified as in \code{\link{flexsurvreg}}.  Any covariates on the
   right hand side of this formula will be placed on the location parameter
-  for every component-specific distribution.  Different covariates may be
-  supplied on different components using the \code{anc} argument.
+  for every component-specific distribution. Covariates on other parameters
+  of the component-specific distributions may be supplied  using the
+  \code{anc} argument.
 
   Alternatively, \code{formula} may be a list of formulae, with one
   component for each alternative event.  This may be used to specify
@@ -52,15 +53,11 @@ flexsurvmix(
   time and status variables in the data for different alternative events.
   This is specified here as
 
-  \code{formula = list("discharge" = 
-                         Surv(t1di, t2di, type="interval2"), 
-                       "death" = 
-                         Surv(t1de, status_de))}
+  \code{formula = list("discharge" = Surv(t1di, t2di, type="interval2"),
+  "death" = Surv(t1de, status_de))}
 
-  where for this individual, 
-  \code{(t1di, t2di) = (0, Inf)}
-  and
-  \code{(t1de, status_de)  = (t, 0)}.}
+  where for this individual, \code{(t1di, t2di) = (0, Inf)} and \code{(t1de,
+  status_de)  = (t, 0)}.}
 
 \item{data}{Data frame containing variables mentioned in \code{formula},
 \code{event} and \code{anc}.}
@@ -145,8 +142,7 @@ each mixture component.  Each list component is specified as the
 \code{dfns} argument of \code{\link{flexsurvreg}}.}
 
 \item{method}{Method for maximising the likelihood.  Either \code{"em"} for
-the EM algorithm, or \code{"direct"} for direct maximisation.  EM is only
-currenly supported if there are no covariates.}
+the EM algorithm, or \code{"direct"} for direct maximisation.}
 
 \item{em.control}{List of settings to control EM algorithm fitting.  The
   only options currently available are

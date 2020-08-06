@@ -29,8 +29,9 @@
 ##' @param formula Survival model formula.  The left hand side is a \code{Surv}
 ##'   object specified as in \code{\link{flexsurvreg}}.  Any covariates on the
 ##'   right hand side of this formula will be placed on the location parameter
-##'   for every component-specific distribution.  Different covariates may be
-##'   supplied on different components using the \code{anc} argument.
+##'   for every component-specific distribution. Covariates on other parameters
+##'   of the component-specific distributions may be supplied  using the
+##'   \code{anc} argument.
 ##'
 ##'   Alternatively, \code{formula} may be a list of formulae, with one
 ##'   component for each alternative event.  This may be used to specify
@@ -52,15 +53,11 @@
 ##'   time and status variables in the data for different alternative events.
 ##'   This is specified here as
 ##'
-##'   \code{formula = list("discharge" = 
-##'                          Surv(t1di, t2di, type="interval2"), 
-##'                        "death" = 
-##'                          Surv(t1de, status_de))}
+##'   \code{formula = list("discharge" = Surv(t1di, t2di, type="interval2"),
+##'   "death" = Surv(t1de, status_de))}
 ##'
-##'   where for this individual, 
-##'   \code{(t1di, t2di) = (0, Inf)}
-##'   and
-##'   \code{(t1de, status_de)  = (t, 0)}.
+##'   where for this individual, \code{(t1di, t2di) = (0, Inf)} and \code{(t1de,
+##'   status_de)  = (t, 0)}.
 ##'
 ##'
 ##' @param data Data frame containing variables mentioned in \code{formula},
@@ -146,8 +143,7 @@
 ##'   \code{dfns} argument of \code{\link{flexsurvreg}}.
 ##'
 ##' @param method Method for maximising the likelihood.  Either \code{"em"} for
-##'   the EM algorithm, or \code{"direct"} for direct maximisation.  EM is only
-##'   currenly supported if there are no covariates.
+##'   the EM algorithm, or \code{"direct"} for direct maximisation. 
 ##'
 ##' @param em.control List of settings to control EM algorithm fitting.  The
 ##'   only options currently available are
@@ -500,6 +496,7 @@ flexsurvmix <- function(formula, data, event, dists,
     alpha <- inits_alpha
     covp <- inits_covp 
     theta <- theta_inits
+    covtheta <- cov_inits
     
     while (!converged) {  
       ## E step
@@ -515,7 +512,7 @@ flexsurvmix <- function(formula, data, event, dists,
       
       llmat <- matrix(nrow=nobs, ncol=K)
       for (k in 1:K) {
-        fs <- flexsurvreg(formula=formula, data=data, dist=dists[k], anc=anc[[k]], inits=theta[[k]], fixedpars=TRUE) 
+        fs <- flexsurvreg(formula=locform[[k]], data=data, dist=dists[k], anc=anc[[k]], inits=theta[[k]], fixedpars=TRUE) 
         llmat[,k] <-  fs$logliki
       }
       alphap <- exp(llmat) * pmat
@@ -535,7 +532,7 @@ flexsurvmix <- function(formula, data, event, dists,
         if (ncovsp > 0) { 
           for (k in 2:K){  
             cpinds <- K - 1 + (k-2)*ncovsp + 1:ncovsp
-            alphamat[,k] <- alphamat[,k-1] + Xp %*% pars[cpinds] 
+            alphamat[,k] <- alphamat[,k] + Xp %*% pars[cpinds] 
           }
         }
         pmat <- exp(alphamat)
@@ -551,28 +548,38 @@ flexsurvmix <- function(formula, data, event, dists,
       covp <- if (ncovsp>0) parsp$par[K:nppars] else NULL
       
       ## call flexsurvreg for each component on weighted dataset to estimate component-specific pars 
-      thetanew <- vector(K, mode="list")
+      thetanew <- covthetanew <- ttepars <- vector(K, mode="list")
       ll <- numeric(K)
-      
+
+      ctrl <- optim.control
       for (k in 1:K) {
         if (is.null(optim.control$ndeps)) 
-          optim.control$ndeps = rep(1e-06, length(theta[[k]]))
+          ctrl$ndeps = rep(1e-06, length(theta[[k]]) + length(covtheta[[k]]))
         fs <- do.call("flexsurvreg",  # need do.call to avoid environment faff with supplying weights
-                      list(formula=formula, data=data, dist=dists[k], 
-                           anc=anc[[k]], inits=theta[[k]], weights=w[,k], 
+                      list(formula=locform[[k]], data=data, dist=dists[k], 
+                           anc=anc[[k]], inits=c(theta[[k]],covtheta[[k]]), 
+                           weights=w[,k], 
                            subset=w[,k]>0, hessian=FALSE,
-                           control=optim.control))
+                           control=ctrl))
         ll[k] <- fs$loglik
-        thetanew[[k]] <- fs$res[,"est"]
+        thetanew[[k]] <- fs$res[1:nthetal[k],"est"]
+        covthetanew[[k]] <- fs$res[nthetal[k] + seq_len(ncoveffsl[k]),"est"]
+        ttepars[[k]] <- c(thetanew[[k]], covthetanew[[k]])
       }
       
       theta <- thetanew
+      covtheta <- covthetanew
       logliknew <- sum(ll)
       if (iter > 0)
         converged <-  (abs(logliknew / loglik - 1) <= em.control$reltol)
       loglik <- logliknew
-      est <- c(probs, covp, unlist(theta))
-      est.t <- c(NA, alpha, covp, unlist(parlist.transform(theta,dlists)))
+      est <- c(probs, covp, unlist(ttepars))
+      theta.t <- parlist.transform(theta,dlists)
+      ttepars.t <- vector(mode="list")
+      for (k in 1:K){
+        ttepars.t[[k]] <- c(theta.t[[k]], covtheta[[k]])
+      }
+      est.t <- c(NA, alpha, covp, unlist(ttepars.t))
       if (is.numeric(em.control$trace) && em.control$trace > 0)
         print(est)
       iter <- iter + 1
