@@ -20,7 +20,7 @@ mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
   if (!is.null(newdata)){  # mean functions aren't vectorised 
     newdata <- as.data.frame(newdata)
     nvals <- nrow(newdata)
-    res <- cisumm_flexsurvmix(x, newdata=newdata[1,], fnname="mean", fnlist=x$dfns, B=B)
+    res <- cisumm_flexsurvmix(x, newdata=newdata[1,,drop=FALSE], fnname="mean", fnlist=x$dfns, B=B)
     if (nvals > 1) {
       for (i in 2:nvals){
         res <- rbind(res, cisumm_flexsurvmix(x, newdata=newdata[i,], fnname="mean", fnlist=x$dfns, B=B))
@@ -89,11 +89,13 @@ quantile_flexsurvmix <- function(x, newdata=NULL, B=NULL, probs=c(0.025, 0.5, 0.
 p_flexsurvmix <- function(x, newdata=NULL, t=1, startname="start", long=FALSE){
   nt <- length(t)
   K <- x$K
+  if (is.null(newdata)) newdata <- default_newdata(x)
   probk <- probs_flexsurvmix(x, newdata=newdata, B=NULL)
+  probk$prob <- probk$val
 
   newdata <- as.data.frame(newdata)
   ncovs <- if (is.null(newdata)) 1 else nrow(newdata)
-  newdatarep <- newdata[rep(1:ncovs, each=nt),]
+  newdatarep <- newdata[rep(1:ncovs, each=nt),,drop=FALSE]
   trep <- rep(t, ncovs)
   probt <- matrix(nrow=nt*ncovs, ncol=K)
   for (k in 1:x$K){ 
@@ -106,7 +108,7 @@ p_flexsurvmix <- function(x, newdata=NULL, t=1, startname="start", long=FALSE){
                     stringsAsFactors = FALSE)
   res$pcond <- as.numeric(probt)
   if (!is.null(newdata)) 
-    res <- cbind(res, newdatarep[rep(1:nrow(newdatarep), K),])
+    res <- cbind(res, newdatarep[rep(1:nrow(newdatarep), K),,drop=FALSE])
   res <- dplyr::left_join(res, probk, by=c("event",names(newdata)))
   res$val <- res$prob * res$pcond
   res$prob <- res$pcond <- NULL
@@ -133,17 +135,36 @@ probs_flexsurvmix <- function(x, newdata=NULL, B=NULL){
 }
 
 
+default_newdata <- function(x){
+  dat <- x$data$mf[[1]]
+  covnames <- attr(terms(dat), "term.labels")
+  ncovs <- length(covnames)
+  if (ncovs == 0){
+    newdata <- NULL
+  }
+  else { 
+    faccovs <- sapply(dat[,covnames], is.factor)
+    if (!all(faccovs)) 
+      newdata <- matrix(0, nrow=1, ncol=ncovs, dimnames=list(NULL, covnames))
+    else 
+      newdata <- do.call(expand.grid, lapply(dat[,covnames],  levels))
+    newdata <- as.data.frame(newdata)
+  }
+  newdata
+}
+
 cisumm_flexsurvmix <- function(x, newdata=NULL, 
                                parclass = "time", 
                                fnname, fnarg=NULL, fnargval=NULL, fnlist=NULL, 
                                B=NULL){
   K <- x$K
   res <- vector(K, mode="list")
+  if (is.null(newdata)) newdata <- default_newdata(x)
   if (parclass=="time") { 
     newdata <- as.data.frame(newdata)
     ncovs <- nrow(newdata)
     nquants <- max(1, length(fnargval))
-    newdatarep <- newdata[rep(1:ncovs, nquants),]
+    newdatarep <- newdata[rep(1:ncovs, nquants),,drop=FALSE]
     fnargvalrep <- rep(fnargval, each=ncovs)
     for (k in 1:x$K){ 
       pars <- get_basepars(x, newdata=newdatarep, event=k)
@@ -158,7 +179,7 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
     if (!is.null(fnarg)) 
       resdf$quant <- rep(fnargvalrep, K)
     if (!is.null(newdata))
-      resdf <- cbind(resdf, newdatarep[rep(1:nrow(newdatarep), K),])
+      resdf <- cbind(resdf, newdatarep[rep(1:nrow(newdatarep), K),,drop=FALSE])
     resdf$val <- unlist(res)
   } else if (parclass=="prob") {   ## will need changing if want multiple outcomes 
     newdata <- as.data.frame(newdata)
@@ -195,7 +216,7 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
 resample_pars <- function(x){ 
   newpars <- rmvnorm(1, x$res$est.t[-1], x$cov)
   x$res$est.t <- c(NA, newpars)
-  x$res$est <- inv.transform.res(x, x$dlist)
+  x$res$est <- inv.transform.res(x, x$dlist)   ## FIXME FIXME probs bust 
   x
 }
 
@@ -229,7 +250,7 @@ get_basepars <- function(x, newdata, event){
         tm <- delete.response(terms(x$all.formulae[[k]][[parname]]))
         if (!all(attr(tm, "term.labels") %in% names(newdata))) 
           stop(sprintf("not all required variables supplied in `newdata`")) 
-        xlev <- lapply(x$data$mf, levels)[attr(tm,"term.labels")]
+        xlev <- lapply(x$data$mf[[k]], levels)[attr(tm,"term.labels")]
         mf <- model.frame(tm, newdata, xlev = xlev)
         mm <- model.matrix(tm, mf)
         basepar <- x$res[bpars,"est.t"][j]
@@ -251,7 +272,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
     if (!all(attr(tm, "term.labels") %in% names(newdata))) 
       stop(sprintf("not all required variables supplied in `newdata`")) 
     
-    xlev <- lapply(x$data$mf, levels)[attr(tm,"term.labels")]
+    xlev <- lapply(x$data$mfcomb, levels)[attr(tm,"term.labels")]
     mf <- model.frame(tm, newdata, xlev = xlev)
     X <- model.matrix(tm, mf)
     K <- x$K
@@ -270,7 +291,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
   names(probpars) <- x$evnames
   if (!is.null(newdata))
     probpars <- cbind(probpars, newdata)
-  probpars <- tidyr::pivot_longer(probpars, tidyselect::all_of(x$evnames), names_to="event", values_to="prob")
+  probpars <- tidyr::pivot_longer(probpars, tidyselect::all_of(x$evnames), names_to="event", values_to="val")
   probpars 
 }
 
@@ -313,7 +334,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
 ##'
 ##' @export
 ajfit <- function(x, newdata=NULL, tidy=TRUE){ 
-  dat <- x$data$mf
+  dat <- x$data$mfcomb
   covnames <- attr(terms(dat), "term.labels")
   ncovs <- length(covnames)
   if (ncovs == 0){

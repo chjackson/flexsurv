@@ -27,7 +27,8 @@
 ##'
 ##'
 ##' @param formula Survival model formula.  The left hand side is a \code{Surv}
-##'   object specified as in \code{\link{flexsurvreg}}.  Any covariates on the
+##'   object specified as in \code{\link{flexsurvreg}}.  This may define
+##'   various kinds of censoring, as described in \code{\link{Surv}}. Any covariates on the
 ##'   right hand side of this formula will be placed on the location parameter
 ##'   for every component-specific distribution. Covariates on other parameters
 ##'   of the component-specific distributions may be supplied  using the
@@ -486,6 +487,7 @@ flexsurvmix <- function(formula, data, event, dists,
     loglik <- - opt$value
     if (!fixed)
       cov <- solve(opt$hessian)
+    else cov <- NULL
   }
   
   else if (method=="em") { 
@@ -607,6 +609,9 @@ flexsurvmix <- function(formula, data, event, dists,
   names.first <- c("component","dist","terms","est","est.t","se")
   res <- res[,c(names.first, setdiff(names(res), names.first)),drop=FALSE]
 
+  mcomb <- do.call("cbind", m)
+  mcomb <- mcomb[,!duplicated(names(mcomb))]
+  
   res <- list(call=match.call(),
               res=res, loglik=loglik,  cov=cov, 
               npars=npars, AIC=-2*loglik + 2*npars,
@@ -618,7 +623,7 @@ flexsurvmix <- function(formula, data, event, dists,
               nthetal=nthetal, parindsl=parindsl, 
               ncoveffsl=ncoveffsl,ncoveffsp=ncoveffsp, covparsl=covparsl,
               all.formulae=forms, pformula=pformula, 
-              data=list(mf=m), mx=mx)
+              data=list(mf=m, mfcomb=mcomb), mx=mx)
   class(res) <- "flexsurvmix"
   res
 }
@@ -741,7 +746,7 @@ inv.transform.res <- function(x, dlists) {
     bpars <- inv.transform(bpars, dlists[[k]])
     est[[k]] <- c(bpars, cpars)
   }
-  probs <- pmnlogit(x$res$est.t[1:(K-1)])  
+  probs <- pmnlogit(x$res$est.t[2:K])  
   pcov <- x$res$est.t[grep("prob[[:digit:]]+\\(.+\\)", x$res$terms)]
   c(probs, pcov, unlist(est))
 }
