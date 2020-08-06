@@ -660,8 +660,8 @@ clean_listarg <- function(arg, argname, evnames){
       names(arg) <- evnames
     else { 
       if (!identical(sort(narg), sort(evnames)))
-        sprintf("names(%s) = %s, but this should match levels(factor(event)) = %s", 
-                narg, argname, dput(evnames))
+        stop(sprintf("names(%s) = %s, but this should match levels(factor(event)) = %s", 
+                argname, paste(narg, collapse=","), paste(evnames,collapse=",")))
       arg <- arg[evnames]
     }
   }

@@ -400,11 +400,11 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start"){
                           tidyselect::num_range("upper.",1:nstates)),
                  names_to=c("summary","state"),
                  names_sep="\\.", values_to="prob") %>%
-    tidyr::pivot_wider(names_from="summary", values_from="prob") %>%
-    dplyr::mutate(state = as.character(factor("state",labels=statenames)),
-           model ="Aalen-Johansen",
-           lower=NULL, upper=NULL) %>%
-    dplyr::rename(t = time)
+    tidyr::pivot_wider(names_from="summary", values_from="prob")
+  ajlong$state <- as.character(factor(ajlong$state, labels=statenames))
+  ajlong$model <- "Aalen-Johansen"
+  ajlong$lower <- ajlong$upper <- NULL
+  names(ajlong)[names(ajlong)=="time"] <- "t"
   if (is.null(maxt)) maxt <- max(ajlong$t)
   times <- seq(0, maxt, length=100)
   modcomp <- 

@@ -934,7 +934,7 @@ simfs_bytrans <- function(simfs){
     }
     suball$start <- state_names(suball$start, simfs)
     suball$end <- state_names(suball$end, simfs)
-    suball$trans <- paste(suball$start, suball$end, sep="-")
+    suball$trans <- paste(suball$start, suball$end, sep=" - ")
     rownames(suball) <- NULL
     res <- suball[,c("id","start","end","trans","time","delay")]
     attr(res, "trans") <- trans
@@ -1034,7 +1034,7 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
         res.rep <- do.call(rbind, lapply(res.rep, as.numeric))
     }
     if (!sample)
-        res <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2))
+        res <- apply(res.rep, 2, quantile, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE)
     else res <- res.rep
     res
 }

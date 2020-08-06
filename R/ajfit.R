@@ -77,7 +77,7 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
     pmat[[i]] <- cbind(pmat[[i]], covvals)
   } 
   pmat <- do.call("rbind", pmat)
-  pmat <- filter(pmat, start==1)
+  pmat <- pmat[pmat$start==1,,drop=FALSE]
   pmat$start <- NULL
   pmat$model <- "Parametric"
   cols <- c("time",covnames,"model",attr(x,"statenames"))
