@@ -90,12 +90,15 @@ p_flexsurvmix <- function(x, newdata=NULL, t=1, startname="start", long=FALSE){
   nt <- length(t)
   K <- x$K
   if (is.null(newdata)) newdata <- default_newdata(x)
+  else newdata <- as.data.frame(newdata)
   probk <- probs_flexsurvmix(x, newdata=newdata, B=NULL)
   probk$prob <- probk$val
-
-  newdata <- as.data.frame(newdata)
+  
   ncovs <- if (is.null(newdata)) 1 else nrow(newdata)
-  newdatarep <- newdata[rep(1:ncovs, each=nt),,drop=FALSE]
+  if (!is.null(newdata)){
+    newdata <- as.data.frame(newdata)
+    newdatarep <- newdata[rep(1:ncovs, each=nt),,drop=FALSE]
+  } else newdatarep <- NULL
   trep <- rep(t, ncovs)
   probt <- matrix(nrow=nt*ncovs, ncol=K)
   for (k in 1:x$K){ 
@@ -136,8 +139,8 @@ probs_flexsurvmix <- function(x, newdata=NULL, B=NULL){
 
 
 default_newdata <- function(x){
-  dat <- x$data$mf[[1]]
-  covnames <- attr(terms(dat), "term.labels")
+  dat <- x$data$mfcomb
+  covnames <- attr(dat, "covnames")
   ncovs <- length(covnames)
   if (ncovs == 0){
     newdata <- NULL
@@ -161,10 +164,15 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
   res <- vector(K, mode="list")
   if (is.null(newdata)) newdata <- default_newdata(x)
   if (parclass=="time") { 
-    newdata <- as.data.frame(newdata)
-    ncovs <- nrow(newdata)
     nquants <- max(1, length(fnargval))
-    newdatarep <- newdata[rep(1:ncovs, nquants),,drop=FALSE]
+    if (!is.null(newdata)) {
+      newdata <- as.data.frame(newdata)
+      ncovs <- nrow(newdata)
+      newdatarep <- newdata[rep(1:ncovs, nquants),,drop=FALSE]
+    } else {
+      ncovs <- 1 
+      newdatarep <- NULL
+    }
     fnargvalrep <- rep(fnargval, each=ncovs)
     for (k in 1:x$K){ 
       pars <- get_basepars(x, newdata=newdatarep, event=k)
@@ -182,7 +190,7 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
       resdf <- cbind(resdf, newdatarep[rep(1:nrow(newdatarep), K),,drop=FALSE])
     resdf$val <- unlist(res)
   } else if (parclass=="prob") {   ## will need changing if want multiple outcomes 
-    newdata <- as.data.frame(newdata)
+    if (!is.null(newdata)) newdata <- as.data.frame(newdata)
     resdf <- get_probpars(x, newdata=newdata)
     if (!is.null(newdata)){
       if (length(intersect(names(resdf), names(newdata)) > 0))
@@ -272,7 +280,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
     if (!all(attr(tm, "term.labels") %in% names(newdata))) 
       stop(sprintf("not all required variables supplied in `newdata`")) 
     
-    xlev <- lapply(x$data$mfcomb, levels)[attr(tm,"term.labels")]
+    xlev <- lapply(x$data$mf[[1]], levels)[attr(tm,"term.labels")]
     mf <- model.frame(tm, newdata, xlev = xlev)
     X <- model.matrix(tm, mf)
     K <- x$K
@@ -335,10 +343,10 @@ get_probpars <- function(x, newdata=NULL, na.action){
 ##' @export
 ajfit <- function(x, newdata=NULL, tidy=TRUE){ 
   dat <- x$data$mfcomb
-  covnames <- attr(terms(dat), "term.labels")
+  covnames <- attr(dat, "covnames")
   ncovs <- length(covnames)
   if (ncovs == 0){
-    sf <- sftidy <- ajfit.dat(dat, x$evnames)
+    sf <- sftidy <- ajfit.dat(x$data$mf[[1]], x$evnames)
     ret <- if (tidy) as.data.frame(unclass(sf)[c("time","pstate","lower","upper")]) else sf
   }
   else { 
@@ -353,9 +361,9 @@ ajfit <- function(x, newdata=NULL, tidy=TRUE){
     covnames <- names(newdata)
     ## TODO error handling 
     for (i in 1:ncovvals) { 
-      datsub <- dat
-      for (j in seq_along(covnames)) 
-        datsub <- datsub[datsub[,covnames[j]] == newdata[i,covnames[j]],]
+      datsub <- x$data$mf[[1]] # assume any of the mf[[k]] will do
+      for (j in seq_along(covnames))  
+        datsub <- datsub[datsub[,covnames[j]] == newdata[i,covnames[j]],,drop=FALSE]
       sf[[i]] <- ajfit.dat(datsub, x$evnames)
       sftidy[[i]] <- as.data.frame(unclass(sf[[i]])[c("time","pstate","lower","upper")])
       covvals <- newdata[i,][rep(1,nrow(sftidy[[i]])),]
@@ -405,8 +413,8 @@ ajfit.dat <- function(dat,evnames){
 ##' @export
 ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start"){
   nstates <- x$K + 1
-  dat <- x$data$mf
-  covnames <- attr(terms(dat), "term.labels")
+  dat <- x$data$mfcomb
+  covnames <- attr(dat, "covnames")
   ncovs <- length(covnames)
   if (ncovs > 0){
     faccovs <- sapply(dat[,covnames], is.factor)

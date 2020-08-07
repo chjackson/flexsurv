@@ -267,8 +267,6 @@ flexsurvmix <- function(formula, data, event, dists,
     names(forms[[k]])[[1]] <- loc
   }
   
-  f2 <- concat.formulae(locform[[1]], c(unlist(forms), pformula)) 
-
   ## Build model frame given formulae
   indx <- match(c("formula", "data", "event"), names(call), nomatch = 0)
   if (indx[1] == 0)
@@ -484,7 +482,7 @@ flexsurvmix <- function(formula, data, event, dists,
                       est = c(res_probs, res_covp, unlist(res_cpars)),
                       est.t = c(NA, opt_all)))
                       
-    loglik <- - opt$value
+    loglik <- - as.vector(opt$value)
     if (!fixed)
       cov <- solve(opt$hessian)
     else cov <- NULL
@@ -589,7 +587,7 @@ flexsurvmix <- function(formula, data, event, dists,
     res <- cbind(res, 
                  data.frame(est=est, est.t=est.t))
     ll <- loglik_flexsurvmix(est.t[-1])
-    loglik <- -as.numeric(ll)
+    loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
     cov <- solve(numDeriv::hessian(loglik_flexsurvmix, est.t[-1]))
     opt <- NULL
@@ -611,6 +609,7 @@ flexsurvmix <- function(formula, data, event, dists,
 
   mcomb <- do.call("cbind", m)
   mcomb <- mcomb[,!duplicated(names(mcomb))]
+  attr(mcomb, "covnames") <- unique(unlist(lapply(m, function(x)attr(terms(x),"term.labels"))))
   
   res <- list(call=match.call(),
               res=res, loglik=loglik,  cov=cov, 

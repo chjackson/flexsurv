@@ -22,15 +22,15 @@ test_that("flexsurvmix basic",{
   fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=1:2)
   
   expect_silent({
-  ## event as character
-  fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, dists=c("gamma","gamma"), fixedpars=TRUE)
-  ## event as factor
-  fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evnamef, dists=c("gamma","gamma"), fixedpars=TRUE)
-  ## user supplied inits 
-  fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, dists=c("gamma","gamma"), 
-                    inits = list(cure=c(2, 1), death=c(1, 3)), fixedpars=TRUE)
-  
-  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","weibull"), fixedpars=TRUE)
+    ## event as character
+    fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, dists=c("gamma","gamma"), fixedpars=TRUE)
+    ## event as factor
+    fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evnamef, dists=c("gamma","gamma"), fixedpars=TRUE)
+    ## user supplied inits 
+    fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, dists=c("gamma","gamma"), 
+                      inits = list(cure=c(2, 1), death=c(1, 3)), fixedpars=TRUE)
+    
+    x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","weibull"), fixedpars=TRUE)
   })
 })
 
@@ -49,13 +49,13 @@ status <- 1 - cens
 event <- ifelse(cens, NA, death+1) # 1 is cure, 2 is death
 dat <- data.frame(t, status, event, x)
 dat$evname <- c("cure", "death")[dat$event]
-  
-## TODO check different ways of supplying covs on location par give same results 
+
 
 test_that("flexsurvmix with covariates on time to event distributions",{
-
+  
   ## covariates on all location pars
-  fs <- flexsurvmix(Surv(t, status) ~ x, data=dat, event=event, dists=c("gamma","weibull"), fixedpars=TRUE)
+  fs <- flexsurvmix(Surv(t, status) ~ x, data=dat, event=event, 
+                    dists=c("gamma","weibull"), fixedpars=TRUE)
   
   ## covariates on all location pars, and some shape pars
   ## this is the right model here 
@@ -66,9 +66,16 @@ test_that("flexsurvmix with covariates on time to event distributions",{
   fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), 
                     anc=list(list(rate=~x, shape=~x), list(rate=~x)), fixedpars=TRUE)
   
-  ## covariates on one component but not another 
-  fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), 
-                    anc=list(list(rate=~x, shape=~x), list(rate=~1)), fixedpars=TRUE)
+  ## covariates on location for one component but not another. two ways to do
+  ini <- list(c(1,3,0.6,0.2), c(1,0.3))
+  fs1 <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), 
+                     anc=list(list(rate=~x, shape=~x), list(rate=~1)), inits=ini, fixedpars=TRUE)
+  
+  fs2 <- flexsurvmix(list(`1`=Surv(t, status) ~ x, 
+                          `2`=Surv(t, status) ~ 1),
+                     data=dat, event=event, dists=c("gamma","gamma"), 
+                     anc=list(list(shape=~x), list(rate=~1)), inits=ini, fixedpars=TRUE)
+  expect_equal(fs1$loglik, fs2$loglik)
   
   expect_error(
     {fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), 
@@ -138,14 +145,17 @@ t2disc[cens] <- Inf
 t1disc[pobs] <- 0
 dat <- data.frame(t, status, t1disc, t2disc, event) 
 
-x <- flexsurvmix(list(icu = Surv(t, status) ~ 1, 
-                      death = Surv(t, status) ~ 1,
-                      discharge =  Surv(t1disc, t2disc, type="interval2") ~ 1),
-                 data=dat, event=event, 
-                 dists=c("gamma","gamma","gamma"), fixedpars=FALSE)
-
-# time to discharge estimates wrong, as observation scheme is misspecified
-xwrong <- flexsurvmix(Surv(t, status) ~ 1, 
-                 data=dat, event=event, 
-                 dists=c("gamma","gamma","gamma"), fixedpars=FALSE) 
-
+test_that("Partially observed outcomes",{
+  x <- flexsurvmix(list(icu = Surv(t, status) ~ 1, 
+                        death = Surv(t, status) ~ 1,
+                        discharge =  Surv(t1disc, t2disc, type="interval2") ~ 1),
+                   data=dat, event=event, 
+                   dists=c("gamma","gamma","gamma"), fixedpars=FALSE)
+  expect_equal(x$loglik, -2486.672, tol=1e-06)
+  
+  # time to discharge estimates wrong, as observation scheme is misspecified
+  xwrong <- flexsurvmix(Surv(t, status) ~ 1, 
+                        data=dat, event=event, 
+                        dists=c("gamma","gamma","gamma"), fixedpars=FALSE) 
+  
+})
