@@ -1326,6 +1326,7 @@ fmsm <- function(..., trans){
     res
 }
 
+##' @export
 print.fmsm <- function(x, ...){
     for (i in seq_along(x)){
         cat(names(x)[i], "\n")
@@ -1333,3 +1334,20 @@ print.fmsm <- function(x, ...){
         if (i < length(x)) cat("\n")
     }
 }
+
+##' @export
+AIC.fmsm <- function(object){
+    nmods <- length(object)
+    aics <- numeric(nmods)
+    for (i in 1:nmods){
+        aics[i] <- AIC(object[[i]])
+    }
+    sum(aics)
+}
+
+nextstates <- function(x, fromstate){
+    trans <- attr(x,"trans")
+    colnames(trans)[!is.na(trans[fromstate,])]
+}
+
+

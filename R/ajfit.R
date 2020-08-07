@@ -20,12 +20,17 @@
 ##'   have a column for each covariate in the model.  If omitted, then all
 ##'   potential subgroups defined by combinations of factor covariates are
 ##'   included.  Continuous covariates are not supported.
+##'   
+##'   @param ajvar Return standard errors for the Aalen-Johansen estimates. TODO  not implemented yet
+##'   
+##'   @param B Number of bootstrap replicates to use to calculate standard
+##'   errors for the parametric estimates.  TODO not implemented yet
 ##'
 ##' @return Tidy data frame containing both Aalen-Johansen and parametric
 ##'   estimates of state occupancy over time, and by subgroup if subgroups are
 ##'   included.
 ##'   
-ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
+ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL, ajvar=FALSE, B=0){
   ## TODO what if different covariates on different transitions? 
   dat <- x[[1]]$data$m
   covnames <- attr(dat,"covnames")
@@ -57,7 +62,7 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
       datsub <- datsub[datsub[,covnames[j]] == newdata[i,covnames[j]],]
     cf <- coxph(Surv(time, status) ~ strata(trans), data=datsub)
     ms <-  msfit(cf, trans=attr(x,"trans"))
-    pt[[i]] <- probtrans(ms, predt=0, variance=FALSE)[[1]]
+    pt[[i]] <- probtrans(ms, predt=0, variance=ajvar)[[1]]
     covvals <- newdata[i,][rep(1,nrow(pt[[i]])),]
     pt[[i]] <- cbind(pt[[i]], covvals)
   } 
@@ -69,11 +74,14 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
   ## Estimates from parametric competing risks model
   nvals <- nrow(newdata)
   pmat <- vector(nvals, mode="list")
-  if (is.null(maxt)) maxt <- max(pt$time)
+  if (is.null(maxt)) 
+    maxt <- max(pt$time)
   times <- seq(0, maxt, length=100)
   for (i in 1:nvals){  # note newdata doesn't support multiple covs 
-    pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,], start=1, t=times, tidy=TRUE)
+    if (B>0) ci <- TRUE else ci <- FALSE
+    pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,], start=1, t=times, tidy=TRUE, ci=ci, B=B)
     covvals <- newdata[i,][rep(1,nrow(pmat[[i]])),]
+    browser()
     pmat[[i]] <- cbind(pmat[[i]], covvals)
   } 
   pmat <- do.call("rbind", pmat)
