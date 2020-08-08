@@ -31,6 +31,42 @@ mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
   res
 }
 
+##' Restricted mean times to events from a flexsurvmix model
+##'
+##' This returns the restricted mean of each event-specific parametric time-to-event
+##' distribution in the mixture model, which is the mean time to event
+##' conditionally on that event being the one that happens, and conditionally
+##' on the event time being less than some time horizon \code{tot}.
+##'
+##' @param x Fitted model object returned from \code{\link{flexsurvmix}}.
+##'
+##' @param newdata Data frame or list of covariate values.
+##'   
+##' @param tot Time horizon to compute the restricted mean until.
+##'
+##' @param B Number of simulations to use to compute 95% confidence intervals,
+##'   based on the asymptotic multivariate normal distribution of the basic
+##'   parameter estimates.  If \code{B=NULL} then intervals are not computed.
+##'
+##' @return Restricted mean times to next event conditionally on each alternative event,
+##'   given the specified covariate values.
+##'   
+##' @export
+rmst_flexsurvmix <- function(x, newdata=NULL, tot=Inf, B=NULL){
+  if (!is.null(newdata)){  # mean functions aren't vectorised 
+    newdata <- as.data.frame(newdata)
+    nvals <- nrow(newdata)
+    res <- cisumm_flexsurvmix(x, newdata=newdata[1,,drop=FALSE], fnname="rmst", fnarg="t", fnargval=tot, fnlist=x$dfns, B=B)
+    if (nvals > 1) {
+      for (i in 2:nvals){
+        res <- rbind(res, cisumm_flexsurvmix(x, newdata=newdata[i,], fnname="rmst", fnarg="t", fnargval=tot, fnlist=x$dfns, B=B))
+      }
+    }
+  } else 
+    res <- cisumm_flexsurvmix(x, newdata=newdata, fnname="rmst", fnarg="t", fnargval=tot, fnlist=x$dfns, B=B)
+  res
+}
+
 
 ##' Quantiles of time-to-event distributions in a flexsurvmix model
 ##' 
