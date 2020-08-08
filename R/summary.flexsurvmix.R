@@ -10,7 +10,7 @@
 ##'
 ##' @param B Number of simulations to use to compute 95% confidence intervals,
 ##'   based on the asymptotic multivariate normal distribution of the basic
-##'   parameter estimates.
+##'   parameter estimates.  If \code{B=NULL} then intervals are not computed.
 ##'
 ##' @return Mean times to next event conditionally on each alternative event,
 ##'   given the specified covariate values.
@@ -75,54 +75,31 @@ quantile_flexsurvmix <- function(x, newdata=NULL, B=NULL, probs=c(0.025, 0.5, 0.
 ##'   the model as a multi-state model where people start in this state, and may
 ##'   transition to one of the competing events.
 ##'
-##' @param long If \code{TRUE} then the function returns a data frame in long
-##'   form.   The default is wide form, where probabilities for different states
-##'   are returned in different columns, and times and covariate values are in
-##'   different rows.  Long format has times, covariates and states in different
-##'   rows, which is ideal for plotting with \pkg{ggplot2}
-##'
 ##' @return A data frame with transition probabilities by time, covariate value
 ##'   and destination state.
 ##'
 ##'
 ##' @export
-p_flexsurvmix <- function(x, newdata=NULL, t=1, startname="start", long=FALSE){
-  nt <- length(t)
-  K <- x$K
-  if (is.null(newdata)) newdata <- default_newdata(x)
-  else newdata <- as.data.frame(newdata)
-  probk <- probs_flexsurvmix(x, newdata=newdata, B=NULL)
-  probk$prob <- probk$val
-  
-  ncovs <- if (is.null(newdata)) 1 else nrow(newdata)
-  if (!is.null(newdata)){
-    newdata <- as.data.frame(newdata)
-    newdatarep <- newdata[rep(1:ncovs, each=nt),,drop=FALSE]
-  } else newdatarep <- NULL
-  trep <- rep(t, ncovs)
-  probt <- matrix(nrow=nt*ncovs, ncol=K)
-  for (k in 1:x$K){ 
-    args <- get_basepars(x, newdata=newdatarep, event=k)
-    args$q <- trep 
-    probt[,k] <- do.call(x$dfns[[k]]$p, args)
+p_flexsurvmix <- function(x, newdata=NULL,startname="start", t=1, B=NULL){
+  fm_p_fn <- function(base,prob,resdf,x,startname) {
+    resdf$val <- base * prob
+    resdf$tval <- resdf$pval <- NULL
+    resdf  <- resdf %>% 
+      tidyr::pivot_wider(names_from="event", values_from="val")
+    resdf[[startname]] <- 1 - rowSums(resdf[,x$evnames]) 
+    statenames <- c(startname,x$evnames)
+    resdf %>% 
+      pivot_longer(cols=all_of(statenames), names_to="state", values_to="val")
   }
-  res <- data.frame(event = rep(x$evnames, each=nt*ncovs), 
-                        t = rep(trep, K),
-                    stringsAsFactors = FALSE)
-  res$pcond <- as.numeric(probt)
-  if (!is.null(newdata)) 
-    res <- cbind(res, newdatarep[rep(1:nrow(newdatarep), K),,drop=FALSE])
-  res <- dplyr::left_join(res, probk, by=c("event",names(newdata)))
-  res$val <- res$prob * res$pcond
-  res$prob <- res$pcond <- NULL
-  res <- tidyr::pivot_wider(res, names_from="event", values_from="val", names_prefix="pstate")
-  res$pstate0 <- 1 - rowSums(res[,paste0("pstate",x$evnames)])
-  statenames <- c(startname, x$evnames)
-  names(res)[match(paste0("pstate",c("0",x$evnames)),names(res))] <- statenames
-  if (long) res <- 
-    tidyr::pivot_longer(res, cols=tidyselect::all_of(statenames), names_to="state", values_to="prob")
+  res <- cisumm_flexsurvmix(x,   newdata=newdata,  fnname="p", fnarg="q",
+                            parclass = c("time", "prob"),
+                            fnargval=t,  fnlist=x$dfns, combfn = fm_p_fn, B=B, 
+                            startname=startname)
+  names(res)[names(res)=="q"] <- "t"
   res
 }
+
+
 
 ##' Probabilities of competing events from a flexsurvmix model
 ##'
@@ -158,12 +135,12 @@ default_newdata <- function(x){
 
 cisumm_flexsurvmix <- function(x, newdata=NULL, 
                                parclass = "time", 
-                               fnname, fnarg=NULL, fnargval=NULL, fnlist=NULL, 
-                               B=NULL){
+                               fnname, fnarg=NULL, fnargval=NULL, fnlist=NULL, combfn=NULL,
+                               B=NULL, ...){
   K <- x$K
   res <- vector(K, mode="list")
   if (is.null(newdata)) newdata <- default_newdata(x)
-  if (parclass=="time") { 
+  if ("time" %in% parclass) { 
     nquants <- max(1, length(fnargval))
     if (!is.null(newdata)) {
       newdata <- as.data.frame(newdata)
@@ -183,24 +160,32 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
         fn <- fnlist[[k]][[fnname]]
       res[[k]] <- do.call(fn, pars)
     } 
-    resdf <- data.frame(event = rep(x$evnames, each=length(res[[1]])))
+    tdf <- data.frame(event = rep(x$evnames, each=length(res[[1]])))
     if (!is.null(fnarg)) 
-      resdf$quant <- rep(fnargvalrep, K)
+      tdf[[fnarg]] <- rep(fnargvalrep, K)
     if (!is.null(newdata))
-      resdf <- cbind(resdf, newdatarep[rep(1:nrow(newdatarep), K),,drop=FALSE])
-    resdf$val <- unlist(res)
-  } else if (parclass=="prob") {   ## will need changing if want multiple outcomes 
+      tdf <- cbind(tdf, newdatarep[rep(1:nrow(newdatarep), K),,drop=FALSE])
+    tdf$val <- unlist(res)
+  } 
+  if ("prob" %in% parclass) {   
     if (!is.null(newdata)) newdata <- as.data.frame(newdata)
-    resdf <- get_probpars(x, newdata=newdata)
+    pdf <- get_probpars(x, newdata=newdata)
     if (!is.null(newdata)){
-      if (length(intersect(names(resdf), names(newdata)) > 0))
-        resdf <- dplyr::left_join(resdf, newdata, by=intersect(names(resdf), names(newdata)))
-      else resdf <- tidyr::crossing(resdf, newdata)
+      if (length(intersect(names(pdf), names(newdata)) > 0))
+        pdf <- dplyr::left_join(pdf, newdata, by=intersect(names(pdf), names(newdata)))
+      else pdf <- tidyr::crossing(pdf, newdata)
     } 
-    ## todo handle fnlist later if we need fnlist=list(identity) for prob, or rename it fns as not list
-    ## what if we need both prob and time pars . then 
-    ## why not handle both all the time even if don't need 3
-    ## dpened what function is of .  for transiiton probs 
+  }
+  if (setequal(parclass, c("time","prob"))){
+    tdf <- tdf %>% dplyr::rename(tval="val") 
+    pdf <- pdf %>% dplyr::rename(pval="val") 
+    resdf <- tdf %>% dplyr::left_join(pdf, by=c("event", names(newdata)))
+    resdf <- combfn(resdf$tval, resdf$pval, resdf, x, ...)
+    resdf$tval <- resdf$pval <- NULL
+  }  else if (parclass=="time"){ 
+    resdf  <- tdf
+  }  else if (parclass=="prob") {
+    resdf <- pdf
   }
   if (is.numeric(B)) {
     resm <- array(dim=c(B, nrow(resdf)))
@@ -208,8 +193,9 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
     if (B > 2) {
       for (b in 2:B){
         pars <- list(x = resample_pars(x), newdata=newdata, parclass=parclass, 
-                     fnname=fnname, fnarg=fnarg, fnargval=fnargval, fnlist=fnlist,
+                     fnname=fnname, fnarg=fnarg, fnargval=fnargval, fnlist=fnlist, combfn=combfn,
                      B = NULL)
+        pars <- c(pars, list(...))
         resm[b,]<- do.call(cisumm_flexsurvmix, pars)$val
       }
     }
@@ -409,9 +395,14 @@ ajfit.dat <- function(dat,evnames){
 ##'
 ##' @param startname Label to give the state corresponding to "no event happened
 ##'   yet".  By default this is \code{"Start"}.
-##'
+##'   
+##' @param B Number of simulation replications to use to calculate a confidence
+##' interval for the parametric estimates in \code{\link{p_flexsurvmix}}. 
+##' Comparable intervals for the Aalen-Johansen estimates are returned if this
+##' is set.  Otherwise if \code{B=NULL} then no intervals are returned.
+##' 
 ##' @export
-ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start"){
+ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   nstates <- x$K + 1
   dat <- x$data$mfcomb
   covnames <- attr(dat, "covnames")
@@ -431,16 +422,21 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start"){
                  names_sep="\\.", values_to="prob") %>%
     tidyr::pivot_wider(names_from="summary", values_from="prob")
   ajlong$state <- as.character(factor(ajlong$state, labels=statenames))
+  names(ajlong)[names(ajlong)=="pstate"] <- "val"
   ajlong$model <- "Aalen-Johansen"
-  ajlong$lower <- ajlong$upper <- NULL
+  if (is.null(B)) {
+    ajlong$lower <- ajlong$upper <- NULL
+    vals <- "val"
+  } else {
+    vals <- c("val","lower","upper")
+  }
   names(ajlong)[names(ajlong)=="time"] <- "t"
   if (is.null(maxt)) maxt <- max(ajlong$t)
   times <- seq(0, maxt, length=100)
   modcomp <- 
-    p_flexsurvmix(x, t=times, newdata=newdata, startname=startname) %>% 
-    tidyr::pivot_longer(cols=tidyselect::all_of(statenames), names_to="state", values_to = "pstate") %>%
+    p_flexsurvmix(x, t=times, newdata=newdata, startname=startname, B=B) %>%
     dplyr::mutate(model="Parametric mixture") %>%
-    dplyr::full_join(ajlong, by = c("t", "state", names(newdata), "model", "pstate")) %>%
-    dplyr::rename(time="t", prob="pstate")
+    dplyr::full_join(ajlong, by = c("t", "state", names(newdata), "model", vals)) %>%
+    dplyr::rename(time="t")
   modcomp
 }

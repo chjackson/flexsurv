@@ -62,3 +62,13 @@ if (em_supported){
  })
  
 }
+
+
+test_that("Variances in Aalen-Johansen",{
+  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
+                 dists=c("gamma","gamma"),  method="em")
+  aj <- ajfit_flexsurvmix(x, B=3)
+  expect_true(inherits(aj, "data.frame")  & is.numeric(aj$lower))
+})
+
+

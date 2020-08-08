@@ -4,25 +4,23 @@
 \alias{p_flexsurvmix}
 \title{Transition probabilities from a flexsurvmix model}
 \usage{
-p_flexsurvmix(x, newdata = NULL, t = 1, startname = "start", long = FALSE)
+p_flexsurvmix(x, newdata = NULL, startname = "start", t = 1, B = NULL)
 }
 \arguments{
 \item{x}{Fitted model object returned from \code{\link{flexsurvmix}}.}
 
 \item{newdata}{Data frame or list of covariate values.}
 
-\item{t}{Vector of times \code{t} to calculate the probabilities of
-transition by.}
-
 \item{startname}{Name of the state where individuals start. This considers
 the model as a multi-state model where people start in this state, and may
 transition to one of the competing events.}
 
-\item{long}{If \code{TRUE} then the function returns a data frame in long
-form.   The default is wide form, where probabilities for different states
-are returned in different columns, and times and covariate values are in
-different rows.  Long format has times, covariates and states in different
-rows, which is ideal for plotting with \pkg{ggplot2}}
+\item{t}{Vector of times \code{t} to calculate the probabilities of
+transition by.}
+
+\item{B}{Number of simulations to use to compute 95% confidence intervals,
+based on the asymptotic multivariate normal distribution of the basic
+parameter estimates.  If \code{B=NULL} then intervals are not computed.}
 }
 \value{
 A data frame with transition probabilities by time, covariate value

@@ -13,7 +13,7 @@ quantile_flexsurvmix(x, newdata = NULL, B = NULL, probs = c(0.025, 0.5, 0.975))
 
 \item{B}{Number of simulations to use to compute 95% confidence intervals,
 based on the asymptotic multivariate normal distribution of the basic
-parameter estimates.}
+parameter estimates.  If \code{B=NULL} then intervals are not computed.}
 
 \item{probs}{Vector of alternative quantiles, by default \code{c(0.025, 0.95, 0.975)}
 giving the median and a 95\% interval.}

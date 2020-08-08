@@ -21,9 +21,9 @@
 ##'   potential subgroups defined by combinations of factor covariates are
 ##'   included.  Continuous covariates are not supported.
 ##'   
-##'   @param ajvar Return standard errors for the Aalen-Johansen estimates. TODO  not implemented yet
+##' @param ajvar Return standard errors for the Aalen-Johansen estimates. TODO  not implemented yet
 ##'   
-##'   @param B Number of bootstrap replicates to use to calculate standard
+##' @param B Number of bootstrap replicates to use to calculate standard
 ##'   errors for the parametric estimates.  TODO not implemented yet
 ##'
 ##' @return Tidy data frame containing both Aalen-Johansen and parametric

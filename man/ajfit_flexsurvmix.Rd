@@ -5,7 +5,7 @@
 \title{Forms a tidy data frame for plotting the fit of parametric mixture
 multi-state models against nonparametric estimates}
 \usage{
-ajfit_flexsurvmix(x, maxt = NULL, startname = "Start")
+ajfit_flexsurvmix(x, maxt = NULL, startname = "Start", B = NULL)
 }
 \arguments{
 \item{x}{Fitted model returned by \code{\link{flexsurvmix}}.}
@@ -16,6 +16,11 @@ nonparametric estimates for.}
 
 \item{startname}{Label to give the state corresponding to "no event happened
 yet".  By default this is \code{"Start"}.}
+
+\item{B}{Number of simulation replications to use to calculate a confidence
+interval for the parametric estimates in \code{\link{p_flexsurvmix}}. 
+Comparable intervals for the Aalen-Johansen estimates are returned if this
+is set.  Otherwise if \code{B=NULL} then no intervals are returned.}
 }
 \description{
 This computes Aalen-Johansen estimates of the probability of occupying each
