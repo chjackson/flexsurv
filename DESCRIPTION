@@ -33,6 +33,7 @@ Imports:
     mvtnorm,
     quadprog,
     Rcpp (>= 0.11.5),
+    rlang,
     rstpm2,
     purrr,
     tibble,

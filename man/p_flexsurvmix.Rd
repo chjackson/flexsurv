@@ -18,7 +18,7 @@ transition to one of the competing events.}
 \item{t}{Vector of times \code{t} to calculate the probabilities of
 transition by.}
 
-\item{B}{Number of simulations to use to compute 95% confidence intervals,
+\item{B}{Number of simulations to use to compute 95\% confidence intervals,
 based on the asymptotic multivariate normal distribution of the basic
 parameter estimates.  If \code{B=NULL} then intervals are not computed.}
 }

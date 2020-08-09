@@ -11,7 +11,7 @@ mean_flexsurvmix(x, newdata = NULL, B = NULL)
 
 \item{newdata}{Data frame or list of covariate values.}
 
-\item{B}{Number of simulations to use to compute 95% confidence intervals,
+\item{B}{Number of simulations to use to compute 95\% confidence intervals,
 based on the asymptotic multivariate normal distribution of the basic
 parameter estimates.  If \code{B=NULL} then intervals are not computed.}
 }

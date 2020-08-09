@@ -8,7 +8,7 @@
 ##'
 ##' @param newdata Data frame or list of covariate values.
 ##'
-##' @param B Number of simulations to use to compute 95% confidence intervals,
+##' @param B Number of simulations to use to compute 95\% confidence intervals,
 ##'   based on the asymptotic multivariate normal distribution of the basic
 ##'   parameter estimates.  If \code{B=NULL} then intervals are not computed.
 ##'
@@ -37,16 +37,10 @@ mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
 ##' distribution in the mixture model, which is the mean time to event
 ##' conditionally on that event being the one that happens, and conditionally
 ##' on the event time being less than some time horizon \code{tot}.
-##'
-##' @param x Fitted model object returned from \code{\link{flexsurvmix}}.
-##'
-##' @param newdata Data frame or list of covariate values.
 ##'   
 ##' @param tot Time horizon to compute the restricted mean until.
 ##'
-##' @param B Number of simulations to use to compute 95% confidence intervals,
-##'   based on the asymptotic multivariate normal distribution of the basic
-##'   parameter estimates.  If \code{B=NULL} then intervals are not computed.
+##' @inheritParams mean_flexsurvmix
 ##'
 ##' @return Restricted mean times to next event conditionally on each alternative event,
 ##'   given the specified covariate values.
