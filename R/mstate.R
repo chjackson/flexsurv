@@ -1336,7 +1336,7 @@ print.fmsm <- function(x, ...){
 }
 
 ##' @export
-AIC.fmsm <- function(object,...,k){
+AIC.fmsm <- function(object,...,k=2){
     nmods <- length(object)
     aics <- numeric(nmods)
     for (i in 1:nmods){

@@ -227,6 +227,11 @@ quantile_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, prob
   nmods <- length(x)
   sims <- vector(nmods, mode="list")
   names(sims) <- names(x)
+  if (final) {  
+    ppath <- prob_pathway(x=x, newdata=newdata, final=FALSE, B=NULL) %>% 
+      dplyr::rename(prob="val") %>%
+      dplyr::mutate(n = round(n*prob))
+  }
   for (i in seq_along(x)){
     sims[[i]] <- simt_flexsurvmix(x[[i]], newdata=newdata, n=n)
   }
@@ -243,21 +248,32 @@ quantile_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, prob
     simsumdf <- sims[[1]][,colnames(newdata)]
     simsumdf$pathway <- attr(x,"pathway_str")[[p]]
     simsumdf$sm <- sm
-    simsum[[p]] <- simsumdf %>%
+    
+    ## TESTME
+    if (final){
+      simsum[[p]] <- simsumdf %>%
+        dplyr::left_join(ppath, by=c(colnames(newdata))) %>%
+        dplyr::group_by_at(c(colnames(newdata))) %>%
+        ## Keep only the first n of the sampled rows
+        ## where n is weighted by the prob of the pathway
+        dplyr::group_modify(~{.x[1:.x$n[1],]}) 
+    } else {
+      simsum[[p]] <- simsumdf %>%
       dplyr::group_by_at(c("pathway", colnames(newdata)))  %>%
       dplyr::summarise(probs=probs,
-                       val = quantile(.data$sm, p=probs))
+                       val = quantile(.data$sm, p=probs,na.rm=TRUE))
+    }
   }
   resq <- do.call("rbind", simsum)
+  
+  if (final){
+    resq <- resq %>%
+      dplyr::group_by_at(c("final", colnames(newdata)))  %>%
+      dplyr::summarise(probs=probs,
+                       val = quantile(.data$sm, p=probs,na.rm=TRUE))
+  }
 
   rownames(resq) <- NULL
-  if (final) {  
-    probs <- prob_pathway(x=x, newdata=newdata, final=FALSE, B=NULL) %>% dplyr::rename(prob="val")
-    resq <- resq %>% 
-      dplyr::left_join(probs, by=c(names(newdata), "pathway", "final")) %>%
-      dplyr::group_by_at(c(names(newdata), "final")) %>% 
-      dplyr::summarise(val=sum(.data$val*.data$prob)/sum(.data$prob))
-  } 
   
   if (is.numeric(B) && B > 1){
     res <- matrix(nrow=B, ncol=length(resq$val))
