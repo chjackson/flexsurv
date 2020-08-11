@@ -457,6 +457,7 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
     names(res) <- t
     if (ci){
         resci <- bootci.fmsm(x, B, fn=pmatrix.fs, cl=cl, ci=FALSE, cores=NULL, trans=trans, t=t, newdata=newdata, condstates=condstates, tvar=tvar, sing.inf=sing.inf, tidy=tidy, ...)
+        if (tidy) resci <- resci[,1:(nt*nst*nst),drop=FALSE]
         resl <- lapply(split(resci[1,],rep(1:nt, each=nst*nst)), function(x)matrix(x,nrow=nst,dimnames=dimnames(trans)))
         resu <- lapply(split(resci[2,],rep(1:nt, each=nst*nst)), function(x)matrix(x,nrow=nst,dimnames=dimnames(trans)))
         names(resl) <- names(resu) <- t

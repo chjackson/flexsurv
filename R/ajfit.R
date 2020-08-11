@@ -81,7 +81,6 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL, ajvar=FALSE, B=0){
     if (B>0) ci <- TRUE else ci <- FALSE
     pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,], start=1, t=times, tidy=TRUE, ci=ci, B=B)
     covvals <- newdata[i,][rep(1,nrow(pmat[[i]])),]
-    browser()
     pmat[[i]] <- cbind(pmat[[i]], covvals)
   } 
   pmat <- do.call("rbind", pmat)
