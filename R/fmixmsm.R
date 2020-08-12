@@ -71,7 +71,7 @@ get_pathways <- function(mod_current, mods, ret){
 ##' 
 ##'
 ##' @export
-prob_pathway <- function(x, newdata=NULL, final=FALSE, B=NULL){
+ppath_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
     pathways <- attr(x, "pathways")
     if (isTRUE(pathways$has_cycle))
         stop("models with cycles not supported in this function")
@@ -116,7 +116,7 @@ prob_pathway <- function(x, newdata=NULL, final=FALSE, B=NULL){
       res[1,] <- ppath$val
       for (i in 2:B){
         xrep <- resample_pars_fmixmsm(x)
-        res[i,] <- prob_pathway(xrep, newdata=newdata, final=final, B=NULL)$val
+        res[i,] <- ppath_fmixmsm(xrep, newdata=newdata, final=final, B=NULL)$val
       }
       resci <- apply(res, 2, quantile, c(0.025, 0.975), na.rm=TRUE)
       ppath$lower <- resci[1,]
@@ -137,7 +137,7 @@ resample_pars_fmixmsm <- function(x){
 ##' "absorbing") state in a mixture multi-state model.  Models with cycles are
 ##' not supported.
 ##'
-##' @inheritParams prob_pathway
+##' @inheritParams ppath_fmixmsm
 ##'
 ##' @param final If \code{TRUE} then the mean time to the final state is
 ##'   calculated for each final state, by taking a weighted average of the mean
@@ -149,7 +149,7 @@ resample_pars_fmixmsm <- function(x){
 ##'   pathway (or by final state)
 ##' 
 ##' @export
-mean_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL){
+meanfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
   pathways <- attr(x, "pathways")
   nmods <- length(x)
   means <- vector(nmods, mode="list")
@@ -182,7 +182,7 @@ mean_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL){
   }
   rownames(meanp) <- NULL
   if (final) {  
-    probs <- prob_pathway(x=x, newdata=newdata, final=FALSE, B=NULL) %>% dplyr::rename(prob="val")
+    probs <- ppath_fmixmsm(x=x, newdata=newdata, final=FALSE, B=NULL) %>% dplyr::rename(prob="val")
     meanp <- meanp %>% 
       dplyr::left_join(probs, by=c(names(newdata), "pathway", "final")) %>%
       dplyr::group_by_at(c(names(newdata), "final")) %>% 
@@ -193,7 +193,7 @@ mean_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL){
     res[1,] <- meanp$val
     for (i in 2:B){
       xrep <- resample_pars_fmixmsm(x)
-      res[i,] <- mean_tofinal(xrep, newdata=newdata, final=final, B=NULL)$val
+      res[i,] <- meanfinal_fmixmsm(xrep, newdata=newdata, final=final, B=NULL)$val
     }
     resci <- apply(res, 2, quantile, c(0.025, 0.975), na.rm=TRUE)
     meanp$lower <- resci[1,]
@@ -203,11 +203,16 @@ mean_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL){
 }
 
 
-##' Quantiles of the distribution of the time until reaching a final state in a mixture multi-state model
-##' 
-##' 
-##' @inheritParams prob_pathway
-##' 
+##' Quantiles of the distribution of the time until reaching a final state in a
+##' mixture multi-state model
+##'
+##' Calculate the quantiles of the time from the start of the process to each
+##' possible final (or "absorbing") state in a mixture multi-state model.
+##' Models with cycles are not supported.
+##'
+##'
+##' @inheritParams ppath_fmixmsm
+##'
 ##' @param final If \code{TRUE} then the mean time to the final state is
 ##'   calculated for each final state, by taking a weighted average of the mean
 ##'   time to travel each pathway ending in that final state, weighted by the
@@ -222,15 +227,15 @@ mean_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL){
 ##' @return Data frame of quantiles of the time to final state by pathway and
 ##'   covariate value, or by final state and covariate value.
 ##'   
-quantile_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=c(0.025, 0.5, 0.975)){
+qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=c(0.025, 0.5, 0.975)){
   pathways <- attr(x, "pathways")
   nmods <- length(x)
   sims <- vector(nmods, mode="list")
   names(sims) <- names(x)
   if (final) {  
-    ppath <- prob_pathway(x=x, newdata=newdata, final=FALSE, B=NULL) %>% 
+    ppath <- ppath_fmixmsm(x=x, newdata=newdata, final=FALSE, B=NULL) %>% 
       dplyr::rename(prob="val") %>%
-      dplyr::mutate(n = round(n*prob))
+      dplyr::mutate(n = round(n * .data$prob))
   }
   for (i in seq_along(x)){
     sims[[i]] <- simt_flexsurvmix(x[[i]], newdata=newdata, n=n)
@@ -280,7 +285,7 @@ quantile_tofinal <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, prob
     res[1,] <- resq$val
     for (i in 2:B){
       xrep <- resample_pars_fmixmsm(x)
-      res[i,] <- quantile_tofinal(xrep, newdata=newdata, final=final, B=NULL, n=n, probs=probs)$val
+      res[i,] <- qfinal_fmixmsm(xrep, newdata=newdata, final=final, B=NULL, n=n, probs=probs)$val
     }
     resci <- apply(res, 2, quantile, c(0.025, 0.975), na.rm=TRUE)
     resq$lower <- resci[1,]
@@ -319,8 +324,8 @@ simt_flexsurvmix <- function(x, newdata=NULL, n){
   }
   if (!is.null(newdata)){
     newdatarep <- newdata[rep(seq_len(ncovvals),n),,drop=FALSE]
+    simdf <- cbind(newdatarep, simdf)
+    simdf <- simdf[do.call("order", newdatarep),,drop=FALSE]
   }
-  simdf <- cbind(newdatarep, simdf)
-  simdf <- simdf[do.call("order", newdatarep),,drop=FALSE]
   simdf
 }

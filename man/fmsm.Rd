@@ -7,12 +7,22 @@
 fmsm(..., trans)
 }
 \arguments{
-\item{...}{Objects returned by \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}} representing fitted survival models.}
+\item{...}{Objects returned by \code{\link{flexsurvreg}} or
+\code{\link{flexsurvspline}} representing fitted survival models.}
 
-\item{trans}{A matrix of integers specifying which models correspond to which transitions.  The \eqn{r,s} entry is \code{i} if the \eqn{i}th argument specified in \code{...} is the model for the state \eqn{r} to state \eqn{s} transition.}
+\item{trans}{A matrix of integers specifying which models correspond to
+which transitions.  The \eqn{r,s} entry is \code{i} if the \eqn{i}th
+argument specified in \code{...} is the model for the state \eqn{r} to
+state \eqn{s} transition.  The entry should be \code{NA} if the 
+transition is disallowed.}
 }
 \value{
-A list containing the objects given in \code{...}, and with attributes \code{"trans"} and \code{"statenames"} defining the transition structure matrix and state names, and with list components named to describe the transitions they correspond to.  If any of the arguments in \code{...} are named, then these are used to define the transition names, otherwise default names are chosen based on the state names.
+A list containing the objects given in \code{...}, and with
+  attributes \code{"trans"} and \code{"statenames"} defining the transition
+  structure matrix and state names, and with list components named to
+  describe the transitions they correspond to.  If any of the arguments in
+  \code{...} are named, then these are used to define the transition names,
+  otherwise default names are chosen based on the state names.
 }
 \description{
 Construct a multi-state model from a set of parametric survival models

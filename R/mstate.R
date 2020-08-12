@@ -1011,12 +1011,9 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
                 x.rep[[j]]$res.t[,"est"] <- sim[[j]][i,]
         } else
             x.rep$res.t[,"est"] <- sim[i,]
-#        fncall$x <- x.rep
-#        fncall$cores <- NULL
         args <- list(...)
         args$x <- x.rep
         resi <- do.call(fn, args)
-#        resi <- eval(fncall)
         resivec <- unlist(resi)
         if (!is.numeric(resivec)) stop("boot_fn returns a non-numeric result")
         c(resivec, unlist(attributes(resi)[attrs]))
@@ -1305,12 +1302,22 @@ default_transnames <- function(flist, trans){
         
 ##' Construct a multi-state model from a set of parametric survival models
 ##'
-##' @param ... Objects returned by \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}} representing fitted survival models.
+##' @param ... Objects returned by \code{\link{flexsurvreg}} or
+##'   \code{\link{flexsurvspline}} representing fitted survival models.
 ##'
-##' @param trans A matrix of integers specifying which models correspond to which transitions.  The \eqn{r,s} entry is \code{i} if the \eqn{i}th argument specified in \code{...} is the model for the state \eqn{r} to state \eqn{s} transition.
+##' @param trans A matrix of integers specifying which models correspond to
+##'   which transitions.  The \eqn{r,s} entry is \code{i} if the \eqn{i}th
+##'   argument specified in \code{...} is the model for the state \eqn{r} to
+##'   state \eqn{s} transition.  The entry should be \code{NA} if the 
+##'   transition is disallowed. 
 ##'
-##' @return A list containing the objects given in \code{...}, and with attributes \code{"trans"} and \code{"statenames"} defining the transition structure matrix and state names, and with list components named to describe the transitions they correspond to.  If any of the arguments in \code{...} are named, then these are used to define the transition names, otherwise default names are chosen based on the state names. 
-##' 
+##' @return A list containing the objects given in \code{...}, and with
+##'   attributes \code{"trans"} and \code{"statenames"} defining the transition
+##'   structure matrix and state names, and with list components named to
+##'   describe the transitions they correspond to.  If any of the arguments in
+##'   \code{...} are named, then these are used to define the transition names,
+##'   otherwise default names are chosen based on the state names.
+##'
 ##' @export
 fmsm <- function(..., trans){
     flist <- list(...)
@@ -1352,3 +1359,164 @@ nextstates <- function(x, fromstate){
 }
 
 
+
+pfinal_fmsm_noci <- function(x, newdata=NULL, fromstate, maxt=100000){
+    tmat <- attr(x, "trans")
+    if (!(fromstate %in% rownames(tmat))) 
+        stop(sprintf("State `%s` not found in rownames(attr(x,\"trans\"))",fromstate))
+    tostates <- colnames(tmat)[!is.na(tmat[fromstate,])]
+    ncovvals <- if (is.null(newdata)) 1 else nrow(newdata)
+    pres <- as.data.frame(matrix(nrow=ncovvals, ncol=length(tostates)))
+    colnames(pres) <- tostates
+    if (length(tostates)==0) stop(sprintf("No destination states possible from state %s",fromstate))
+    for (i in 1:ncovvals){
+        nd <- if (is.null(newdata)) NULL else newdata[i,,drop=FALSE]
+        pm <- pmatrix.fs(x, newdata=nd, condstates=tostates, t=maxt, tidy=TRUE)[1,tostates]
+        pres[i,tostates]  <- unlist(pm)
+    }
+    if (!is.null(newdata)) pres <- cbind(newdata, pres)
+    pres
+}
+
+
+##' Steady state probabilities in a flexible parametric Markov multi-state model
+##'
+##' This requires the model to be Markov, and is not valid for semi-Markov
+##' models, as it works by wrapping \code{\link{pmatrix.fs}} to calculate the
+##' transition probability over a very large time.  No check is performed for
+##' the Markov property, so use with care.  For semi-Markov models, simulation
+##' is required, e.g. through \code{\link{pmatrix.simfs}}.
+##'
+##' Competing risks models, defined by just one starting state with multiple
+##' destination states representing competing events, are Markov by definition.
+##' For these models, this function returns the probability governing which
+##' competing event happens next.
+##'
+##' @param x Object returned by \code{\link{fmsm}}, representing a multi-state
+##'   model formed from transition-specific time-to-event models fitted by
+##'   \code{\link{flexsurvreg}}.
+##'
+##' @param newdata Data frame of covariate values, with one column per
+##'   covariate, and one row per alternative value.
+##'
+##' @param fromstate State from which to calculate the transition probability
+##'   state.  This should refer to the name of a row of the transition matrix
+##'   \code{attr(x,trans)}.
+##'
+##' @param maxt Large time to use for forecasting steady state probabilities.
+##'   The transition probability from zero to this time is used.  Note
+##'   \code{Inf} will not work. The default is \code{100000}.
+##'
+##' @param B Number of simulations to use to calculate 95% confidence intervals
+##'   based on the asymptotic normal distribution of the basic parameter
+##'   estimates. If \code{B=0} then no intervals are calculated.
+##'
+##' @param cores Number of processor cores to use.  If \code{NULL} (the default)
+##'   then a single core is used.
+##'
+##' @return A data frame with one row per covariate value and destination state,
+##'   giving the state in column \code{state}, and probability in column
+##'   \code{val}. Additional columns \code{lower} and \code{upper} for the
+##'   confidence limits are returned if \code{B=0}.
+##'
+##' @export
+pfinal_fmsm <- function(x, newdata=NULL, fromstate, maxt=100000, B=0, cores=NULL){
+    ests <- pfinal_fmsm_noci(x, newdata, fromstate=fromstate, maxt=maxt)
+    tostates <- nextstates(x, fromstate)
+    ests <- pivot_longer(ests, all_of(tostates), names_to="state", values_to="val")
+    ests$state <- factor(ests$state, levels=tostates)
+    ests <- ests[order(ests$state),]
+    if (B>0){
+        bci <- bootci.fmsm(x, fn=pfinal_fmsm_noci, newdata=newdata, 
+                           fromstate=fromstate, maxt=maxt, B=B, cores=cores)
+        if (!is.null(newdata))
+            bci <- bci[,-seq_along(unlist(newdata)),drop=FALSE]
+        ests$lower <- bci["2.5%",]
+        ests$upper <- bci["97.5%",]
+    }
+    ests
+}
+
+
+simfinal_fmsm_noci <- function(x, newdata=NULL, t=1000, M=100000, probs=c(0.025, 0.5, 0.975)){
+    ncovvals <- if (is.null(newdata)) 1 else nrow(newdata)
+    simfs <- vector(ncovvals, mode="list")
+    for (i in 1:ncovvals){
+        nd <- if (is.null(newdata)) NULL else newdata[i,,drop=FALSE]
+        simfs[[i]] <- sim.fmsm(x, newdata=nd, t=t, M=M, tidy=TRUE)
+    }
+    rest <- vector(ncovvals, mode="list")
+    statenames <- names(absorbing(attr(x,"trans")))
+    for (i in 1:ncovvals){
+        sf <- simfs[[i]]
+        abs <- sf$end %in% statenames
+        finaldat <- sf[abs,,drop=FALSE]
+        means <- data.frame(state=statenames, 
+                            val=tapply(finaldat$time, finaldat$end, mean), 
+                            quantity="mean")
+        probsu <- data.frame(state=statenames, 
+                            val=as.numeric(prop.table(table(finaldat$end))[statenames]), 
+                            quantity="prob")
+        quants <- tapply(finaldat$time, finaldat$end, quantile, probs)
+        quants <- as.data.frame(do.call("rbind",quants))
+        qnames <- colnames(quants)
+        quants$state <- statenames
+        quants <-  tidyr::pivot_longer(quants, cols=c(all_of(qnames)), 
+                                       names_to="quantity", 
+                                       values_to="val")
+        rest[[i]] <- quants %>% 
+            dplyr::full_join(means,by=c("state","quantity","val")) %>% 
+            dplyr::full_join(probsu,by=c("state","quantity","val"))
+        rest[[i]] <- newdata[i,,drop=FALSE] %>%
+            tidyr::crossing(rest[[i]])       
+    }
+    do.call("rbind",rest)
+}  
+
+##' Simulate and summarise final outcomes from a flexible parametric multi-state
+##' model
+##'
+##' Estimates the probability of each final outcome ("absorbing" state), and the
+##' mean and quantiles of the time to that outcome for people who experience it,
+##' by simulating a large sample of individuals from the model.  This can be used
+##' for both Markov and semi-Markov models.
+##' 
+##' For a competing risks model, i.e. a model defined by just one starting state
+##' and multiple destination states representing competing events, this returns
+##' the probability governing the next event that happens, and the distribution 
+##' of the time to each event conditionally on that event happening. 
+##'
+##' @inheritParams pfinal_fmsm
+##'
+##' @param probs Quantiles to calculate, by default, \code{c(0.025, 0.5, 0.975)}
+##'   for a median and 95\% interval.
+##'
+##' @param t Maximum time to simulate to, passed to \code{\link{sim.fmsm}}, so
+##'   that the summaries are taken from the subset of individuals in the
+##'   simulated data who are in the absorbing state at this time.
+##'
+##' @param M Number of individuals to simulate.
+##'
+##' @return A tidy data frame with rows for each combination of covariate values
+##'   and quantity of interest.  The quantity of interest is identified in the
+##'   column \code{quantity}, and the value of the quantity is in \code{val},
+##'   with additional columns \code{lower} and \code{upper} giving 95\%
+##'   confidence intervals for the quantity, if \code{B>0}.
+##'
+##' @export
+simfinal_fmsm <- function(x, newdata=NULL, probs=c(0.025, 0.5, 0.975), 
+                         t=1000, M=100000, B=0, cores=NULL){
+    if (x[[1]]$ncoveffs > 0 & is.null(newdata))
+        stop("`newdata` should be supplied if there are covariates in the model")
+    ests <- simfinal_fmsm_noci(x=x, newdata=newdata, probs=probs, t=t, M=M)
+    valfn <- function(x, newdata=NULL, t, M, probs){ 
+        simfinal_fmsm_noci(x=x, newdata=newdata, t=t, M=M, probs=probs)$val
+    }
+    if (B>0){
+        bci <- bootci.fmsm(x, fn=valfn, newdata=newdata, 
+                           t=t, M=M, B=B, cores=cores, probs=probs)
+        ests$lower <- bci["2.5%",]
+        ests$upper <- bci["97.5%",]
+    }
+    ests
+}

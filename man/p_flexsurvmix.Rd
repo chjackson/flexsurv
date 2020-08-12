@@ -9,7 +9,10 @@ p_flexsurvmix(x, newdata = NULL, startname = "start", t = 1, B = NULL)
 \arguments{
 \item{x}{Fitted model object returned from \code{\link{flexsurvmix}}.}
 
-\item{newdata}{Data frame or list of covariate values.}
+\item{newdata}{Data frame or list of covariate values.   If omitted for a
+model with covariates, a default is used, defined by all combinations of
+factors if the only covariates in the model are factors, or all covariate
+values of zero if there are any non-factor covariates in the model.}
 
 \item{startname}{Name of the state where individuals start. This considers
 the model as a multi-state model where people start in this state, and may

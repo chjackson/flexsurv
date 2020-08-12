@@ -6,7 +6,10 @@
 ##'
 ##' @param x Fitted model object returned from \code{\link{flexsurvmix}}.
 ##'
-##' @param newdata Data frame or list of covariate values.
+##' @param newdata Data frame or list of covariate values.   If omitted for a
+##'   model with covariates, a default is used, defined by all combinations of
+##'   factors if the only covariates in the model are factors, or all covariate
+##'   values of zero if there are any non-factor covariates in the model.
 ##'
 ##' @param B Number of simulations to use to compute 95\% confidence intervals,
 ##'   based on the asymptotic multivariate normal distribution of the basic
@@ -14,7 +17,7 @@
 ##'
 ##' @return Mean times to next event conditionally on each alternative event,
 ##'   given the specified covariate values.
-##'   
+##'
 ##' @export
 mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
   if (!is.null(newdata)){  # mean functions aren't vectorised 
@@ -78,10 +81,6 @@ quantile_flexsurvmix <- function(x, newdata=NULL, B=NULL, probs=c(0.025, 0.5, 0.
   cisumm_flexsurvmix(x, newdata=newdata, fnname="q", fnarg="p", fnargval=probs, fnlist=x$dfns, B=B)
   
 }
-
-## if we want CIs for this we'll have to rethink parclass thing 
-## this one depends on both probs and basepars. 
-## parclass="both"? 
 
 ##' Transition probabilities from a flexsurvmix model
 ##'

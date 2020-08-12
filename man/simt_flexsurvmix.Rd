@@ -9,7 +9,10 @@ simt_flexsurvmix(x, newdata = NULL, n)
 \arguments{
 \item{x}{Fitted model object returned from \code{\link{flexsurvmix}}.}
 
-\item{newdata}{Data frame or list of covariate values.}
+\item{newdata}{Data frame or list of covariate values.   If omitted for a
+model with covariates, a default is used, defined by all combinations of
+factors if the only covariates in the model are factors, or all covariate
+values of zero if there are any non-factor covariates in the model.}
 
 \item{n}{Number of simulations}
 }

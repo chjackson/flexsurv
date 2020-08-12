@@ -44,39 +44,46 @@ ficu <- flexsurvmix(Surv(ti, statusi) ~ 1, data=dati, event=evicu,
 
 ## Construct multi-state model object
 fm <- fmixmsm("hospital"=fhosp, "icu"=ficu)
+nd <- data.frame(x=c(0,0.02), y=c(0,0.01))
 
-test_that("prob_pathway",{
+test_that("ppath_fmixmsm",{
   probh <- probs_flexsurvmix(fhosp)
   probi <- probs_flexsurvmix(ficu)
-  pp <- prob_pathway(fm)
+  pp <- ppath_fmixmsm(fm)
   expect_equal(
     probh$val[probh$event=="icu"] * probi$val[probi$event=="death"],
     pp$val[pp$pathway=="hospital-icu-death"]
   )
-  prob_pathway(fm, final=TRUE)
-  nd <- data.frame(x=c(0,0.02), y=c(0,0.01))
+  ppath_fmixmsm(fm, final=TRUE)
   probh <- probs_flexsurvmix(fhosp,newdata=nd)
   probi <- probs_flexsurvmix(ficu,newdata=nd)
-  pp <- prob_pathway(fm, newdata=nd)
+  pp <- ppath_fmixmsm(fm, newdata=nd)
   expect_equal(
     probh$val[probh$event=="icu" & probh$x==0.02 & probh$y==0.01] * 
       probi$val[probi$event=="death" & probi$x==0.02 & probi$y==0.01],
     pp$val[pp$pathway=="hospital-icu-death" & pp$x==0.02 & pp$y==0.01]
   )
-  prob_pathway(fm, newdata=nd, final=TRUE)
-  expect_true(is.numeric(prob_pathway(fm, B=3)$lower))
-  expect_true(is.numeric(prob_pathway(fm, final=TRUE, B=3)$lower))
-  expect_true(is.numeric(prob_pathway(fm, newdata=nd, B=3)$lower))
-  expect_true(is.numeric(prob_pathway(fm, newdata=nd, final=TRUE, B=3)$lower))
+  ppath_fmixmsm(fm, newdata=nd, final=TRUE)
+  expect_true(is.numeric(ppath_fmixmsm(fm, B=3)$lower))
+  expect_true(is.numeric(ppath_fmixmsm(fm, final=TRUE, B=3)$lower))
+  expect_true(is.numeric(ppath_fmixmsm(fm, newdata=nd, B=3)$lower))
+  expect_true(is.numeric(ppath_fmixmsm(fm, newdata=nd, final=TRUE, B=3)$lower))
 })
 
-test_that("mean_tofinal",{
-  mean_tofinal(fm)
-  mean_tofinal(fm, final=TRUE)
-  mean_tofinal(fm, newdata=nd)
-  mean_tofinal(fm, newdata=nd, final=TRUE)
-  expect_true(is.numeric(mean_tofinal(fm, B=3)$lower))
-  expect_true(is.numeric(mean_tofinal(fm, final=TRUE, B=3)$lower))
-  expect_true(is.numeric(mean_tofinal(fm, newdata=nd, B=3)$lower))
-  expect_true(is.numeric(mean_tofinal(fm, newdata=nd, final=TRUE, B=3)$lower))
+test_that("meanfinal_fmixmsm",{
+  meanfinal_fmixmsm(fm)
+  meanfinal_fmixmsm(fm, final=TRUE)
+  meanfinal_fmixmsm(fm, newdata=nd)
+  meanfinal_fmixmsm(fm, newdata=nd, final=TRUE)
+  expect_true(is.numeric(meanfinal_fmixmsm(fm, B=3)$lower))
+  expect_true(is.numeric(meanfinal_fmixmsm(fm, final=TRUE, B=3)$lower))
+  expect_true(is.numeric(meanfinal_fmixmsm(fm, newdata=nd, B=3)$lower))
+  expect_true(is.numeric(meanfinal_fmixmsm(fm, newdata=nd, final=TRUE, B=3)$lower))
+})
+
+test_that("qfinal_fmixmsm",{
+  expect_error(qfinal_fmixmsm(fm))  # FIXME ERROR WHEN NEWDATA NOT SUPPLIED..
+  #expect_error(qfinal_fmixmsm(fm, newdata=nd["x"]))  # OR INCOMPLETE
+  quantile_tofinal(fm, newdata=nd)
+  quantile_tofinal(fm, newdata=nd, probs=c(0.25, 0.75))
 })
