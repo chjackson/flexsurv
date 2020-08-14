@@ -581,6 +581,8 @@ flexsurvmix <- function(formula, data, event, dists,
       }
       est.t <- c(NA, alpha, covp, unlist(ttepars.t))
       if (is.numeric(em.control$trace) && em.control$trace > 0)
+        cat(sprintf("loglik=%s\n",loglik))
+      if (is.numeric(em.control$trace) && em.control$trace > 1)
         print(est)
       iter <- iter + 1
     }
