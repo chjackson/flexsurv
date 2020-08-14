@@ -20,6 +20,7 @@
 ##'
 ##' @export
 mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
+  if (is.null(newdata)) newdata <- default_newdata(x)
   if (!is.null(newdata)){  # mean functions aren't vectorised 
     newdata <- as.data.frame(newdata)
     nvals <- nrow(newdata)
@@ -29,8 +30,9 @@ mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
         res <- rbind(res, cisumm_flexsurvmix(x, newdata=newdata[i,], fnname="mean", fnlist=x$dfns, B=B))
       }
     }
-  } else 
+  } else {
     res <- cisumm_flexsurvmix(x, newdata=newdata, fnname="mean", fnlist=x$dfns, B=B)
+  }
   res
 }
 
@@ -50,6 +52,7 @@ mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
 ##'   
 ##' @export
 rmst_flexsurvmix <- function(x, newdata=NULL, tot=Inf, B=NULL){
+  if (is.null(newdata)) newdata <- default_newdata(x)
   if (!is.null(newdata)){  # mean functions aren't vectorised 
     newdata <- as.data.frame(newdata)
     nvals <- nrow(newdata)
@@ -59,8 +62,10 @@ rmst_flexsurvmix <- function(x, newdata=NULL, tot=Inf, B=NULL){
         res <- rbind(res, cisumm_flexsurvmix(x, newdata=newdata[i,], fnname="rmst", fnarg="t", fnargval=tot, fnlist=x$dfns, B=B))
       }
     }
-  } else 
+  } else {
+    newdata <- default_newdata(x, zero=TRUE)
     res <- cisumm_flexsurvmix(x, newdata=newdata, fnname="rmst", fnarg="t", fnargval=tot, fnlist=x$dfns, B=B)
+  }
   res
 }
 
@@ -144,7 +149,7 @@ probs_flexsurvmix <- function(x, newdata=NULL, B=NULL){
 }
 
 
-default_newdata <- function(x){
+default_newdata <- function(x, zero=FALSE){
   dat <- x$data$mfcomb
   covnames <- attr(dat, "covnames")
   ncovs <- length(covnames)
@@ -153,7 +158,7 @@ default_newdata <- function(x){
   }
   else { 
     faccovs <- sapply(dat[,covnames], is.factor)
-    if (!all(faccovs)) 
+    if (!all(faccovs) & !zero) 
       newdata <- matrix(0, nrow=1, ncol=ncovs, dimnames=list(NULL, covnames))
     else 
       newdata <- do.call(expand.grid, lapply(dat[,covnames],  levels))
