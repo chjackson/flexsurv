@@ -839,7 +839,7 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
 
     nst <- nrow(trans)
     ## TODO only need a max time if model is transient, else if absorbing, can allocate these up front
-    res.st <- cur.st <- start
+    res.st <- cur.st <- rep(start, M)
     res.t <- cur.t <- rep(0, M)
     todo <- seq_len(M)
     while (any(todo)){
