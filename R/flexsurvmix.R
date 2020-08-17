@@ -235,7 +235,7 @@ flexsurvmix <- function(formula, data, event, dists,
   dlists <- vector(K, mode="list")
   if (is.null(dfns)) dfns <- vector(K, mode="list")
   for (k in 1:K){
-    dlists[[k]] <- parse.dist(dists[k])
+    dlists[[k]] <- parse.dist(dists[[k]])
     dfns[[k]] <- form.dp(dlists[[k]], dfns[[k]], integ.opts)
   }
   names(dlists) <- names(dfns) <- names(dists)
@@ -346,10 +346,11 @@ flexsurvmix <- function(formula, data, event, dists,
       dlists[[k]]$inits <- expand.inits.args(dlists[[k]]$inits)
       ## This extra stuff is needed for the Weibull, to use a  survreg fit to
       ## get "initial values"
-      inits.aux <- c(aux, list(forms=forms[[k]], data=if(missing(data)) NULL else data, weights=temp$weights,
-                               control=sr.control,
-                               counting=(attr(model.extract(m[[k]], "response"), "type")=="counting")
-      ))
+      if (dlists[[k]]$name %in% c("exp","weibull.quiet","lnorm","weibullPH","llogis"))
+        inits.aux <- list(forms=forms[[k]], data=if(missing(data)) NULL else data, weights=temp$weights,
+                          control=sr.control,
+                          counting=(attr(model.extract(m[[k]], "response"), "type")=="counting")
+        ) else inits.aux <- aux[[k]]
       ## Auto-generate initial values using the heuristic for that distribution
       auto.inits <- dlists[[k]]$inits(t=yy,mf=m[[k]],mml=mml[[k]],aux=inits.aux)
       nin <- length(inits)
@@ -421,8 +422,9 @@ flexsurvmix <- function(formula, data, event, dists,
       probmat[!is.na(event) & event!=k, k] <- 0
       need_lik <- probmat[,k] > 0
       liki[need_lik,k] <- exp(do.call("flexsurvreg", 
-                                      list(formula=locform[[k]], data=data, dist=dists[k], 
+                                      list(formula=locform[[k]], data=data, dist=dists[[k]], 
                                            anc=anc[[k]], inits=initsk, subset=need_lik,
+                                           aux=aux[[k]],
                                            fixedpars=TRUE))$logliki)
       llp_event_known[,k] <- as.numeric((!is.na(event) & event==k) * log(pmat[,k]))
     }
@@ -432,8 +434,9 @@ flexsurvmix <- function(formula, data, event, dists,
     res
   }
   # Parameter dictionary to be completed with the estimates
+  distnames <- sapply(dists, function(x){if(is.list(x))x$name else x})
   res <- data.frame(component = c(evnames, rep(evnames[1:(K-1)], each=ncovsp),  rep(evnames, ncparsl)), 
-                    dist = c(rep("",nppars+1), rep(dists, ncparsl)), 
+                    dist = c(rep("",nppars+1), rep(distnames, ncparsl)), 
                     terms = c(paste0("prob",1:K),  names(inits_covp),  names(inits_theta)),
                     parclass = c("prob", parclass), 
                     baseorcov = c("pbase", baseorcov), 
@@ -457,6 +460,8 @@ flexsurvmix <- function(formula, data, event, dists,
         optim.control$ndeps = rep(1e-06, length(inits_opt))
       opt <- optim(inits_opt, loglik_flexsurvmix, hessian=TRUE, method="BFGS",
                    control=optim.control, ...)
+      if (opt$convergence==1)
+        warning("Iteration limit in optim() reached without convergence. Reported estimates are not the maximum likelihood. Increase \"maxit\" or simplify the model.")
     } else {
       opt <- list(par=inits_all, value=loglik_flexsurvmix(inits_all))
     }
@@ -512,7 +517,8 @@ flexsurvmix <- function(formula, data, event, dists,
       
       llmat <- matrix(nrow=nobs, ncol=K)
       for (k in 1:K) {
-        fs <- flexsurvreg(formula=locform[[k]], data=data, dist=dists[k], anc=anc[[k]], inits=theta[[k]], fixedpars=TRUE) 
+        fs <- flexsurvreg(formula=locform[[k]], data=data, dist=dists[[k]], 
+                          anc=anc[[k]], inits=theta[[k]], aux=aux[[k]], fixedpars=TRUE) 
         llmat[,k] <-  fs$logliki
       }
       alphap <- exp(llmat) * pmat
@@ -556,9 +562,10 @@ flexsurvmix <- function(formula, data, event, dists,
         if (is.null(optim.control$ndeps)) 
           ctrl$ndeps = rep(1e-06, length(theta[[k]]) + length(covtheta[[k]]))
         fs <- do.call("flexsurvreg",  # need do.call to avoid environment faff with supplying weights
-                      list(formula=locform[[k]], data=data, dist=dists[k], 
+                      list(formula=locform[[k]], data=data, dist=dists[[k]], 
                            anc=anc[[k]], inits=c(theta[[k]],covtheta[[k]]), 
                            weights=w[,k], 
+                           aux=aux[[k]], 
                            subset=w[,k]>0, hessian=FALSE,
                            control=ctrl))
         ll[k] <- fs$loglik
@@ -616,7 +623,7 @@ flexsurvmix <- function(formula, data, event, dists,
   res <- list(call=match.call(),
               res=res, loglik=loglik,  cov=cov, 
               npars=npars, AIC=-2*loglik + 2*npars,
-              K=K, dists=dists,  dlists=dlists, dfns=dfns, 
+              K=K, dists=distnames,  dlists=dlists, dfns=dfns, 
               opt=opt,
               fixedpars=fixedpars, optpars=optpars,
               logliki=logliki,

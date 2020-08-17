@@ -374,7 +374,7 @@ ajfit <- function(x, newdata=NULL, tidy=TRUE){
     if (!all(faccovs)) 
       stop("Nonparametric estimation not supported with non-factor covariates")
     if (is.null(newdata)) 
-      newdata <- do.call(expand.grid, lapply(dat[,covnames],  levels))
+      newdata <- do.call(expand.grid, lapply(dat[,covnames,drop=FALSE],  levels))
     newdata <- as.data.frame(newdata)
     ncovvals <- nrow(newdata)
     sf <- sftidy <- vector(ncovvals, mode="list")
@@ -386,7 +386,7 @@ ajfit <- function(x, newdata=NULL, tidy=TRUE){
         datsub <- datsub[datsub[,covnames[j]] == newdata[i,covnames[j]],,drop=FALSE]
       sf[[i]] <- ajfit.dat(datsub, x$evnames)
       sftidy[[i]] <- as.data.frame(unclass(sf[[i]])[c("time","pstate","lower","upper")])
-      covvals <- newdata[i,][rep(1,nrow(sftidy[[i]])),]
+      covvals <- newdata[i,,drop=FALSE][rep(1,nrow(sftidy[[i]])),,drop=FALSE]
       sftidy[[i]] <- cbind(sftidy[[i]], covvals)
     }
     ret <- if (tidy) do.call("rbind", sftidy) else sf
@@ -442,10 +442,10 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   covnames <- attr(dat, "covnames")
   ncovs <- length(covnames)
   if (ncovs > 0){
-    faccovs <- sapply(dat[,covnames], is.factor)
+    faccovs <- sapply(dat[,covnames,drop=FALSE], is.factor)
     if (!all(faccovs)) 
       stop("Nonparametric estimation not supported with non-factor covariates")
-    newdata <- do.call(expand.grid, lapply(dat[,covnames],  levels))
+    newdata <- do.call(expand.grid, lapply(dat[,covnames,drop=FALSE],  levels))
   } else newdata <- NULL    
   statenames <- c(startname,x$evnames)
   ajlong <- ajfit(x) %>% 
