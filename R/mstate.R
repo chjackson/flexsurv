@@ -882,7 +882,7 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
                 ## if final simulated state is greater than target time, censor at target time
                 cens <- cur.t.out[inds] > t[inds]
                 cur.t.out[inds][cens] <- t[inds][cens]               
-                cur.st.out[!cens] <- next.state[!cens]
+                cur.st.out[inds][!cens] <- next.state[!cens]
                 done <- todo[inds][cens]
             }
         }
