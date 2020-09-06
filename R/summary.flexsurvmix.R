@@ -27,7 +27,7 @@ mean_flexsurvmix <- function(x, newdata=NULL, B=NULL){
     res <- cisumm_flexsurvmix(x, newdata=newdata[1,,drop=FALSE], fnname="mean", fnlist=x$dfns, B=B)
     if (nvals > 1) {
       for (i in 2:nvals){
-        res <- rbind(res, cisumm_flexsurvmix(x, newdata=newdata[i,], fnname="mean", fnlist=x$dfns, B=B))
+        res <- rbind(res, cisumm_flexsurvmix(x, newdata=newdata[i,,drop=FALSE], fnname="mean", fnlist=x$dfns, B=B))
       }
     }
   } else {
@@ -145,7 +145,15 @@ p_flexsurvmix <- function(x, newdata=NULL,startname="start", t=1, B=NULL){
 ##'
 ##' @export
 probs_flexsurvmix <- function(x, newdata=NULL, B=NULL){
-  cisumm_flexsurvmix(x, newdata=newdata, parclass="prob", B=B, fnname=NULL)
+  if (is.null(newdata)) newdata <- default_newdata(x)
+  if (x$K==1) { 
+    res <- newdata
+    res$event <- x$evnames
+    res$val <- 1
+    
+  } else 
+    res <- cisumm_flexsurvmix(x, newdata=newdata, parclass="prob", B=B, fnname=NULL)
+  res
 }
 
 

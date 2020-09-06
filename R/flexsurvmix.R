@@ -369,7 +369,7 @@ flexsurvmix <- function(formula, data, event, dists,
   }
   ## Transform initial values to log or logit scale for optimisation, if needed. 
   inits_probs <- initp
-  inits_alpha <- qmnlogit(inits_probs)
+  inits_alpha <- if (K==1) numeric() else qmnlogit(inits_probs)
   inits_covp <- rep( rep(0,ncovsp), K-1)   # order by covariate within probability
   names(inits_covp) <- sprintf("prob%s(%s)", rep(2:K, each=ncovsp), rep(colnames(Xp), K-1))
   inits_theta <- numeric()
@@ -380,20 +380,24 @@ flexsurvmix <- function(formula, data, event, dists,
   loglik_flexsurvmix <- function(parsopt, ...){
     pars <- inits_all
     pars[optpars] <- parsopt
-    ## Apply covariate effects to mixing probabilities by multinomial logistic
-    ## regression
-    alpha <-  c(0, pars[1:(K-1)])
-    alphamat <- matrix(alpha, nrow=nobs, ncol=K, byrow=TRUE)  # by individual 
-    if (ncovsp > 0) { 
-      for (k in 2:K){  
-        cpinds <- K - 1 + (k-2)*ncovsp + 1:ncovsp
-        alphamat[,k] <- alpha[k] + Xp %*% pars[cpinds] 
-      }
-    }
-    pmat <- exp(alphamat)
-    pmat <- pmat / rowSums(pmat)
-    probmat <- pmat # this will be 1 or 0 if event observed
     
+    if (K==1) 
+      probmat <- pmat <- matrix(1, nrow=nobs, ncol=K)
+    else { 
+      ## Apply covariate effects to mixing probabilities by multinomial logistic
+      ## regression
+      alpha <-  c(0, pars[1:(K-1)])
+      alphamat <- matrix(alpha, nrow=nobs, ncol=K, byrow=TRUE)  # by individual 
+      if (ncovsp > 0) { 
+        for (k in 2:K){  
+          cpinds <- K - 1 + (k-2)*ncovsp + 1:ncovsp
+          alphamat[,k] <- alpha[k] + Xp %*% pars[cpinds] 
+        }
+      }
+      pmat <- exp(alphamat)
+      pmat <- pmat / rowSums(pmat)
+      probmat <- pmat # this will be 1 or 0 if event observed
+    }
     ## Remaining parameters are time-to-event stuff   
     parsl <- split(pars[nppars + seq_len(ncpars)], parindsl)
     theta <- coveffs <- vector(K, mode="list")
@@ -435,7 +439,8 @@ flexsurvmix <- function(formula, data, event, dists,
   }
   # Parameter dictionary to be completed with the estimates
   distnames <- sapply(dists, function(x){if(is.list(x))x$name else x})
-  res <- data.frame(component = c(evnames, rep(evnames[1:(K-1)], each=ncovsp),  rep(evnames, ncparsl)), 
+  res <- data.frame(component = c(evnames, rep(evnames[seq_len(K-1)], each=ncovsp),  
+                                  rep(evnames, ncparsl)), 
                     dist = c(rep("",nppars+1), rep(distnames, ncparsl)), 
                     terms = c(paste0("prob",1:K),  names(inits_covp),  names(inits_theta)),
                     parclass = c("prob", parclass), 
@@ -454,6 +459,7 @@ flexsurvmix <- function(formula, data, event, dists,
   if (is.null(optim.control$fnscale))
     optim.control$fnscale <- 10000
   
+  method <- match.arg(method, c("direct","em"))
   if (method=="direct"){
     if (any(optpars)){
       if (is.null(optim.control$ndeps)) 
@@ -470,7 +476,7 @@ flexsurvmix <- function(formula, data, event, dists,
     ## Transform mixing probs back to natural scale for presentation 
     opt_all <- inits_all
     opt_all[optpars] <- opt$par
-    res_probs <- pmnlogit(opt_all[1:(K-1)])  
+    res_probs <- if (K>1)  pmnlogit(opt_all[1:(K-1)])  else 1
     res_covp <- if (ncoveffsp>0) opt_all[K:(K-1+ncoveffsp)] else numeric()
     res_cpars <- split(opt_all[(nppars+1):length(opt_all)], parindsl)
     res_theta <- res_coveffs <- vector(K, mode="list")
@@ -483,9 +489,10 @@ flexsurvmix <- function(formula, data, event, dists,
     ## Build tidy data frame of results with one row per parameter. Includes an
     ## extra row for the probability of the first event (defined as 1 - sum of
     ## rest)
+    est.t <- c(NA, opt_all)
     res <- cbind(res, data.frame(
                       est = c(res_probs, res_covp, unlist(res_cpars)),
-                      est.t = c(NA, opt_all)))
+                      est.t = est.t))
                       
     loglik <- - as.vector(opt$value)
     if (!fixed)
@@ -608,14 +615,14 @@ flexsurvmix <- function(formula, data, event, dists,
   res$fixed[1 + fixedpars] <- TRUE
   if (!fixed){
     covp <- cov[1:(K-1), 1:(K-1), drop=FALSE]
-    sepk <- sqrt(sum(diag(covp)) - sum(covp[lower.tri(covp)]))
-    res$se <- rep(NA, npars+1)
-    res$se[1] <- sepk
+    res$se <- rep(NA, npars + 1)
+    res$se[1] <- if (K==1) NA else sqrt(sum(diag(covp)) - sum(covp[lower.tri(covp)]))
     res$se[1 + optpars] <- sqrt(diag(cov))
   } else res$se <- NA
   names.first <- c("component","dist","terms","est","est.t","se")
   res <- res[,c(names.first, setdiff(names(res), names.first)),drop=FALSE]
-
+  rownames(res) <- NULL
+  
   mcomb <- do.call("cbind", m)
   mcomb <- mcomb[,!duplicated(names(mcomb))]
   attr(mcomb, "covnames") <- unique(unlist(lapply(m, function(x)attr(terms(x),"term.labels"))))
@@ -696,7 +703,8 @@ print.flexsurvmix <- function(x, ...)
   dput(x$call)
   cat("\n")
   if (x$npars > 0) {
-    res <- x$res
+    keep.cols <- c("component","dist","terms","est","est.t","se")
+    res <- x$res[,keep.cols,drop=FALSE]
     cat ("Estimates: \n")
     args <- list(...)
     if (is.null(args$digits)) args$digits <- 3
@@ -754,7 +762,7 @@ inv.transform.res <- function(x, dlists) {
     bpars <- inv.transform(bpars, dlists[[k]])
     est[[k]] <- c(bpars, cpars)
   }
-  probs <- pmnlogit(x$res$est.t[2:K])  
+  probs <- if (K==1) 1 else pmnlogit(x$res$est.t[2:K])  
   pcov <- x$res$est.t[grep("prob[[:digit:]]+\\(.+\\)", x$res$terms)]
   c(probs, pcov, unlist(est))
 }
@@ -770,8 +778,10 @@ model.frame.flexsurvmix <- function(formula, ...)
 
 # returns transformed probs relative to first component, excluding first component 
 qmnlogit <- function(probs){
-  if  (length(probs) < 2) stop("length(probs) should be 2 or more")
-  log(probs[-1] / probs[1])
+  if  (length(probs) == 1) 
+    qlogis(probs)
+  else 
+    log(probs[-1] / probs[1])
 }
 
 # returns probs including first component, given transformed probs with first component excluded 
