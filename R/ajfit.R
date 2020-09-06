@@ -20,17 +20,13 @@
 ##'   have a column for each covariate in the model.  If omitted, then all
 ##'   potential subgroups defined by combinations of factor covariates are
 ##'   included.  Continuous covariates are not supported.
-##'   
-##' @param ajvar Return standard errors for the Aalen-Johansen estimates. TODO  not implemented yet
-##'   
-##' @param B Number of bootstrap replicates to use to calculate standard
-##'   errors for the parametric estimates.  TODO not implemented yet
 ##'
 ##' @return Tidy data frame containing both Aalen-Johansen and parametric
 ##'   estimates of state occupancy over time, and by subgroup if subgroups are
 ##'   included.
-##'   
-ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL, ajvar=FALSE, B=0){
+##'
+##' @export
+ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
   ## TODO what if different covariates on different transitions? 
   dat <- x[[1]]$data$m
   covnames <- attr(dat,"covnames")
@@ -55,6 +51,7 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL, ajvar=FALSE, B=0){
   dat$status <- dat[,1][,"status"]
   
   ncovvals <- nrow(newdata)
+  if (ncovvals==0) ncovvals <- 1
   pt <- vector(ncovvals, mode="list")
   for (i in 1:ncovvals) { 
     datsub <- dat
@@ -62,7 +59,7 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL, ajvar=FALSE, B=0){
       datsub <- datsub[datsub[,covnames[j]] == newdata[i,covnames[j]],]
     cf <- coxph(Surv(time, status) ~ strata(trans), data=datsub)
     ms <-  msfit(cf, trans=attr(x,"trans"))
-    pt[[i]] <- probtrans(ms, predt=0, variance=ajvar)[[1]]
+    pt[[i]] <- probtrans(ms, predt=0, variance=FALSE)[[1]]
     covvals <- newdata[i,][rep(1,nrow(pt[[i]])),]
     pt[[i]] <- cbind(pt[[i]], covvals)
   } 
@@ -72,14 +69,12 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL, ajvar=FALSE, B=0){
   pt$model <- "Aalen-Johansen"
   
   ## Estimates from parametric competing risks model
-  nvals <- nrow(newdata)
-  pmat <- vector(nvals, mode="list")
+  pmat <- vector(ncovvals, mode="list")
   if (is.null(maxt)) 
     maxt <- max(pt$time)
   times <- seq(0, maxt, length=100)
-  for (i in 1:nvals){  # note newdata doesn't support multiple covs 
-    if (B>0) ci <- TRUE else ci <- FALSE
-    pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,], start=1, t=times, tidy=TRUE, ci=ci, B=B)
+  for (i in 1:ncovvals){  # note newdata doesn't support multiple covs 
+    pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,], start=1, t=times, tidy=TRUE, ci=FALSE)
     covvals <- newdata[i,][rep(1,nrow(pmat[[i]])),]
     pmat[[i]] <- cbind(pmat[[i]], covvals)
   } 
@@ -89,7 +84,8 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL, ajvar=FALSE, B=0){
   pmat$model <- "Parametric"
   cols <- c("time",covnames,"model",attr(x,"statenames"))
   res <- rbind(pt[,cols], pmat[,cols])
-  res <- tidyr::pivot_longer(res, cols=tidyselect::all_of(attr(x,"statenames")), names_to="state", values_to="prob")
+  res <- tidyr::pivot_longer(res, cols=tidyselect::all_of(attr(x,"statenames")), 
+                             names_to="state", values_to="val")
   res
 }
 

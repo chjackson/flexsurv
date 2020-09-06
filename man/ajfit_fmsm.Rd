@@ -5,7 +5,7 @@
 \title{Check the fit of Markov flexible parametric multi-state models against
 nonparametric estimates.}
 \usage{
-ajfit_fmsm(x, maxt = NULL, newdata = NULL, ajvar = FALSE, B = 0)
+ajfit_fmsm(x, maxt = NULL, newdata = NULL)
 }
 \arguments{
 \item{x}{Object returned by \code{\link{fmsm}} representing a flexible
@@ -20,11 +20,6 @@ destination states, are Markov, so those are fine here.}
 have a column for each covariate in the model.  If omitted, then all
 potential subgroups defined by combinations of factor covariates are
 included.  Continuous covariates are not supported.}
-
-\item{ajvar}{Return standard errors for the Aalen-Johansen estimates. TODO  not implemented yet}
-
-\item{B}{Number of bootstrap replicates to use to calculate standard
-errors for the parametric estimates.  TODO not implemented yet}
 }
 \value{
 Tidy data frame containing both Aalen-Johansen and parametric
