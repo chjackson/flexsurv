@@ -32,7 +32,7 @@ simulated data who are in the absorbing state at this time.}
 
 \item{M}{Number of individuals to simulate.}
 
-\item{B}{Number of simulations to use to calculate 95% confidence intervals
+\item{B}{Number of simulations to use to calculate 95\% confidence intervals
 based on the asymptotic normal distribution of the basic parameter
 estimates. If \code{B=0} then no intervals are calculated.}
 

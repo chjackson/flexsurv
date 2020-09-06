@@ -2,7 +2,7 @@
 % Please edit documentation in R/mstate.R
 \name{pfinal_fmsm}
 \alias{pfinal_fmsm}
-\title{Steady state probabilities in a flexible parametric Markov multi-state model}
+\title{Probabilities of final states in a flexible parametric competing risks model}
 \usage{
 pfinal_fmsm(x, newdata = NULL, fromstate, maxt = 1e+05, B = 0, cores = NULL)
 }
@@ -18,11 +18,11 @@ covariate, and one row per alternative value.}
 state.  This should refer to the name of a row of the transition matrix
 \code{attr(x,trans)}.}
 
-\item{maxt}{Large time to use for forecasting steady state probabilities.
+\item{maxt}{Large time to use for forecasting final state probabilities.
 The transition probability from zero to this time is used.  Note
 \code{Inf} will not work. The default is \code{100000}.}
 
-\item{B}{Number of simulations to use to calculate 95% confidence intervals
+\item{B}{Number of simulations to use to calculate 95\% confidence intervals
 based on the asymptotic normal distribution of the basic parameter
 estimates. If \code{B=0} then no intervals are calculated.}
 
@@ -38,13 +38,12 @@ A data frame with one row per covariate value and destination state,
 \description{
 This requires the model to be Markov, and is not valid for semi-Markov
 models, as it works by wrapping \code{\link{pmatrix.fs}} to calculate the
-transition probability over a very large time.  No check is performed for
-the Markov property, so use with care.  For semi-Markov models, simulation
-is required, e.g. through \code{\link{pmatrix.simfs}}.
-}
-\details{
-Competing risks models, defined by just one starting state with multiple
-destination states representing competing events, are Markov by definition.
+transition probability over a very large time.    As it also works on a
+\code{fmsm} object formed from transition-specific time-to-event models,
+it therefore only works on competing risks models, defined by just one starting
+state with multiple destination states representing competing events. 
 For these models, this function returns the probability governing which
-competing event happens next.
+competing event happens next.   However this function simply wraps \code{pmatrix.fs},
+so for other models, \code{pmatrix.fs} or \code{pmatrix.simfs} can be used with a
+large forecast time \code{t}.
 }
