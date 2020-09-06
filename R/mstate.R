@@ -1374,12 +1374,13 @@ simfinal_fmsm_noci <- function(x, newdata=NULL, t=1000, M=100000, probs=c(0.025,
         abs <- sf$end %in% statenames
         finaldat <- sf[abs,,drop=FALSE]
         means <- data.frame(state=statenames, 
-                            val=tapply(finaldat$time, finaldat$end, mean), 
+                            val=tapply(finaldat$time, finaldat$end, mean)[statenames], 
                             quantity="mean")
         probsu <- data.frame(state=statenames, 
                             val=as.numeric(prop.table(table(finaldat$end))[statenames]), 
                             quantity="prob")
         quants <- tapply(finaldat$time, finaldat$end, quantile, probs)
+        quants <-  quants[statenames]
         quants <- as.data.frame(do.call("rbind",quants))
         qnames <- colnames(quants)
         quants$state <- statenames
