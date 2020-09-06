@@ -226,7 +226,8 @@ meanfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
 ##'
 ##' @return Data frame of quantiles of the time to final state by pathway and
 ##'   covariate value, or by final state and covariate value.
-##'   
+##'
+##' @export
 qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=c(0.025, 0.5, 0.975)){
   pathways <- attr(x, "pathways")
   nmods <- length(x)
