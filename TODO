@@ -1,3 +1,11 @@
+#  flexsurvmix
+
+bring pfinal back or delete tests 
+
+
+
+
+
 Handle left truncation and interval censoring at the same time? 
 
 is logliki component of flexsurvreg objects the same as deviance residuals given by survreg?

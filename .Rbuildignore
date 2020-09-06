@@ -28,3 +28,5 @@ tests/test_extra.R
 ^codecov\.yml$
 \.gcda
 \.gcno
+^doc$
+^Meta$

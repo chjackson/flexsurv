@@ -1,0 +1,841 @@
+%\VignetteIndexEntry{Multi-state modelling with flexsurv}
+%\VignetteEngine{knitr::knitr}
+
+% \documentclass[article,shortnames]{jss}
+\documentclass[article,shortnames,nojss,nofooter]{jss}
+\usepackage{bm}
+\usepackage{tabularx}
+\usepackage{graphics}
+\usepackage{alltt}
+
+<<echo=FALSE>>=
+options(width=60)
+options(prompt="R> ")
+library(knitr)
+opts_chunk$set(fig.path="flexsurv-")
+render_sweave()
+@
+%% need no \usepackage{Sweave.sty}
+
+\author{Christopher H. Jackson \\ MRC Biostatistics Unit, Cambridge, UK}
+\title{Flexible parametric multi-state modelling with flexsurv}
+
+\Plainauthor{Christopher Jackson, MRC Biostatistics Unit}
+
+\Address{
+  Christopher Jackson\\
+  MRC Biostatistics Unit\\
+  Cambridge Institute of Public Health\\
+  Robinson Way\\
+  Cambridge, CB2 0SR, U.K.\\
+  E-mail: \email{chris.jackson@mrc-bsu.cam.ac.uk}
+}
+
+
+ \Abstract{ A \emph{multi-state model} represents how an individual moves between
+multiple states in continuous time.  Survival analysis is a special case
+with two states, ``alive'' and ``dead''.  \emph{Competing risks} are a
+further special case, where there are multiple causes of death, that
+is, one starting state and multiple possible destination states.
+
+This vignette describes the two forms of multi-state or competing risks models that can 
+be implemented in \pkg{flexsurv}.  Section~\ref{sec:causespec} describes models
+based on \emph{cause-specific hazards}.   Section~\ref{sec:mixture} describes 
+a less commonly-used approach based on \emph{mixture models}.   Cause-specific 
+hazards models tend to be faster to fit, whereas the parameters of the
+mixture models are easier to interpret.  }
+
+\Keywords{multi-state models, multistate models, competing risks}
+
+\begin{document}
+
+\section{Overview}
+\label{sec:multistate}
+
+
+This vignette describes multi-state models for data where there are a
+series of event times $t_{1},\dots, t_{n}$ for an individual, corresponding to changes of state.  The
+last of these may be an observed or right-censored event time.  Note
+\emph{panel data} are not considered here --- that is, observations of
+the state of the process at an arbitrary set of times
+\citep{kalbfleisch:lawless}.  In panel data, we do not necessarily
+know the time of each transition, or even whether transitions of
+a certain type have occurred at all between a pair of observations.
+Multi-state models for that type of data (and also exact event times)
+can be fitted with the \pkg{msm} package for \proglang{R} \citep{msmjss}, but are
+restricted to (piecewise) exponential event time distributions.  Knowing
+the exact event times enables much more flexible models, which 
+\pkg{flexsurv} can fit. 
+
+The \pkg{flexsurv} package provides two general frameworks for
+multi-state modelling.
+
+\begin{enumerate}
+\item The most common framework is based on \emph{cause-specific
+    hazards} of competing risks.   This is an extension of
+  standard survival modelling, and is explained in
+  Section~\ref{sec:causespec}.
+
+\item An alternative approach is based on \emph{mixture models}.
+  For example, suppose there are three competing states that an
+  individual in state $r$ may move to next.  People are then
+  classified into three \emph{mixture components}, defined by the
+  state the person moves to.  The probabilities of each next state,
+  and the distribution of the time of moving to each state, are
+  estimated jointly.   These quantities are easier to interpret than
+  cause specific hazards.   This approach was originally described by
+  \citet{larson1985mixture}.  In Section~\ref{sec:mixture} we explain how to
+  implement it using the \code{flexsurvmix} function. 
+\end{enumerate}
+
+
+\section{Multi-state modelling using cause-specific hazards}
+\label{sec:causespec}
+
+Given that an individual is in state $X(t)$ at time $t$, their next
+state, and the time of the change, are governed by a set of
+\emph{transition intensities} or \emph{transition hazards}
+\[q_{rs}(t,\mathbf{z}(t),\mathcal{F}_t) = \lim_{\delta t \rightarrow 0} \Prob(X(t+\delta t) = s | X(t) = r, \mathbf{z}(t), \mathcal{F}_t) / \delta t \] 
+for states $r, s = 1,\dots,R$, which for a survival model
+are equivalent to the hazard $h(t)$.  The intensity represents the
+instantaneous risk of moving from state $r$ to state $s$, and is 
+zero if the transition is impossible.  It may
+depend on covariates $\mathbf{z}(t)$, the time $t$ itself, and possibly also the ``history'' of
+the process up to that time, $\mathcal{F}_t$: the states previously
+visited or the length of time spent in them.
+
+\paragraph{Alternative time scales} 
+In semi-Markov (``clock-reset'') models, $q_{rs}(t)$ is defined as a 
+function of the time $t$ since entry into the current state.  Any 
+software to fit survival models can also fit this kind of multi-state model, as the following sections will explain. 
+
+In an inhomogeneous Markov model, $t$ represents the
+time since the beginning of the process (that is, a ``clock-forward'' 
+scale is used), but the intensity $q_{rs}(t)$
+does not depend further on $\mathcal{F}_t$.  Again, standard survival
+modelling software can be used, with the additional requirement that
+it can deal with left-truncation or \emph{counting process} data, which 
+\code{survreg}, for example, does not currently support.
+
+These approaches are equivalent for competing risks models, since
+there is at most one transition for each individual, so that the time
+since the beginning of the process equals the time spent in the
+current state.  Therefore no left-truncation is necessary.
+
+Note also that in a clock-reset model, the time since the beginning of
+the process may enter the model as a covariate.  Likewise, in a
+clock-forward model, the time spent in the current state may enter as
+a covariate, in which case the model is no longer Markov.
+
+\paragraph{Example} For illustration, consider a simple three-state
+example, previously studied by \citet{heng:paper}. Recipients of lung
+transplants are are risk of bronchiolitis obliterans syndrome (BOS).
+This was defined as a decrease in lung function to below 80\% of a
+baseline value defined in the six months following transplant.  A
+three-state ``illness-death'' model represents the risk of developing
+BOS, the risk of dying before developing BOS, and the risk of death
+after BOS.  BOS is assumed to be irreversible, so there are only three
+allowed transitions (Figure \ref{fig:bosmsm}), each with an intensity
+function $q_{rs}(t)$.
+
+\begin{figure}[h]
+  \centering
+  \scalebox{0.6}{\includegraphics{bosmsm.pdf}}
+  \caption{Three-state multi-state model for bronchiolitis obliterans syndrome (BOS).}
+  \label{fig:bosmsm}
+\end{figure}
+
+\subsection{Representing multi-state data as survival data}
+\label{sec:multistate:data}
+
+\citet{andersen:keiding} and \citet{putter:mstate} explain how to implement multi-state models by
+manipulating the data into a suitable form for survival modelling
+software --- an overview is given here.  For each permitted $r
+\rightarrow s$ transition in the multi-state model, there is a
+corresponding ``survival'' (time-to-event) model, with hazard rates
+defined by $q_{rs}(t)$.  For a patient who enters state $r$ at
+time $t_{j}$, their next event at $t_{j+1}$ is defined by the model
+structure to be one of a set of competing events $s_1,\ldots,s_{n_r}$.
+This implies there are $n_r$ corresponding survival models for this
+state $r$, and $\sum_r n_r$ models over all states $r$.
+In the BOS example, there are $n_1=2,n_2=1$ and $n_3=0$ possible
+transitions from states 1, 2 and 3 respectively.
+
+The data to inform the $n_r$ models from state $r$ consists firstly of an
+indicator for whether the transition to the corresponding state
+$s_1,\ldots,s_{n_r}$ is observed or censored at $t_{j+1}$.  If the
+individual moves to state $s_k$, the transitions to all other
+states in this set are censored at this time. This indicator is 
+coupled with:
+\begin{itemize}
+\item (for a semi-Markov model) the time elapsed $dt_{j} = t_{j+1} -
+  t_{j}$ from state $r$ entry to state $s$ entry.  
+  The ``survival'' model for the $r \rightarrow s$ transition is 
+  fitted to this time. 
+  
+\item (for an inhomogeneous Markov model) the start and stop time
+  $(t_j,t_{j+1})$, as in \S\ref{sec:censtrunc}.  
+  The $r \rightarrow s$ model is fitted to the
+  right-censored time $t_{j+1}$ from the \emph{start of the process},
+  but is conditional on not experiencing the $r \rightarrow s$
+  transition until after the state $r$ entry time.  In other words,
+  the $r \rightarrow s$ transition model is \emph{left-truncated} at
+  the state $r$ entry time.
+\end{itemize}
+
+In this form, the outcomes of two patients in the BOS data are
+<<>>=
+library(flexsurv)
+bosms3[18:22, ]
+@
+
+Each row represents an observed (\code{status = 1}) or censored
+(\code{status = 0}) transition time for one of three time-to-event
+models indicated by the categorical variable \code{trans} (defined as
+a factor).  Times are expressed in years, with the baseline time 0
+representing six months after transplant.  Values of \code{trans} of
+1, 2, 3 correspond to no BOS$\rightarrow$BOS, no BOS$\rightarrow$death
+and BOS$\rightarrow$death respectively.  The first row indicates that
+the patient (\code{id} 7) moved from state 1 (no BOS) to state 2 (BOS)
+at 0.17 years, but (second row) this is also interpreted as a
+censored time of moving from state 1 to state 3, potential death before BOS
+onset.  This patient then died, given by the third row with
+\code{status} 1 for \code{trans} 3.  Patient 8 died before BOS onset,
+therefore at 8.2 years their potential BOS onset is censored (fourth
+row), but their death before BOS is observed (fifth row).
+
+The \pkg{mstate} \proglang{R} package \citep{mstate:cmpb,mstate:jss} has a
+utility \code{msprep} to produce data of this form from
+``wide-format'' datasets where rows represent individuals, and times
+of different events appear in different columns. \pkg{msm}
+has a similar utility \code{msm2Surv} for producing the
+required form given longitudinal data where rows represent state
+observations.
+
+\subsection{Multi-state model likelihood with cause-specific hazards}
+\label{sec:multistate:lik}
+
+After forming survival data as described above, a multi-state model
+can be fitted by maximising the standard survival model
+likelihood~(given at the start of the main \pkg{flexsurv} vignette), $l(\bm{\theta} | \mathbf{x}) = \prod_i
+l_i(\bm{\theta}|x_i)$, where $\mathbf{x}$ is the data, and $i$ now
+indexes multiple observations for multiple individuals.  This can also
+be written as a product over the $K=\sum_r n_r$ transitions $k$, and
+the $m_k$ observations $j$ pertaining to the $k$th transition.  The
+transition type will typically enter this model as a categorical
+covariate --- see the examples in the next section.
+
+\begin{equation}
+  \label{eq:lik:multistate}
+  l(\bm{\theta} | \mathbf{x}) = \prod_{k=1}^K \prod_{j=1}^{m_k} l_{jk}(\bm{\theta}|\mathbf{x}_{jk}) 
+\end{equation}
+
+Therefore if the parameter vector $\bm{\theta}$ can be partitioned
+as $(\bm{\theta}_1|\ldots|\bm{\theta}_K)$, independent components for
+each transition $k$, the likelihood becomes the product of $K$
+independent transition-specific likelihoods \citep{andersen:keiding}.
+The full multi-state model can then be fitted by maximising each of
+these independently, using $K$ separate calls to a survival modelling
+function such as \code{flexsurvreg}.  This can give vast computational
+savings over maximising the joint likelihood for $\bm{\theta}$ with a
+single fit.  For example, \citet{francesca:smmr} used \pkg{flexsurv}
+to fit a parametric multi-state model with 21 transitions and 84
+parameters for over 30,000 observations, which was computationally
+impractical via the joint likelihood, whereas it only took about a minute
+to perform 21 transition-specific fits.
+
+On the other hand, if any parameters are constrained between
+transitions (e.g. if hazards are proportional between transitions, or
+the effects of covariates on different transitions are the same) then
+it is necessary to maximise the joint
+likelihood~(\ref{eq:lik:multistate}) with a single call. 
+
+
+\subsection{Fitting parametric multi-state models with cause-specific hazards}
+\label{sec:multistate:fitting}
+
+\paragraph{Joint likelihood} 
+
+Three multi-state models are fitted to the BOS data using \code{flexsurvreg}, firstly using a single 
+likelihood maximisation for each model.   The
+first two use the ``clock-reset'' time scale.  \code{crexp}
+is a simple time-homogeneous Markov model where all transition
+intensities are constant through time, so that the clock-forward and
+clock-reset scales are identical.  The time to the next event is
+exponentially-distributed, but with a different rate $q_{rs}$ for each
+transition type \code{trans}.  \code{crwei} is a semi-Markov model where
+the times to BOS onset, death without BOS and the time from BOS onset
+to death all have Weibull distributions, with a different shape and
+scale for each transition type.  \code{cfwei} is a clock-forward,
+inhomogeneous Markov version of the Weibull model: the 1$\rightarrow$2
+and 1$\rightarrow$3 transition models are the same, but the third has
+a different interpretation, now the time \emph{from baseline} to death
+with BOS has a Weibull distribution.  
+<<>>=
+crexp <- flexsurvreg(Surv(years, status) ~ trans, data = bosms3, 
+                     dist = "exp")
+crwei <- flexsurvreg(Surv(years, status) ~ trans + shape(trans), 
+                     data = bosms3, dist = "weibull")
+cfwei <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans + shape(trans), 
+                     data = bosms3, dist = "weibull")
+@ 
+
+\paragraph{Semi-parametric equivalents} 
+The equivalent Cox models are also fitted using
+\code{coxph} from the \pkg{survival} package.  These specify a
+different baseline hazard for each transition type through a function
+\code{strata} in the formula, so since there are no other covariates,
+they are essentially non-parametric.  Note that the \code{strata} function
+is not currently understood by \code{flexsurvreg} --- the user must say
+explicitly what parameters, if any, vary with the transition type,
+as in \code{crwei}.
+<<>>=
+crcox <- coxph(Surv(years, status) ~ strata(trans), data = bosms3)
+cfcox <- coxph(Surv(Tstart, Tstop, status) ~ strata(trans), data = bosms3)
+@ 
+In all cases, if there were other covariates, they could simply be
+included in the model formula.  Typically, covariate effects will vary
+with the transition type, so that an interaction term with
+\code{trans} would be included.  Some post-processing might then be
+needed to combine the main covariate effects and interaction terms
+into an easily-interpretable quantity (such as the hazard ratio for
+the $r,s$ transition).  Alternatively, \pkg{mstate} has a utility
+\code{expand.covs} to expand a single covariate in the data into a set
+of transition-specific covariates, to aid interpretation
+\citep[see][]{mstate:jss}.
+
+\paragraph{Transition-specific models}
+
+In this small example, the joint likelihood can be maximised easily
+with a single function call, but for larger models and datasets, this
+may be unfeasible.  A more computationally-efficient approach is to
+fit a list of transition-specific models, as follows.  
+<<>>=
+mod_nobos_bos <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==1),  
+                             data = bosms3, dist = "weibull")
+mod_nobos_death <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==2),  
+                               data = bosms3, dist = "weibull")
+mod_bos_death <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==3), 
+                             data = bosms3, dist = "weibull")
+@ 
+
+We then define a matrix \code{tmat} describes the transition structure of
+the multi-state model , as a matrix of integers whose $r,s$ entry is $i$ if the $i$th transition type is
+$r,s$, and has \code{NA}s on the diagonal and where the $r,s$
+transition is disallowed.
+
+<<>>=
+tmat <- rbind(c(NA, 1, 2), c(NA, NA, 3), c(NA, NA, NA))
+crfs <- fmsm(mod_nobos_bos, mod_nobos_death, mod_bos_death, trans = tmat)
+@ 
+
+The three transition models are then grouped together,  and the
+transition matrix is attached, using the \code{fmsm}
+function.  This constructs an R object, \code{crfs}, that fully
+describes the multistate model. 
+
+The \code{fmsm} object can be supplied to the output and prediction functions described in the
+subsequent sections, instead of a single \code{flexsurvreg} object. 
+However, this approach is not possible if there are constraints in the
+parameters across transitions, such as common covariate effects.
+
+\begin{sloppypar}
+Any parametric distribution can be employed in a multi-state model, just as for standard
+survival models, with \code{flexsurvreg}.  Spline models may also be
+fitted with \code{flexsurvspline}, and if hazards are assumed
+proportional, they are expected to give similar results to the Cox
+model.  Since \pkg{flexsurv} version 2.0, different parametric
+families can be used for different transitions, though in earlier 
+versions, the same family had to be used. 
+\end{sloppypar}
+
+\subsection{Obtaining cumulative transition-specific hazards}
+
+Multi-state models can be characterised by their cumulative $r
+\rightarrow s$ transition-specific hazard functions $H_{rs}(t)
+= \int_0^t q_{rs}(u)du$.  For \emph{semi-parametric}
+multi-state models fitted with \code{coxph}, the function \code{msfit}
+in \pkg{mstate} \citep{mstate:cmpb,mstate:jss} provides
+piecewise-constant estimates and covariances for $H_{rs}(t)$.
+For the Cox models for the BOS data,
+<<>>=
+require("mstate")
+mrcox <- msfit(crcox, trans = tmat)
+mfcox <- msfit(cfcox, trans = tmat)
+@
+
+\pkg{flexsurv} provides an analogous function \code{msfit.flexsurvreg}
+to produce cumulative hazards from \emph{fully-parametric} multi-state
+models in the same format.  This is a short wrapper around
+\code{summary.flexsurvreg(..., type = "cumhaz")}, previously mentioned
+in \S\ref{sec:plots}.  The difference from \pkg{mstate}'s method is
+that hazard estimates can be produced for any grid of times \code{t},
+at any level of detail and even beyond the range of the data, since
+the model is fully parametric. The argument \code{newdata} can be used
+in the same way to specify a desired covariate category, though in
+this example there are no covariates in addition to the transition
+type.  The name of the (factor) covariate indicating the transition
+type can also be supplied through the \code{tvar} argument, in this
+case it is the default, \code{"trans"}.
+<<>>=
+tgrid <- seq(0, 14, by = 0.1)
+mrwei <- msfit.flexsurvreg(crwei, t = tgrid, trans = tmat)
+mrexp <- msfit.flexsurvreg(crexp, t = tgrid, trans = tmat)
+mfwei <- msfit.flexsurvreg(cfwei, t = tgrid, trans = tmat)
+@
+These can be plotted (Figure \ref{fig:bos:cumhaz}) to show the fit of
+the parametric models compared to the non-parametric estimates.  Both
+models appear to fit adequately, though give diverging extrapolations
+after around 6 years when the data become sparse.  The Weibull
+clock-reset model has an improved AIC of \Sexpr{round(crwei$AIC)}, compared to
+\Sexpr{round(crexp$AIC)} for the exponential model.  For the $2\rightarrow 3$ transition,
+the clock-forward and clock-reset models give slightly
+different hazard trajectories.
+<<cumhaz,include=FALSE>>=
+cols <- c("black", "#E495A5", "#86B875", "#7DB0DD") # colorspace::rainbow_hcl(3)
+plot(mrcox, xlab = "Years after baseline", lwd = 3, xlim = c(0, 14), cols = cols[1:3])
+for (i in 1:3){
+    lines(tgrid, mrexp$Haz$Haz[mrexp$Haz$trans == i], col = cols[i], lty = 2, lwd = 2)
+    lines(tgrid, mrwei$Haz$Haz[mrwei$Haz$trans == i], col = cols[i], lty = 3, lwd = 2)
+}
+lines(mfcox$Haz$time[mfcox$Haz$trans == 3], mfcox$Haz$Haz[mfcox$Haz$trans == 3],
+      type = "s", col = cols[4], lty = 1, lwd = 2)
+lines(tgrid, mfwei$Haz$Haz[mfwei$Haz$trans == 3], col = cols[4], lty = 3, lwd = 2)
+legend("topleft", inset = c(0, 0.2), lwd = 2, col = cols[4], 
+       c("2 -> 3 (clock-forward)"), bty = "n")
+legend("topleft", inset = c(0, 0.3), c("Non-parametric", "Exponential", "Weibull"),
+       lty = c(1, 2, 3), lwd = c(3, 2, 2), bty = "n")
+@ 
+\begin{figure}[h]
+\includegraphics{flexsurv-cumhaz-1}
+\caption{Cumulative hazards for three transitions in the BOS multi-state model (clock-reset), under non-parametric, exponential and Weibull models.  For the  $2\rightarrow 3$ transition, an alternative clock-forward scale is shown for the non-parametric and Weibull models.} 
+\label{fig:bos:cumhaz}
+\end{figure}
+
+\subsection{Prediction from parametric multi-state models with
+  cause-specific hazards}
+
+The \emph{transition probabilities} of the multi-state model are the
+probabilities of occupying each state $s$ at time $t > t_0$, given
+that the individual is in state $r$ at time $t_0$.
+\[ P(t_0, t) = \Prob(X(t) = s | X(t_0) = r) \]
+
+\paragraph{Markov models}
+For a time-inhomogeneous Markov model, these are related to the transition
+intensities via the Kolmogorov forward equation
+\[ \frac{d P(t_0,t)}{dt} = P(t_0,t) Q(t) \] with initial condition
+$P(t_0,t_0) = I$ \citep{cox:miller}.  This can be solved numerically, as in
+\citet{titman:nonhomog}.  This is implemented in the function
+\code{pmatrix.fs}, using the \pkg{deSolve} package \citep{deSolve}.
+This returns the full transition probability matrix $P(t_0,t)$ from
+time $t_0=0$ to a time or set of times $t$ specified in the call.
+Under the Weibull model, the probability 
+of remaining alive and free
+of BOS is estimated at 0.3 at 5 years and 0.09 at 10 years: 
+<<>>=
+pmatrix.fs(cfwei, t = c(5, 10), trans = tmat)
+@ 
+Confidence intervals can be obtained by simulation from the
+asymptotic distribution of the maximum likelihood estimates --- see
+\code{help(pmatrix.fs)} for full details.  A similar function
+\code{totlos.fs} is provided to estimate the expected total
+amount of time spent in state $s$ up to time $t$ for a process that
+starts in state $r$, defined as $\int_{u=0}^tP(0,u)_{rs}du$.
+
+\paragraph{Semi-Markov models} 
+For semi-Markov models, the Kolmogorov equation does not apply, since
+the transition intensity matrix $Q(t)$ is no longer a deterministic
+function of $t$, but depends on when the transitions occur between
+time $t_0$ and $t$. Predictions can then be made by simulation.
+The function \code{sim.fmsm} simulates trajectories from
+parametric semi-Markov models by repeatedly generating the time to the next
+transition until the individual reaches an absorbing state or a
+specified censoring time.  This requires the presence of a function to
+generate random numbers from the underlying parametric distribution
+--- and is fast for built-in distributions which use vectorised
+functions such as \code{rweibull}.
+
+\code{pmatrix.simfs} calculates the transition
+probability matrix by using \code{sim.fmsm} to simulate state histories for a large number of individuals, by default 100000.  Simulation-based
+confidence-intervals are also available in \code{pmatrix.simfs}, at an
+extra computational cost, and the expected total length of stay in each state is
+available from \code{totlos.simfs}.
+<<eval=FALSE>>=
+pmatrix.simfs(crwei, trans = tmat, t = 5)
+pmatrix.simfs(crwei, trans = tmat, t = 10)
+@ 
+
+\paragraph{Prediction via mstate}
+
+Alternatively, predictions can be made by supplying the cumulative transition-specific hazards,
+calculated with \code{msfit.flexsurvreg}, to functions in the
+\pkg{mstate} package.
+
+For Markov models, the solution to the Kolmogorov equation
+\citep[e.g.,][]{aalen:process} is given by a product integral, which can be
+approximated as 
+\[ P(t_0, t) = \prod_{i=0}^{m-1} \left\{ I + Q(t_i)dt \right\} \]
+where a fine grid of times $t_0,t_1,\ldots,t_m=t$ is chosen to span
+the prediction interval, and $Q(t_i)dt$ is the increment in the
+cumulative hazard matrix between times $t_i$ and $t_{i+1}$.  $Q$ may
+also depend on other covariates, as long as these are known in
+advance.
+In \pkg{mstate}, these can be calculated with the \code{probtrans}
+function, applied to the cumulative hazards returned by \code{msfit}.
+For Cox models, the time grid is naturally defined by the observed 
+survival times, giving the
+Aalen-Johansen estimator \citep{andersen}.  Here, the probability of
+remaining alive and free of BOS is estimated at 0.27 at 5 years and 0.17
+at 10 years.  
+<<>>=
+ptc <- probtrans(mfcox, predt = 0, direction = "forward")[[1]]
+round(ptc[c(165, 193),], 3)
+@ 
+For parametric models, using a similar discrete-time approximation was
+suggested by \citet{cook:lawless}.  This
+is achieved by passing the object returned by \code{msfit.flexsurvreg}
+to \code{probtrans} in \pkg{mstate}.  It can be made arbitrarily
+accurate by choosing a finer resolution for the grid of times when 
+calling \code{msfit.flexsurvreg}.  
+<<>>=
+ptw <- probtrans(mfwei, predt = 0, direction = "forward")[[1]]
+round(ptw[ptw$time %in% c(5, 10),], 3)
+@ 
+\code{pstate1}--\code{pstate3} are close to the first rows of the
+matrices returned by \code{pmatrix.fs}.  The
+discrepancy from the Cox model is more marked at 10 years when the
+data are more sparse (Figure \ref{fig:bos:cumhaz}).  A finer time
+grid would be required to achieve a similar level of accuracy to 
+\code{pmatrix.fs} for the point estimates, at the cost of a slower run
+time than \code{pmatrix.fs}.  However, an advantage of 
+\code{probtrans} is that standard errors are available more cheaply.
+
+For semi-Markov models, \pkg{mstate} provides the function
+\code{mssample} to produce both simulated trajectories and transition
+probability matrices from semi-Markov models, given the estimated
+piecewise-constant cumulative hazards \citep{fiocco:mstatepred},
+produced by \code{msfit} or \code{msfit.flexsurvreg}, though this is
+generally less efficient than \code{pmatrix.simfs}.  In this example,
+1000 samples from \code{mssample} give estimates
+of transition probabilities that are accurate to within around 0.02.  
+However with
+\code{pmatrix.simfs}, greater precision is achieved by simulating
+100 times as many trajectories in a shorter time.  
+<<eval=FALSE>>=
+mssample(mrcox$Haz, trans = tmat, clock = "reset", M = 1000, 
+         tvec = c(5, 10))
+mssample(mrwei$Haz, trans = tmat, clock = "reset", M = 1000, 
+         tvec = c(5, 10))
+@ 
+
+
+\subsection{Next-state probabilities}
+\label{sec:nextstate}
+
+In a multi-state situation we are usually interested in the probability
+that a person in one state will move to a specific state next, rather than to the other 
+competing states.    In the BOS example we might want to estimate the 
+probability that a patient will die before getting BOS, or get BOS before dying. 
+In a mixture multi-state model (Section~\ref{sec:mixture}), these are explicit parameters
+of the model.   In a multi-state model parameterised by cause-specific hazards, these 
+probabilities are related to the hazards through the Kolmogorov forward equation. 
+
+To obtain these, we consider the full multi-state model as a set of \emph{competing risks submodels}.  There is one submodel for each state a person can transition from (the "transient" states of the model).  In the BOS example, there is one submodel for the transitions from no BOS (with two competing risks: BOS and death), and a second submodel for the single transition from BOS to death.  
+
+The probability that the the next state after $r$ is $s$ can then be obtained in practice as the transition probability $P(X(t)=s | X(t_0)=r)$, under the submodel for transient state $r$, for a very large time $t$.   \code{pmatrix.fs} can be used for this. 
+
+<<>>=
+tmat_nobos <- rbind("No BOS"=c(NA,1,2),
+"BOS"=c(NA,NA,NA),"Death"=c(NA,NA,NA))
+crfs_nobos <- fmsm(mod_nobos_bos, mod_nobos_death, trans = tmat_nobos)
+pmatrix.fs(crfs_nobos, from=1, t=100000)["No BOS",c("BOS","Death")]
+@
+
+In a time-homogeneous Markov model, i.e. where the times from state $r$ to state $s$ are all exponentially distributed with a constant rate $\lambda_{rs}$, the probability that the next state after $r$ is $s$ is simply $\lambda_{rs} / \sum_u \lambda_{ru}$, where the sum is taken over all possible next states after $r$.  We can check the result from \code{pmatrix.fs} agrees
+with this:
+
+<<>>=
+modexp_nobos_bos <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==1),  
+                                data = bosms3, dist = "exponential")
+modexp_nobos_death <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==2),
+                                  data = bosms3, dist = "exponential")
+crfs_nobos <- fmsm(modexp_nobos_bos, modexp_nobos_death, trans=tmat_nobos)
+pmatrix.fs(crfs_nobos, from=1, t=100000)["No BOS",c("BOS","Death")]
+rate12 <- modexp_nobos_bos$res["rate","est"]
+rate13 <- modexp_nobos_death$res["rate","est"]
+rate12 / (rate12  + rate13)
+@
+
+\subsection{Distribution of the time to the next state} 
+\label{sec:nexttime}
+
+Under the cause-specific hazards model, the time until the next observed transition can be considered to equal the \emph{minimum} of a set of latent times --- one latent time for each potential transition whose cause-specific hazard defines the multi-state model. 
+
+The distribution of this time is not generally known analytically, given a set of parametric 
+distributions defining the cause-specific hazards.  For example, if there were two competing latent event times $T_1$, $T_2$ with cause-specific hazards distributed as Gamma$(a_1,b_1)$ and Weibull$(a_2,b_2)$ respectively, then the equivalent mixture model would be specified by the conditional distributions of $T_1|T_1<T_2$ and $T_2|T_1 > T_2$, which wouldn't have a standard form.    Instead this time can be computed using simulation, via \code{sim.fmsm}.  
+
+The function \code{simfinal_fmsm} wraps \code{sim.fmsm} to summarise the distribution of the time to  each absorbing state in a multi-state model, conditionally on that state occurring. 
+If this is applied to a \emph{competing-risks submodel} for state $r$ of a multi-state model, this simply produces the time to the \emph{next} state in the full model, since the absorbing states of the submodel define the potential next states after state $r$.
+
+This is done here to calculate the mean, median and interquartile range for the time to BOS (given survival) and the time to death (given no BOS before death).  The function also produces estimates of the probability of each of these states, though as we saw in Section~\ref{sec:nextstate}, this is available more efficiently via \code{pmatrix.fs}.   Note the number of simulated individuals $M$ can be increased for more accuracy, and optionally the $B$ argument can be supplied to obtain simulation-based confidence intervals around the estimates. 
+
+<<>>=
+crfs_nobos <- fmsm(mod_nobos_bos, mod_nobos_death, trans = tmat_nobos)
+simfinal_fmsm(crfs_nobos, probs = c(0.25, 0.5, 0.75), M=10000)
+@
+
+
+\subsection{Obtaining probabilities of, and times to, a final absorbing state} 
+\label{sec:ultimate}
+
+As the previous section mentioned, \code{simfinal_fmsm} can be applied to any multi-state
+model with an absorbing state, to estimate the distribution of the time from the start of the process to the absorbing state. If there are multiple absorbing states, it can also estimate the probability that the individual ends up in each one.   For the BOS model, there is only one
+absorbing state, death, so the function returns a probability of 1 that the patient will eventually die, and summaries of the distribution of the time from transplant to death.
+<<>>=
+simfinal_fmsm(crfs, probs = c(0.25, 0.5, 0.75), M=10000)
+@
+
+\code{simfinal_fmsm} requires a semi-Markov multi-state model, or a simple competing risks model, constructed through \code{fmsm}.  Though for a simple competing risks model, \code{pmatrix.fs} can be used to get the probability of each competing state, as in~\ref{sec:nextstate}.
+
+
+\section{Multi-state modelling using mixtures}
+\label{sec:mixture}
+
+\subsection{Definitions} 
+
+A ``mixture'' multi-state model, first described for competing risks models by \citep{larson1985mixture} is described in terms of: 
+
+\begin{itemize}
+\item the probability $\pi_{rs}$ that the next state after state $r$ is state $s$
+
+\item the distribution of the time $T_{rs}$ from state $r$ entry to state $s$ entry, given
+that the next state after $r$ is state $s$. 
+\end{itemize}
+
+In other words, the transition intensity is defined by
+  \[
+    q_{rs}(t)  = \left\{
+                \begin{array}{ll}
+                  q^*_{rs}(t) & \mbox{if } I_{r} = s \\
+                  0           & \mbox{if}  I_{r} \neq s\\ 
+                \end{array}
+              \right.
+  \]
+
+where $I_{r}$ is a latent categorical variable that determines which transition will happen next for an individual in state $r$, governed by probabilities $\pi_{r,s} = P(I_{r} = s)$, with $\sum_{s \in \mathcal{S}_r} \pi_{r,s} = 1$ over the potential next state $\mathcal{S}_r$ after state $r$.   The transition intensity $q^*_{rs}(t) $ is defined by the hazard function of a parametric distribution that governs the time $S_{rs}$ from state $r$ entry until the transition to state $s$, \emph{given that this is the transition that occurs}. 
+
+The mixture model describes a mechanism where the transition that happens is determined "in advance" at time zero, whereas in the cause-specific hazards model, the risks of different events "compete" with each other as time proceeds.  However, in practice, both models can represent situations where individuals can experience any of the competing events.  In the mixture model, we only specify a distribution for the time to the event \emph{that happens first} among the competing risks, and do not model events that don't occur.    As discussed by \citet{cox1959analysis}, if the time-to-event distributions are specified correctly in both frameworks, then they can both represent the same process.   In practice however, they will differ.   As discussed in Section~\ref{sec:nexttime}, given a particular parametric form for a set of cause-specific hazards, the form of the distribution for the \emph{minimum} of the potential event times, the one that actually happens, won't be available.   The main advantage of the mixture model is that it is parameterised in terms of quantities
+that have an easy, direct interpretation. 
+
+In the mixture model,  we specify a parametric distribution with density $f_{r,s}(|\theta_{r,s})$  (and  CDF $F_{r,s}()$)  for the time of transition to state $s$ for a person in state $r$, conditionally on this transition being the one that occurs.   We have data consisting of state transitions, indexed by $j$, experienced by individuals $i$.  This can either be 
+\begin{itemize}
+\item \emph{an exact transition time:}  $\{y_{i,j}, r_{i,j}, s_{i,j}, \delta_{i,j}=1\}$, where a transition to state $s_{i,j}$ is known to occur at a time $y_{i,j}$ after entry to state $r_{i,j}$. 
+
+\item \emph{right censoring}  $\{y_{i,j},r_{i,j},\delta_{i,j}=2\}$, where an individual's follow-up ends while they are in state $r_{i,j}$, at time $y_{i,j}$ after entering this state, thus the next state and the time of transition to it are unknown. 
+\end{itemize}
+
+Therefore, for an exact time of transition to a known state $s_{i,j}$, i.e.  $\delta_{i,j}=1$, the likelihood contribution is simply 
+
+  \[ l_{i,j} = \pi_{r_{i,j}s_{i,j}} f_{r_{i,j},s_{i,j}}(y_{i,j} | \theta_{r_{i,j},s_{i,j}}) \] 
+
+For observations $j$ of right-censoring at $y_{i,j}$, the state that the person will move to, and the time of that transition, is unknown.  Thus it is unknown which of the distributions $f_{r,s}$ the transition time will obey, and the likelihood contribution is of the form of a mixture model, that sums over the set $\mathcal{S}_r$ of potential next states after $r$:
+
+  \[ l_{i,j} = \sum_{s \in \mathcal{S}_r} \pi_{r_{i,j}s} (1 - F_{r_{i,j},s}(y_{i,j} | \theta_{r_{i,j},s})) \] 
+
+
+\subsection{Data for mixture competing risks models}
+
+The required data format for the mixture model is shown for the BOS data in the object \code{bosmx3}.  This has 
+\begin{itemize}
+\item one row for each observed event time
+\item one row for each ``end of follow-up" time where we know an individual was still at risk of making a transition, but we don't know which transition will occur.  
+\end{itemize}
+Recall that in the data \code{bosms3} used to implement the cause-specific hazards model,
+a individual ``censored" at time $t$ contributed a row in the data \emph{for each} of the events that might have occurred after $t$.   The only difference from \code{bosmx3} is that for these
+individuals, \code{bosmx3} only has \emph{one} row per ``censored" individual.  For example, patient 5 is censored at 11 years, when they were still at risk of either BOS or death. 
+
+The process of transforming the cause-specific dataset to the mixture dataset is shown below.  Multiple censoring records, for different destination states, are condensed to a single 
+censoring record.  Each row of \code{bosmx3} then corresponds to a transition.   A new column called \code{event} is created, which identifies the terminal event of the transition,  which takes the value \code{NA} in cases of censoring where the transition that will happen is unknown.   Columns not needed for the mixture model are removed.  Labels are added to identify the states. 
+
+
+<<>>=
+bosms3[bosms3$id==5,]
+bosmx3 <- bosms3
+bosmx3$Tstart <- bosmx3$Tstop <- bosmx3$trans <- NULL
+bosmx3 <- bosmx3[!(bosmx3$status==0 & duplicated(paste(bosmx3$id, bosmx3$from))),]
+bosmx3$event <- ifelse(bosmx3$status==0, NA, bosmx3$to)
+bosmx3$event <- factor(bosmx3$event, labels=c("BOS","Death"))
+bosmx3$to <- NULL
+bosmx3[bosmx3$id==5,]
+@
+
+\subsection{Fitting mixture competing risks models}
+
+The \code{flexsurvmix} function fits a mixture model to competing risks data.  To fit a full multi-state mixture model, we fit one mixture competing risks model for each transient state.  The models are then grouped together (Section~\ref{sec:fmixmsm}) to form the full multi-state model.  
+
+The mixture model for the event following transplant (BOS or death before BOS, the 1-2 and 1-3 transitions in the multi-state model) is fitted as follows.  A Weibull distribution is fitted for the time to BOS given BOS onset, and an exponential distribution is fitted for the time to death given death before BOS onset.  These distributions are specified in the \code{dists} argument.  The same distributions as in \code{flexsurvreg} are supported (including custom distributions, in the same way). 
+
+<<>>=
+bosfs <- flexsurvmix(Surv(years, status) ~ 1, event=event, 
+                     data=bosmx3[bosmx3$from==1,],
+            dists = c(BOS="weibull", Death="exponential"))
+bosfs
+@
+
+
+The printed results object shows the two event probabilities $\pi_{rs}$ in the first two rows, 
+and the parameters of the time-to-event distributions in the remaining rows.  
+The maximum likelihood estimates are in column \code{est}, and estimates on a logit or log
+transformed scale are in column \code{est.t} with standard errors on the transformed scale in \code{se}. 
+
+Covariates can be included on the event probabilities through multinomial logistic regression.  For illustration, we just simulate some fake covariate data in the variable \code{x}.  The log odds ratio for this covariate on the odds of death (with the first category, BOS here, always taken as the baseline) is shown in the row with \code{terms} labelled \code{prob2(x)}. 
+
+<<>>=
+set.seed(1)
+bosmx3$x <- rnorm(nrow(bosmx3),0,1)
+bosfsp <- flexsurvmix(Surv(years, status) ~ 1, event=event,
+                      data=bosmx3[bosmx3$from==1,],
+            dists = c(BOS="weibull", Death="exponential"),
+            pformula = ~ x)
+bosfsp
+@
+
+Covariates may also be included on any parameter of any time-to-event distribution, as in \code{flexsurvreg}.  If the covariate is named on the right hand side of the \code{Surv} formula
+in the first argument, then it is included on the location parameter of all distributions.
+
+<<>>=
+bosfst <- flexsurvmix(Surv(years, status) ~ x, event=event, 
+                      data=bosmx3[bosmx3$from==1,],
+            dists = c(BOS="weibull", Death="exponential"))
+@
+
+The first argument may be a list of formulae, to indicate that different covariates are included 
+on the location parameter for different events. 
+
+<<>>=
+flexsurvmix(list(Surv(years, status) ~ x, 
+                 Surv(years, status) ~ 1),
+                 event=event, data=bosmx3[bosmx3$from==1,],
+            dists = c(BOS="weibull", Death="exponential"))
+@
+
+An argument \code{anc} is used to supply covariates on ancillary parameters (e.g. shape parameters).  This must be a list of length matching the number of competing events, each 
+component being a named list in the format used for the \code{anc} argument in \code{flexsurvreg}.  If there are no covariates for a particular component, just specify a null formula on the location parameter (as below, \code{rate=~1}).
+
+<<>>=
+flexsurvmix(Surv(years, status) ~ 1,
+            event=event, data=bosmx3[bosmx3$from==1,],
+            dists = c(BOS="weibull", Death="exponential"),
+            anc = list(BOS=list(shape=~x), 
+                       Death=list(rate=~1)))
+@
+
+
+
+
+\subsection{Predictions from mixture competing risks models}
+
+A few functions have been supplied to extract estimates and confidence intervals for interpretable quantities, for given covariate values.  Here we extract estimates of various
+quantities for covariate values of \code{x=0} and \code{x=1}.  These values are provided
+in a data frame \code{nd} that will be supplied as the \code{newdata} argument to various extractor functions.  
+
+The first extractor function \code{probs_flexsurvmix} gives the fitted event probabilities,
+by event and covariate value. This is applied here to the fitted model \code{bosfsp} that 
+included a covariate on the event probabilities.  All these functions take an argument \code{B} which specifies the number of samples to use for calculating bootstrap-like confidence limits --- increase this for more accurate limits.   
+
+<<>>=
+nd <-  data.frame(x=c(0,1))
+probs_flexsurvmix(bosfsp, newdata=nd, B=50)
+@
+
+\code{mean_flexsurvmix} extracts the mean time to each event conditionally on that event
+occurring, from the mean of the fitted time-to-event distribution. \code{quantile_flexsurvmix}
+extracts the quantiles of these distributions, e.g. the interquartile range in this example
+summarises the variability between individuals for this time. 
+
+<<>>=
+mean_flexsurvmix(bosfst, newdata=nd)
+quantile_flexsurvmix(bosfst, B=50, newdata=nd, probs=c(0.25, 0.5, 0.75))
+@ 
+
+\code{p_flexsurvmix} extracts the probability of being in each of the states at a time $t$ in the future, shown for $t=5,10$ here.   The \code{startname} argument supplies an informative name to the ``starting" state that the model \code{bosfst} describes transitions from. 
+
+<<>>=
+p_flexsurvmix(bosfst, t=c(5, 10), B=10, startname="No BOS")
+@ 
+
+
+\subsection{Forming a mixture multi-state model}
+\label{sec:fmixmsm}
+
+We supplement the mixture model for the event following state 1 (no BOS) with a second model \code{bosfst_bos} for the events following BOS (the other transient state in the multi-state model).   Although this is fitted with \code{flexsurvmix}, there is only one potential next state after BOS, which is death, so internally this just fits a standard survival model using \code{flexsurvreg}.   
+
+The two mixture models are then coupled together using the \code{fmixmsm} function, which returns 
+an object containing the entire multi-state model, here named \code{bosfmix}.  This object contains attributes listing the potential pathways that an individual can take through the states.  These pathways are identified automatically by naming the arguments to \code{fmixmsm} with the label of the state that each model describes transitions from --- here the first model \code{bosfst} describes transitions from ``No BOS" and the second describes transitions from BOS. 
+
+<<>>=
+bdat <- bosmx3[bosmx3$from==2,]
+bdat$event <- factor(bdat$event)
+bosfst_bos <- flexsurvmix(Surv(years, status) ~ x, event=event, data=bdat,
+                          dists = c(Death="exponential"))
+bosfmix <- fmixmsm("No BOS"=bosfst, "BOS"=bosfst_bos)
+@
+
+Now we can predict outcomes from the full multi-state model.   All these functions work by simulating a large population of individuals from the model, by default \code{M=10000}, so increase this for more accuracy.   A cut-off time \code{t=1000} is also applied to the simulated data that assumes people have all reached the absorbing state by this time -- increase this if necessary.   These functions currently require models to have at least one absorbing state, and no ``cycles" in their transition structure.
+
+The function \code{ppath_fmixmsm} returns the probability of following each of the potential pathways through the model.  For this example, they are the same for both covariate values \code{x=0} and \code{x=1}.  Setting \code{final=TRUE} aggregates the pathway probabilities by the final (absorbing) state, returning the probability of ending in each of the potential final states, which is trivially 1 in this case for the single absorbing state of death. 
+
+<<>>=
+ppath_fmixmsm(bosfmix, B=20)
+ppath_fmixmsm(bosfmix, B=20, final=TRUE)
+@
+
+To estimate the mean time to the final state for individuals following each pathway, use \code{meanfinal_fmixmsm}, and for the quantiles of the distribution of this time over individuals (by default the median and a 95\% interval), use \code{qfinal_fmixmsm}.   Supplying \code{final=TRUE} in these functions summarises the mean time to the final state, averaged over all potential pathways (according to the probability of following those pathways).   Again, covariate values can be supplied in the \code{newdata} argument if needed.  
+
+<<>>=
+meanfinal_fmixmsm(bosfmix, B=10)
+qfinal_fmixmsm(bosfmix, B=10)
+meanfinal_fmixmsm(bosfmix, B=10, final=TRUE)
+@
+
+
+\subsection{Goodness of fit checking} 
+
+The fit of mixture competing risks models can be checked by comparing predictions of the state occupancy probabilities (as returned by \code{p_flexsurvmix}) with nonparametric estimates of these quantities \citep{aalen:johansen}.  This is only supported for models with no covariates or only factor covariates (where subgroup-specific predictions are compared with stratified nonparametric estimates).  The function \code{ajfit_flexsurvmix} derives these 
+estimates from both the mixture model and the Aalen-Johansen method, and collects them in a tidy data frame ready for plotting, e.g. with the \pkg{ggplot2} package.  
+
+The mixture models fit nicely here. Note a \code{start} argument is supplied to give an informative label in the plots to the starting state. 
+
+<<fig.height=3>>=
+aj <- ajfit_flexsurvmix(bosfs, start="No BOS")
+bosfs_bos <- flexsurvmix(Surv(years, status) ~ 1, event=event, data=bdat, 
+                          dists = c(Death="exponential"))
+aj2 <- ajfit_flexsurvmix(bosfs_bos, start="BOS")
+library(ggplot2)
+ggplot(aj, aes(x=time, y=val, lty=model, col=state)) + 
+  geom_line() +  
+  xlab("Years after transplant") + ylab("Probability of being in state")
+ggplot(aj2, aes(x=time, y=val, lty=model, col=state)) + 
+  xlab("Years after transplant") + ylab("Probability of being in state") +
+  geom_line()
+@
+
+
+\section{Comparison of frameworks for parametric multi-state modelling}
+
+As the mixture model is described by the probabilities of observable events and the 
+times to those events, it is somewhat easier to interpret then the cause-specific hazards model. 
+While those quantities can be computed under the cause-specific hazards model, they require
+potentially-expensive simulation.   An advantage of the cause-specific hazards model is that it tends to be faster to \emph{fit}, if the transition-specific models are fitted independently.
+
+Another competing-risks modelling framework not implemented here is typically referred to as
+\emph{subdistribution} hazard modelling --- essentially covariate effects are applied to the probabilities of occupying different states at time $t$, rather than to the cause-specific 
+hazards.  This leads to covariate effects that are easier to interpret compared to, e.g. cause-specific hazard ratios.  The method has been implemented semiparametrically~\citep{fine1999proportional} and parametrically~\citep{lambert2017flexible}.
+
+A further framework referred to as ``vertical"  modelling \citep{nicolaie2010vertical} involves factorising the joint distribution of events and event times as $P(time)P(event|time)$, whereas the mixture modelling framework uses $P(event)P(time|event)$.
+
+
+
+\bibliography{flexsurv}
+
+\end{document}

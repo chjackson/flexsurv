@@ -1,7 +1,22 @@
 -*- text -*-
 
-Version 1.2 (TODO)
+Version 2.0 (TODO)
 -------------
+
+* A new class of multi-state models based on mixtures (Larson and
+  Dinse 1985).  A new vignette on multi-state modelling describes this
+  model class and contrasts it with standard (cause-specific hazards)
+  multi-state models.
+
+* Different parametric families are now supported for different
+  transitions in multi-state models.
+
+* New multi-state model constructor "fmsm" which allows a list of
+  flexsurvreg objects to be associated with a particular transition
+  structure matrix.
+
+* New functions simfinal_fmsm to summarise times and probabilities of
+  final absorbing events in multi-state models, using simulation.
 
 * More features for right-truncated data.  Individual-level
   right-truncation times supported with new "rtrunc" argument to
@@ -10,13 +25,6 @@ Version 1.2 (TODO)
   "survrtrunc".  Alternative parametric estimators, which make use
   of the time of an initiating event, are provided in a new function,
   "flexsurvrtrunc".
-
-* Different parametric families are now supported for different
-  transitions in multi-state models.
-
-* New multi-state model constructor "fmsm" which allows a list of
-  flexsurvreg objects to be associated with a particular transition
-  structure matrix.
 
 * qgeneric is now vectorised, thanks to the vuniroot function imported
   from the rstpm2 package by Mark Clements.  This massively boosts the

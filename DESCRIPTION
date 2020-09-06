@@ -1,8 +1,8 @@
 Package: flexsurv
 Type: Package
 Title: Flexible Parametric Survival and Multi-State Models
-Version: 1.2
-Date: 2020-05-08
+Version: 2.0
+Date: 2020-09-08
 Authors@R: c(person("Christopher", "Jackson",
          email="chris.jackson@mrc-bsu.cam.ac.uk",
          role=c("aut", "cre")),
@@ -44,6 +44,7 @@ Encoding: UTF-8
 Suggests:
     colorspace,
     eha,
+    ggplot2,
     knitr,
     msm,
     numDeriv,
