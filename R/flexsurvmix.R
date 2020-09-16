@@ -144,7 +144,7 @@
 ##'   \code{dfns} argument of \code{\link{flexsurvreg}}.
 ##'
 ##' @param method Method for maximising the likelihood.  Either \code{"em"} for
-##'   the EM algorithm, or \code{"direct"} for direct maximisation. 
+##'   the EM algorithm, or \code{"direct"} for direct maximisation.
 ##'
 ##' @param em.control List of settings to control EM algorithm fitting.  The
 ##'   only options currently available are
@@ -165,7 +165,7 @@
 ##'   and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
 ##'   being estimated, unless the user specifies these options explicitly.
 ##'
-##'   
+##'
 
 ##' @inheritParams flexsurvreg
 ##'
@@ -184,21 +184,21 @@
 ##'
 ##' @export
 flexsurvmix <- function(formula, data, event, dists,
-                        pformula=NULL, anc=NULL, 
+                        pformula=NULL, anc=NULL,
                         partial_events = NULL,
-                        initp=NULL, inits=NULL, 
+                        initp=NULL, inits=NULL,
                         fixedpars=NULL, dfns=NULL,
-                        method="direct", 
-                        em.control=NULL, 
+                        method="direct",
+                        em.control=NULL,
                         optim.control=NULL,
-                        aux=NULL, 
-                        sr.control=survreg.control(), 
+                        aux=NULL,
+                        sr.control=survreg.control(),
                         integ.opts, ...){
   call <- match.call()
-  ## Determine names of competing events, and their order, based on event data 
+  ## Determine names of competing events, and their order, based on event data
   event <- eval(substitute(event), data, parent.frame())
   if (!is.factor(event)) event <- factor(event)
- 
+
   ## Determine which of these are codes for partially observed events
   if (!is.null(partial_events)) {
     if (!is.list(partial_events)) stop("`partial_events` must be a list")
@@ -208,20 +208,20 @@ flexsurvmix <- function(formula, data, event, dists,
     for (i in 1:npartials){
       badnames <- partial_events[[i]][!(partial_events[[i]] %in% evnames)]
       badnames <- paste0("\"",badnames,"\"")
-      if (any(badnames)) 
-        stop(sprintf("partial_events[[%s]] values %s not in levels(events)", 
+      if (any(badnames))
+        stop(sprintf("partial_events[[%s]] values %s not in levels(events)",
                      i, paste(badnames,collapse=",")))
       ## Convert to codes
       partial_events[[i]] <- match(partial_events[[i]], evnames)
     }
   } else npartials <- 0
   evnames <- setdiff(levels(event), names(partial_events))
-  
+
   partial_event <- ifelse(event %in% names(partial_events), event, NA)
   partial_event <- match(partial_event, names(partial_events))
   event[event %in% names(partial_events)] <- NA
-  
-  ## For all arguments that are vectors or lists by event, 
+
+  ## For all arguments that are vectors or lists by event,
   ## make sure their names match names of events
   ## and reorder if necessary so the order of the names matches too
   if (missing(dists)) stop("Distributions \"dists\" not specified")
@@ -229,7 +229,7 @@ flexsurvmix <- function(formula, data, event, dists,
   anc <- clean_listarg(anc, "anc", evnames)
   inits <- clean_listarg(inits, "inits", evnames)
   dfns <- clean_listarg(dfns, "dfns", evnames)
-  
+
   ## Build distribution functions
   K <- length(dists)
   dlists <- vector(K, mode="list")
@@ -239,10 +239,10 @@ flexsurvmix <- function(formula, data, event, dists,
     dfns[[k]] <- form.dp(dlists[[k]], dfns[[k]], integ.opts)
   }
   names(dlists) <- names(dfns) <- names(dists)
-  
+
   check.formula.flexsurvmix(formula, dlists[[1]]) # TESTME
   if (is.list(formula)) formula <- clean_listarg(formula, "formula", evnames)
-  
+
   ## Build covariate model formulae
   if (!is.null(anc)) {
     if (!is.list(anc)) stop("`anc` should be a list")
@@ -253,8 +253,8 @@ flexsurvmix <- function(formula, data, event, dists,
     fk <- if (is.list(formula)) formula[[k]] else formula
     ancm[[k]] <- anc_from_formula(fk, anc[[k]], dlists[[k]], msg)
   }
-  locform <- forms <- vector(K, mode="list") 
-  for (k in 1:K) { 
+  locform <- forms <- vector(K, mode="list")
+  for (k in 1:K) {
     ancnames <- setdiff(dlists[[k]]$pars, dlists[[k]]$location)
     fk <- if (is.list(formula)) formula[[k]] else formula
     locform[[k]]  <- get.locform(fk, ancnames)
@@ -266,7 +266,7 @@ flexsurvmix <- function(formula, data, event, dists,
     forms[[k]] <- c(location=locform[[k]], ancm[[k]])
     names(forms[[k]])[[1]] <- loc
   }
-  
+
   ## Build model frame given formulae
   indx <- match(c("formula", "data", "event"), names(call), nomatch = 0)
   if (indx[1] == 0)
@@ -286,13 +286,13 @@ flexsurvmix <- function(formula, data, event, dists,
     m[[k]] <- eval(temp, parent.frame())
     m[[k]] <- droplevels(m[[k]]) # remove unused factor levels after subset applied
   }
-  nobs <- nrow(m[[1]]) 
-  
-  ## Build design matrices given formulae and model frame  
+  nobs <- nrow(m[[1]])
+
+  ## Build design matrices given formulae and model frame
   mml <- mx <- X <- whichparcov <- vector(K, mode="list")
-  for (k in 1:K) { 
+  for (k in 1:K) {
     mml[[k]] <- mx[[k]] <- vector(mode="list", length=length(dlists[[k]]$pars))
-    names(mml[[k]]) <- names(mx[[k]]) <- c(dlists[[k]]$location, 
+    names(mml[[k]]) <- names(mx[[k]]) <- c(dlists[[k]]$location,
                                            setdiff(dlists[[k]]$pars, dlists[[k]]$location))
     for (i in names(forms[[k]])){
       mml[[k]][[i]] <- model.matrix(forms[[k]][[i]], m[[k]])
@@ -304,14 +304,14 @@ flexsurvmix <- function(formula, data, event, dists,
   }
   if (is.null(pformula)) pformula <- ~1
   Xp <- model.matrix(pformula, m[[1]])[,-1,drop=FALSE]
-  
+
   ## Convert event internally to numbers based on factor levels
   event <- model.extract(m[[1]], "event")
   event <- match(event, evnames, incomparables=NA)
-  
-  ## Count parameters of particular kinds 
+
+  ## Count parameters of particular kinds
   ncoveffsl <- sapply(X, ncol) # number of covariate effects for each component-specific distribution
-  ncoveffs <- sum(ncoveffsl)    
+  ncoveffs <- sum(ncoveffsl)
   ncovsp <- ncol(Xp)  # number of covariates on mixing probabilities
   ncoveffsp <- (K-1)*ncovsp  # number of covariate effects on mixing probabilities
   nppars <- length(dists) - 1 + ncoveffsp # number of parameters related to mixing probabilities: baseline probs and covariate effects
@@ -321,24 +321,24 @@ flexsurvmix <- function(formula, data, event, dists,
   ## by covariate effects on the remaining parameters.
   nthetal <- sapply(dlists, function(x)length(x$pars)) # number of baseline parameters for each component-specific distribution
   ncparsl <- nthetal + ncoveffsl # total number of pars for each component
-  parindsl <- rep(1:K, ncparsl) # index identifying component for each of those parameters 
-  ncpars <- sum(ncparsl) # total number of parameters related to time-to-event distributions 
-  npars <- nppars + ncpars # total number of parameters 
-  ## identify parameters of particular kinds 
-  parclass <- rep(c("prob","time"), c(nppars, ncpars))  # mixing prob or time-to-event related 
-  baseorcov <- c(rep(c("pbase","pcov"), c(length(dists) -1, ncoveffsp)),  # baseline or covariate effect 
+  parindsl <- rep(1:K, ncparsl) # index identifying component for each of those parameters
+  ncpars <- sum(ncparsl) # total number of parameters related to time-to-event distributions
+  npars <- nppars + ncpars # total number of parameters
+  ## identify parameters of particular kinds
+  parclass <- rep(c("prob","time"), c(nppars, ncpars))  # mixing prob or time-to-event related
+  baseorcov <- c(rep(c("pbase","pcov"), c(length(dists) -1, ncoveffsp)),  # baseline or covariate effect
                  rep(rep(c("tbase","tcov"), K), as.vector(rbind(nthetal, ncoveffsl))))
   parcov <- character(npars) # identify baseline parameter which a covariate effect modifies
   parcov[parclass=="prob"  &  baseorcov=="pcov"] <- rep(paste0("prob",2:K), each=ncovsp)
   parcov[baseorcov=="tcov"] <- unlist(whichparcov)
-  
-  ## Build initial values for each parameter type for optimisation 
+
+  ## Build initial values for each parameter type for optimisation
   if (is.null(initp)) initp <- rep(1/K, K)
-  alpha <- initp 
+  alpha <- initp
   theta_inits <- cov_inits <- covparsl <- vector(K, mode="list")
-  for (k in 1:K) { 
+  for (k in 1:K) {
     covparsl[[k]] <- nthetal[k] + seq_len(ncoveffsl[k])
-    if (is.null(inits[[k]])) { 
+    if (is.null(inits[[k]])) {
       Y <- check.flexsurv.response(model.extract(m[[k]], "response"))
       yy <- ifelse(Y[,"status"]==3 & is.finite(Y[,"time2"]), (Y[,"time1"] + Y[,"time2"])/2, Y[,"time1"])
       yy  <- yy[event==k | is.na(event)]
@@ -355,19 +355,19 @@ flexsurvmix <- function(formula, data, event, dists,
       auto.inits <- dlists[[k]]$inits(t=yy,mf=m[[k]],mml=mml[[k]],aux=inits.aux)
       nin <- length(inits)
       theta_inits[[k]] <- auto.inits[seq_len(nthetal[k])]
-      if ((length(auto.inits) > nthetal[k]) && (ncoveffsl[k] > 0)) { 
-        ## e.g for Weibull distributions, initial value fn also estimates covariate effects. 
+      if ((length(auto.inits) > nthetal[k]) && (ncoveffsl[k] > 0)) {
+        ## e.g for Weibull distributions, initial value fn also estimates covariate effects.
         cov_inits[[k]] <- auto.inits[nthetal[k] + seq_len(ncoveffsl[k])]
-      } else 
+      } else
         cov_inits[[k]] <- rep(0, ncoveffsl[k])
-    } else { 
+    } else {
       theta_inits[[k]] <- inits[[k]][1:nthetal[k]] # baseline pars of parametric survival dists
       cov_inits[[k]] <- inits[[k]][covparsl[[k]]]
     }
     names(theta_inits[[k]]) <- dlists[[k]]$pars
     names(cov_inits[[k]]) <- colnames(X[[k]])
   }
-  ## Transform initial values to log or logit scale for optimisation, if needed. 
+  ## Transform initial values to log or logit scale for optimisation, if needed.
   inits_probs <- initp
   inits_alpha <- if (K==1) numeric() else qmnlogit(inits_probs)
   inits_covp <- rep( rep(0,ncovsp), K-1)   # order by covariate within probability
@@ -376,41 +376,41 @@ flexsurvmix <- function(formula, data, event, dists,
   for (k in 1:K){
     inits_theta <- c(inits_theta, par.transform(theta_inits[[k]], dlists[[k]]), cov_inits[[k]])
   }
-  
+
   loglik_flexsurvmix <- function(parsopt, ...){
     pars <- inits_all
     pars[optpars] <- parsopt
-    
-    if (K==1) 
+
+    if (K==1)
       probmat <- pmat <- matrix(1, nrow=nobs, ncol=K)
-    else { 
+    else {
       ## Apply covariate effects to mixing probabilities by multinomial logistic
       ## regression
       alpha <-  c(0, pars[1:(K-1)])
-      alphamat <- matrix(alpha, nrow=nobs, ncol=K, byrow=TRUE)  # by individual 
-      if (ncovsp > 0) { 
-        for (k in 2:K){  
+      alphamat <- matrix(alpha, nrow=nobs, ncol=K, byrow=TRUE)  # by individual
+      if (ncovsp > 0) {
+        for (k in 2:K){
           cpinds <- K - 1 + (k-2)*ncovsp + 1:ncovsp
-          alphamat[,k] <- alpha[k] + Xp %*% pars[cpinds] 
+          alphamat[,k] <- alpha[k] + Xp %*% pars[cpinds]
         }
       }
       pmat <- exp(alphamat)
       pmat <- pmat / rowSums(pmat)
       probmat <- pmat # this will be 1 or 0 if event observed
     }
-    ## Remaining parameters are time-to-event stuff   
+    ## Remaining parameters are time-to-event stuff
     parsl <- split(pars[nppars + seq_len(ncpars)], parindsl)
     theta <- coveffs <- vector(K, mode="list")
-    
+
     ## Contribution to likelihood for mixing probabilities for those with known events
     llp_event_known <- matrix(0, nrow=nobs, ncol=K)
-  
+
     # Set membership prob to 0 where there are partially-observed events
-    for (i in seq_len(npartials)){ 
+    for (i in seq_len(npartials)){
       non_events <- setdiff(1:K, partial_events[[i]])
       probmat[!is.na(partial_event) & partial_event==i, non_events] <- 0
     }
-    
+
     ## Likelihood from times to events or censoring
     liki <-  matrix(0, nrow=nobs, ncol=K)
     for (k in 1:K){
@@ -421,30 +421,30 @@ flexsurvmix <- function(formula, data, event, dists,
       initsk <- c(theta[[k]], coveffs[[k]])
       if (any(is.infinite(log(exp(initsk))))) return(-Inf)
       ## Event probability is 1 if their event was observed to be k
-      probmat[!is.na(event) & event==k, k] <- 1  
+      probmat[!is.na(event) & event==k, k] <- 1
       ## Event probability is 1 if their event was observed to be one other than k
       probmat[!is.na(event) & event!=k, k] <- 0
       need_lik <- probmat[,k] > 0
-      liki[need_lik,k] <- exp(do.call("flexsurvreg", 
-                                      list(formula=locform[[k]], data=data, dist=dists[[k]], 
+      liki[need_lik,k] <- exp(do.call("flexsurvreg",
+                                      list(formula=locform[[k]], data=data, dist=dists[[k]],
                                            anc=anc[[k]], inits=initsk, subset=need_lik,
                                            aux=aux[[k]],
                                            fixedpars=TRUE))$logliki)
       llp_event_known[,k] <- as.numeric((!is.na(event) & event==k) * log(pmat[,k]))
     }
     logliki <- - (log(rowSums(probmat*liki, na.rm=TRUE)) + rowSums(llp_event_known))
-    res <- sum(logliki) 
+    res <- sum(logliki)
     attr(res, "indiv") <- logliki
     res
   }
   # Parameter dictionary to be completed with the estimates
   distnames <- sapply(dists, function(x){if(is.list(x))x$name else x})
-  res <- data.frame(component = c(evnames, rep(evnames[seq_len(K-1)], each=ncovsp),  
-                                  rep(evnames, ncparsl)), 
-                    dist = c(rep("",nppars+1), rep(distnames, ncparsl)), 
+  res <- data.frame(component = c(evnames, rep(evnames[seq_len(K-1)], each=ncovsp),
+                                  rep(evnames, ncparsl)),
+                    dist = c(rep("",nppars+1), rep(distnames, ncparsl)),
                     terms = c(paste0("prob",1:K),  names(inits_covp),  names(inits_theta)),
-                    parclass = c("prob", parclass), 
-                    baseorcov = c("pbase", baseorcov), 
+                    parclass = c("prob", parclass),
+                    baseorcov = c("pbase", baseorcov),
                     parcov = c("", parcov))
   inits_all <- c(inits_alpha, inits_covp, inits_theta)
   if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
@@ -453,16 +453,16 @@ flexsurvmix <- function(formula, data, event, dists,
   inits_opt <- inits_all[optpars]
   if (any(fixedpars) && (method=="em")){
     method <- "direct"
-    if (any(optpars)) 
+    if (any(optpars))
       warning("Optimisation with some parameters fixed not currently supported with EM algorithm, switching to direct likelihood maximisation")
   }
   if (is.null(optim.control$fnscale))
     optim.control$fnscale <- 10000
-  
+
   method <- match.arg(method, c("direct","em"))
   if (method=="direct"){
     if (any(optpars)){
-      if (is.null(optim.control$ndeps)) 
+      if (is.null(optim.control$ndeps))
         optim.control$ndeps = rep(1e-06, length(inits_opt))
       opt <- optim(inits_opt, loglik_flexsurvmix, hessian=TRUE, method="BFGS",
                    control=optim.control, ...)
@@ -472,8 +472,8 @@ flexsurvmix <- function(formula, data, event, dists,
       opt <- list(par=inits_all, value=loglik_flexsurvmix(inits_all))
     }
     logliki <- -attr(loglik_flexsurvmix(opt$par), "indiv")
-    
-    ## Transform mixing probs back to natural scale for presentation 
+
+    ## Transform mixing probs back to natural scale for presentation
     opt_all <- inits_all
     opt_all[optpars] <- opt$par
     res_probs <- if (K>1)  pmnlogit(opt_all[1:(K-1)])  else 1
@@ -481,7 +481,7 @@ flexsurvmix <- function(formula, data, event, dists,
     res_cpars <- split(opt_all[(nppars+1):length(opt_all)], parindsl)
     res_theta <- res_coveffs <- vector(K, mode="list")
     for (k in 1:K){
-      ## Transform time-to-event parameters back to natural scale 
+      ## Transform time-to-event parameters back to natural scale
       res_theta[[k]] <- inv.transform(res_cpars[[k]][seq_len(nthetal[k])], dlists[[k]])
       res_coveffs[[k]] <- res_cpars[[k]][nthetal[k] + seq_len(ncoveffsl[k])]
       res_cpars[[k]] <- c(res_theta[[k]], res_coveffs[[k]])
@@ -493,39 +493,41 @@ flexsurvmix <- function(formula, data, event, dists,
     res <- cbind(res, data.frame(
                       est = c(res_probs, res_covp, unlist(res_cpars)),
                       est.t = est.t))
-                      
+
     loglik <- - as.vector(opt$value)
-    if (!fixed)
-      cov <- solve(opt$hessian)
-    else cov <- NULL
+    if (!fixed) {
+      cov <- chol2inv(chol(opt$hessian))
+    } else {
+      cov <- NULL
+    }
   }
-  
-  else if (method=="em") { 
+
+  else if (method=="em") {
     if (!is.list(em.control)) em.control <- list()
     if (is.null(em.control$reltol)) em.control$reltol <- sqrt(.Machine$double.eps)
     converged <- FALSE
     iter <- 0
     alpha <- inits_alpha
-    covp <- inits_covp 
+    covp <- inits_covp
     theta <- theta_inits
     covtheta <- cov_inits
-    
-    while (!converged) {  
+
+    while (!converged) {
       ## E step
-      alphamat <- matrix(c(0,alpha), nrow=nobs, ncol=K, byrow=TRUE)  # by individual 
+      alphamat <- matrix(c(0,alpha), nrow=nobs, ncol=K, byrow=TRUE)  # by individual
       if (ncovsp>0){
-        for (k in 2:K){ 
+        for (k in 2:K){
           cpinds <- (k-2)*ncovsp + 1:ncovsp
-          alphamat[,k] <- alpha[k-1] + Xp %*% covp[cpinds] 
+          alphamat[,k] <- alpha[k-1] + Xp %*% covp[cpinds]
         }
       }
       pmat <- exp(alphamat)
       pmat <- pmat / rowSums(pmat)
-      
+
       llmat <- matrix(nrow=nobs, ncol=K)
       for (k in 1:K) {
-        fs <- flexsurvreg(formula=locform[[k]], data=data, dist=dists[[k]], 
-                          anc=anc[[k]], inits=theta[[k]], aux=aux[[k]], fixedpars=TRUE) 
+        fs <- flexsurvreg(formula=locform[[k]], data=data, dist=dists[[k]],
+                          anc=anc[[k]], inits=theta[[k]], aux=aux[[k]], fixedpars=TRUE)
         llmat[,k] <-  fs$logliki
       }
       alphap <- exp(llmat) * pmat
@@ -535,17 +537,17 @@ flexsurvmix <- function(formula, data, event, dists,
         w[!is.na(event) & event!=k, k] <- 0
       }
       w
-      
+
       ## M step
-      
+
       ## estimate component probs and covariate effects on them
       #alpha <- colMeans(w)
       loglik_p_em <- function(pars){
         alphamat <- matrix(c(0,pars[1:(K-1)]), nrow=nobs, ncol=K, byrow=TRUE)
-        if (ncovsp > 0) { 
-          for (k in 2:K){  
+        if (ncovsp > 0) {
+          for (k in 2:K){
             cpinds <- K - 1 + (k-2)*ncovsp + 1:ncovsp
-            alphamat[,k] <- alphamat[,k] + Xp %*% pars[cpinds] 
+            alphamat[,k] <- alphamat[,k] + Xp %*% pars[cpinds]
           }
         }
         pmat <- exp(alphamat)
@@ -553,26 +555,26 @@ flexsurvmix <- function(formula, data, event, dists,
         -sum(w*log(pmat))
       }
 
-      #  if setting a control argument here in  the future, note ndeps has  to be different  
-      # length from others. 
+      #  if setting a control argument here in  the future, note ndeps has  to be different
+      # length from others.
       parsp <- optim(c(alpha,covp), loglik_p_em, method="BFGS")
       alpha <- parsp$par[1:(K-1)]
-      probs <- pmnlogit(alpha) 
+      probs <- pmnlogit(alpha)
       covp <- if (ncovsp>0) parsp$par[K:nppars] else NULL
-      
-      ## call flexsurvreg for each component on weighted dataset to estimate component-specific pars 
+
+      ## call flexsurvreg for each component on weighted dataset to estimate component-specific pars
       thetanew <- covthetanew <- ttepars <- vector(K, mode="list")
       ll <- numeric(K)
 
       ctrl <- optim.control
       for (k in 1:K) {
-        if (is.null(optim.control$ndeps)) 
+        if (is.null(optim.control$ndeps))
           ctrl$ndeps = rep(1e-06, length(theta[[k]]) + length(covtheta[[k]]))
         fs <- do.call("flexsurvreg",  # need do.call to avoid environment faff with supplying weights
-                      list(formula=locform[[k]], data=data, dist=dists[[k]], 
-                           anc=anc[[k]], inits=c(theta[[k]],covtheta[[k]]), 
-                           weights=w[,k], 
-                           aux=aux[[k]], 
+                      list(formula=locform[[k]], data=data, dist=dists[[k]],
+                           anc=anc[[k]], inits=c(theta[[k]],covtheta[[k]]),
+                           weights=w[,k],
+                           aux=aux[[k]],
                            subset=w[,k]>0, hessian=FALSE,
                            control=ctrl))
         ll[k] <- fs$loglik
@@ -580,7 +582,7 @@ flexsurvmix <- function(formula, data, event, dists,
         covthetanew[[k]] <- fs$res[nthetal[k] + seq_len(ncoveffsl[k]),"est"]
         ttepars[[k]] <- c(thetanew[[k]], covthetanew[[k]])
       }
-      
+
       theta <- thetanew
       covtheta <- covthetanew
       logliknew <- sum(ll)
@@ -600,15 +602,15 @@ flexsurvmix <- function(formula, data, event, dists,
         print(est)
       iter <- iter + 1
     }
-    res <- cbind(res, 
+    res <- cbind(res,
                  data.frame(est=est, est.t=est.t))
     ll <- loglik_flexsurvmix(est.t[-1])
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
-    cov <- solve(numDeriv::hessian(loglik_flexsurvmix, est.t[-1]))
+    cov <- chol2inv(chol(numDeriv::hessian(loglik_flexsurvmix, est.t[-1])))
     opt <- NULL
   }
-  
+
   ## Add standard errors to results data frame, given covariance matrix.
   ## var ( 1 - p1 - p2 - .. ) = var(p1) + var(p2) - cov(p1,p2) - ...
   res$fixed <- c(NA, rep(FALSE, npars))
@@ -622,22 +624,22 @@ flexsurvmix <- function(formula, data, event, dists,
   names.first <- c("component","dist","terms","est","est.t","se")
   res <- res[,c(names.first, setdiff(names(res), names.first)),drop=FALSE]
   rownames(res) <- NULL
-  
+
   mcomb <- do.call("cbind", m)
   mcomb <- mcomb[,!duplicated(names(mcomb))]
   attr(mcomb, "covnames") <- unique(unlist(lapply(m, function(x)attr(terms(x),"term.labels"))))
-  
+
   res <- list(call=match.call(),
-              res=res, loglik=loglik,  cov=cov, 
+              res=res, loglik=loglik,  cov=cov,
               npars=npars, AIC=-2*loglik + 2*npars,
-              K=K, dists=distnames,  dlists=dlists, dfns=dfns, 
+              K=K, dists=distnames,  dlists=dlists, dfns=dfns,
               opt=opt,
               fixedpars=fixedpars, optpars=optpars,
               logliki=logliki,
               evnames=evnames,
-              nthetal=nthetal, parindsl=parindsl, 
+              nthetal=nthetal, parindsl=parindsl,
               ncoveffsl=ncoveffsl,ncoveffsp=ncoveffsp, covparsl=covparsl,
-              all.formulae=forms, pformula=pformula, 
+              all.formulae=forms, pformula=pformula,
               data=list(mf=m, mfcomb=mcomb), mx=mx)
   class(res) <- "flexsurvmix"
   res
@@ -649,7 +651,7 @@ check.formula.flexsurvmix <- function(formula, dlist){
     formula <- list(formula)
   }
   for (i in seq_along(formula)){
-    if (!inherits(formula[[i]],"formula")) 
+    if (!inherits(formula[[i]],"formula"))
       stop(sprintf("\"formula[[%s]]\" must be a formula object", i))
     labs <- attr(terms(formula[[i]]), "term.labels")
     if (!("strata" %in% dlist$pars)){
@@ -680,14 +682,14 @@ logLik.flexsurvmix <- function(object, ...){
 clean_listarg <- function(arg, argname, evnames){
   if (!is.null(arg)){
     if (length(arg) != length(evnames))
-      stop(sprintf("`%s` of length %s, should equal the number of mixture components, assumed to be %s, from the number of levels of factor(event)", 
+      stop(sprintf("`%s` of length %s, should equal the number of mixture components, assumed to be %s, from the number of levels of factor(event)",
            argname, length(arg), length(evnames)))
     narg <- names(arg)
-    if (is.null(narg)) 
+    if (is.null(narg))
       names(arg) <- evnames
-    else { 
+    else {
       if (!identical(sort(narg), sort(evnames)))
-        stop(sprintf("names(%s) = %s, but this should match levels(factor(event)) = %s", 
+        stop(sprintf("names(%s) = %s, but this should match levels(factor(event)) = %s",
                 argname, paste(narg, collapse=","), paste(evnames,collapse=",")))
       arg <- arg[evnames]
     }
@@ -742,13 +744,13 @@ parlist.transform <- function(parlist, dlists){
 invlist.transform <- function(parlist, dlists){
   parlist.t <- vector(length(parlist), mode="list")
   for (k in seq_along(parlist.t))
-    parlist.t[[k]] <- inv.transform(parlist[[k]], dlists[[k]])  
+    parlist.t[[k]] <- inv.transform(parlist[[k]], dlists[[k]])
   parlist.t
 }
 
-## Transform full vector of estimates back to natural scale.  
-## Returns Kth baseline prob as well 
-## TODO can this go into the main flexsurvreg function? Would have to form list first 
+## Transform full vector of estimates back to natural scale.
+## Returns Kth baseline prob as well
+## TODO can this go into the main flexsurvreg function? Would have to form list first
 
 inv.transform.res <- function(x, dlists) {
   dpars <- x$res$est.t[x$res$dist!=""]
@@ -762,7 +764,7 @@ inv.transform.res <- function(x, dlists) {
     bpars <- inv.transform(bpars, dlists[[k]])
     est[[k]] <- c(bpars, cpars)
   }
-  probs <- if (K==1) 1 else pmnlogit(x$res$est.t[2:K])  
+  probs <- if (K==1) 1 else pmnlogit(x$res$est.t[2:K])
   pcov <- x$res$est.t[grep("prob[[:digit:]]+\\(.+\\)", x$res$terms)]
   c(probs, pcov, unlist(est))
 }
@@ -776,15 +778,15 @@ model.frame.flexsurvmix <- function(formula, ...)
 
 # Multinomial logistic transform and inverse transform
 
-# returns transformed probs relative to first component, excluding first component 
+# returns transformed probs relative to first component, excluding first component
 qmnlogit <- function(probs){
-  if  (length(probs) == 1) 
+  if  (length(probs) == 1)
     qlogis(probs)
-  else 
+  else
     log(probs[-1] / probs[1])
 }
 
-# returns probs including first component, given transformed probs with first component excluded 
+# returns probs including first component, given transformed probs with first component excluded
 pmnlogit <- function(alpha){
   c(1, exp(alpha)) / (1 + sum(exp(alpha)))
 }
