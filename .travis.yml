@@ -9,6 +9,5 @@ install:
 script:
 - R CMD build .
 - R CMD check *tar.gz
-- Rscript -e 'devtools::test()'
 after_success:
   - Rscript -e 'covr::codecov()'
