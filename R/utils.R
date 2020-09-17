@@ -261,5 +261,6 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
       "empirical covariance matrix no positive definite, smallest eigenvalue is %.1e (threshold: %.1e). This might indicate that the optimization did not converge to the MLE, continuing with positive definite approximation of the empirical covariance matrix.",
       min(evalues), -tol.evalues
     ))
-  Matrix::nearPD(inv_hessian, ensureSymmetry = TRUE, ...)$mat
+  # make sure we return a plain matrix
+  as.matrix(Matrix::nearPD(inv_hessian, ensureSymmetry = TRUE, ...)$mat)
 }
