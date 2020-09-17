@@ -250,7 +250,15 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
 ## suppresses NOTE from checker about variables created with "assign"
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
 
-# helper function to safely convert a Hessian matrix to covariance matrix
+##' helper function to safely convert a Hessian matrix to covariance matrix
+##'
+##' @param hessian hessian matrix to convert to covariance matrix (must be evaluated at MLE)
+##' @param tol.solve tolerance used for solve()
+##' @param tol.evalues accepted tolerance for negative eigenvalues of the covariance matrix
+##' @param ... arguments passed to Matrix::nearPD
+##'
+##' @importFrom Matrix nearPD
+##' @keywords internal
 .hess_to_cov <- function(hessian, tol.solve = 1e-9, tol.evalues = 1e-5, ...) {
   # use solve(.) over chol2inv(chol(.)) to get an inverse even if not PD
   # less efficient but more stable
@@ -261,6 +269,6 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
       "empirical covariance matrix no positive definite, smallest eigenvalue is %.1e (threshold: %.1e). This might indicate that the optimization did not converge to the MLE, continuing with positive definite approximation of the empirical covariance matrix.",
       min(evalues), -tol.evalues
     ))
-  # make sure we return a plain matrix
+  # make sure we return a plain positive definite symmetric matrix
   as.matrix(Matrix::nearPD(inv_hessian, ensureSymmetry = TRUE, ...)$mat)
 }

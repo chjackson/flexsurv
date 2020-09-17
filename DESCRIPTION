@@ -29,6 +29,7 @@ Imports:
     generics,
     magrittr,
     mstate (>= 0.2.10),
+    Matrix,
     muhaz,
     mvtnorm,
     quadprog,
