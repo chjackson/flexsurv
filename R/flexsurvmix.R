@@ -464,7 +464,7 @@ flexsurvmix <- function(formula, data, event, dists,
     if (any(optpars)){
       if (is.null(optim.control$ndeps))
         optim.control$ndeps = rep(1e-06, length(inits_opt))
-      opt <- optim(inits_opt, loglik_flexsurvmix, hessian=TRUE, method="BFGS",
+      opt <- optim(inits_opt, loglik_flexsurvmix, hessian=FALSE, method="BFGS",
                    control=optim.control, ...)
       if (opt$convergence==1)
         warning("Iteration limit in optim() reached without convergence. Reported estimates are not the maximum likelihood. Increase \"maxit\" or simplify the model.")
@@ -496,7 +496,8 @@ flexsurvmix <- function(formula, data, event, dists,
 
     loglik <- - as.vector(opt$value)
     if (!fixed) {
-      cov <- .hess_to_cov(opt$hessian)
+      # the hessian computation is potentially extremely time consuming!
+       cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, opt$par))
     } else {
       cov <- NULL
     }
@@ -607,7 +608,7 @@ flexsurvmix <- function(formula, data, event, dists,
     ll <- loglik_flexsurvmix(est.t[-1])
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
-    cov <- .hess_to_cov(numDeriv::hessian(loglik_flexsurvmix, est.t[-1]))
+    cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, est.t[-1]))
     opt <- NULL
   }
 
