@@ -266,7 +266,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
   evalues <- eigen(inv_hessian, symmetric = TRUE, only.values = TRUE)$values
   if (min(evalues) < -tol.evalues)
     warning(sprintf(
-      "empirical covariance matrix no positive definite, smallest eigenvalue is %.1e (threshold: %.1e). This might indicate that the optimization did not converge to the MLE, continuing with positive definite approximation of the empirical covariance matrix.",
+      "Hessian not positive definite: smallest eigenvalue is %.1e (threshold: %.1e). This might indicate that the optimization did not converge to the maximum likelihood, so that the results are invalid. Continuing with the nearest positive definite approximation of the covariance matrix.",
       min(evalues), -tol.evalues
     ))
   # make sure we return a plain positive definite symmetric matrix
