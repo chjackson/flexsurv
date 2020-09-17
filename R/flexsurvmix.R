@@ -496,7 +496,7 @@ flexsurvmix <- function(formula, data, event, dists,
 
     loglik <- - as.vector(opt$value)
     if (!fixed) {
-      cov <- chol2inv(chol(opt$hessian))
+      cov <- .hess_to_cov(opt$hessian)
     } else {
       cov <- NULL
     }
@@ -607,7 +607,7 @@ flexsurvmix <- function(formula, data, event, dists,
     ll <- loglik_flexsurvmix(est.t[-1])
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
-    cov <- chol2inv(chol(numDeriv::hessian(loglik_flexsurvmix, est.t[-1])))
+    cov <- .hess_to_cov(numDeriv::hessian(loglik_flexsurvmix, est.t[-1]))
     opt <- NULL
   }
 

@@ -81,15 +81,15 @@ rbase <- function(dname, n, ...){
 
 
 ##' Generic function to find restricted mean survival of a distribution
-##' 
+##'
 ##' Generic function to find the restricted mean of a distribution, given the
 ##' equivalent probability distribution function using numeric intergration.
-##' 
+##'
 ##' This function is used by default for custom distributions for which an
 ##' rmst function is not provided.
-##' 
+##'
 ##' This assumes a suitably smooth, continuous distribution.
-##' 
+##'
 ##' @param pdist Probability distribution function, for example,
 ##' \code{\link{pnorm}} for the normal distribution, which must be defined in
 ##' the current workspace.  This should accept and return vectorised parameters
@@ -111,11 +111,11 @@ rbase <- function(dname, n, ...){
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
 ##' @keywords distribution
 ##' @examples
-##' 
+##'
 ##' rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138)
 ##' rmst_generic(plnorm, 500, start=250, c(0.025, 0.975), meanlog=7.4225, sdlog = 1.1138)
 ##' # must name the arguments
-##' 
+##'
 ##' @export
 rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
 {
@@ -135,57 +135,57 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
 }
 
 ##' Generic function to find quantiles of a distribution
-##' 
+##'
 ##' Generic function to find the quantiles of a distribution, given the
 ##' equivalent probability distribution function.
-##' 
+##'
 ##' This function is used by default for custom distributions for which a
 ##' quantile function is not provided.
-##' 
+##'
 ##' It works by finding the root of the equation \eqn{h(q) = pdist(q) - p = 0}.
 ##' Starting from the interval \eqn{(-1, 1)}, the interval width is expanded by
 ##' 50\% until \eqn{h()} is of opposite sign at either end.  The root is then
 ##' found using \code{\link{uniroot}}.
-##' 
+##'
 ##' This assumes a suitably smooth, continuous distribution.
-##' 
+##'
 ##' @param pdist Probability distribution function, for example,
 ##' \code{\link{pnorm}} for the normal distribution, which must be defined in
 ##' the current workspace.  This should accept and return vectorised parameters
 ##' and values.  It should also return the correct values for the entire real
 ##' line, for example a positive distribution should have \code{pdist(x)==0}
 ##' for \eqn{x<0}.
-##' 
+##'
 ##' @param p Vector of probabilities to find the quantiles for.
-##' 
+##'
 ##' @param matargs Character vector giving the elements of \code{...} which
 ##' represent vector parameters of the distribution.  Empty by default.  When
 ##' vectorised, these will become matrices.  This is used for the arguments
 ##' \code{gamma} and \code{knots} in \code{\link{qsurvspline}}.
 ##'
-##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{qsurvspline}}. 
-##' 
+##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{qsurvspline}}.
+##'
 ##' @param ...  The remaining arguments define parameters of the distribution
 ##' \code{pdist}.  These MUST be named explicitly.
-##' 
+##'
 ##' This may also contain the standard arguments \code{log.p} (logical; default
 ##' \code{FALSE}, if \code{TRUE}, probabilities p are given as log(p)), and
 ##' \code{lower.tail} (logical; if \code{TRUE} (default), probabilities are P[X
 ##' <= x] otherwise, P[X > x].).
-##' 
+##'
 ##' If the distribution is bounded above or below, then this should contain
 ##' arguments \code{lbound} and \code{ubound} respectively, and these will be
 ##' returned if \code{p} is 0 or 1 respectively.  Defaults to \code{-Inf} and
 ##' \code{Inf} respectively.
-##' 
+##'
 ##' @return Vector of quantiles of the distribution at \code{p}.
-##' 
+##'
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
-##' 
+##'
 ##' @keywords distribution
-##' 
+##'
 ##' @examples
-##' 
+##'
 ##' qnorm(c(0.025, 0.975), 0, 1)
 ##' qgeneric(pnorm, c(0.025, 0.975), mean=0, sd=1) # must name the arguments
 ##' @export
@@ -203,11 +203,11 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
     ret[p == 1] <- args$ubound
     ## args containing vector params of the distribution (e.g. gamma and knots in dsurvspline)
     args.mat <- args[matargs]
-    ## Arguments that cannot be vectorised 
+    ## Arguments that cannot be vectorised
     args.scalar <- args[scalarargs]
     args[c(matargs,scalarargs,"lower.tail","log.p","lbound","ubound")] <- NULL
     ## Other args assumed to contain vectorisable parameters of the distribution.
-    ## Replicate all to their maximum length, along with p 
+    ## Replicate all to their maximum length, along with p
     matlen <- if(is.null(matargs)) NULL else sapply(args.mat, function(x){if(is.matrix(x))nrow(x) else 1})
     veclen <- if (is.null(args)) NULL else sapply(args, length)
     maxlen <- max(c(length(p), veclen, matlen))
@@ -249,3 +249,17 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
 
 ## suppresses NOTE from checker about variables created with "assign"
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
+
+# helper function to safely convert a Hessian matrix to covariance matrix
+.hess_to_cov <- function(hessian, tol.solve = 1e-9, tol.evalues = 1e-5, ...) {
+  # use solve(.) over chol2inv(chol(.)) to get an inverse even if not PD
+  # less efficient but more stable
+  inv_hessian <- solve(hessian, tol = tol.solve)
+  evalues <- eigen(inv_hessian, symmetric = TRUE, only.values = TRUE)$values
+  if (min(evalues) < -tol.evalues)
+    warning(sprintf(
+      "empirical covariance matrix no positive definite, smallest eigenvalue is %.1e (threshold: %.1e). This might indicate that the optimization did not converge to the MLE, continuing with positive definite approximation of the empirical covariance matrix.",
+      min(evalues), -tol.evalues
+    ))
+  Matrix::nearPD(inv_hessian, ensureSymmetry = TRUE, ...)$mat
+}
