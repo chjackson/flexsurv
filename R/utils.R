@@ -272,3 +272,47 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
   # make sure we return a plain positive definite symmetric matrix
   as.matrix(Matrix::nearPD(inv_hessian, ensureSymmetry = TRUE, ...)$mat)
 }
+
+
+#' Numerical evaluation of the hessian of a function using numDeriv::hessian
+#'
+#' We perform a quick check about the expected runtime and adjust the
+#' precision accordingly.
+#'
+#' @param f function to compute Hessian for
+#' @param x location to evaluate Hessian at
+#' @param seconds.warning time threshold in seconds to trigger message and
+#'    reduce the number of iterations for Richardson extrapolation of
+#'    numDeriv::hessian
+#' @param default.r default number of iterations (high-precicion recommendation
+#'    of numDeriv)
+#' @param min.r minial number of iteration, must be at least 2,
+#' @param ... further arguments passed to method.args of numDeriv::hessian
+#'
+#' @importFrom numDeriv hessian
+#' @keywords internal
+.hessian <- function(f, x, seconds.warning = 60, default.r = 6, min.r = 2, ...) {
+  # dimensionality of the problem
+  k <- length(x)
+  # estimate evaluation time of f(x)
+  start_time <- Sys.time()
+  for (i in 1:3) f(x)
+    mean_eval_sec <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))/3
+  default_runtime <- mean_eval_sec * (1 + default.r*(k^2 + k))
+  # reduce iterations for Richardson extrapolation
+  if (default_runtime > seconds.warning) {
+          r <- default.r
+    runtime <- default_runtime
+    while ((r > min.r) & (runtime > seconds.warning)) {
+            r <- r - 1
+      runtime <- mean_eval_sec * (1 + r*(k^2 + k))
+    }
+    message(sprintf(
+      "estimated runtime for evaluating the hessian with r=%i is %i minutes, reducing r to %i, estimated runtime is %i minutes",
+      default.r, round(default_runtime/60), r, round(runtime/60)
+    ))
+  } else {
+    r <- default.r
+  }
+  numDeriv::hessian(f, x, method = "Richardson", method.args = list(r = r, ...))
+}
