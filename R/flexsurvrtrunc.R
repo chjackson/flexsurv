@@ -1,6 +1,6 @@
 ##' Flexible parametric models for right-truncated, uncensored data defined by times of initial and final events.
 ##'
-##' This function estimates the distribution of the time between an initial and final event, in situations where individuals are only observed if they have experienced both events before a certain tme, thus they are right-truncated at this time.   The time of the initial event provides information about the time from initial to final event, and initial events are assumed to occur with an exponential growth rate.
+##' This function estimates the distribution of the time between an initial and final event, in situations where individuals are only observed if they have experienced both events before a certain time, thus they are right-truncated at this time.   The time of the initial event provides information about the time from initial to final event, given the truncated observation scheme, and initial events are assumed to occur with an exponential growth rate.
 ##'
 ##' Covariates are not currently supported.
 ##'
@@ -19,7 +19,7 @@
 ##'
 ##' @param data Data frame containing \code{t}, \code{rtrunc} and \code{tinit}.
 ##'
-##' @param method If \code{"joint"} then the joint-conditional method is used.  If \code{"final"} then the conditional-on-final method is used.   The conditional-on-initial method" can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).
+##' @param method If \code{"joint"} then the joint-conditional method is used.  If \code{"final"} then the conditional-on-final method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).
 ##'
 ##' @param theta Initial value (or fixed value) for the exponential growth rate \code{theta}. Defaults to 1.
 ##'
@@ -76,9 +76,8 @@
 ##' flexsurvrtrunc(t=T, rtrunc=rtrunc, tinit=X, tmax=40, data=dat,
 ##'                 dist="gompertz", fixed.theta=TRUE)
 ##'
-##' @references Seaman, S., Presanis, A. and Jackson, C. (2020) Review
-##' of methods for estimating distribution of time to event from
-##' right-truncated data.   
+##' @references Seaman, S., Presanis, A. and Jackson, C. (2020) Estimating a Time-to-Event
+##' Distribution from Right-Truncated Data in an Epidemic: a Review of Methods
 ##'
 ##' @export
 flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", dist, 
@@ -130,7 +129,7 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
     for (i in 1:nbpars){
         inits[i] <- dlist$transforms[[i]](inits[i])
     }
-    inits[nbpars+1] <- log(inits[nbpars+1])
+    inits[nbpars+1] <- inits[nbpars+1]
     optpars <- setdiff(1:npars, fixedpars)
     optvals <- inits[optpars]
 
@@ -240,7 +239,7 @@ frtrunc_loglik_factory <- function(inits, tinit, tdelay, tmax, method, dlist, df
             pars[i] <- dlist$inv.transforms[[i]](pars[i])
         }
         dpars <- pars[1:nbpars]
-        theta <- exp(pars[nbpars+1]) 
+        theta <- pars[nbpars+1]
         nv <- length(tinit)
         dargs <- as.list(dpars)
         dargs$x <- tdelay 

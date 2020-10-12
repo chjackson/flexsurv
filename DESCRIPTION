@@ -11,6 +11,8 @@ Authors@R: c(person("Christopher", "Jackson",
 	   person("Jordan", "Amdahl",
          role=c("ctb")),
          person("Matthew T.", "Warkentin",
+         role = c("ctb")),
+         person("Kevin", "Kunzmann",
          role = c("ctb"))
 	   )
 Description: Flexible parametric models for time-to-event data,

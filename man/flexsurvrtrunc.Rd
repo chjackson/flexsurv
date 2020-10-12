@@ -33,7 +33,7 @@ flexsurvrtrunc(
 
 \item{data}{Data frame containing \code{t}, \code{rtrunc} and \code{tinit}.}
 
-\item{method}{If \code{"joint"} then the joint-conditional method is used.  If \code{"final"} then the conditional-on-final method is used.   The conditional-on-initial method" can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).}
+\item{method}{If \code{"joint"} then the joint-conditional method is used.  If \code{"final"} then the conditional-on-final method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).}
 
 \item{dist}{Typically, one of the strings in the first column of the
 following table, identifying a built-in distribution.  This table also
@@ -129,7 +129,7 @@ estimates, by default 0.95.}
 \item{optim_control}{List to supply as the \code{control} argument to \code{\link{optim}} to control the likelihood maximisation.}
 }
 \description{
-This function estimates the distribution of the time between an initial and final event, in situations where individuals are only observed if they have experienced both events before a certain tme, thus they are right-truncated at this time.   The time of the initial event provides information about the time from initial to final event, and initial events are assumed to occur with an exponential growth rate.
+This function estimates the distribution of the time between an initial and final event, in situations where individuals are only observed if they have experienced both events before a certain time, thus they are right-truncated at this time.   The time of the initial event provides information about the time from initial to final event, given the truncated observation scheme, and initial events are assumed to occur with an exponential growth rate.
 }
 \details{
 Covariates are not currently supported.
@@ -181,9 +181,8 @@ flexsurvrtrunc(t=T, rtrunc=rtrunc, tinit=X, tmax=40, data=dat,
 
 }
 \references{
-Seaman, S., Presanis, A. and Jackson, C. (2020) Review
-of methods for estimating distribution of time to event from
-right-truncated data.
+Seaman, S., Presanis, A. and Jackson, C. (2020) Estimating a Time-to-Event
+Distribution from Right-Truncated Data in an Epidemic: a Review of Methods
 }
 \seealso{
 \code{\link{flexsurvreg}}, \code{\link{survrtrunc}}.
