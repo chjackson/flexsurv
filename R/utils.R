@@ -260,6 +260,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
 ##' @importFrom Matrix nearPD
 ##' @keywords internal
 .hess_to_cov <- function(hessian, tol.solve = 1e-9, tol.evalues = 1e-5, ...) {
+  if(is.null(tol.solve)) tol.solve <- 1e-9
+  if(is.null(tol.evalues)) tol.evalues <- 1e-5 
   # use solve(.) over chol2inv(chol(.)) to get an inverse even if not PD
   # less efficient but more stable
   inv_hessian <- solve(hessian, tol = tol.solve)

@@ -10,3 +10,4 @@ src/*.dll
 flexsurv.Rproj
 doc
 Meta
+.DS_Store

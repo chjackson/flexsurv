@@ -22,6 +22,7 @@ flexsurvmix(
   aux = NULL,
   sr.control = survreg.control(),
   integ.opts,
+  hess.control = NULL,
   ...
 )
 }
@@ -179,6 +180,11 @@ list is passed as the \code{control} argument to \code{\link{survreg}}.}
 its cumulative version.  For example,
 
 \code{integ.opts = list(rel.tol=1e-12)}}
+
+\item{hess.control}{List of options to control Hessian computation.
+Available options are \code{tol.solve}, the tolerance used for \code{\link{solve}}
+when inverting the Hessian, and \code{tol.evalues}, the accepted tolerance for 
+negative eigenvalues in the covariance matrix.}
 
 \item{...}{Optional arguments to the general-purpose optimisation routine
 \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the

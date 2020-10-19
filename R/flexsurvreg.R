@@ -201,14 +201,14 @@ check.formula <- function(formula, dlist){
     labs <- attr(terms(formula), "term.labels")
     if (!("strata" %in% dlist$pars)){
         strat <- grep("strata\\((.+)\\)",labs)
-        if (any(strat)){
+        if (length(strat) > 0){
             cov <- gsub("strata\\((.+)\\)","\\1",labs[strat[1]])
             warning("Ignoring \"strata\" function: interpreting \"",cov, "\" as a covariate on \"", dlist$location, "\"")
         }
     }
     if (!("frailty" %in% dlist$pars)){
         fra <- grep("frailty\\((.+)\\)",labs)
-        if (any(fra)){
+        if (length(fra) > 0){
             warning("frailty models are not supported and behaviour of frailty() is undefined")
         }
     }

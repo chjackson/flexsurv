@@ -164,9 +164,13 @@
 ##'   M step of \code{method="em"}.  By default, this uses \code{fnscale=10000}
 ##'   and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
 ##'   being estimated, unless the user specifies these options explicitly.
+##'   
+##' @param hess.control List of options to control Hessian computation.  
+##' Available options are \code{tol.solve}, the tolerance used for \code{\link{solve}}
+##' when inverting the Hessian, and \code{tol.evalues}, the accepted tolerance for 
+##' negative eigenvalues in the covariance matrix.
 ##'
 ##'
-
 ##' @inheritParams flexsurvreg
 ##'
 ##' @return List of objects containing information about the fitted model.   The
@@ -193,7 +197,7 @@ flexsurvmix <- function(formula, data, event, dists,
                         optim.control=NULL,
                         aux=NULL,
                         sr.control=survreg.control(),
-                        integ.opts, ...){
+                        integ.opts, hess.control=NULL, ...){
   call <- match.call()
   ## Determine names of competing events, and their order, based on event data
   event <- eval(substitute(event), data, parent.frame())
@@ -208,7 +212,7 @@ flexsurvmix <- function(formula, data, event, dists,
     for (i in 1:npartials){
       badnames <- partial_events[[i]][!(partial_events[[i]] %in% evnames)]
       badnames <- paste0("\"",badnames,"\"")
-      if (any(badnames))
+      if (length(badnames) > 0)
         stop(sprintf("partial_events[[%s]] values %s not in levels(events)",
                      i, paste(badnames,collapse=",")))
       ## Convert to codes
@@ -449,11 +453,11 @@ flexsurvmix <- function(formula, data, event, dists,
   inits_all <- c(inits_alpha, inits_covp, inits_theta)
   if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
   optpars <- setdiff(seq_len(npars), fixedpars)
-  fixed <- !any(optpars)
+  fixed <- (length(optpars) == 0)
   inits_opt <- inits_all[optpars]
-  if (any(fixedpars) && (method=="em")){
+  if ((length(fixedpars) > 0) && (method=="em")){
     method <- "direct"
-    if (any(optpars))
+    if (length(optpars) > 0)
       warning("Optimisation with some parameters fixed not currently supported with EM algorithm, switching to direct likelihood maximisation")
   }
   if (is.null(optim.control$fnscale))
@@ -461,7 +465,7 @@ flexsurvmix <- function(formula, data, event, dists,
 
   method <- match.arg(method, c("direct","em"))
   if (method=="direct"){
-    if (any(optpars)){
+    if (length(optpars) > 0){
       if (is.null(optim.control$ndeps))
         optim.control$ndeps = rep(1e-06, length(inits_opt))
       opt <- optim(inits_opt, loglik_flexsurvmix, hessian=FALSE, method="BFGS",
@@ -497,7 +501,8 @@ flexsurvmix <- function(formula, data, event, dists,
     loglik <- - as.vector(opt$value)
     if (!fixed) {
       # the hessian computation is potentially extremely time consuming!
-       cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, opt$par))
+       cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, opt$par), 
+                           hess.control$tol.solve, hess.control$tol.evalues)
     } else {
       cov <- NULL
     }
@@ -608,7 +613,8 @@ flexsurvmix <- function(formula, data, event, dists,
     ll <- loglik_flexsurvmix(est.t[-1])
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
-    cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, est.t[-1]))
+    cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, est.t[-1]), 
+                        hess.control$tol.solve, hess.control$tol.evalues)
     opt <- NULL
   }
 
@@ -657,14 +663,14 @@ check.formula.flexsurvmix <- function(formula, dlist){
     labs <- attr(terms(formula[[i]]), "term.labels")
     if (!("strata" %in% dlist$pars)){
       strat <- grep("strata\\((.+)\\)",labs)
-      if (any(strat)){
+      if (length(strat) > 0){
         cov <- gsub("strata\\((.+)\\)","\\1",labs[strat[1]])
         warning("Ignoring \"strata\" function: interpreting \"",cov, "\" as a covariate on \"", dlist$location, "\"")
       }
     }
     if (!("frailty" %in% dlist$pars)){
       fra <- grep("frailty\\((.+)\\)",labs)
-      if (any(fra)){
+      if (length(fra) > 0){
         warning("frailty models are not supported and behaviour of frailty() is undefined")
       }
     }
