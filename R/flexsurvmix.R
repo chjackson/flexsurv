@@ -511,6 +511,7 @@ flexsurvmix <- function(formula, data, event, dists,
   else if (method=="em") {
     if (!is.list(em.control)) em.control <- list()
     if (is.null(em.control$reltol)) em.control$reltol <- sqrt(.Machine$double.eps)
+    if (is.null(em.control$var.method)) em.control$var.method <- "direct"
     converged <- FALSE
     iter <- 0
     alpha <- inits_alpha
@@ -563,15 +564,16 @@ flexsurvmix <- function(formula, data, event, dists,
 
       #  if setting a control argument here in  the future, note ndeps has  to be different
       # length from others.
-      parsp <- optim(c(alpha,covp), loglik_p_em, method="BFGS")
+      parsp <- optim(c(alpha,covp), loglik_p_em, method="BFGS", hessian=TRUE)
       alpha <- parsp$par[1:(K-1)]
       probs <- pmnlogit(alpha)
       covp <- if (ncovsp>0) parsp$par[K:nppars] else NULL
+      hess_full_p <- parsp$hessian
 
       ## call flexsurvreg for each component on weighted dataset to estimate component-specific pars
-      thetanew <- covthetanew <- ttepars <- vector(K, mode="list")
+      thetanew <- covthetanew <- ttepars <- hess_full_t <- vector(K, mode="list")
       ll <- numeric(K)
-
+    
       ctrl <- optim.control
       for (k in 1:K) {
         if (is.null(optim.control$ndeps))
@@ -581,12 +583,13 @@ flexsurvmix <- function(formula, data, event, dists,
                            anc=anc[[k]], inits=c(theta[[k]],covtheta[[k]]),
                            weights=w[,k],
                            aux=aux[[k]],
-                           subset=w[,k]>0, hessian=FALSE,
+                           subset=w[,k]>0, 
                            control=ctrl))
         ll[k] <- fs$loglik
         thetanew[[k]] <- fs$res[1:nthetal[k],"est"]
         covthetanew[[k]] <- fs$res[nthetal[k] + seq_len(ncoveffsl[k]),"est"]
         ttepars[[k]] <- c(thetanew[[k]], covthetanew[[k]])
+        hess_full_t[[k]] <- fs$opt$hessian
       }
 
       theta <- thetanew
@@ -613,8 +616,16 @@ flexsurvmix <- function(formula, data, event, dists,
     ll <- loglik_flexsurvmix(est.t[-1])
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
-    cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, est.t[-1]), 
-                        hess.control$tol.solve, hess.control$tol.evalues)
+    if (em.control$var.method=="direct")
+      cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, est.t[-1]), 
+                          hess.control$tol.solve, hess.control$tol.evalues)
+    else if (em.control$var.method=="louis") 
+      cov <- flexsurvmix_cov_louis(K, nthetal, dlists, ncoveffsl, 
+                          locform, data, dists, anc,  aux, ctrl, 
+                          ttepars.t, nobs, ncparsl, nppars, 
+                          w, alpha, covp, ncovsp, Xp,
+                          hess_full_p, hess_full_t
+                          ) 
     opt <- NULL
   }
 
