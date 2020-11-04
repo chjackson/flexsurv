@@ -324,12 +324,12 @@ flexsurvmix <- function(formula, data, event, dists,
   ## Weibull), followed by covariate effects on the location parameter, followed
   ## by covariate effects on the remaining parameters.
   nthetal <- sapply(dlists, function(x)length(x$pars)) # number of baseline parameters for each component-specific distribution
-  ncparsl <- nthetal + ncoveffsl # total number of pars for each component
-  parindsl <- rep(1:K, ncparsl) # index identifying component for each of those parameters
-  ncpars <- sum(ncparsl) # total number of parameters related to time-to-event distributions
-  npars <- nppars + ncpars # total number of parameters
+  ntparsl <- nthetal + ncoveffsl # total number of time-to-event related pars for each component
+  parindsl <- rep(1:K, ntparsl) # index identifying component for each of those parameters
+  ntpars <- sum(ntparsl) # total number of parameters related to time-to-event distributions
+  npars <- nppars + ntpars # total number of parameters
   ## identify parameters of particular kinds
-  parclass <- rep(c("prob","time"), c(nppars, ncpars))  # mixing prob or time-to-event related
+  parclass <- rep(c("prob","time"), c(nppars, ntpars))  # mixing prob or time-to-event related
   baseorcov <- c(rep(c("pbase","pcov"), c(length(dists) -1, ncoveffsp)),  # baseline or covariate effect
                  rep(rep(c("tbase","tcov"), K), as.vector(rbind(nthetal, ncoveffsl))))
   parcov <- character(npars) # identify baseline parameter which a covariate effect modifies
@@ -403,7 +403,7 @@ flexsurvmix <- function(formula, data, event, dists,
       probmat <- pmat # this will be 1 or 0 if event observed
     }
     ## Remaining parameters are time-to-event stuff
-    parsl <- split(pars[nppars + seq_len(ncpars)], parindsl)
+    parsl <- split(pars[nppars + seq_len(ntpars)], parindsl)
     theta <- coveffs <- vector(K, mode="list")
 
     ## Contribution to likelihood for mixing probabilities for those with known events
@@ -444,22 +444,24 @@ flexsurvmix <- function(formula, data, event, dists,
   # Parameter dictionary to be completed with the estimates
   distnames <- sapply(dists, function(x){if(is.list(x))x$name else x})
   res <- data.frame(component = c(evnames, rep(evnames[seq_len(K-1)], each=ncovsp),
-                                  rep(evnames, ncparsl)),
-                    dist = c(rep("",nppars+1), rep(distnames, ncparsl)),
+                                  rep(evnames, ntparsl)),
+                    dist = c(rep("",nppars+1), rep(distnames, ntparsl)),
                     terms = c(paste0("prob",1:K),  names(inits_covp),  names(inits_theta)),
                     parclass = c("prob", parclass),
                     baseorcov = c("pbase", baseorcov),
                     parcov = c("", parcov))
   inits_all <- c(inits_alpha, inits_covp, inits_theta)
   if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
+  if (is.numeric(fixedpars) && any(!fixedpars %in% 1:npars)) 
+    stop(sprintf("`fixedpars` should all be in 1,...,%s",npars))
   optpars <- setdiff(seq_len(npars), fixedpars)
   fixed <- (length(optpars) == 0)
   inits_opt <- inits_all[optpars]
-  if ((length(fixedpars) > 0) && (method=="em")){
-    method <- "direct"
-    if (length(optpars) > 0)
-      warning("Optimisation with some parameters fixed not currently supported with EM algorithm, switching to direct likelihood maximisation")
-  }
+#  if ((length(fixedpars) > 0) && (method=="em")){
+#    method <- "direct"
+#    if (length(optpars) > 0)
+#      warning("Optimisation with some parameters fixed not currently supported with EM algorithm, switching to direct likelihood maximisation")
+#  }
   if (is.null(optim.control$fnscale))
     optim.control$fnscale <- 10000
 
@@ -519,8 +521,12 @@ flexsurvmix <- function(formula, data, event, dists,
     theta <- theta_inits
     covtheta <- cov_inits
 
+    fixedpars_em <- split_fixedpars(fixedpars, nppars, ntparsl, K, nthetal)
+    optpars_em <- split_fixedpars(optpars, nppars, ntparsl, K, nthetal)
     while (!converged) {
+      
       ## E step
+      
       alphamat <- matrix(c(0,alpha), nrow=nobs, ncol=K, byrow=TRUE)  # by individual
       if (ncovsp>0){
         for (k in 2:K){
@@ -550,11 +556,14 @@ flexsurvmix <- function(formula, data, event, dists,
       ## estimate component probs and covariate effects on them
       #alpha <- colMeans(w)
       loglik_p_em <- function(pars){
-        alphamat <- matrix(c(0,pars[1:(K-1)]), nrow=nobs, ncol=K, byrow=TRUE)
+        parsfull <- numeric(nppars)
+        parsfull[optpars_em$p] <- pars
+        parsfull[fixedpars_em$p] <- c(inits_alpha, inits_covp)[fixedpars_em$p]
+        alphamat <- matrix(c(0,parsfull[1:(K-1)]), nrow=nobs, ncol=K, byrow=TRUE)
         if (ncovsp > 0) {
           for (k in 2:K){
             cpinds <- K - 1 + (k-2)*ncovsp + 1:ncovsp
-            alphamat[,k] <- alphamat[,k] + Xp %*% pars[cpinds]
+            alphamat[,k] <- alphamat[,k] + Xp %*% parsfull[cpinds]
           }
         }
         pmat <- exp(alphamat)
@@ -564,12 +573,20 @@ flexsurvmix <- function(formula, data, event, dists,
 
       #  if setting a control argument here in  the future, note ndeps has  to be different
       # length from others.
-      parsp <- optim(c(alpha,covp), loglik_p_em, method="BFGS", hessian=TRUE)
-      alpha <- parsp$par[1:(K-1)]
+      alpha <- inits_alpha
+      covp <- inits_covp
+      if (length(fixedpars_em$p) == nppars) { # all prob-related parameters fixed
+        hess_full_p <- matrix(nrow=0,ncol=0)
+      } else {
+        parsp <- optim(c(alpha,covp)[optpars_em$p], loglik_p_em, method="BFGS", hessian=TRUE)
+        if(any(names(optpars_em$p)=="p"))
+          alpha[optpars_em$p[names(optpars_em$p)=="p"]] <- parsp$par[names(optpars_em$p)=="p"]  
+        if(any(names(optpars_em$p)=="pcov"))
+          covp[optpars_em$p[names(optpars_em$p)=="pcov"] - (K-1)] <- parsp$par[names(optpars_em$p)=="pcov"] 
+        hess_full_p <- parsp$hessian
+      }
       probs <- pmnlogit(alpha)
-      covp <- if (ncovsp>0) parsp$par[K:nppars] else NULL
-      hess_full_p <- parsp$hessian
-
+      
       ## call flexsurvreg for each component on weighted dataset to estimate component-specific pars
       thetanew <- covthetanew <- ttepars <- hess_full_t <- vector(K, mode="list")
       ll <- numeric(K)
@@ -577,21 +594,24 @@ flexsurvmix <- function(formula, data, event, dists,
       ctrl <- optim.control
       for (k in 1:K) {
         if (is.null(optim.control$ndeps))
-          ctrl$ndeps = rep(1e-06, length(theta[[k]]) + length(covtheta[[k]]))
+          ctrl$ndeps = rep(1e-06, length(optpars_em$t[[as.character(k)]]))
         fs <- do.call("flexsurvreg",  # need do.call to avoid environment faff with supplying weights
                       list(formula=locform[[k]], data=data, dist=dists[[k]],
                            anc=anc[[k]], inits=c(theta[[k]],covtheta[[k]]),
+                           fixedpars = fixedpars_em$t[[as.character(k)]],
                            weights=w[,k],
                            aux=aux[[k]],
                            subset=w[,k]>0, 
                            control=ctrl))
         ll[k] <- fs$loglik
-        thetanew[[k]] <- fs$res[1:nthetal[k],"est"]
-        covthetanew[[k]] <- fs$res[nthetal[k] + seq_len(ncoveffsl[k]),"est"]
+        thetanew[[k]] <- fs$res[seq_len(nthetal[k]),"est"]
+        if (ncoveffsl[k] > 0)
+          covthetanew[[k]] <- fs$res[nthetal[k] +  seq_len(ncoveffsl[k]), "est"]
         ttepars[[k]] <- c(thetanew[[k]], covthetanew[[k]])
         hess_full_t[[k]] <- fs$opt$hessian
+        if (is.null(hess_full_t[[k]])) hess_full_t[[k]] <- matrix(nrow=0,ncol=0)
       }
-
+      
       theta <- thetanew
       covtheta <- covthetanew
       logliknew <- sum(ll)
@@ -613,19 +633,21 @@ flexsurvmix <- function(formula, data, event, dists,
     }
     res <- cbind(res,
                  data.frame(est=est, est.t=est.t))
-    ll <- loglik_flexsurvmix(est.t[-1])
+    ll <- loglik_flexsurvmix(est.t[-1][optpars])
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
-    if (em.control$var.method=="direct")
-      cov <- .hess_to_cov(.hessian(loglik_flexsurvmix, est.t[-1]), 
-                          hess.control$tol.solve, hess.control$tol.evalues)
+    
+    if (em.control$var.method=="direct"){
+      hess <- .hessian(loglik_flexsurvmix, est.t[-1][optpars])
+      cov <- .hess_to_cov(hess, hess.control$tol.solve, hess.control$tol.evalues)
+    }
     else if (em.control$var.method=="louis") 
-      cov <- flexsurvmix_cov_louis(K, nthetal, dlists, ncoveffsl, 
-                          locform, data, dists, anc,  aux, ctrl, 
-                          ttepars.t, nobs, ncparsl, nppars, 
+      cov <- flexsurvmix_louis(K, nthetal, dlists, ncoveffsl, 
+                          locform, data, dists, anc,  aux, 
+                          fixedpars_em, optpars_em, inits, optim.control, 
+                          ttepars.t, nobs, ntparsl, nppars, 
                           w, alpha, covp, ncovsp, Xp,
-                          hess_full_p, hess_full_t
-                          ) 
+                          hess_full_p, hess_full_t) 
     opt <- NULL
   }
 
@@ -633,12 +655,15 @@ flexsurvmix <- function(formula, data, event, dists,
   ## var ( 1 - p1 - p2 - .. ) = var(p1) + var(p2) - cov(p1,p2) - ...
   res$fixed <- c(NA, rep(FALSE, npars))
   res$fixed[1 + fixedpars] <- TRUE
+  optp <- optpars[optpars < K]
+  res$se <- rep(NA, npars + 1)
   if (!fixed){
-    covp <- cov[1:(K-1), 1:(K-1), drop=FALSE]
-    res$se <- rep(NA, npars + 1)
-    res$se[1] <- if (K==1) NA else sqrt(sum(diag(covp)) - sum(covp[lower.tri(covp)]))
-    res$se[1 + optpars] <- sqrt(diag(cov))
-  } else res$se <- NA
+      if (length(optp) > 0){
+        covp <- cov[optp, optp, drop=FALSE]
+        res$se[1] <- if (K==1) NA else sqrt(sum(diag(covp)) - sum(covp[lower.tri(covp)]))
+      }
+      res$se[1 + optpars] <- sqrt(diag(cov))
+  } 
   names.first <- c("component","dist","terms","est","est.t","se")
   res <- res[,c(names.first, setdiff(names(res), names.first)),drop=FALSE]
   rownames(res) <- NULL
@@ -807,4 +832,36 @@ qmnlogit <- function(probs){
 # returns probs including first component, given transformed probs with first component excluded
 pmnlogit <- function(alpha){
   c(1, exp(alpha)) / (1 + sum(exp(alpha)))
+}
+
+## Convert "fixedpars" (vector of parameter indices to fix) from 
+## joint full MLE form (indices into full parameter vector) to EM form 
+## (indices of parameters in each submodel to be maximised in the M step)
+## e.g. 
+#nppars <- 4    # number of prob pars (including cov effects)
+#ntparsl <- c(3, 3, 4) # number of time to event pars for each event (including cov effects)
+#indices  1,2,3,4  are prob pars, 5,6,7 time to event 1 pars
+# 8,9,10 are time to event 2 pars, and 11,12,13,14 are time to event 3 pars
+#fixedpars <- c(2,3,   6,7,    9,   12)
+#correspond to indices 2,3    2,3     2   2)  in the four submodels 
+# so function returns list(p=c(2,3), t=list(c(2,3), 2, 2))
+# List component will be numeric(0) for prob model, or NULL for time model, if no pars fixed for that model
+# names of time models will be "1","2",.
+
+split_fixedpars <- function(fixedpars, nppars, ntparsl, K, nthetal){
+  fixedpars_p <- fixedpars[fixedpars <= nppars]
+  if (!is.null(fixedpars_p))
+    names(fixedpars_p) <- ifelse(fixedpars_p <= K-1, "p", "pcov")
+  ft <- fixedpars[fixedpars >= nppars] - nppars
+  fixedpars_t <- 
+    split(sequence(ntparsl)[ft],  
+          rep(seq_along(ntparsl), ntparsl)[ft])
+  for (i in 1:K){
+    ic <- as.character(i)
+    if (!is.null(fixedpars_t[[ic]]))
+      names(fixedpars_t[[ic]]) <- ifelse(fixedpars_t[[ic]] <= nthetal[i], "theta",  "covtheta")
+    else fixedpars_t[[ic]] <- numeric()
+  }
+  fixedpars_t <- fixedpars_t[as.character(1:K)]
+  list(p=fixedpars_p, t=fixedpars_t)
 }

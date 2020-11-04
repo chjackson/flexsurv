@@ -72,3 +72,51 @@ test_that("Variances in Aalen-Johansen",{
 })
 
 
+test_that("Partially observed outcomes",{
+  x <- flexsurvmix(list(icu = Surv(t, status) ~ 1, 
+                        death = Surv(t, status) ~ 1,
+                        discharge =  Surv(t1disc, t2disc, type="interval2") ~ 1),
+                   data=dat, event=event, 
+                   dists=c("gamma","gamma","gamma"), fixedpars=FALSE, optim.control = list(maxit=10000))
+  expect_equal(x$loglik, -2486.672, tol=1e-06)
+  
+  # time to discharge estimates wrong, as observation scheme is misspecified
+  xwrong <- flexsurvmix(Surv(t, status) ~ 1, 
+                        data=dat, event=event, 
+                        dists=c("gamma","gamma","gamma"), fixedpars=FALSE) 
+  
+})
+
+
+
+n <- 10000
+set.seed(1)
+x <- rnorm(n)
+y <- rbinom(n, 1,  0.5)
+p <- plogis(qlogis(0.5) + 2*x - 3*y)
+death <- rbinom(n, 1, p)
+t <- numeric(n)
+t[death==0] <- rgamma(sum(death==0), 1, 3.2)
+t[death==1] <- rgamma(sum(death==1), 2.5, 1.2)
+cens <- as.numeric(t > 3)
+status <- 1 - cens
+t[cens] <- 3
+event <- ifelse(cens, NA, death+1) # 1 is cure, 2 is death
+dat <- data.frame(t, status, event, x)
+dat$evname <- c("cure", "death")[dat$event]
+
+test_that("fixedpars with EM",{
+  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
+                   dists=c("gamma","gamma"), pformula = ~ x + y, method="em")
+  
+  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
+                   dists=c("gamma","gamma"), pformula = ~ x + y, method="em", fixedpars=c(3,4),
+                   em.control=list(var.method="louis"))
+  x
+  
+  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
+                   dists=c("gamma","gamma"), pformula = ~ x + y, method="em", fixedpars=c(3,4),
+                   em.control=list(var.method="direct"))
+  
+  x
+})

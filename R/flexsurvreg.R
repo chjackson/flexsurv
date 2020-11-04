@@ -880,7 +880,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     check.fixedpars(fixedpars, npars)
 
     if ((is.logical(fixedpars) && fixedpars==TRUE) ||
-        (is.numeric(fixedpars) && identical(fixedpars, 1:npars))) {
+        (is.numeric(fixedpars) && identical(as.vector(fixedpars), 1:npars))) {
         minusloglik <- minusloglik.flexsurv(inits, Y=Y, X=X,
                                             weights=weights, bhazard=bhazard, rtrunc=rtrunc, 
                                             dlist=dlist, inits=inits,

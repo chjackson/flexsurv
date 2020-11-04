@@ -18,9 +18,6 @@ test_that("flexsurvmix basic",{
   fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"))
   expect_equivalent(fs$loglik, -1343.37172263181)
   
-  fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, 
-                    event=event, dists=c("gamma","gamma"), method="em")
-
   fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=TRUE)
   expect_equivalent(fs$loglik, -1550.65934372248)
   fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=1:2)
@@ -148,18 +145,3 @@ t1disc <- t2disc <- t
 t2disc[cens] <- Inf
 t1disc[pobs] <- 0
 dat <- data.frame(t, status, t1disc, t2disc, event) 
-
-test_that("Partially observed outcomes",{
-  x <- flexsurvmix(list(icu = Surv(t, status) ~ 1, 
-                        death = Surv(t, status) ~ 1,
-                        discharge =  Surv(t1disc, t2disc, type="interval2") ~ 1),
-                   data=dat, event=event, 
-                   dists=c("gamma","gamma","gamma"), fixedpars=FALSE)
-  expect_equal(x$loglik, -2486.672, tol=1e-06)
-  
-  # time to discharge estimates wrong, as observation scheme is misspecified
-  xwrong <- flexsurvmix(Surv(t, status) ~ 1, 
-                        data=dat, event=event, 
-                        dists=c("gamma","gamma","gamma"), fixedpars=FALSE) 
-  
-})
