@@ -156,12 +156,22 @@
 ##'   likelihood changes by a relative amount less than \code{reltol}.  The
 ##'   default is the same as in \code{\link{optim}}, that is,
 ##'   \code{sqrt(.Machine$double.eps)}.
-##'
+##'   
+##'   \code{var.method} method to compute the covariance matrix. \code{"louis"}
+##'   for the method of Louis (1982), or \code{"direct"}for direct numerical
+##'   calculation of the Hessian of the log likelihood.
+##'   
+##'   \code{optim.p.control} A list that is passed as the \code{control} argument
+##'   to  \code{optim} in the M step for the component membership probability 
+##'   parameters.
+##'   The optimisation in the M step for the time-to-event parameters can be
+##'   controlled by the \code{optim.control} argument to \code{flexsurvmix}.
+##'   
 ##'   For example, \code{em.control = list(trace=1, reltol=1e-12)}.
 ##'
 ##' @param optim.control List of options to pass as the \code{control} argument
 ##'   to \code{\link{optim}},  which is used by \code{method="direct"} or in the
-##'   M step of \code{method="em"}.  By default, this uses \code{fnscale=10000}
+##'   M step for the time-to-event parameters in \code{method="em"}.  By default, this uses \code{fnscale=10000}
 ##'   and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
 ##'   being estimated, unless the user specifies these options explicitly.
 ##'   
@@ -452,16 +462,18 @@ flexsurvmix <- function(formula, data, event, dists,
                     parcov = c("", parcov))
   inits_all <- c(inits_alpha, inits_covp, inits_theta)
   if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
+  if (is.character(fixedpars)){
+    if (any(!fixedpars %in% res$terms)) {
+      bad_fixedpars <- fixedpars[! fixedpars %in% res$terms[-1]]
+      stop(paste(bad_fixedpars,collapse=","), " not in model terms")
+    }
+    fixedpars <- match(fixedpars, as.character(res$terms[-1]))
+  }
   if (is.numeric(fixedpars) && any(!fixedpars %in% 1:npars)) 
     stop(sprintf("`fixedpars` should all be in 1,...,%s",npars))
   optpars <- setdiff(seq_len(npars), fixedpars)
   fixed <- (length(optpars) == 0)
   inits_opt <- inits_all[optpars]
-#  if ((length(fixedpars) > 0) && (method=="em")){
-#    method <- "direct"
-#    if (length(optpars) > 0)
-#      warning("Optimisation with some parameters fixed not currently supported with EM algorithm, switching to direct likelihood maximisation")
-#  }
   if (is.null(optim.control$fnscale))
     optim.control$fnscale <- 10000
 
@@ -578,7 +590,8 @@ flexsurvmix <- function(formula, data, event, dists,
       if (length(fixedpars_em$p) == nppars) { # all prob-related parameters fixed
         hess_full_p <- matrix(nrow=0,ncol=0)
       } else {
-        parsp <- optim(c(alpha,covp)[optpars_em$p], loglik_p_em, method="BFGS", hessian=TRUE)
+        parsp <- optim(c(alpha,covp)[optpars_em$p], loglik_p_em, method="BFGS", hessian=TRUE,
+                       control = em.control$optim.p.control)
         if(any(names(optpars_em$p)=="p"))
           alpha[optpars_em$p[names(optpars_em$p)=="p"]] <- parsp$par[names(optpars_em$p)=="p"]  
         if(any(names(optpars_em$p)=="pcov"))
@@ -647,7 +660,7 @@ flexsurvmix <- function(formula, data, event, dists,
                           fixedpars_em, optpars_em, inits, optim.control, 
                           ttepars.t, nobs, ntparsl, nppars, 
                           w, alpha, covp, ncovsp, Xp,
-                          hess_full_p, hess_full_t) 
+                          hess_full_p, hess_full_t, hess.control) 
     opt <- NULL
   }
 

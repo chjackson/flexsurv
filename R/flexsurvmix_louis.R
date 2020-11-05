@@ -6,7 +6,7 @@ flexsurvmix_louis <- function(K, nthetal, dlists, ncoveffsl,
                              fixedpars_em,  optpars_em, inits, optim.control, 
                              ttepars.t, nobs, ntparsl, nppars, 
                              w, alpha, covp, ncovsp, Xp, 
-                             hess_full_p, hess_full_t) 
+                             hess_full_p, hess_full_t, hess.control) 
 { 
   ESST_t <- vector(K, mode="list")
   ctrl <- optim.control
@@ -96,7 +96,7 @@ flexsurvmix_louis <- function(K, nthetal, dlists, ncoveffsl,
   ESST <- Matrix::bdiag(ESST_p, Matrix::bdiag(ESST_t))
   hess_full <- - Matrix::bdiag(hess_full_p, Matrix::bdiag(hess_full_t))
   hess <- hess_full - ESST
-  cov <- solve(-hess)
+  cov <- .hess_to_cov(-hess, hess.control$tol.solve, hess.control$tol.evalues)
   cov # of loglik
 }
 
