@@ -287,6 +287,16 @@ get_basepars <- function(x, newdata, event){
         if (!all(attr(tm, "term.labels") %in% names(newdata))) 
           stop(sprintf("not all required variables supplied in `newdata`")) 
         xlev <- lapply(x$data$mf[[k]], levels)[attr(tm,"term.labels")]
+        
+        ## convert numeric newdata to factor if necessary, ensure ordered status preserved
+        for (i in names(newdata)){
+          vari <- x$data$mf[[1]][[i]]
+          if (is.factor(vari)) {
+            newdata[[i]] <- factor(as.character(newdata[[i]]), 
+                                   levels=levels(vari), ordered=is.ordered(vari))
+          }
+        }
+
         mf <- model.frame(tm, newdata, xlev = xlev)
         mm <- model.matrix(tm, mf)
         basepar <- x$res[bpars,"est.t"][j]
@@ -381,8 +391,11 @@ ajfit <- function(x, newdata=NULL, tidy=TRUE){
     faccovs <- sapply(dat[,covnames], is.factor)
     if (!all(faccovs)) 
       stop("Nonparametric estimation not supported with non-factor covariates")
-    if (is.null(newdata)) 
+    if (is.null(newdata)) {
       newdata <- do.call(expand.grid, lapply(dat[,covnames,drop=FALSE],  levels))
+      for (i in names(newdata)) 
+        class(newdata[[i]]) <- class(x$data$mf[[1]][[i]]) # preserve e.g. ordered factor status
+    }
     newdata <- as.data.frame(newdata)
     ncovvals <- nrow(newdata)
     sf <- sftidy <- vector(ncovvals, mode="list")
@@ -454,6 +467,8 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
     if (!all(faccovs)) 
       stop("Nonparametric estimation not supported with non-factor covariates")
     newdata <- do.call(expand.grid, lapply(dat[,covnames,drop=FALSE],  levels))
+    for (i in names(newdata)) 
+      class(newdata[[i]]) <- class(dat[[i]]) # preserve e.g. ordered factor status
   } else newdata <- NULL    
   statenames <- c(startname,x$evnames)
   ajlong <- ajfit(x) %>% 
@@ -475,6 +490,8 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   names(ajlong)[names(ajlong)=="time"] <- "t"
   if (is.null(maxt)) maxt <- max(ajlong$t)
   times <- seq(0, maxt, length=100)
+  ## FIXME p_flex returns factor, ajlong$x has ordered
+  ## p_flex should return factor if that's what newdata has. so the newdata used should have ordered
   modcomp <- 
     p_flexsurvmix(x, t=times, newdata=newdata, startname=startname, B=B) %>%
     dplyr::mutate(model="Parametric mixture") %>%

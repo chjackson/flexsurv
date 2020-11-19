@@ -24,7 +24,6 @@ fhosp <-   flexsurvmix(Surv(t, status) ~ x, pformula = ~x + y,
                        data=dat, event=event, 
                        dists=c("gamma","gamma","gamma"))
 
-
 ## simulate events following ICU
 nicu <- sum(dat$event=="icu")
 picu <- c(0.4, 0.6)
@@ -82,8 +81,6 @@ test_that("meanfinal_fmixmsm",{
 })
 
 test_that("qfinal_fmixmsm",{
-  expect_error(qfinal_fmixmsm(fm))  # FIXME ERROR WHEN NEWDATA NOT SUPPLIED..
-  #expect_error(qfinal_fmixmsm(fm, newdata=nd["x"]))  # OR INCOMPLETE
   quantile_tofinal(fm, newdata=nd)
   quantile_tofinal(fm, newdata=nd, probs=c(0.25, 0.75))
 })
