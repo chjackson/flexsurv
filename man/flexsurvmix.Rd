@@ -156,12 +156,22 @@ the EM algorithm, or \code{"direct"} for direct maximisation.}
   likelihood changes by a relative amount less than \code{reltol}.  The
   default is the same as in \code{\link{optim}}, that is,
   \code{sqrt(.Machine$double.eps)}.
-
+  
+  \code{var.method} method to compute the covariance matrix. \code{"louis"}
+  for the method of Louis (1982), or \code{"direct"}for direct numerical
+  calculation of the Hessian of the log likelihood.
+  
+  \code{optim.p.control} A list that is passed as the \code{control} argument
+  to  \code{optim} in the M step for the component membership probability 
+  parameters.
+  The optimisation in the M step for the time-to-event parameters can be
+  controlled by the \code{optim.control} argument to \code{flexsurvmix}.
+  
   For example, \code{em.control = list(trace=1, reltol=1e-12)}.}
 
 \item{optim.control}{List of options to pass as the \code{control} argument
 to \code{\link{optim}},  which is used by \code{method="direct"} or in the
-M step of \code{method="em"}.  By default, this uses \code{fnscale=10000}
+M step for the time-to-event parameters in \code{method="em"}.  By default, this uses \code{fnscale=10000}
 and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
 being estimated, unless the user specifies these options explicitly.}
 

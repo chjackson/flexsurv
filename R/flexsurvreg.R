@@ -236,6 +236,11 @@ anc_from_formula <- function(formula, anc, dlist,
     else {
         if (!is.list(anc) || !all(sapply(anc, function(x)inherits(x, "formula"))))
             stop(msg)
+        badnames <- names(anc)[!(names(anc) %in% dlist$pars)]
+        if (length(badnames) > 0) stop(sprintf("There is no parameter of distribution `%s` called `%s`",
+                                               dlist$name, badnames[1]))
+        ## reorder components of anc to canonical order
+        anc <- anc[dlist$pars[dlist$pars %in% names(anc)]]
     }
     anc
 }

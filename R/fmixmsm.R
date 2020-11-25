@@ -101,14 +101,19 @@ ppath_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
                         pathway=pathway, 
                         val = unlist(ppath))
     if (!is.null(newdata)) { 
-      nd <- newdata[rep(seq_len(ncovs), npaths),]
+      nd <- newdata[rep(seq_len(ncovs), npaths),,drop=FALSE]
       ppath <- cbind(nd, ppath)
     }
     rownames(ppath) <- NULL
     if (final) { 
       ppath <- ppath %>% 
-        dplyr::group_by_at(c(names(newdata), "final")) %>% 
+        dplyr::group_by(dplyr::across(c(names(newdata), "final"))) %>% 
         dplyr::summarise(val=sum(.data$val))
+
+    #  ppath <- ppath %>% 
+    #    dplyr::group_by_at(c(names(newdata), "final")) %>% 
+    #    dplyr::summarise(val=sum(.data$val))
+      
     } 
     
     if (is.numeric(B) && B > 1){
@@ -177,7 +182,7 @@ meanfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
                       pathway=pathway, 
                       val = unlist(meanp))
   if (!is.null(newdata)) { 
-    nd <- newdata[rep(seq_len(ncovs), npaths),]
+    nd <- newdata[rep(seq_len(ncovs), npaths),,drop=FALSE]
     meanp <- cbind(nd, meanp)
   }
   rownames(meanp) <- NULL
@@ -185,7 +190,7 @@ meanfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
     probs <- ppath_fmixmsm(x=x, newdata=newdata, final=FALSE, B=NULL) %>% dplyr::rename(prob="val")
     meanp <- meanp %>% 
       dplyr::left_join(probs, by=c(names(newdata), "pathway", "final")) %>%
-      dplyr::group_by_at(c(names(newdata), "final")) %>% 
+      dplyr::group_by(dplyr::across(c(names(newdata), "final"))) %>% 
       dplyr::summarise(val=sum(.data$val*.data$prob)/sum(.data$prob))
   } 
   if (is.numeric(B) && B > 1){
@@ -251,21 +256,20 @@ qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=
       next_state <- pathways[[p]][i+1]
       sm <- sm + sims[[cur_state]][,next_state]
     }
-    simsumdf <- sims[[1]][,colnames(newdata)]
+    simsumdf <- sims[[1]][,colnames(newdata),drop=FALSE]
     simsumdf$pathway <- attr(x,"pathway_str")[[p]]
     simsumdf$sm <- sm
     
-    ## TESTME
     if (final){
       simsum[[p]] <- simsumdf %>%
         dplyr::left_join(ppath, by=c(colnames(newdata))) %>%
-        dplyr::group_by_at(c(colnames(newdata))) %>%
+        dplyr::group_by(dplyr::across(c(colnames(newdata)))) %>%
         ## Keep only the first n of the sampled rows
         ## where n is weighted by the prob of the pathway
         dplyr::group_modify(~{.x[1:.x$n[1],]}) 
     } else {
       simsum[[p]] <- simsumdf %>%
-      dplyr::group_by_at(c("pathway", colnames(newdata)))  %>%
+      dplyr::group_by(dplyr::across(c("pathway", colnames(newdata))))  %>%
       dplyr::summarise(probs=probs,
                        val = quantile(.data$sm, p=probs,na.rm=TRUE))
     }
@@ -274,7 +278,7 @@ qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=
   
   if (final){
     resq <- resq %>%
-      dplyr::group_by_at(c("final", colnames(newdata)))  %>%
+      dplyr::group_by(dplyr::across(c("final", colnames(newdata))))  %>%
       dplyr::summarise(probs=probs,
                        val = quantile(.data$sm, p=probs,na.rm=TRUE))
   }
