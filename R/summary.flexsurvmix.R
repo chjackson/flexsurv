@@ -383,7 +383,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
 ##' @export
 ajfit <- function(x, newdata=NULL, tidy=TRUE){ 
   dat <- x$data$mfcomb
-  covnames <- attr(dat, "covnames")
+  covnames <- attr(dat, "covnames.main")
   ncovs <- length(covnames)
   if (ncovs == 0){
     sf <- sftidy <- ajfit.dat(x$data$mf[[1]], x$evnames)
@@ -462,7 +462,7 @@ ajfit.dat <- function(dat,evnames){
 ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   nstates <- x$K + 1
   dat <- x$data$mfcomb
-  covnames <- attr(dat, "covnames")
+  covnames <- attr(dat, "covnames.main") # main effects, excluding interaction terms
   ncovs <- length(covnames)
   if (ncovs > 0){
     faccovs <- sapply(dat[,covnames,drop=FALSE], is.factor)
@@ -492,8 +492,6 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   names(ajlong)[names(ajlong)=="time"] <- "t"
   if (is.null(maxt)) maxt <- max(ajlong$t)
   times <- seq(0, maxt, length=100)
-  ## FIXME p_flex returns factor, ajlong$x has ordered
-  ## p_flex should return factor if that's what newdata has. so the newdata used should have ordered
   modcomp <- 
     p_flexsurvmix(x, t=times, newdata=newdata, startname=startname, B=B) %>%
     dplyr::mutate(model="Parametric mixture") %>%
