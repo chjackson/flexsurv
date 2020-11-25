@@ -250,9 +250,11 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
 }
 
 resample_pars <- function(x){ 
-  newpars <- rmvnorm(1, x$res$est.t[-1], x$cov)
+  cov <- matrix(0, x$npars, x$npars)
+  cov[x$optpars, x$optpars] <- x$cov
+  newpars <- rmvnorm(1, x$res$est.t[-1], cov)
   x$res$est.t <- c(NA, newpars)
-  x$res$est <- inv.transform.res(x, x$dlist)   ## FIXME FIXME probs bust 
+  x$res$est <- inv.transform.res(x, x$dlist) 
   x
 }
 
@@ -284,7 +286,7 @@ get_basepars <- function(x, newdata, event){
       betainds <- x$res$component == x$evnames[k] & x$res$parcov == x$dlists[[k]]$pars[j] 
       if (any(betainds)) { 
         tm <- delete.response(terms(x$all.formulae[[k]][[parname]]))
-        if (!all(attr(tm, "term.labels") %in% names(newdata))) 
+        if (!all(rownames(attr(tm, "factors")) %in% names(newdata))) 
           stop(sprintf("not all required variables supplied in `newdata`")) 
         xlev <- lapply(x$data$mf[[k]], levels)[attr(tm,"term.labels")]
         mf <- model.frame(tm, newdata, xlev = xlev)
@@ -305,7 +307,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
   }
   else { 
     tm <- delete.response(terms(x$pformula))
-    if (!all(attr(tm, "term.labels") %in% names(newdata))) 
+    if (!all(rownames(attr(tm, "factors")) %in% names(newdata))) 
       stop(sprintf("not all required variables supplied in `newdata`")) 
     
     xlev <- lapply(x$data$mf[[1]], levels)[attr(tm,"term.labels")]
