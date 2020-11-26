@@ -120,3 +120,13 @@ test_that("fixedpars with EM",{
   
   x
 })
+
+
+test_that("Models with interactions",{
+  dat$x <- factor(rbinom(nrow(dat), size=1, prob=0.5))
+  dat$y <- factor(rbinom(nrow(dat), size=1, prob=0.4))
+  fsi <- flexsurvmix(formula = Surv(t, status) ~ x*y, data = dat, event = event, 
+                     dists = c("gamma", "weibull"), fixedpars = FALSE, method="em", 
+                     em.control=list(var.method="louis", reltol=1e-04))
+  ajfit_flexsurvmix(fsi)
+})

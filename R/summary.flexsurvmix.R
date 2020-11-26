@@ -250,9 +250,11 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
 }
 
 resample_pars <- function(x){ 
-  newpars <- rmvnorm(1, x$res$est.t[-1], x$cov)
+  cov <- matrix(0, x$npars, x$npars)
+  cov[x$optpars, x$optpars] <- x$cov
+  newpars <- rmvnorm(1, x$res$est.t[-1], cov)
   x$res$est.t <- c(NA, newpars)
-  x$res$est <- inv.transform.res(x, x$dlist)   ## FIXME FIXME probs bust 
+  x$res$est <- inv.transform.res(x, x$dlist) 
   x
 }
 
@@ -284,7 +286,7 @@ get_basepars <- function(x, newdata, event){
       betainds <- x$res$component == x$evnames[k] & x$res$parcov == x$dlists[[k]]$pars[j] 
       if (any(betainds)) { 
         tm <- delete.response(terms(x$all.formulae[[k]][[parname]]))
-        if (!all(attr(tm, "term.labels") %in% names(newdata))) 
+        if (!all(rownames(attr(tm, "factors")) %in% names(newdata))) 
           stop(sprintf("not all required variables supplied in `newdata`")) 
         xlev <- lapply(x$data$mf[[k]], levels)[attr(tm,"term.labels")]
         
@@ -315,7 +317,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
   }
   else { 
     tm <- delete.response(terms(x$pformula))
-    if (!all(attr(tm, "term.labels") %in% names(newdata))) 
+    if (!all(rownames(attr(tm, "factors")) %in% names(newdata))) 
       stop(sprintf("not all required variables supplied in `newdata`")) 
     
     xlev <- lapply(x$data$mf[[1]], levels)[attr(tm,"term.labels")]
@@ -381,7 +383,7 @@ get_probpars <- function(x, newdata=NULL, na.action){
 ##' @export
 ajfit <- function(x, newdata=NULL, tidy=TRUE){ 
   dat <- x$data$mfcomb
-  covnames <- attr(dat, "covnames")
+  covnames <- attr(dat, "covnames.main")
   ncovs <- length(covnames)
   if (ncovs == 0){
     sf <- sftidy <- ajfit.dat(x$data$mf[[1]], x$evnames)
@@ -460,7 +462,7 @@ ajfit.dat <- function(dat,evnames){
 ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   nstates <- x$K + 1
   dat <- x$data$mfcomb
-  covnames <- attr(dat, "covnames")
+  covnames <- attr(dat, "covnames.main") # main effects, excluding interaction terms
   ncovs <- length(covnames)
   if (ncovs > 0){
     faccovs <- sapply(dat[,covnames,drop=FALSE], is.factor)
@@ -490,8 +492,6 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   names(ajlong)[names(ajlong)=="time"] <- "t"
   if (is.null(maxt)) maxt <- max(ajlong$t)
   times <- seq(0, maxt, length=100)
-  ## FIXME p_flex returns factor, ajlong$x has ordered
-  ## p_flex should return factor if that's what newdata has. so the newdata used should have ordered
   modcomp <- 
     p_flexsurvmix(x, t=times, newdata=newdata, startname=startname, B=B) %>%
     dplyr::mutate(model="Parametric mixture") %>%

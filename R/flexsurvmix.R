@@ -462,6 +462,7 @@ flexsurvmix <- function(formula, data, event, dists,
                     parcov = c("", parcov))
   inits_all <- c(inits_alpha, inits_covp, inits_theta)
   if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
+  if (is.logical(fixedpars) && (fixedpars==FALSE)) fixedpars <- NULL
   if (is.character(fixedpars)){
     if (any(!fixedpars %in% res$terms)) {
       bad_fixedpars <- fixedpars[! fixedpars %in% res$terms[-1]]
@@ -684,7 +685,8 @@ flexsurvmix <- function(formula, data, event, dists,
   mcomb <- do.call("cbind", m)
   mcomb <- mcomb[,!duplicated(names(mcomb))]
   attr(mcomb, "covnames") <- unique(unlist(lapply(m, function(x)attr(terms(x),"term.labels"))))
-
+  attr(mcomb, "covnames.main") <- unique(unlist(lapply(m, function(x)rownames(attr(terms(x),"factors"))[-1])))
+  
   res <- list(call=match.call(),
               res=res, loglik=loglik,  cov=cov,
               npars=npars, AIC=-2*loglik + 2*npars,
