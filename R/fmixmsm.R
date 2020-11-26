@@ -109,11 +109,6 @@ ppath_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
       ppath <- ppath %>% 
         dplyr::group_by(dplyr::across(c(names(newdata), "final"))) %>% 
         dplyr::summarise(val=sum(.data$val))
-
-    #  ppath <- ppath %>% 
-    #    dplyr::group_by_at(c(names(newdata), "final")) %>% 
-    #    dplyr::summarise(val=sum(.data$val))
-      
     } 
     
     if (is.numeric(B) && B > 1){
@@ -262,7 +257,7 @@ qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=
     
     if (final){
       simsum[[p]] <- simsumdf %>%
-        dplyr::left_join(ppath, by=c(colnames(newdata))) %>%
+        dplyr::left_join(ppath, by=c("pathway", colnames(newdata))) %>%
         dplyr::group_by(dplyr::across(c(colnames(newdata)))) %>%
         ## Keep only the first n of the sampled rows
         ## where n is weighted by the prob of the pathway
@@ -277,7 +272,8 @@ qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=
   resq <- do.call("rbind", simsum)
   
   if (final){
-    resq <- resq %>%
+    resq <- resq %>% 
+      dplyr::ungroup() %>%
       dplyr::group_by(dplyr::across(c("final", colnames(newdata))))  %>%
       dplyr::summarise(probs=probs,
                        val = quantile(.data$sm, p=probs,na.rm=TRUE))

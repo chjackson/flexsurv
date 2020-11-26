@@ -81,6 +81,13 @@ test_that("meanfinal_fmixmsm",{
 })
 
 test_that("qfinal_fmixmsm",{
-  quantile_tofinal(fm, newdata=nd)
-  quantile_tofinal(fm, newdata=nd, probs=c(0.25, 0.75))
+  qfinal_fmixmsm(fm, newdata=nd)
+  qfinal_fmixmsm(fm, newdata=nd, final=TRUE)
+  qfinal_fmixmsm(fm, newdata=nd, probs=c(0.25, 0.75))
+  qfinal_fmixmsm(fm, newdata=nd, probs=c(0.25, 0.75), final=TRUE)
+
+  qfinal_fmixmsm(fm, newdata=nd, B=10)
+  qfinal_fmixmsm(fm, newdata=nd, B=10, final=TRUE)
+  qfinal_fmixmsm(fm, newdata=nd, n=100, B=10)
+  qfinal_fmixmsm(fm, newdata=nd, n=100, B=10, final=TRUE)
 })
