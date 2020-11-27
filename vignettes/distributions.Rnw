@@ -1,0 +1,290 @@
+%\VignetteIndexEntry{Distributions reference}
+
+\documentclass[nojss,nofooter]{jss}
+\usepackage{bm}
+\usepackage{tabularx}
+\usepackage{graphics}
+\usepackage{listings}
+
+\newcommand{\bbeta}{{\bm\beta}}
+\newcommand{\x}{{\mathbf{x}}}
+\newcommand{\z}{{\mathbf{z}}}
+\newcommand{\btheta}{{\bm{\theta}}}
+%\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+%\newcommand{\code}[1]{\texttt\lstinline|#1|}
+
+\author{Christopher H. Jackson \\ MRC Biostatistics Unit, Cambridge, UK \\ \email{chris.jackson@mrc-bsu.cam.ac.uk}}
+
+\title{flexsurv: Distributions reference}
+
+\Plainauthor{Christopher Jackson, MRC Biostatistics Unit}
+
+\Abstract{ A reference guide for the distributions built into flexsurv  }
+\Keywords{survival}
+
+\begin{document}
+
+This document lists the following information for each of the built-in
+distributions in \code{flexsurvreg}. 
+
+\begin{itemize}
+
+  \item How the distribution is identified in the \code{dist} argument
+    to \code{flexsurvreg}.
+
+  \item Name of the \code{d} function in R for the probability density, showing
+    how names of the arguments in the R function correspond to the
+    symbols in the formula for the survivor function.  In each case, there are
+    corresponding R functions with names beginning with
+    \code{p},\code{q} and \code{r} instead of \code{d}, for the
+    cumulative distribution, quantiles and random number generation.
+
+    The R \code{help} page for the function named here will contain more
+    information about the distribution, e.g. the probability density
+    function, and how particular distributions are defined as special
+    cases of other distributions. 
+
+    \item The survivor function $S(t|\btheta)$ as a function of time $t$ and
+      the parameters of the distribution $\btheta$.  Any restrictions
+      on the allowed values of the parameters are noted. 
+
+      \item The location parameter of the distribution, now indexed by
+        $j$, and a function describing how the location parameter
+        depends on covariate values $\z_j$ and covariate effects
+        $\bbeta$.
+
+        $\bbeta$ are the covariate effects indicated when printing a
+\code{flexsurvreg} object, which can take any real value. 
+
+\item A more interpretable covariate effect measure, defined as a
+  function of $\bbeta$.
+
+\end{itemize}
+
+  In a \emph{proportional hazards} model, the ``more interpretable'' effect
+  measure presented is is the hazard ratio (HR) for one unit of the
+  covariate.   
+
+  In an \emph{accelerated failure time model}, the time acceleration
+  factor (TAF) for one unit of the covariate is presented.   The
+  survivor function is of the form $S(t) = S^*(ct)$ where $c$ is some
+  constant that depends on the parameters.   Multiplying $c$ by 2 has
+  the same effect on survival as multiplying $t$ by 2, doubling the
+  speed of time and halving the expected survival time.   An
+  alternative way of presenting effects from an accelarated failure
+  time model is the ratio of expected times to the event between covariate values
+of 1 and 0.   This equals 1/TAF, and may be easier to interpret if the time to the event is of direct
+interest. 
+
+A HR below 1 and a TAF above 1 both indicate that higher covariate values are associated with a higher risk of the event, or shorter times to the event. 
+
+
+%  So the comparable parameters are exp(-beta) for the lognormal and gengamma 1/exp(beta) = exp(-beta) for the weibull exp(beta) for the gamma and exponential
+
+
+\subsection*{Weibull (accelerated failure time)}
+
+\verb+flexsurvreg(..., dist="weibull")+\\
+\code{dweibull(..., shape=a, scale=mu)}
+
+\[
+S(t | \mu, a) = \exp(- (t/\mu)^ a), \qquad \mu>0, a>0
+\]
+
+\[ \mu_j = \exp(\z_j \bbeta), \quad TAF = \exp(-\bbeta) \]
+
+\subsection*{Weibull (proportional hazards)}
+
+\verb+flexsurvreg(..., dist="weibullPH")+\\
+\code{dweibullPH(..., shape=a, scale=lambda)}
+
+\[
+S(t | \lambda, a) = \exp(- \lambda t^ a), \qquad \lambda>0, a>0
+\]
+
+\[ \lambda_j = \exp(\z_j \bbeta), \quad HR = \exp(\bbeta) \]
+
+(Note the argument ``scale'' to \code{dweibullPH} would perhaps better have been called
+``rate'', given the analogy with the rate of the exponential model).
+
+\subsection*{Gamma}
+
+\verb+flexsurvreg(..., dist="gamma")+\\
+\code{dgamma(..., shape=a, scale=mu)}
+
+\[
+  S(t | a, \mu) = 1 - \int_{0}^t 
+  \frac{x^{a-1} \exp{-(x/\mu)}}{\mu^a \Gamma(a)}
+    dx, \qquad \mu>0, a>0
+\]
+
+\[
+  \mu_j = \exp(\z_j \bbeta), \quad TAF = \exp(\bbeta)
+\]
+
+\subsection*{Exponential}
+
+\verb+flexsurvreg(..., dist="exp")+\\
+\code{dexp(..., rate=lambda)}
+
+\[ S(t | \lambda) = \exp(-\lambda t), \qquad \lambda > 0  \]
+
+\[
+  \lambda_j = \exp(\z_j \bbeta),  \quad HR = \exp(\bbeta), \quad TAF = \exp(\bbeta) 
+\]
+
+\subsection*{Log-logistic}
+
+\verb+flexsurvreg(..., dist="llogis")+\\
+\code{dllogis(..., shape=a, scale=b)}
+
+\[
+  S(t | a, b) = 1/ (1 + (t/b)^a), \qquad a>0, b>0
+\]
+
+\[
+  b_j = \exp(\z_j \bbeta), \quad TAF = \exp(-\bbeta)
+\]
+    
+\subsection*{Log-normal}
+
+\verb+flexsurvreg(..., dist="lnorm")+\\
+\code{dlnorm(..., meanlog=mu, sdlog=sigma)}
+
+\[
+S(t | \mu, \sigma) =  1 - \int_0^t \frac{1}{x\sigma\sqrt{2 \pi}}
+\exp{\left\{-\frac{(\log x - \mu)^2}{2 \sigma^2}\right\}} dx, \qquad
+\sigma > 0
+\] 
+
+\[  \mu_j = z_j \bbeta , \quad TAF = \exp(-\bbeta) \]
+
+
+\subsection*{Gompertz}
+
+\verb+flexsurvreg(..., dist="gompertz")+\\
+\code{dgompertz(..., shape=a, rate=b)}
+
+\[
+S(t | a, b) =   \exp(-(b/a) (\exp(at) - 1)), b > 0
+\]
+
+Note that $a<0$ is permitted, in which case $S(t|)$ tends to a
+non-zero probability as $t$ increases. 
+
+\[
+  b_j = \exp(\z_j \bbeta), \quad HR = \exp(\bbeta)
+\]
+
+\subsection*{Generalised gamma (Prentice)} 
+
+\verb+flexsurvreg(..., dist="gengamma")+\\
+\code{dgengamma(..., mu, sigma, Q)}
+
+\[ S(t|\mu,\sigma,Q) =  
+\begin{array}{ll}
+S_G(\frac{\exp(Qw)}{Q^2} ~ | ~   \frac{1}{Q^2}, 1)  &   (Q > 0 )\\
+1 - S_G(\frac{\exp(Qw)}{Q^2}  ~ |  ~  \frac{1}{Q^2}, 1)  &   (Q < 0)\\
+S_L(t ~ | ~ \mu, \sigma) &  (Q = 0)\\
+\end{array}
+\]
+where $w = (\log(t) - \mu)/\sigma$, $S_G(t | a,1)$ is the survivor function of the gamma distribution with shape $a$ and scale $1$, $S_L(t |\mu,\sigma)$ is the survivor function of the log-normal distribution with log-scale mean $\mu$ and standard deviation $\sigma$, $\mu,Q$ are  unrestricted, and $\sigma$ is positive.
+
+\[
+  \mu_j = \exp(z_j \bbeta), \quad TAF = \exp(-\bbeta)
+\]
+
+\subsection*{Generalised gamma (Stacy)}
+
+\verb+flexsurvreg(..., dist="gengamma.orig")+\\
+\code{dgengamma.orig(..., shape=b, scale=a, k=k)}
+\[
+S(t|a, b, k) = 1 -   \int_0^t
+\frac{ b  x^{bk -1}}{   \Gamma(k) a^{bk}  }\exp(-(x/a)^b) dx
+\]
+\[
+a_j = \exp(z_j \bbeta), \quad TAF = \exp(-\bbeta)
+\]
+
+\subsection*{Generalised F (Prentice)} 
+
+\verb+flexsurvreg(..., dist="genf")+\\
+\code{dgenf(..., mu, sigma, Q, P)}
+
+\[ S(t | \mu, \sigma, Q, P) = 1 - \int_0^t 
+  \frac{\delta (s_1/s_2)^{s_1} e^{s_1 w}}{\sigma x (1 + s_1 e^w/s_2) ^
+    {(s_1 + s_2)} B(s_1, s_2)}, \qquad \sigma>0, P>0
+\]
+
+where $s_1 = 2(Q^2 + 2P + Q\delta)^{-1}$, $s_2 = 2(Q^2 + 2P -Q\delta)^{-1}$, ${\delta = (Q^2 + 2P)^{1/2}}$ and $w = (\log(x) - \mu)\delta /\sigma$
+
+
+\[
+  \mu_j = x_j \bbeta,  \quad TAF = \exp(-\bbeta)
+\]
+
+\subsection*{Generalised F (original)}
+
+\verb+flexsurvreg(..., dist="genf.orig")+\\
+\code{dgenf.orig(..., mu, sigma, s1, s2)}
+
+\[
+S(t | \mu, \sigma, s_1, s_2) =  1 - \int_0^t \frac{(s_1/s_2)^{s_1} e^{s_1 w}}{\sigma x (1 + s_1
+  e^w/s_2) ^ {s_1 + s_2} B(s_1, s_2)} dx, \qquad \sigma>0, s_1>0, s_2>0
+\]
+
+where $w = (\log(x) - \mu)/\sigma$, and $B(s_1,s_2) =\frac{\Gamma(s_1)\Gamma(s_2)}{\Gamma(s_1+s_2)}$ is the beta function.
+\[
+\mu_j = z_j \bbeta ,  \quad TAF = \exp(-\bbeta)
+\]
+
+\subsection*{Spline (Royston/Parmar)}
+
+\verb+flexsurvspline(...,scale="hazard")+\\
+\verb+flexsurvspline(...,scale="odds")+\\
+\verb+flexsurvspline(...,scale="normal")+\\
+\code{dsurvspline(..., gamma)} where the argument \texttt{gamma} collects together
+all parameters,\\
+~\\
+or the alternative forms for the density/distribution functions
+(flexsurv versions 2.0 and later) where different parameters are in
+separate arguments:\\
+\code{dsurvspline0(..., gamma0, gamma1)} (no internal knots)\\
+\code{dsurvspline1(..., gamma0, gamma1, gamma2)} (1 internal knot)\\
+\code{dsurvspline2(..., gamma0, gamma1, gamma2, gamma3)} (2 internal knots)\\
+etc., all the way up to \code{dsurvspline7}. 
+
+\[
+g(S(t,z)) = s(x, \bm{\gamma})
+\]
+where $s()$ is a natural cubic spline function with $m$ internal
+knots: 
+\[
+  s(x,\bm{\gamma}) = \gamma_0 + \gamma_1 x + \gamma_2 v_1(x) + \ldots + \gamma_{m+1} v_m(x)   
+\]
+where $v_j(x)$ is the $j$th \emph{basis} function,
+\[v_j(x) = (x - k_j)^3_+ - \lambda_j(x - k_{min})^3_+ - (1 - \lambda_j) (x - k_{max})^3_+, 
+\qquad
+\lambda_j = \frac{k_{max} - k_j}{k_{max} - k_{min}} \] 
+and $(x - a)_+ = max(0, x - a)$.
+
+The link function relating the survivor function to the spline is:
+
+\[
+g(S(t,\mathbf{z})) =  \begin{array}{ll}
+\log(-\log(S(t,\mathbf{z}))) &\verb+(scale="hazard")+ \\
+\log(S(t,\mathbf{z})^{-1} - 1)      &                  \verb+(scale="odds")+ \\
+\Phi^{-1}(S(t,\mathbf{z})) &     \verb+(scale="normal")+ \\
+                      \end{array}
+                    \]
+
+For more details, see the main \code{flexsurv} vignette. 
+
+The location parameter is
+
+\[  \gamma_{0j} = z_j \bbeta \]
+
+For \verb+scale="hazard"+, the hazard ratio is $\exp(\bbeta)$.
+
+\end{document}
+

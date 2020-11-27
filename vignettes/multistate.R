@@ -187,9 +187,8 @@ ggplot(aj2, aes(x=time, y=val, lty=model, col=state)) +
   xlab("Years after transplant") + ylab("Probability of having moved to state") +
   geom_line()
 
-## ---------------------------------------------------------
+## ----message=FALSE----------------------------------------
 library(dplyr)
-library(forcats)
 
 aj3 <- ajfit_fmsm(crfs_nobos) %>%
   filter(model=="Parametric") %>%

@@ -355,6 +355,10 @@ built-in distributions, \pkg{flexsurv} also defines functions
 beginning with \code{h} giving the hazard, and \code{H} for the
 cumulative hazard.
 
+A package vignette ``Distributions reference'' lists the survivor
+function and parameterisation of covariate effects used by each
+built-in distribution. 
+
 \paragraph{Generalized gamma} This three-parameter distribution
 includes the Weibull, gamma and log-normal as special cases.  The
 original parameterisation from \citet{stacy:gengamma} is available as\\
