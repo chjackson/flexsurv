@@ -132,6 +132,9 @@ as in their built-in distribution functions: \code{\link{dgengamma}},
 respectively.  The functions in base R are used where available, otherwise,
 they are provided in this package.
 
+A package vignette "Distributions reference" lists the survivor functions and
+covariate effect parameterisations used by each built-in distribution.
+
 For the Weibull, exponential and log-normal distributions,
 \code{\link{flexsurvreg}} simply works by calling \code{\link{survreg}} to
 obtain the maximum likelihood estimates, then calling \code{\link{optim}}

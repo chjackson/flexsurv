@@ -170,7 +170,7 @@ S(t | a, b) =   \exp(-(b/a) (\exp(at) - 1)), b > 0
 \]
 
 Note that $a<0$ is permitted, in which case $S(t|)$ tends to a
-non-zero probability as $t$ increases. 
+non-zero probability as $t$ increases, i.e. a probability of living forever.
 
 \[
   b_j = \exp(\z_j \bbeta), \quad HR = \exp(\bbeta)
@@ -255,9 +255,9 @@ separate arguments:\\
 etc., all the way up to \code{dsurvspline7}. 
 
 \[
-g(S(t,z)) = s(x, \bm{\gamma})
+g(S(t)) = s(x, \bm{\gamma})
 \]
-where $s()$ is a natural cubic spline function with $m$ internal
+where $x=\log(t)$ and $s()$ is a natural cubic spline function with $m$ internal
 knots: 
 \[
   s(x,\bm{\gamma}) = \gamma_0 + \gamma_1 x + \gamma_2 v_1(x) + \ldots + \gamma_{m+1} v_m(x)   
@@ -271,10 +271,10 @@ and $(x - a)_+ = max(0, x - a)$.
 The link function relating the survivor function to the spline is:
 
 \[
-g(S(t,\mathbf{z})) =  \begin{array}{ll}
-\log(-\log(S(t,\mathbf{z}))) &\verb+(scale="hazard")+ \\
-\log(S(t,\mathbf{z})^{-1} - 1)      &                  \verb+(scale="odds")+ \\
-\Phi^{-1}(S(t,\mathbf{z})) &     \verb+(scale="normal")+ \\
+g(S(t)) =  \begin{array}{ll}
+\log(-\log(S(t))) &\verb+(scale="hazard")+ \\
+\log(S(t)^{-1} - 1)      &                  \verb+(scale="odds")+ \\
+\Phi^{-1}(S(t)) &     \verb+(scale="normal")+ \\
                       \end{array}
                     \]
 
