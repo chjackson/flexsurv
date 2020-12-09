@@ -30,3 +30,4 @@ tests/test_extra.R
 \.gcno
 ^doc$
 ^Meta$
+docs

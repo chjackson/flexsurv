@@ -71,7 +71,7 @@ distributions in \code{flexsurvreg}.
   constant that depends on the parameters.   Multiplying $c$ by 2 has
   the same effect on survival as multiplying $t$ by 2, doubling the
   speed of time and halving the expected survival time.   An
-  alternative way of presenting effects from an accelarated failure
+  alternative way of presenting effects from an accelerated failure
   time model is the ratio of expected times to the event between covariate values
 of 1 and 0.   This equals 1/TAF, and may be easier to interpret if the time to the event is of direct
 interest. 

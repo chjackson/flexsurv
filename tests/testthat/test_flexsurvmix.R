@@ -109,9 +109,8 @@ dat$evname <- c("cure", "death")[dat$event]
 
 test_that("flexsurvmix with covariates on mixing probabilities",{
   x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
-                   dists=c("gamma","gamma"), fixedpars=TRUE)
-  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
                    dists=c("gamma","gamma"), pformula = ~ x + y, fixedpars=TRUE)
+  expect_equal(x$res$est[x$res$terms=="prob2(x)"], 0)
 })
 
 

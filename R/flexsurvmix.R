@@ -453,7 +453,7 @@ flexsurvmix <- function(formula, data, event, dists,
   }
   # Parameter dictionary to be completed with the estimates
   distnames <- sapply(dists, function(x){if(is.list(x))x$name else x})
-  res <- data.frame(component = c(evnames, rep(evnames[seq_len(K-1)], each=ncovsp),
+  res <- data.frame(component = c(evnames, rep(evnames[setdiff(1:K, 1)], each=ncovsp),
                                   rep(evnames, ntparsl)),
                     dist = c(rep("",nppars+1), rep(distnames, ntparsl)),
                     terms = c(paste0("prob",1:K),  names(inits_covp),  names(inits_theta)),
