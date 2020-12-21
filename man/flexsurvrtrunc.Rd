@@ -36,67 +36,68 @@ flexsurvrtrunc(
 \item{method}{If \code{"joint"} then the joint-conditional method is used.  If \code{"final"} then the conditional-on-final method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).}
 
 \item{dist}{Typically, one of the strings in the first column of the
-following table, identifying a built-in distribution.  This table also
-identifies the location parameters, and whether covariates on these
-parameters represent a proportional hazards (PH) or accelerated failure
-time (AFT) model.  In an accelerated failure time model, the covariate
-speeds up or slows down the passage of time.  So if the coefficient
-(presented on the log scale) is log(2), then doubling the covariate value
-would give half the expected survival time.
+  following table, identifying a built-in distribution.  This table also
+  identifies the location parameters, and whether covariates on these
+  parameters represent a proportional hazards (PH) or accelerated failure
+  time (AFT) model.  In an accelerated failure time model, the covariate
+  speeds up or slows down the passage of time.  So if the coefficient
+  (presented on the log scale) is log(2), then doubling the covariate value
+  would give half the expected survival time.
 
-\tabular{llll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
-\tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
-scale \tab AFT \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
-AFT \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT
-\cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr \code{"gamma"}
-\tab Gamma \tab rate \tab AFT \cr \code{"exp"} \tab Exponential \tab rate
-\tab PH \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \cr
-\code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \cr \code{"gompertz"}
-\tab Gompertz \tab rate \tab PH \cr }
+  \tabular{llll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
+  \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
+  scale \tab AFT \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
+  AFT \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT
+  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr \code{"gamma"}
+  \tab Gamma \tab rate \tab AFT \cr \code{"exp"} \tab Exponential \tab rate
+  \tab PH \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \cr
+  \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \cr \code{"gompertz"}
+  \tab Gompertz \tab rate \tab PH \cr }
 
-\code{"exponential"} and \code{"lognormal"} can be used as aliases for
-\code{"exp"} and \code{"lnorm"}, for compatibility with
-\code{\link{survreg}}.
+  \code{"exponential"} and \code{"lognormal"} can be used as aliases for
+  \code{"exp"} and \code{"lnorm"}, for compatibility with
+  \code{\link{survreg}}.
 
-Alternatively, \code{dist} can be a list specifying a custom distribution.
-See section ``Custom distributions'' below for how to construct this list.
+  Alternatively, \code{dist} can be a list specifying a custom distribution.
+  See section ``Custom distributions'' below for how to construct this list.
 
-Very flexible spline-based distributions can also be fitted with
-\code{\link{flexsurvspline}}.
+  Very flexible spline-based distributions can also be fitted with
+  \code{\link{flexsurvspline}}.
 
-The parameterisations of the built-in distributions used here are the same
-as in their built-in distribution functions: \code{\link{dgengamma}},
-\code{\link{dgengamma.orig}}, \code{\link{dgenf}},
-\code{\link{dgenf.orig}}, \code{\link{dweibull}}, \code{\link{dgamma}},
-\code{\link{dexp}}, \code{\link{dlnorm}}, \code{\link{dgompertz}},
-respectively.  The functions in base R are used where available, otherwise,
-they are provided in this package.
+  The parameterisations of the built-in distributions used here are the same
+  as in their built-in distribution functions: \code{\link{dgengamma}},
+  \code{\link{dgengamma.orig}}, \code{\link{dgenf}},
+  \code{\link{dgenf.orig}}, \code{\link{dweibull}}, \code{\link{dgamma}},
+  \code{\link{dexp}}, \code{\link{dlnorm}}, \code{\link{dgompertz}},
+  respectively.  The functions in base R are used where available,
+  otherwise, they are provided in this package.
 
-A package vignette "Distributions reference" lists the survivor functions and
-covariate effect parameterisations used by each built-in distribution.
+  A package vignette "Distributions reference" lists the survivor functions
+  and covariate effect parameterisations used by each built-in distribution.
 
-For the Weibull, exponential and log-normal distributions,
-\code{\link{flexsurvreg}} simply works by calling \code{\link{survreg}} to
-obtain the maximum likelihood estimates, then calling \code{\link{optim}}
-to double-check convergence and obtain the covariance matrix for
-\code{\link{flexsurvreg}}'s preferred parameterisation.
+  For the Weibull, exponential and log-normal distributions,
+  \code{\link{flexsurvreg}} simply works by calling \code{\link{survreg}} to
+  obtain the maximum likelihood estimates, then calling \code{\link{optim}}
+  to double-check convergence and obtain the covariance matrix for
+  \code{\link{flexsurvreg}}'s preferred parameterisation.
 
-The Weibull parameterisation is different from that in
-\code{\link[survival]{survreg}}, instead it is consistent with
-\code{\link{dweibull}}.  The \code{"scale"} reported by
-\code{\link[survival]{survreg}} is equivalent to \code{1/shape} as defined
-by \code{\link{dweibull}} and hence \code{\link{flexsurvreg}}.  The first
-coefficient \code{(Intercept)} reported by \code{\link[survival]{survreg}}
-is equivalent to \code{log(scale)} in \code{\link{dweibull}} and
-\code{\link{flexsurvreg}}.
+  The Weibull parameterisation is different from that in
+  \code{\link[survival]{survreg}}, instead it is consistent with
+  \code{\link{dweibull}}.  The \code{"scale"} reported by
+  \code{\link[survival]{survreg}} is equivalent to \code{1/shape} as defined
+  by \code{\link{dweibull}} and hence \code{\link{flexsurvreg}}.  The first
+  coefficient \code{(Intercept)} reported by \code{\link[survival]{survreg}}
+  is equivalent to \code{log(scale)} in \code{\link{dweibull}} and
+  \code{\link{flexsurvreg}}.
 
-Similarly in the exponential distribution, the rate, rather than the mean,
-is modelled on covariates.
+  Similarly in the exponential distribution, the rate, rather than the mean,
+  is modelled on covariates.
 
-The object \code{flexsurv.dists} lists the names of the built-in
-distributions, their parameters, location parameter, functions used to
-transform the parameter ranges to and from the real line, and the functions
-used to generate initial values of each parameter for estimation.}
+  The object \code{flexsurv.dists} lists the names of the built-in
+  distributions, their parameters, location parameter, functions used to
+  transform the parameter ranges to and from the real line, and the
+  functions used to generate initial values of each parameter for
+  estimation.}
 
 \item{theta}{Initial value (or fixed value) for the exponential growth rate \code{theta}. Defaults to 1.}
 
@@ -106,25 +107,25 @@ used to generate initial values of each parameter for estimation.}
 
 \item{fixedpars}{Integer indices of the parameters of the survival distribution that should be fixed to their values supplied in \code{inits}.   Same length as \code{inits}.}
 
-\item{dfns}{An alternative way to define a custom survival distribution
-(see section ``Custom distributions'' below).  A list whose components may
-include \code{"d"}, \code{"p"}, \code{"h"}, or \code{"H"} containing the
-probability density, cumulative distribution, hazard, or cumulative hazard
-functions of the distribution.  For example,
+\item{dfns}{An alternative way to define a custom survival distribution (see
+  section ``Custom distributions'' below).  A list whose components may
+  include \code{"d"}, \code{"p"}, \code{"h"}, or \code{"H"} containing the
+  probability density, cumulative distribution, hazard, or cumulative hazard
+  functions of the distribution.  For example,
 
-\code{list(d=dllogis, p=pllogis)}.
+  \code{list(d=dllogis, p=pllogis)}.
 
-If \code{dfns} is used, a custom \code{dlist} must still be provided, but
-\code{dllogis} and \code{pllogis} need not be visible from the global
-environment.  This is useful if \code{flexsurvreg} is called within other
-functions or environments where the distribution functions are also defined
-dynamically.}
+  If \code{dfns} is used, a custom \code{dlist} must still be provided, but
+  \code{dllogis} and \code{pllogis} need not be visible from the global
+  environment.  This is useful if \code{flexsurvreg} is called within other
+  functions or environments where the distribution functions are also
+  defined dynamically.}
 
 \item{integ.opts}{List of named arguments to pass to
-\code{\link{integrate}}, if a custom density or hazard is provided without
-its cumulative version.  For example,
+  \code{\link{integrate}}, if a custom density or hazard is provided without
+  its cumulative version.  For example,
 
-\code{integ.opts = list(rel.tol=1e-12)}}
+  \code{integ.opts = list(rel.tol=1e-12)}}
 
 \item{cl}{Width of symmetric confidence intervals for maximum likelihood
 estimates, by default 0.95.}

@@ -174,11 +174,6 @@
 ##'   M step for the time-to-event parameters in \code{method="em"}.  By default, this uses \code{fnscale=10000}
 ##'   and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
 ##'   being estimated, unless the user specifies these options explicitly.
-##'   
-##' @param hess.control List of options to control Hessian computation.  
-##' Available options are \code{tol.solve}, the tolerance used for \code{\link{solve}}
-##' when inverting the Hessian, and \code{tol.evalues}, the accepted tolerance for 
-##' negative eigenvalues in the covariance matrix.
 ##'
 ##'
 ##' @inheritParams flexsurvreg

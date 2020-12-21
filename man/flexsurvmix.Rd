@@ -178,23 +178,34 @@ being estimated, unless the user specifies these options explicitly.}
 \item{aux}{A named list of other arguments to pass to custom distribution
 functions.  This is used, for example, by \code{\link{flexsurvspline}} to
 supply the knot locations and modelling scale (e.g. hazard or odds).  This
-cannot be used to fix parameters of a distribution --- use \code{fixedpars}
-for that.}
+cannot be used to fix parameters of a distribution --- use
+\code{fixedpars} for that.}
 
-\item{sr.control}{For the models which use \code{\link{survreg}} to find
-the maximum likelihood estimates (Weibull, exponential, log-normal), this
-list is passed as the \code{control} argument to \code{\link{survreg}}.}
+\item{sr.control}{For the models which use \code{\link{survreg}} to find the
+maximum likelihood estimates (Weibull, exponential, log-normal), this list
+is passed as the \code{control} argument to \code{\link{survreg}}.}
 
 \item{integ.opts}{List of named arguments to pass to
-\code{\link{integrate}}, if a custom density or hazard is provided without
-its cumulative version.  For example,
+  \code{\link{integrate}}, if a custom density or hazard is provided without
+  its cumulative version.  For example,
 
-\code{integ.opts = list(rel.tol=1e-12)}}
+  \code{integ.opts = list(rel.tol=1e-12)}}
 
-\item{hess.control}{List of options to control Hessian computation.
-Available options are \code{tol.solve}, the tolerance used for \code{\link{solve}}
-when inverting the Hessian, and \code{tol.evalues}, the accepted tolerance for 
-negative eigenvalues in the covariance matrix.}
+\item{hess.control}{List of options to control inversion of the Hessian to
+  obtain a covariance matrix. Available options are \code{tol.solve}, the
+  tolerance used for \code{\link{solve}} when inverting the Hessian (default
+  \code{1e-09}), and \code{tol.evalues}, the accepted tolerance for negative
+  eigenvalues in the covariance matrix (default \code{1e-05}).
+
+  The Hessian is positive definite, thus invertible, at the maximum
+  likelihood.  If the Hessian computed after optimisation convergence can't
+  be inverted, this is either because the converged result is not the
+  maximum likelihood (e.g. it could be a "saddle point"), or because the
+  numerical methods used to obtain the Hessian were inaccurate. If you
+  suspect that the Hessian was computed wrongly enough that it is not
+  invertible, but not wrongly enough that the nearest valid inverse would be
+  an inaccurate estimate of the covariance matrix, then these tolerance
+  values can be increased to allow the inverse to be computed.}
 
 \item{...}{Optional arguments to the general-purpose optimisation routine
 \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the
@@ -203,11 +214,11 @@ to \code{method="Nelder-Mead"} which can be more robust to poor initial
 values.  If the optimisation fails to converge, consider normalising the
 problem using, for example, \code{control=list(fnscale = 2500)}, for
 example, replacing 2500 by a number of the order of magnitude of the
-likelihood. If 'false' convergence is reported with a non-positive-definite
-Hessian, then consider tightening the tolerance criteria for convergence.
-If the optimisation takes a long time, intermediate steps can be printed
-using the \code{trace} argument of the control list. See
-\code{\link{optim}} for details.}
+likelihood. If 'false' convergence is reported with a
+non-positive-definite Hessian, then consider tightening the tolerance
+criteria for convergence. If the optimisation takes a long time,
+intermediate steps can be printed using the \code{trace} argument of the
+control list. See \code{\link{optim}} for details.}
 }
 \value{
 List of objects containing information about the fitted model.   The

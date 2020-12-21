@@ -536,3 +536,4 @@ test_that("summary type `link`",{
     expect_equal(summary(fitg, type="link")[["factor(rx)=2"]]$est, 
                  exp(fitg$res.t["scale","est"] + fitg$res.t["factor(rx)2","est"]))
 })
+s
