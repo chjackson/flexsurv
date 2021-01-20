@@ -28,12 +28,12 @@ flexsurvmix(
 }
 \arguments{
 \item{formula}{Survival model formula.  The left hand side is a \code{Surv}
-  object specified as in \code{\link{flexsurvreg}}.  This may define
-  various kinds of censoring, as described in \code{\link{Surv}}. Any covariates on the
-  right hand side of this formula will be placed on the location parameter
-  for every component-specific distribution. Covariates on other parameters
-  of the component-specific distributions may be supplied  using the
-  \code{anc} argument.
+  object specified as in \code{\link{flexsurvreg}}.  This may define various
+  kinds of censoring, as described in \code{\link{Surv}}. Any covariates on
+  the right hand side of this formula will be placed on the location
+  parameter for every component-specific distribution. Covariates on other
+  parameters of the component-specific distributions may be supplied  using
+  the \code{anc} argument.
 
   Alternatively, \code{formula} may be a list of formulae, with one
   component for each alternative event.  This may be used to specify
@@ -156,24 +156,25 @@ the EM algorithm, or \code{"direct"} for direct maximisation.}
   likelihood changes by a relative amount less than \code{reltol}.  The
   default is the same as in \code{\link{optim}}, that is,
   \code{sqrt(.Machine$double.eps)}.
-  
+
   \code{var.method} method to compute the covariance matrix. \code{"louis"}
   for the method of Louis (1982), or \code{"direct"}for direct numerical
   calculation of the Hessian of the log likelihood.
-  
-  \code{optim.p.control} A list that is passed as the \code{control} argument
-  to  \code{optim} in the M step for the component membership probability 
-  parameters.
-  The optimisation in the M step for the time-to-event parameters can be
-  controlled by the \code{optim.control} argument to \code{flexsurvmix}.
-  
+
+  \code{optim.p.control} A list that is passed as the \code{control}
+  argument to  \code{optim} in the M step for the component membership
+  probability parameters. The optimisation in the M step for the
+  time-to-event parameters can be controlled by the \code{optim.control}
+  argument to \code{flexsurvmix}.
+
   For example, \code{em.control = list(trace=1, reltol=1e-12)}.}
 
 \item{optim.control}{List of options to pass as the \code{control} argument
 to \code{\link{optim}},  which is used by \code{method="direct"} or in the
-M step for the time-to-event parameters in \code{method="em"}.  By default, this uses \code{fnscale=10000}
-and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
-being estimated, unless the user specifies these options explicitly.}
+M step for the time-to-event parameters in \code{method="em"}.  By
+default, this uses \code{fnscale=10000} and \code{ndeps=rep(1e-06,p)}
+where \code{p} is the number of parameters being estimated, unless the
+user specifies these options explicitly.}
 
 \item{aux}{A named list of other arguments to pass to custom distribution
 functions.  This is used, for example, by \code{\link{flexsurvspline}} to
@@ -254,10 +255,10 @@ and M steps.
 }
 \references{
 Larson, M. G., & Dinse, G. E. (1985). A mixture model for the
-regression analysis of competing risks data. Journal of the Royal
-Statistical Society: Series C (Applied Statistics), 34(3), 201-211.
+  regression analysis of competing risks data. Journal of the Royal
+  Statistical Society: Series C (Applied Statistics), 34(3), 201-211.
 
-Lau, B., Cole, S. R., & Gange, S. J. (2009). Competing risk regression
-models for epidemiologic data. American Journal of Epidemiology, 170(2),
-244-256.
+  Lau, B., Cole, S. R., & Gange, S. J. (2009). Competing risk regression
+  models for epidemiologic data. American Journal of Epidemiology, 170(2),
+  244-256.
 }

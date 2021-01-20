@@ -27,12 +27,12 @@
 ##'
 ##'
 ##' @param formula Survival model formula.  The left hand side is a \code{Surv}
-##'   object specified as in \code{\link{flexsurvreg}}.  This may define
-##'   various kinds of censoring, as described in \code{\link{Surv}}. Any covariates on the
-##'   right hand side of this formula will be placed on the location parameter
-##'   for every component-specific distribution. Covariates on other parameters
-##'   of the component-specific distributions may be supplied  using the
-##'   \code{anc} argument.
+##'   object specified as in \code{\link{flexsurvreg}}.  This may define various
+##'   kinds of censoring, as described in \code{\link{Surv}}. Any covariates on
+##'   the right hand side of this formula will be placed on the location
+##'   parameter for every component-specific distribution. Covariates on other
+##'   parameters of the component-specific distributions may be supplied  using
+##'   the \code{anc} argument.
 ##'
 ##'   Alternatively, \code{formula} may be a list of formulae, with one
 ##'   component for each alternative event.  This may be used to specify
@@ -156,24 +156,25 @@
 ##'   likelihood changes by a relative amount less than \code{reltol}.  The
 ##'   default is the same as in \code{\link{optim}}, that is,
 ##'   \code{sqrt(.Machine$double.eps)}.
-##'   
+##'
 ##'   \code{var.method} method to compute the covariance matrix. \code{"louis"}
 ##'   for the method of Louis (1982), or \code{"direct"}for direct numerical
 ##'   calculation of the Hessian of the log likelihood.
-##'   
-##'   \code{optim.p.control} A list that is passed as the \code{control} argument
-##'   to  \code{optim} in the M step for the component membership probability 
-##'   parameters.
-##'   The optimisation in the M step for the time-to-event parameters can be
-##'   controlled by the \code{optim.control} argument to \code{flexsurvmix}.
-##'   
+##'
+##'   \code{optim.p.control} A list that is passed as the \code{control}
+##'   argument to  \code{optim} in the M step for the component membership
+##'   probability parameters. The optimisation in the M step for the
+##'   time-to-event parameters can be controlled by the \code{optim.control}
+##'   argument to \code{flexsurvmix}.
+##'
 ##'   For example, \code{em.control = list(trace=1, reltol=1e-12)}.
 ##'
 ##' @param optim.control List of options to pass as the \code{control} argument
 ##'   to \code{\link{optim}},  which is used by \code{method="direct"} or in the
-##'   M step for the time-to-event parameters in \code{method="em"}.  By default, this uses \code{fnscale=10000}
-##'   and \code{ndeps=rep(1e-06,p)} where \code{p} is the number of parameters
-##'   being estimated, unless the user specifies these options explicitly.
+##'   M step for the time-to-event parameters in \code{method="em"}.  By
+##'   default, this uses \code{fnscale=10000} and \code{ndeps=rep(1e-06,p)}
+##'   where \code{p} is the number of parameters being estimated, unless the
+##'   user specifies these options explicitly.
 ##'
 ##'
 ##' @inheritParams flexsurvreg
@@ -184,19 +185,20 @@
 ##'
 ##'
 ##' @references Larson, M. G., & Dinse, G. E. (1985). A mixture model for the
-##' regression analysis of competing risks data. Journal of the Royal
-##' Statistical Society: Series C (Applied Statistics), 34(3), 201-211.
+##'   regression analysis of competing risks data. Journal of the Royal
+##'   Statistical Society: Series C (Applied Statistics), 34(3), 201-211.
 ##'
-##' Lau, B., Cole, S. R., & Gange, S. J. (2009). Competing risk regression
-##' models for epidemiologic data. American Journal of Epidemiology, 170(2),
-##' 244-256.
+##'   Lau, B., Cole, S. R., & Gange, S. J. (2009). Competing risk regression
+##'   models for epidemiologic data. American Journal of Epidemiology, 170(2),
+##'   244-256.
 ##'
 ##' @export
 flexsurvmix <- function(formula, data, event, dists,
                         pformula=NULL, anc=NULL,
                         partial_events = NULL,
                         initp=NULL, inits=NULL,
-                        fixedpars=NULL, dfns=NULL,
+                        fixedpars=NULL, 
+                        dfns=NULL,
                         method="direct",
                         em.control=NULL,
                         optim.control=NULL,
@@ -386,6 +388,8 @@ flexsurvmix <- function(formula, data, event, dists,
     inits_theta <- c(inits_theta, par.transform(theta_inits[[k]], dlists[[k]]), cov_inits[[k]])
   }
 
+  ## Full loglikelihood function, required for the direct likelihood maximisation
+  ## (note this is different from the "complete data" loglikelihood used in EM)
   loglik_flexsurvmix <- function(parsopt, ...){
     pars <- inits_all
     pars[optpars] <- parsopt
@@ -438,6 +442,7 @@ flexsurvmix <- function(formula, data, event, dists,
                                       list(formula=locform[[k]], data=data, dist=dists[[k]],
                                            anc=anc[[k]], inits=initsk, subset=need_lik,
                                            aux=aux[[k]],
+                                           hessian=FALSE,
                                            fixedpars=TRUE))$logliki)
       llp_event_known[,k] <- as.numeric((!is.na(event) & event==k) * log(pmat[,k]))
     }
@@ -474,6 +479,7 @@ flexsurvmix <- function(formula, data, event, dists,
     optim.control$fnscale <- 10000
 
   method <- match.arg(method, c("direct","em"))
+  if (!any(is.na(event))) method <- "em" # likelihoods factorise, use EM code with one iteration
   if (method=="direct"){
     if (length(optpars) > 0){
       if (is.null(optim.control$ndeps))
@@ -548,7 +554,8 @@ flexsurvmix <- function(formula, data, event, dists,
       llmat <- matrix(nrow=nobs, ncol=K)
       for (k in 1:K) {
         fs <- flexsurvreg(formula=locform[[k]], data=data, dist=dists[[k]],
-                          anc=anc[[k]], inits=theta[[k]], aux=aux[[k]], fixedpars=TRUE)
+                          anc=anc[[k]], inits=theta[[k]], aux=aux[[k]], fixedpars=TRUE,
+                          hessian=FALSE)
         llmat[,k] <-  fs$logliki
       }
       alphap <- exp(llmat) * pmat
@@ -624,7 +631,9 @@ flexsurvmix <- function(formula, data, event, dists,
       theta <- thetanew
       covtheta <- covthetanew
       logliknew <- sum(ll)
-      if (iter > 0)
+      if (!any(is.na(event))) 
+        converged <- TRUE
+      else if (iter > 0)
         converged <-  (abs(logliknew / loglik - 1) <= em.control$reltol)
       loglik <- logliknew
       est <- c(probs, covp, unlist(ttepars))

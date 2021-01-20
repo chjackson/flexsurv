@@ -144,3 +144,27 @@ t1disc <- t2disc <- t
 t2disc[cens] <- Inf
 t1disc[pobs] <- 0
 dat <- data.frame(t, status, t1disc, t2disc, event) 
+
+
+# No censoring, all events known, likelihood factorises nicely
+# Use "EM algorithm" code with one iteration,  since no latent data
+
+n <- 1000
+p <- 0.5 
+set.seed(1)
+death <- rbinom(n, 1, p)
+t <- numeric(n)
+t[death==0] <- rgamma(sum(death==0), 1, 3.2)
+t[death==1] <- rgamma(sum(death==1), 2.5, 1.2)
+status <- 1
+event <-  death+1 # 1 is cure, 2 is death
+dat <- data.frame(t, status, event)
+dat$evname <- c("cure", "death")[dat$event]
+dat$evnamef <- factor(dat$evname)
+
+test_that("With no censored data, we get the obvious estimates of the event probabilities",{
+  ## Observed proportions 0.52, 0.48 should be MLEs of the probs.  EM looks to work better here.
+  fse <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"))
+  expect_equal(fse$res$est[fse$res$terms=="prob1"], sum(event==1)/length(event), tol=1e-04)
+  expect_equal(fse$loglik, -1344.29387018376, tol=1e-05)
+})
