@@ -655,17 +655,22 @@ flexsurvmix <- function(formula, data, event, dists,
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
     
-    if (em.control$var.method=="direct"){
-      hess <- .hessian(loglik_flexsurvmix, est.t[-1][optpars])
-      cov <- .hess_to_cov(hess, hess.control$tol.solve, hess.control$tol.evalues)
+    if (!any(is.na(event))){
+      hess <- - Matrix::bdiag(hess_full_p, Matrix::bdiag(hess_full_t))
+      cov <- .hess_to_cov(-hess, hess.control$tol.solve, hess.control$tol.evalues)
+    } else {
+      if (em.control$var.method=="direct"){
+        hess <- .hessian(loglik_flexsurvmix, est.t[-1][optpars])
+        cov <- .hess_to_cov(hess, hess.control$tol.solve, hess.control$tol.evalues)
+      }
+      else if (em.control$var.method=="louis") 
+        cov <- flexsurvmix_louis(K, nthetal, dlists, ncoveffsl, 
+                                 locform, data, dists, anc,  aux, 
+                                 fixedpars_em, optpars_em, inits, optim.control, 
+                                 ttepars.t, nobs, ntparsl, nppars, 
+                                 w, alpha, covp, ncovsp, Xp,
+                                 hess_full_p, hess_full_t, hess.control) 
     }
-    else if (em.control$var.method=="louis") 
-      cov <- flexsurvmix_louis(K, nthetal, dlists, ncoveffsl, 
-                          locform, data, dists, anc,  aux, 
-                          fixedpars_em, optpars_em, inits, optim.control, 
-                          ttepars.t, nobs, ntparsl, nppars, 
-                          w, alpha, covp, ncovsp, Xp,
-                          hess_full_p, hess_full_t, hess.control) 
     opt <- NULL
   }
 

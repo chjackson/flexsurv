@@ -407,10 +407,12 @@ ajfit <- function(x, newdata=NULL, tidy=TRUE){
       datsub <- x$data$mf[[1]] # assume any of the mf[[k]] will do
       for (j in seq_along(covnames))  
         datsub <- datsub[datsub[,covnames[j]] == newdata[i,covnames[j]],,drop=FALSE]
-      sf[[i]] <- ajfit.dat(datsub, x$evnames)
-      sftidy[[i]] <- as.data.frame(unclass(sf[[i]])[c("time","pstate","lower","upper")])
-      covvals <- newdata[i,,drop=FALSE][rep(1,nrow(sftidy[[i]])),,drop=FALSE]
-      sftidy[[i]] <- cbind(sftidy[[i]], covvals)
+      if (nrow(datsub) > 1) { 
+        sf[[i]] <- ajfit.dat(datsub, x$evnames)
+        sftidy[[i]] <- as.data.frame(unclass(sf[[i]])[c("time","pstate","lower","upper")])
+        covvals <- newdata[i,,drop=FALSE][rep(1,nrow(sftidy[[i]])),,drop=FALSE]
+        sftidy[[i]] <- cbind(sftidy[[i]], covvals)
+      }
     }
     ret <- if (tidy) do.call("rbind", sftidy) else sf
   }
