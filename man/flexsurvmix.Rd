@@ -96,7 +96,10 @@ component is treated as the baseline.}
 
   Covariates on the location parameter may also be supplied here instead of
   in \code{formula}.  Supplying them in \code{anc} allows some components
-  but not others to have covariates on their location parameter.}
+  but not others to have covariates on their location parameter.  If a covariate
+  on the location parameter was provided in \code{formula}, and there are 
+  covariates on other parameters, then a null formula should be included 
+  for the location parameter in \code{anc}, e.g \code{list(rate=~1)}}
 
 \item{partial_events}{List specifying the factor levels of \code{event}
   which indicate knowledge that an individual will not experience particular

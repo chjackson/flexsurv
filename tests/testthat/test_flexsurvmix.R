@@ -78,6 +78,21 @@ test_that("flexsurvmix with covariates on time to event distributions",{
                      anc=list(list(shape=~x), list(rate=~1)), inits=ini, fixedpars=TRUE)
   expect_equal(fs1$loglik, fs2$loglik)
   
+  ## We can either put location formula in first arg (adding ~1 in anc if necessary)...
+  ini <- list(c(1,3, 0.6, 0.2, 0.01), 
+              c(1, 0.3, 0.01))
+  fs3 <- flexsurvmix(list(`1`=Surv(t, status) ~ x, 
+                          `2`=Surv(t, status) ~ x),
+                     data=dat, event=event, dists=c("gamma","gamma"), 
+                     anc=list(list(shape=~x), list(rate=~1)), 
+                     inits=ini, fixedpars=TRUE)
+  ## ...or include the location formula in anc. 
+  fs4 <- flexsurvmix(Surv(t, status) ~ 1 ,
+                     data=dat, event=event, dists=c("gamma","gamma"), 
+                     anc=list(list(shape  = ~x,  rate = ~x), list(rate = ~x)), 
+                     inits=ini, fixedpars=TRUE)
+  expect_equal(fs3$loglik, fs4$loglik)
+  
   expect_error(
     {fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), 
                        anc=list(list(rate=~x, shape=~x)), fixedpars=TRUE)},

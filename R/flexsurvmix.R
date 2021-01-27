@@ -96,7 +96,10 @@
 ##'
 ##'   Covariates on the location parameter may also be supplied here instead of
 ##'   in \code{formula}.  Supplying them in \code{anc} allows some components
-##'   but not others to have covariates on their location parameter.
+##'   but not others to have covariates on their location parameter.  If a covariate
+##'   on the location parameter was provided in \code{formula}, and there are 
+##'   covariates on other parameters, then a null formula should be included 
+##'   for the location parameter in \code{anc}, e.g \code{list(rate=~1)}
 ##'
 ##' @param partial_events List specifying the factor levels of \code{event}
 ##'   which indicate knowledge that an individual will not experience particular
@@ -271,14 +274,17 @@ flexsurvmix <- function(formula, data, event, dists,
     locform[[k]]  <- get.locform(fk, ancnames)
     loc <- dlists[[k]]$location
     if (loc %in% names(ancm[[k]])){
-      locform[[k]] <- update(locform[[k]], ancm[[k]][[loc]])
+      ## Add any extra covariates on the location parameter found in "anc" (usually we'll be adding to ~1)
+      fc <- as.character(ancm[[k]][[loc]])
+      extraterms <- formula(paste(fc[1],  ". +", fc[-1], collapse=" "))
+      locform[[k]] <- update(locform[[k]], extraterms)
       ancm[[k]][[loc]] <- anc[[k]][[loc]]<- NULL
     }
     forms[[k]] <- c(location=locform[[k]], ancm[[k]])
     names(forms[[k]])[[1]] <- loc
   }
 
-  ## Build model frame given formulae
+  ## Build model frame given formulaec
   indx <- match(c("formula", "data", "event"), names(call), nomatch = 0)
   if (indx[1] == 0)
     stop("A \"formula\" argument is required")
