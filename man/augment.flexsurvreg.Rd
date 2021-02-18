@@ -41,7 +41,7 @@ Augment accepts a model object and a dataset and adds information about each obs
 If neither of \code{data} or \code{newdata} are specified, then \code{model.frame(x)} will be used. It is worth noting that \code{model.frame(x)} will include a \code{\link{Surv}} object and not the original time-to-event variables used when fitting the \code{flexsurvreg} object. If the original data is desired, specify \code{data}.
 }
 \examples{
-fit <- flexsurvreg(formula = Surv(time, status) ~ age, data = cancer, dist = "exp")
-augment(fit, data = cancer)
+fit <- flexsurvreg(formula = Surv(time, status) ~ age, data = lung, dist = "exp")
+augment(fit, data = lung)
 
 }

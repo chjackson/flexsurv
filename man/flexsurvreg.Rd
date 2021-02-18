@@ -443,7 +443,6 @@ model.
 
 \examples{
 
-data(ovarian)
 ## Compare generalized gamma fit with Weibull
 fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="gengamma")
 fitg

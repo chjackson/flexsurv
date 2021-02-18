@@ -184,7 +184,7 @@ test_that("flexsurvspline results match stpm in Stata",{
     ## see ~/flexsurv/stpm/do1.do
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=0)
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -638.45432, tol=1e-05)
-    expect_equal(as.numeric(spl$res[,"est"]), c(-3.360303, 1.379652, .8465394, 1.672433), tol=1e-04)
+    expect_equal(as.numeric(spl$res[,"est"]), c(-3.360303, 1.379652, .8465394, 1.672433), tol=1e-02)
     
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2)
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -674.75128, tol=1e-04)

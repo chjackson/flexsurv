@@ -36,8 +36,6 @@ test_that("custom function in summary.flexsurvreg",{
 
 })
 
-data(lung)
-
 test_that("newdata in summary.flexsurvreg: dynamic cut, unknown factor level",{
     fl2a <- flexsurvspline(Surv(time, event = status) ~ factor(sex) + cut(age,c(0,56,69,100)), data = lung, k = 2)
     su <- summary(fl2a, newdata = lung, B = 0)
