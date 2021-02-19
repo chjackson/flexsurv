@@ -200,8 +200,8 @@ generics::glance
 #' @export
 #'
 #' @examples
-#' fit <- flexsurvreg(formula = Surv(time, status) ~ age, data = lung, dist = "exp")
-#' augment(fit, data = lung)
+#' fit <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "exp")
+#' augment(fit, data = ovarian)
 #'
 augment.flexsurvreg <- function(x, data = NULL, newdata = NULL,
                                 type.predict = "response",
