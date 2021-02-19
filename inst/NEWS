@@ -1,7 +1,7 @@
 -*- text -*-
 
-Version 2.0 (TODO)
--------------
+Version 2.0 (2021-02-19)
+--------------------
 
 * A new class of multi-state models based on mixtures (Larson and
   Dinse 1985).  A new vignette on multi-state modelling describes this
@@ -11,9 +11,9 @@ Version 2.0 (TODO)
 * Different parametric families are now supported for different
   transitions in multi-state models.
 
-* New multi-state model constructor "fmsm" which allows a list of
-  flexsurvreg objects to be associated with a particular transition
-  structure matrix.
+* New function "fmsm" allows a list of flexsurvreg objects to be
+  associated with a particular transition structure matrix, to create
+  a multi-state model. 
 
 * New functions simfinal_fmsm to summarise times and probabilities of
   final absorbing events in multi-state models, using simulation.
