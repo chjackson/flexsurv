@@ -140,4 +140,5 @@ totlos.fs(bexp, t=c(5,10), trans=tmat)
 \author{
 Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
 }
-\keyword{models,survival}
+\keyword{models}
+\keyword{survival}

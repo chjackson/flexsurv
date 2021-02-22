@@ -198,7 +198,7 @@ is passed as the \code{control} argument to \code{\link{survreg}}.}
 \item{hess.control}{List of options to control inversion of the Hessian to
   obtain a covariance matrix. Available options are \code{tol.solve}, the
   tolerance used for \code{\link{solve}} when inverting the Hessian (default
-  \code{1e-09}), and \code{tol.evalues}, the accepted tolerance for negative
+  \code{.Machine$double.eps}), and \code{tol.evalues}, the accepted tolerance for negative
   eigenvalues in the covariance matrix (default \code{1e-05}).
 
   The Hessian is positive definite, thus invertible, at the maximum
@@ -209,7 +209,8 @@ is passed as the \code{control} argument to \code{\link{survreg}}.}
   suspect that the Hessian was computed wrongly enough that it is not
   invertible, but not wrongly enough that the nearest valid inverse would be
   an inaccurate estimate of the covariance matrix, then these tolerance
-  values can be increased to allow the inverse to be computed.}
+  values can be modified (reducing \code{tol.solve} or increasing \code{tol.evalues})
+  to allow the inverse to be computed.}
 
 \item{...}{Optional arguments to the general-purpose optimisation routine
 \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the

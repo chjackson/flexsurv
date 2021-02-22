@@ -119,4 +119,5 @@ totlos.simfs(bexp, t=1000, trans=tmat)
 \author{
 Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
 }
-\keyword{models,survival}
+\keyword{models}
+\keyword{survival}

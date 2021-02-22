@@ -107,4 +107,5 @@ sim.fmsm(bexp, M=10, t=5, trans=tmat)
 \author{
 Christopher Jackson \email{chris.jackson@mrc-bsu.cam.ac.uk}.
 }
-\keyword{models,survival}
+\keyword{models}
+\keyword{survival}
