@@ -16,6 +16,8 @@ event <- ifelse(cens, NA, death+1) # 1 is cure, 2 is death
 dat <- data.frame(t, status, event, x)
 dat$evname <- c("cure", "death")[dat$event]
 
+fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=1:2)
+
 if (em_supported){
 
   test_that("EM basic",{

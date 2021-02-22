@@ -17,7 +17,7 @@ dat <- data.frame(t, status, event, x)
 dat$evname <- c("cure", "death")[dat$event]
 
 fs <- flexsurvmix(Surv(t, status) ~ x, data=dat, event=event, 
-                  dists=c("gamma","weibull"), fixedpars=FALSE, 
+                  dists=c("gamma","weibull"), fixedpars=FALSE,
                   optim.control=list(reltol=1e-4))
 
 test_that("summary functions, default newdata, one covariate",{

@@ -233,24 +233,21 @@ test_that("Covariates on ancillary parameters",{
     dead <- as.numeric(sim<=30)
     simt <- ifelse(sim<=30, sim, 30)
 
-    fit <- flexsurvreg(Surv(simt, dead) ~ sigma(x3), dist="gengamma", control=list(maxit=10000))
-    cl <- confint(fit)
-
     ## Cov on ancillary, not on location
-    flexsurvreg(Surv(simt, dead) ~ sigma(x3), dist="gengamma")
-    flexsurvreg(Surv(simt, dead) ~ 1, anc=list(sigma=~x3), dist="gengamma")
+    flexsurvreg(Surv(simt, dead) ~ sigma(x3), dist="gengamma", fixedpars=TRUE)
+    flexsurvreg(Surv(simt, dead) ~ 1, anc=list(sigma=~x3), dist="gengamma", fixedpars=TRUE)
 
     ## Cov on both location and ancillary
-    flexsurvreg(Surv(simt, dead) ~ x3 + sigma(x3), dist="gengamma")
-    flexsurvreg(Surv(simt, dead) ~ x3, anc=list(sigma=~x3), dist="gengamma")
+    flexsurvreg(Surv(simt, dead) ~ x3 + sigma(x3), dist="gengamma", fixedpars=TRUE)
+    flexsurvreg(Surv(simt, dead) ~ x3, anc=list(sigma=~x3), dist="gengamma", fixedpars=TRUE)
 
     ## More than one covariate on an ancillary parameter
-    flexsurvreg(Surv(simt, dead) ~ x3 + sigma(x3) + sigma(x4), dist="gengamma")
-    flexsurvreg(Surv(simt, dead) ~ x3, anc=list(sigma=~x3+x4), dist="gengamma")
+    flexsurvreg(Surv(simt, dead) ~ x3 + sigma(x3) + sigma(x4), dist="gengamma", fixedpars=TRUE)
+    flexsurvreg(Surv(simt, dead) ~ x3, anc=list(sigma=~x3+x4), dist="gengamma", fixedpars=TRUE)
 
     ## More than one ancillary parameter with covariates
-    flexsurvreg(Surv(simt, dead) ~ x3 + sigma(x3) + sigma(x4) + Q(x5), dist="gengamma")
-    x <- flexsurvreg(Surv(simt, dead) ~ x3, anc=list(sigma=~x3+x4, Q=~x5), dist="gengamma")
+    flexsurvreg(Surv(simt, dead) ~ x3 + sigma(x3) + sigma(x4) + Q(x5), dist="gengamma", fixedpars=TRUE)
+    x <- flexsurvreg(Surv(simt, dead) ~ x3, anc=list(sigma=~x3+x4, Q=~x5), dist="gengamma", fixedpars=TRUE)
   }, NA)
 })
 
@@ -441,62 +438,6 @@ test_that("Weibull hazards from summary are reliable",{
   fs1 = flexsurvreg(Surv(rectime, censrec)~group ,dist="weibull",data=bc)
   output = summary(fs1, t=seq(from=0,to=30000,length.out=100), ci=F, tidy=T)
   expect_true(all(is.finite(output$est)))
-})
-
-test_that("RMST/Mean/Median calculations are working",{
-  
-  fs1 = flexsurvreg(Surv(rectime, censrec)~group ,dist="weibull",data=bc)
-  fs2 = flexsurvreg(Surv(rectime, censrec)~group ,dist="exp",data=bc)
-  fs3 = flexsurvreg(Surv(rectime, censrec)~group ,dist="llogis",data=bc)
-  fs4 = flexsurvreg(Surv(rectime, censrec)~group ,dist="lnorm",data=bc)
-  suppressWarnings({  # warnings from temporary overflow during optimisation 
-    fs5 = flexsurvreg(Surv(rectime, censrec)~group ,dist="gamma",data=bc)
-  })
-  res1 = summary(fs1,t=c(Inf),start=0,type="rmst")
-  res2 = summary(fs1,type="mean")
-  
-  res1_len = length(res1)
-  for(i in seq_len(res1_len)){
-    expect_equal(
-      res1[[i]]$est,
-      res2[[i]]$est,
-      tolerance=1e-3
-    )
-  }
-  
-  # Exponential analytical RMST should be consistent w/ analytical
-  # mean.
-  expect_equal(summary(fs2,type="mean",tidy=T)$est,summary(fs2,t=Inf,type="rmst",tidy=T)$est, tolerance=1e-3)
-  
-  # Analytical mean should closely match result from integration
-  expect_equal(summary(fs1,type="mean",tidy=T)$est,summary(fs1,t=Inf,type="rmst",tidy=T)$est, tolerance=1e-3)
-  expect_equal(summary(fs3,type="mean",tidy=T)$est,summary(fs3,t=Inf,type="rmst",tidy=T)$est, tolerance=1e-3)
-  expect_equal(summary(fs4,type="mean",tidy=T)$est,summary(fs4,t=Inf,type="rmst",tidy=T)$est, tolerance=1e-3)
-  expect_equal(summary(fs5,type="mean",tidy=T)$est,summary(fs5,t=Inf,type="rmst",tidy=T)$est, tolerance=1e-3)
-  
-  
-  # RMST of exponential to 100 starting at 0 should be the same
-  # as RMST to 200 starting at 100.
-  res3 = summary(fs2,t=c(100,200),start=c(0,100),type="rmst")
-  res3_len = length(res3)
-  for(i in seq_len(res1_len)){
-    expect_equal(
-      res3[[i]]$est[1],
-      res3[[i]]$est[2],
-      tolerance=1e-3
-    )
-  }
-  
-  expect_warning(
-    summary(fs1,t=10,type="mean"),
-    "Mean selected, but time specified.  For restricted mean, set type to 'rmst'."
-  )
-  
-  expect_warning(
-    summary(fs1,t=10,type="median"),
-    "Median selected, but time specified."
-  )
-  
 })
 
 test_that("No events in the data",{

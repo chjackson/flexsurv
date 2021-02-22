@@ -15,12 +15,8 @@ dat$evname <- c("cure", "death")[dat$event]
 dat$evnamef <- factor(dat$evname)
 
 test_that("flexsurvmix basic",{
-  fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"))
-  expect_equivalent(fs$loglik, -1343.37172263181)
-  
   fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=TRUE)
   expect_equivalent(fs$loglik, -1550.65934372248)
-  fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=1:2)
   
   expect_silent({
     ## event as character
