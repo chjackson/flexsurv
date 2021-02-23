@@ -105,7 +105,7 @@ form.msm.newdata <- function(x, newdata=NULL, tvar="trans", trans){
 ##' @references Liesbeth C. de Wreede, Marta Fiocco, Hein Putter (2011).
 ##' \pkg{mstate}: An R Package for the Analysis of Competing Risks and
 ##' Multi-State Models. \emph{Journal of Statistical Software}, 38(7), 1-30.
-##' \url{http://www.jstatsoft.org/v38/i07}
+##' \url{https://www.jstatsoft.org/v38/i07}
 ##' 
 ##' Mandel, M. (2013). "Simulation based confidence intervals for functions
 ##' with complicated derivatives." The American Statistician 67(2):76-81
@@ -250,7 +250,7 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
 ##' 
 ##' @author Christopher Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}.
 ##' 
-##' @keywords models,survival
+##' @keywords models survival
 ##' 
 ##' @export
 pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
@@ -400,7 +400,7 @@ state_names <- function(state, object){
 ##' @author Christopher Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}.
 ##' @seealso \code{\link{pmatrix.simfs}}, \code{\link{totlos.fs}},
 ##' \code{\link{msfit.flexsurvreg}}.
-##' @keywords models,survival
+##' @keywords models survival
 ##' @examples
 ##' 
 ##' # BOS example in vignette, and in msfit.flexsurvreg
@@ -581,7 +581,7 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
 ##' @author Christopher Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}.
 ##' @seealso \code{\link{totlos.simfs}}, \code{\link{pmatrix.fs}},
 ##' \code{\link{msfit.flexsurvreg}}.
-##' @keywords models,survival
+##' @keywords models survival
 ##' @examples
 ##' 
 ##' # BOS example in vignette, and in msfit.flexsurvreg
@@ -817,7 +817,7 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
 ##' 
 ##' @seealso \code{\link{pmatrix.simfs}},\code{\link{totlos.simfs}}
 ##' 
-##' @keywords models,survival
+##' @keywords models survival
 ##' 
 ##' @examples
 ##' 
@@ -1110,7 +1110,7 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
 ##' @seealso
 ##' \code{\link{pmatrix.fs}},\code{\link{sim.fmsm}},\code{\link{totlos.simfs}},
 ##' \code{\link{msfit.flexsurvreg}}.
-##' @keywords models,survival
+##' @keywords models survival
 ##' @examples
 ##' 
 ##' # BOS example in vignette, and in msfit.flexsurvreg
@@ -1225,7 +1225,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
 ##' @author Christopher Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}.
 ##' @seealso
 ##' \code{\link{pmatrix.simfs}},\code{\link{sim.fmsm}},\code{\link{msfit.flexsurvreg}}.
-##' @keywords models,survival
+##' @keywords models survival
 ##' @examples
 ##' 
 ##' # BOS example in vignette, and in msfit.flexsurvreg

@@ -31,3 +31,5 @@ tests/test_extra.R
 ^doc$
 ^Meta$
 docs
+travis.md
+vignettes/_region_.tex

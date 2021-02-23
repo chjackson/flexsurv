@@ -1,6 +1,6 @@
 -*- text -*-
 
-Version 2.0 (2021-02-19)
+Version 2.0 (2021-02-22)
 --------------------
 
 * A new class of multi-state models based on mixtures (Larson and
@@ -25,6 +25,9 @@ Version 2.0 (2021-02-19)
   "survrtrunc".  Alternative parametric estimators, which make use
   of the time of an initiating event, are provided in a new function,
   "flexsurvrtrunc".
+
+* A new vignette describes properties of the different built-in
+   parametric distributions in more detail. 
 
 * qgeneric is now vectorised, thanks to the vuniroot function imported
   from the rstpm2 package by Mark Clements.  This massively boosts the
