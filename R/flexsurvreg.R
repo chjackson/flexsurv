@@ -29,6 +29,21 @@ buildAuxParms <- function(aux, dlist) {
     aux.transform
 }
 
+## Filter out warnings produced during fitting, when the optimiser visits
+## parameters are on the boundary of the parameter space, as the optimiser will
+## move on in these cases, and the message is unhelpful to users.
+
+call_distfn_quiet <- function(fn, args){
+    res <- withCallingHandlers(
+        do.call(fn, args),
+        warning=function(w) {
+            if (grepl(x = w$message, pattern = "NaNs produced"))
+                invokeRestart("muffleWarning")
+        }
+    )
+    res
+} 
+
 logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
                           inits, dfns, aux, mx, fixedpars=NULL) {
     pars   <- inits
@@ -84,29 +99,29 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         dargs <- fnargs.event
         dargs$x <- event.times
         dargs$log <- TRUE
-        logdens <- do.call(dfns$d, dargs)
+        logdens <- call_distfn_quiet(dfns$d, dargs)
         
         ## Left censoring times (upper bound for event time) 
         if (any(!event)){
             pmaxargs <- fnargs.nevent
             pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
-            pmax <- do.call(dfns$p, pmaxargs)
+            pmax <- call_distfn_quiet(dfns$p, pmaxargs)
             pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
 
         ## Right censoring times (lower bound for event time) 
             pargs <- fnargs.nevent
             pargs$q <- right.censor
-            pmin <- do.call(dfns$p, pargs)
+            pmin <- call_distfn_quiet(dfns$p, pargs)
         }
         
         targs   <- fnargs
         ## Left-truncation
         targs$q <- Y[,"start"]
-        plower <- do.call(dfns$p, targs)
+        plower <- call_distfn_quiet(dfns$p, targs)
 
         ## Right-truncation
         targs$q <- rtrunc
-        pupper <- do.call(dfns$p, targs)
+        pupper <- call_distfn_quiet(dfns$p, targs)
         pupper[rtrunc==Inf] <- 1 # in case the user's function doesn't already do this
         pobs <- pupper - plower # prob of being observed = 1 - 0 if no truncation 
 
@@ -114,7 +129,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         if (do.hazard){
             pargs   <- fnargs.event
             pargs$q <- event.times
-            pminb   <- do.call(dfns$p, pargs)
+            pminb   <- call_distfn_quiet(dfns$p, pargs)
             loghaz  <- logdens - log(1 - pminb)
             offseti <- log(1 + bhazard[event] / exp(loghaz)*weights[event])
         } else {
