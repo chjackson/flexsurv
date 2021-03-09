@@ -924,14 +924,18 @@ simfs_bytrans <- function(simfs){
         endi <- which(!is.na(trans[start[i],]))
         for (j in 1:(ncol(simfs$st)-1)){
             sub <- (simfs$st[,j] == start[i] & simfs$st[,j+1] %in% endi)
-            subj <- data.frame(end = simfs$st[sub,j+1],
-                               time = simfs$t[sub,j+1],
-                               delay = simfs$t[sub,j+1] - simfs$t[sub,j],
-                               id = which(sub))
-            subi <- rbind(subi, subj)
+            if (length(sub) > 0){
+                subj <- data.frame(end = simfs$st[sub,j+1],
+                                   time = simfs$t[sub,j+1],
+                                   delay = simfs$t[sub,j+1] - simfs$t[sub,j],
+                                   id = which(sub))
+                subi <- rbind(subi, subj)
+            }
         }
-        subi$start <- start[i]
-        suball <- rbind(suball, subi)
+        if (nrow(subi) > 0){
+            subi$start <- start[i]
+            suball <- rbind(suball, subi)
+        }
     }
     suball$start <- state_names(suball$start, simfs)
     suball$end <- state_names(suball$end, simfs)
