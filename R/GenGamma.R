@@ -195,8 +195,10 @@ Hgengamma <- function(x, mu=0, sigma=1, Q)
 ##' @rdname GenGamma
 hgengamma <- function(x, mu=0, sigma=1, Q)
 {
-    dgengamma(x=x, mu=mu, sigma=sigma, Q=Q) /
-        pgengamma(q=x, mu=mu, sigma=sigma, Q=Q, lower.tail=FALSE)
+  logdens <- dgengamma(x = x, mu = mu, sigma = sigma, Q = Q, log=TRUE)
+  logsurv <- pgengamma(q = x, mu = mu, sigma = sigma, Q = Q, lower.tail = FALSE, log.p=TRUE)
+  loghaz <- logdens - logsurv
+  exp(loghaz)
 }
 
 ##' @export
@@ -278,8 +280,10 @@ Hgengamma.orig <- function(x, shape, scale=1, k)
 ##' @rdname GenGamma.orig
 hgengamma.orig <- function(x, shape, scale=1, k)
 {
-    dgengamma.orig(x=x, shape=shape, scale=scale, k=k) /
-        pgengamma.orig(q=x, shape=shape, scale=scale, k=k, lower.tail=FALSE)
+  logdens <- dgengamma.orig(x = x, shape = shape, scale = scale, k = k, log=TRUE)
+  logsurv <- pgengamma.orig(q = x, shape = shape, scale = scale, k = k, lower.tail = FALSE, log.p=TRUE)
+  loghaz <- logdens - logsurv
+  exp(loghaz)
 }
 
 ##' @export
