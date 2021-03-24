@@ -61,7 +61,7 @@ tidy.flexsurvreg <- function(x, conf.int = FALSE, conf.level = 0.95,
   if ("baseline.real" %in% transform) vals <- x$res.t else vals <- x$res
 
   coefs <- vals[, "est"]
-  terms <- names(coefs)
+  terms <- rownames(vals)
   ses <- vals[, "se"]
   stats <- coefs / ses; stats[names(stats) %in% dist_pars] <- NA
   pvals <- pnorm(abs(stats), lower.tail = FALSE)
