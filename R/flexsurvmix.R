@@ -284,7 +284,7 @@ flexsurvmix <- function(formula, data, event, dists,
     names(forms[[k]])[[1]] <- loc
   }
 
-  ## Build model frame given formulaec
+  ## Build model frame given formulae
   indx <- match(c("formula", "data", "event"), names(call), nomatch = 0)
   if (indx[1] == 0)
     stop("A \"formula\" argument is required")

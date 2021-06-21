@@ -87,6 +87,51 @@ quantile_flexsurvmix <- function(x, newdata=NULL, B=NULL, probs=c(0.025, 0.5, 0.
   
 }
 
+##' Fitted densities for times to events in a flexsurvmix model
+##'
+##' This returns an estimate of the probability density for the time to each
+##' competing event, at a vector of times supplied by the user.
+##'
+##' @inheritParams mean_flexsurvmix
+##'
+##' @param t Vector of times at which to evaluate the probability density
+##'
+##' @return A data frame with each row giving the fitted density \code{dens} for
+##'   a combination of covariate values, time and competing event.
+##'
+##' @export
+pdf_flexsurvmix <- function(x, newdata=NULL, t=NULL){
+  if (is.null(t)) {
+    stop("Times `t` to evaluate the density at not supplied")
+  } else {
+    if (!is.numeric(t)) stop("`t` must be numeric")
+  }
+  nt <- length(t)
+  if (!is.null(newdata)) {
+    newdata <- as.data.frame(newdata)
+    ncovs <- nrow(newdata)
+    newdatarep <- newdata[rep(1:ncovs, nt),,drop=FALSE]
+  } else {
+    ncovs <- 1 
+    newdatarep <- NULL
+  }
+  K <- x$K
+  res <- vector(K, mode="list")
+  for (k in 1:K){ 
+    pars <- get_basepars(x, newdata=newdatarep, event=k)
+    pars$x <- rep(t, each=ncovs)
+    res[[k]] <- do.call(x$dfns[[k]]$d, pars)
+  } 
+  tdf <- data.frame(event = rep(x$evnames, each=length(res[[1]])))
+  if (!is.null(newdata))
+    tdf <- cbind(tdf, newdatarep[rep(1:nrow(newdatarep), K),,drop=FALSE])
+  tdf$t <- rep(rep(t,each=ncovs), K)
+  tdf$dens <- unlist(res)
+  rownames(tdf) <- NULL
+  tdf
+}
+
+
 ##' Transition probabilities from a flexsurvmix model
 ##'
 ##' These quantities are variously known as transition probabilities, or state
@@ -145,6 +190,7 @@ p_flexsurvmix <- function(x, newdata=NULL,startname="start", t=1, B=NULL){
 ##'
 ##' @export
 probs_flexsurvmix <- function(x, newdata=NULL, B=NULL){
+    if (!inherits(x, "flexsurvmix")) stop("`x` is not a flexsurvmix object")
   if (is.null(newdata)) newdata <- default_newdata(x)
   if (x$K==1) { 
     res <- newdata
@@ -213,6 +259,7 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
     if (!is.null(newdata)) newdata <- as.data.frame(newdata)
     pdf <- get_probpars(x, newdata=newdata)
     if (!is.null(newdata)){
+      # in case there are covariates on times but not probs
       if (length(intersect(names(pdf), names(newdata)) > 0))
         pdf <- dplyr::left_join(pdf, newdata, by=intersect(names(pdf), names(newdata)))
       else pdf <- tidyr::crossing(pdf, newdata)
@@ -243,8 +290,8 @@ cisumm_flexsurvmix <- function(x, newdata=NULL,
     }
     qp <- c(0.025, 0.975)
     ci <- apply(resm, 2, quantile, qp)
-    resdf$lower <- ci["2.5%",]
-    resdf$upper <- ci["97.5%",]
+    resdf$lower <- ci[1,]
+    resdf$upper <- ci[2,]
   }
   resdf
 }
@@ -337,8 +384,8 @@ get_probpars <- function(x, newdata=NULL, na.action){
   }
   probpars <- as.data.frame(probpars)
   names(probpars) <- x$evnames
-  if (!is.null(newdata))
-    probpars <- cbind(probpars, newdata)
+  if (!is.null(newdata) && (x$ncoveffsp > 0))
+    probpars <- cbind(probpars, mf)
   probpars <- tidyr::pivot_longer(probpars, tidyselect::all_of(x$evnames), names_to="event", values_to="val")
   probpars 
 }

@@ -39,7 +39,7 @@ for.}
 fitted model, other than the transition number.  See
 \code{\link{msfit.flexsurvreg}}.}
 
-\item{condstates}{Instead of the unconditional probability of being in state \eqn{s} at time \eqn{t} given state \eqn{r} at time 0, return the probability conditional on being in a particular subset of states at time \eqn{t}.  This subset is specified in the \code{condstates} argument.
+\item{condstates}{xInstead of the unconditional probability of being in state \eqn{s} at time \eqn{t} given state \eqn{r} at time 0, return the probability conditional on being in a particular subset of states at time \eqn{t}.  This subset is specified in the \code{condstates} argument, as a vector of character labels or integers. 
 
 This is used, for example, in competing risks situations, e.g. if the competing states are death or recovery from a disease, and we want to compute the probability a patient has died, given they have died or recovered.   If these are absorbing states, then as \eqn{t} increases, this converges to the case fatality ratio.  To compute this, set \eqn{t} to a very large number, \code{Inf} will not work.}
 

@@ -83,7 +83,7 @@ environment.}
 \item{weights}{Optional variable giving case weights.}
 
 \item{bhazard}{Optional variable giving expected hazards for relative
-survival models.}
+survival models (see Nelson et al.).}
 
 \item{rtrunc}{Optional variable giving individual-specific right-truncation
   times.  Used for analysing data with "retrospective ascertainment".  For
@@ -497,6 +497,10 @@ distribution.  Statistics in Medicine 26:4252-4374
 Jackson, C. H. and Sharples, L. D. and Thompson, S. G. (2010) Survival
 models in health economic evaluations: balancing fit and parsimony to
 improve prediction. International Journal of Biostatistics 6(1):Article 34.
+
+Nelson, C. P., Lambert, P. C., Squire, I. B., & Jones, D. R. (2007).
+Flexible parametric models for relative survival, with application in
+coronary heart disease. Statistics in medicine, 26(30), 5486-5498.
 }
 \seealso{
 \code{\link{flexsurvspline}} for flexible survival modelling using

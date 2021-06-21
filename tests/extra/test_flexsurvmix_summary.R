@@ -28,6 +28,9 @@ test_that("summary functions, default newdata, one covariate",{
   expect_equal(pr$val[1], 0.522480219512026)
   pr <- p_flexsurvmix(fs)
   expect_equal(pr$val[pr$state=="1"], 0.494566645108882)
+  pdf_flexsurvmix(fs, t=1:4)
+  
+  
 })
 
 
@@ -38,9 +41,25 @@ test_that("summary functions, newdata, one covariate",{
   expect_equal(qu$val[qu$event==1 & qu$p==0.975], 1.04738692622352, tol=1e-06)
   pr <- probs_flexsurvmix(fs, newdata=nd)
   expect_equal(pr$val[1], 0.522480219512026)
+  pdf_flexsurvmix(fs, newdata=list(x=1), t=1:4)
+  
   nd <- list(x=c(1,2))
   pr <- p_flexsurvmix(fs,newdata=nd)
   expect_equal(pr$val[pr$state=="2" & pr$x==2], 0.1125475218393)
+
+  shape <- fs$res$est[fs$res$component==1 & fs$res$terms=="shape"]
+  rate <- fs$res$est[fs$res$component==1 & fs$res$terms=="rate"]
+  beta <- fs$res$est[fs$res$component==1 & fs$res$terms=="x"]
+  rate1 <- exp(log(rate) + beta*1)
+  rate2 <- exp(log(rate) + beta*2)
+  dens <- pdf_flexsurvmix(fs, newdata=nd, t=1:4)
+
+  expect_equal(dens$dens[dens$event==1 & dens$x==1 & dens$t==1],
+               dgamma(1, shape, rate1))
+  expect_equal(dens$dens[dens$event==1 & dens$x==2 & dens$t==1],
+               dgamma(1, shape, rate2))
+  expect_equal(dens$dens[dens$event==1 & dens$x==2 & dens$t==4],
+               dgamma(4, shape, rate2))
 })
 
 test_that("Aalen Johansen estimates",{
