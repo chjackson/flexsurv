@@ -9,6 +9,7 @@
   newdata,
   type = "response",
   times,
+  start = 0,
   conf.int = FALSE,
   conf.level = 0.95,
   se.fit = FALSE,
@@ -17,46 +18,74 @@
 )
 }
 \arguments{
-\item{object}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.}
+\item{object}{Output from \code{\link{flexsurvreg}} or
+\code{\link{flexsurvspline}}, representing a fitted survival model object.}
 
-\item{newdata}{Data frame containing covariate values at which to produce fitted values. There must be a column for every covariate in the model formula used to fit \code{object}, and one row for every combination of covariate values at which to obtain the fitted predictions.
+\item{newdata}{Data frame containing covariate values at which to produce
+fitted values. There must be a column for every covariate in the model
+formula used to fit \code{object}, and one row for every combination of
+covariate values at which to obtain the fitted predictions.
 
-If \code{newdata} is omitted, then the original data used to fit the model are used, as extracted by \code{model.frame(object)}.}
+If \code{newdata} is omitted, then the original data used to fit the model
+are used, as extracted by \code{model.frame(object)}.}
 
 \item{type}{Character vector for the type of predictions desired.
 \itemize{
 \item \code{"response"} for mean survival (the default)
-\item \code{"quantile"} for quantiles of the survival distribution specified by \code{p}
+\item \code{"quantile"} for quantiles of the survival distribution specified by
+\code{p}
 \item \code{"rmst"} for restricted mean survival time
 \item \code{"survival"} for survival probabilities
 \item \code{"cumhaz"} for cumulative hazards
 \item \code{"hazard"} for hazards
-\item \code{"link"} for fitted values of the location parameter, analogous to the linear predictor in generalized linear models (\code{type = "lp"} and \code{type = "linear"} are acceptable synonyms)
+\item \code{"link"} for fitted values of the location parameter, analogous to
+the linear predictor in generalized linear models (\code{type = "lp"} and
+\code{type = "linear"} are acceptable synonyms)
 }}
 
-\item{times}{Vector of time horizons at which to compute fitted values. Only applies when \code{type} is \code{"survival"}, \code{"cumhaz"}, \code{"hazard"}, or \code{"rmst"}. Will be silently ignored for all other types.
+\item{times}{Vector of time horizons at which to compute fitted values.
+Only applies when \code{type} is \code{"survival"}, \code{"cumhaz"},
+\code{"hazard"}, or \code{"rmst"}. Will be silently ignored for all other
+types.
 
-If not specified, predictions for \code{"survival"}, \code{"cumhaz"}, and \code{"hazard"} will be made at each observed event time in \code{model.frame(object)}.
+If not specified, predictions for \code{"survival"}, \code{"cumhaz"}, and
+\code{"hazard"} will be made at each observed event time in
+\code{model.frame(object)}.
 
-For \code{"rmst"}, when \code{times} is not specified predictions will be made at the maximum observed event time from the data used to fit \code{object}. Specifying \code{times = Inf} is valid, and will return mean survival (equal to \code{type = "response"}).}
+For \code{"rmst"}, when \code{times} is not specified predictions will be
+made at the maximum observed event time from the data used to fit
+\code{object}. Specifying \code{times = Inf} is valid, and will return
+mean survival (equal to \code{type = "response"}).}
 
-\item{conf.int}{Logical. Should confidence intervals be returned? Default is \code{FALSE}.}
+\item{start}{Optional left-truncation time or times. The returned
+survival, hazard, or cumulative hazard will be conditioned on survival up
+to this time. \code{start} must be length 1 or the same length as \code{times}.}
+
+\item{conf.int}{Logical. Should confidence intervals be returned?
+Default is \code{FALSE}.}
 
 \item{conf.level}{Width of symmetric confidence intervals, relative to 1.}
 
-\item{se.fit}{Logical. Should standard errors of fitted values be returned? Default is \code{FALSE}.}
+\item{se.fit}{Logical. Should standard errors of fitted values be returned?
+Default is \code{FALSE}.}
 
-\item{p}{Vector of quantiles at which to return fitted values when \code{type = "quantile"}. Default is \code{c(0.1, 0.9)}.}
+\item{p}{Vector of quantiles at which to return fitted values when
+\code{type = "quantile"}. Default is \code{c(0.1, 0.9)}.}
 
 \item{...}{Not currently used.}
 }
 \value{
-A \code{\link{tibble}} with same number of rows as \code{newdata} and in the same order. If multiple predictions are requested, a \code{\link{tibble}} containing a single list-column of data frames.
+A \code{\link{tibble}} with same number of rows as \code{newdata}
+and in the same order. If multiple predictions are requested, a
+\code{\link{tibble}} containing a single list-column of data frames.
 
-For the list-column of data frames - the dimensions of each data frame will be identical. Rows are added for each value of \code{times} or \code{p} requested.
+For the list-column of data frames - the dimensions of each data frame
+will be identical. Rows are added for each value of \code{times} or
+\code{p} requested.
 }
 \description{
-Predict outcomes from flexible survival models at the covariate values specified in \code{newdata}.
+Predict outcomes from flexible survival models at the covariate values
+specified in \code{newdata}.
 }
 \examples{
 
@@ -77,5 +106,6 @@ tidyr::unnest(pr, .pred)
 
 }
 \seealso{
-\code{\link{summary.flexsurvreg}}, \code{\link{residuals.flexsurvreg}}
+\code{\link{summary.flexsurvreg}},
+\code{\link{residuals.flexsurvreg}}
 }

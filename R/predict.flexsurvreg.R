@@ -1,18 +1,25 @@
 #' Predictions from flexible survival models
 #'
-#' Predict outcomes from flexible survival models at the covariate values specified in \code{newdata}.
+#' Predict outcomes from flexible survival models at the covariate values
+#'   specified in \code{newdata}.
 #'
-#' @param object Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.
+#' @param object Output from \code{\link{flexsurvreg}} or
+#'   \code{\link{flexsurvspline}}, representing a fitted survival model object.
 #'
-#' @param newdata Data frame containing covariate values at which to produce fitted values. There must be a column for every covariate in the model formula used to fit \code{object}, and one row for every combination of covariate values at which to obtain the fitted predictions.
+#' @param newdata Data frame containing covariate values at which to produce
+#'   fitted values. There must be a column for every covariate in the model
+#'   formula used to fit \code{object}, and one row for every combination of
+#'   covariate values at which to obtain the fitted predictions.
 #'
-#' If \code{newdata} is omitted, then the original data used to fit the model are used, as extracted by \code{model.frame(object)}.
+#'   If \code{newdata} is omitted, then the original data used to fit the model
+#'   are used, as extracted by \code{model.frame(object)}.
 #'
 #' @param type Character vector for the type of predictions desired.
 #'
 #' * \code{"response"} for mean survival (the default)
 #'
-#' * \code{"quantile"} for quantiles of the survival distribution specified by \code{p}
+#' * \code{"quantile"} for quantiles of the survival distribution specified by
+#'   \code{p}
 #'
 #' * \code{"rmst"} for restricted mean survival time
 #'
@@ -22,29 +29,51 @@
 #'
 #' * \code{"hazard"} for hazards
 #'
-#' * \code{"link"} for fitted values of the location parameter, analogous to the linear predictor in generalized linear models (\code{type = "lp"} and \code{type = "linear"} are acceptable synonyms)
+#' * \code{"link"} for fitted values of the location parameter, analogous to
+#'   the linear predictor in generalized linear models (\code{type = "lp"} and
+#'   \code{type = "linear"} are acceptable synonyms)
 #'
-#' @param times Vector of time horizons at which to compute fitted values. Only applies when \code{type} is \code{"survival"}, \code{"cumhaz"}, \code{"hazard"}, or \code{"rmst"}. Will be silently ignored for all other types.
+#' @param times Vector of time horizons at which to compute fitted values.
+#'   Only applies when \code{type} is \code{"survival"}, \code{"cumhaz"},
+#'   \code{"hazard"}, or \code{"rmst"}. Will be silently ignored for all other
+#'   types.
 #'
-#' If not specified, predictions for \code{"survival"}, \code{"cumhaz"}, and \code{"hazard"} will be made at each observed event time in \code{model.frame(object)}.
+#'   If not specified, predictions for \code{"survival"}, \code{"cumhaz"}, and
+#'   \code{"hazard"} will be made at each observed event time in
+#'   \code{model.frame(object)}.
 #'
-#' For \code{"rmst"}, when \code{times} is not specified predictions will be made at the maximum observed event time from the data used to fit \code{object}. Specifying \code{times = Inf} is valid, and will return mean survival (equal to \code{type = "response"}).
+#'   For \code{"rmst"}, when \code{times} is not specified predictions will be
+#'   made at the maximum observed event time from the data used to fit
+#'   \code{object}. Specifying \code{times = Inf} is valid, and will return
+#'   mean survival (equal to \code{type = "response"}).
 #'
-#' @param conf.int Logical. Should confidence intervals be returned? Default is \code{FALSE}.
+#' @param start Optional left-truncation time or times. The returned
+#'   survival, hazard, or cumulative hazard will be conditioned on survival up
+#'   to this time. `start` must be length 1 or the same length as `times`.
+#'
+#' @param conf.int Logical. Should confidence intervals be returned?
+#'   Default is \code{FALSE}.
 #'
 #' @param conf.level Width of symmetric confidence intervals, relative to 1.
 #'
-#' @param se.fit Logical. Should standard errors of fitted values be returned? Default is \code{FALSE}.
+#' @param se.fit Logical. Should standard errors of fitted values be returned?
+#'   Default is \code{FALSE}.
 #'
-#' @param p Vector of quantiles at which to return fitted values when \code{type = "quantile"}. Default is \code{c(0.1, 0.9)}.
+#' @param p Vector of quantiles at which to return fitted values when
+#'   \code{type = "quantile"}. Default is \code{c(0.1, 0.9)}.
 #'
 #' @param ... Not currently used.
 #'
-#' @return A \code{\link{tibble}} with same number of rows as \code{newdata} and in the same order. If multiple predictions are requested, a \code{\link{tibble}} containing a single list-column of data frames.
+#' @return A \code{\link{tibble}} with same number of rows as \code{newdata}
+#'   and in the same order. If multiple predictions are requested, a
+#'   \code{\link{tibble}} containing a single list-column of data frames.
 #'
-#' For the list-column of data frames - the dimensions of each data frame will be identical. Rows are added for each value of \code{times} or \code{p} requested.
+#'   For the list-column of data frames - the dimensions of each data frame
+#'   will be identical. Rows are added for each value of \code{times} or
+#'   \code{p} requested.
 #'
-#' @seealso \code{\link{summary.flexsurvreg}}, \code{\link{residuals.flexsurvreg}}
+#' @seealso \code{\link{summary.flexsurvreg}},
+#'   \code{\link{residuals.flexsurvreg}}
 #'
 #' @importFrom tibble tibble
 #' @importFrom stats predict
@@ -74,6 +103,7 @@ predict.flexsurvreg <- function(object,
                                 newdata,
                                 type = "response",
                                 times,
+                                start = 0,
                                 conf.int = FALSE,
                                 conf.level = 0.95,
                                 se.fit = FALSE,
@@ -88,6 +118,11 @@ predict.flexsurvreg <- function(object,
     assertthat::assert_that(is.logical(conf.int), is.logical(se.fit))
     assertthat::assert_that(all(is.numeric(p), p <= 1, p >=0),
                             msg = "`p` should be a vector of quantiles between 0 and 1")
+
+    assertthat::assert_that(
+        is.numeric(start),
+        msg = "`start` must be a numeric vector of left-truncation times"
+    )
 
     if (conf.int) assertthat::assert_that(is.numeric(conf.level),
                                           conf.level > 0, conf.level < 1,
@@ -116,12 +151,20 @@ predict.flexsurvreg <- function(object,
         times <- NULL
     }
 
+    assertthat::assert_that(
+        length(start) == 1 | length(start) == length(times),
+        msg =
+            paste0(
+                "Length of `start` is ", length(start), ". Length should be 1, or the same length as `times`, which is ", length(times)
+            )
+    )
+
     nest_output <- ((stype == "quantile" && length(p) > 1) |
                         (stype %in% c("survival", "cumhaz", "hazard", "rmst") &&
                         length(times) > 1))
 
     res <- summary(object = object, newdata = newdata, type = stype,
-                   quantiles = p, t = times,
+                   quantiles = p, t = times, start = start,
                    ci = conf.int, cl = conf.level, se = se.fit,
                    tidy = FALSE)
 
@@ -135,18 +178,19 @@ predict.flexsurvreg <- function(object,
     res
 }
 
-rename_tidy <- function(x){
-    names_map <- tibble::tibble(
-        old_names = c("time", "quantile", "est", "se", "lcl", "ucl"),
-        new_names  = c(".time", ".quantile", ".pred",
-                        ".std_error", ".pred_lower", ".pred_upper")
+tidy_names <- function() {
+    tibble::tibble(
+        old = c("time", "quantile", "est", "se", "lcl", "ucl"),
+        new = c(".time", ".quantile", ".pred", ".std_error",
+                ".pred_lower", ".pred_upper")
     )
+}
 
-    x <- lapply(x, function (x) {
-        for (i in seq_along(names_map$old_names)) {
-            colnames(x)[colnames(x)==names_map$old_names[i]] <- names_map$new_names[i]
+rename_tidy <- function(x) {
+    lapply(x, function(x) {
+        for (i in seq_along(tidy_names()$old)) {
+            colnames(x)[colnames(x) == tidy_names()$old[i]] <- tidy_names()$new[i]
         }
         x
     })
-    x
 }
