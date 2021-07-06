@@ -69,6 +69,11 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
+        shell: Rscript {0}
+
+      - name: Install TeX dependencies
+        run: |
+          install.packages("tinytex")
           tinytex::install_yihui_pkgs()
         shell: Rscript {0}
 
