@@ -69,6 +69,7 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
+          tinytex::install_yihui_pkgs()
         shell: Rscript {0}
 
       - name: Check
