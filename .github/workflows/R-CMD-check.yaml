@@ -74,7 +74,7 @@ jobs:
       - name: Install TeX dependencies
         run: |
           install.packages("tinytex")
-          tinytex::install_yihui_pkgs()
+          tinytex:::install_yihui_pkgs()
         shell: Rscript {0}
 
       - name: Check
