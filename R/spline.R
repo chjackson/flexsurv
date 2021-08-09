@@ -623,7 +623,7 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' \code{1/scale}) in \code{\link[survival]{survreg}} notation.
 ##' 
 ##' In the log-logistic model with shape \code{a} and scale \code{b} (as in
-##' \code{\link[eha]{dllogis}} from the \pkg{eha} package), \code{1/b^a} is
+##' \code{\link[eha:Loglogistic]{eha::dllogis}} from the \pkg{eha} package), \code{1/b^a} is
 ##' equivalent to \code{exp(gamma0)}, and \code{a} is equivalent to
 ##' \code{gamma1}.
 ##' 

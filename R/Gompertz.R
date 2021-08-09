@@ -44,7 +44,7 @@
 ##' as \eqn{x} increases to infinity.  The more flexible implementation given
 ##' here is consistent with \code{streg} in Stata.
 ##' 
-##' The functions \code{\link[eha]{dgompertz}} and similar available in the
+##' The functions \code{\link[eha:Gompertz]{eha::dgompertz}} and similar available in the
 ##' package \pkg{eha} label the parameters the other way round, so that what is
 ##' called the \code{shape} there is called the \code{rate} here, and what is
 ##' called \code{1 / scale} there is called the \code{shape} here. The

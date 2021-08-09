@@ -47,8 +47,8 @@
 ##' represent time acceleration factors, or ratios of expected
 ##' survival.
 ##' 
-##' The same parameterisation is also uqsed in
-##' \code{\link[eha]{dllogis}} in the \pkg{eha} package.
+##' The same parameterisation is also used in
+##' \code{\link[eha:Loglogistic]{eha::dllogis}} in the \pkg{eha} package.
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
 ##' @seealso \code{\link{dweibull}}
 ##' @references Stata Press (2007) Stata release 10 manual: Survival analysis

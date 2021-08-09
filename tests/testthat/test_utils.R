@@ -31,7 +31,15 @@ test_that("Weibull hazards",{
     expect_equal(Hexp(c(-Inf, NaN, Inf,  NA, -1, 0,  1, 2, 4), c(1,2,3)), c(0,NaN,Inf, NA,0,0, 1, 4, 12))
 })
 
+test_that("Log-normal hazards",{
+    expect_equal(hlnorm(1, 2, 3, log=TRUE), log(hlnorm(1,2,3,log=FALSE)))
+    expect_equal(Hlnorm(1, 2, 3, log=TRUE), log(-log(1 - plnorm(1,2,3,log=FALSE))))
+})
 
+test_that("Gamma hazards",{
+    expect_equal(hgamma(1, 2, 3, log=TRUE), log(hgamma(1,2,3,log=FALSE)))
+    expect_equal(Hgamma(1, 2, 3, log=TRUE), log(-log(1 - pgamma(1,2,3,log=FALSE))))
+})
 
 test_that("WeibullPH",{
     a <- 0.1; m <- 2

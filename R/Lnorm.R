@@ -10,7 +10,7 @@ hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
     logdens <- dlnorm(x = x, meanlog = meanlog, sdlog = sdlog, log=TRUE)
     logsurv <- plnorm(q = x, meanlog = meanlog, sdlog = sdlog, lower.tail = FALSE, log.p=TRUE)
     loghaz <- logdens - logsurv
-    ret[ind] <- exp(loghaz)
+    ret[ind] <- if (log) loghaz else exp(loghaz)
     ret
 }
 
@@ -20,6 +20,7 @@ Hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
     h <- dbase("lnorm", log=log, x=x, meanlog=meanlog, sdlog=sdlog)
     for (i in seq_along(h)) assign(names(h)[i], h[[i]])
     ret[ind] <- - plnorm(x, meanlog, sdlog, lower.tail=FALSE, log.p=TRUE)
+    if (log) ret[ind] <- log(ret[ind])
     ret
 }
 

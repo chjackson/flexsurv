@@ -106,9 +106,9 @@ NULL
 ##' distributions, as described in the \code{\link{GenGamma}} help page.
 ##' 
 ##' The generalized F distribution includes the log-logistic distribution (see
-##' \code{\link[eha]{Llogis}}) as a further special case:
+##' \code{\link[eha:Loglogistic]{eha::dllogis}}) as a further special case:
 ##' 
-##' \code{dgenf(x, mu=mu, sigma=sigma, Q=0, P=1) = \link[eha]{dllogis}(x,
+##' \code{dgenf(x, mu=mu, sigma=sigma, Q=0, P=1) = \link[eha:Loglogistic]{eha::dllogis}(x,
 ##' shape=sqrt(2)/sigma, scale=exp(mu))}
 ##' 
 ##' The range of hazard trajectories available under this distribution are

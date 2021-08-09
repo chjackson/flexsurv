@@ -765,7 +765,7 @@ compress.model.matrices <- function(mml){
 ##' For example, suppose we want to use an extreme value survival distribution.
 ##' This is available in the CRAN package \pkg{eha}, which provides
 ##' conventionally-defined density and probability functions called
-##' \code{\link[eha]{dEV}} and \code{\link[eha]{pEV}}.  See the Examples below
+##' \code{\link[eha:EV]{eha::dEV}} and \code{\link[eha:EV]{eha::pEV}}.  See the Examples below
 ##' for the custom list in this case, and the subsequent command to fit the
 ##' model.
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>

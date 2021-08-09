@@ -8,6 +8,7 @@ hgamma <- function(x, shape, rate=1, log=FALSE){
     h <- dbase("gamma", log=log, x=x, shape=shape, rate=rate)
     for (i in seq_along(h)) assign(names(h)[i], h[[i]])
     ret[ind] <- dgamma(x, shape, rate) / pgamma(x, shape, rate, lower.tail=FALSE)
+    if (log) ret[ind] <- log(ret[ind])
     ret
 }
 
@@ -17,6 +18,7 @@ Hgamma <- function(x, shape, rate=1, log=FALSE){
     h <- dbase("gamma", log=log, x=x, shape=shape, rate=rate)
     for (i in seq_along(h)) assign(names(h)[i], h[[i]])
     ret[ind] <- - pgamma(x, shape, rate, lower.tail=FALSE, log.p=TRUE)
+    if (log) ret[ind] <- log(ret[ind])
     ret
 }
 
