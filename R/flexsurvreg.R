@@ -956,7 +956,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         if (is.null(optim.args$method)){
             optim.args$method <- "BFGS"
         }
-        gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
+        gr <- if (dfns$deriv & all(bhazard==0)) Dminusloglik.flexsurv else NULL
         optim.args <- c(optim.args,
                         list(par=optpars,
                              fn=logLikFactory(Y=Y, X=X,
