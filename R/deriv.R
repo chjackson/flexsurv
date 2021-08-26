@@ -41,6 +41,28 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dli
     if (sum(!dead) > 0) dscens <- dscens * weights[!dead]
     dstrunc <- dderiv(dfns$DLS, dstcall, X, mx, dlist) * weights
     res <- - ( colSums(dd) + colSums(dscens) - colSums(dstrunc) )
+
+    ## Derivatives with baseline hazard.
+    ## adjust dd, dscens and dstrunc.  cens and trunc terms don't depend on pars 
+    ## Add deriv of log(1 + (1/h) * bh/w)  just for uncensored event 
+    ## 1 / (1 + (1/h)*bh/w) * -h^{-2}bh/w * dh 
+    ## and h = f * S^-1, so dh = df*s^-1   +   f * -s^-2 * ds)
+    if (any(bhazard > 0)) { 
+        dcall <- ddcall
+        dcall$x <- ddcall$t; dcall$t <- NULL
+        dens <- do.call(dfns$d, dcall)
+        pcall <- dcall
+        pcall$q <- pcall$x; pcall$x <- NULL
+        surv <- 1 - do.call(dfns$p, pcall)
+        loghaz  <- log(dens) - log(surv)
+        haz <- dens / surv
+        offseti <- 1 / (1 + bhazard[dead] / (haz*weights[dead]))
+        ## Note d/dx log(x) = 1/x ddx
+        dscense <- dderiv(dfns$DLS, ddcall, X[dead,,drop=FALSE], mx, dlist)
+        doff <- offseti * -haz^{-2}*bhazard[dead]/weights[dead] * (dd*dens/surv  -  dens/surv^2 * dscense*surv)
+        res <- res - colSums(doff)
+    }
+
     ## currently wastefully calculates derivs for fixed pars then discards them
     res[setdiff(1:npars, fixedpars)]
 }

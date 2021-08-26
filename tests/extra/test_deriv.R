@@ -84,6 +84,18 @@ test_that("Analytic derivatives match numeric",{
     time.deriv <- system.time(spl <- flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1, scale="odds"))["elapsed"]
     time.noderiv <- system.time(spl <- flexsurvspline(Surv(recyrs, censrec) ~ group + foo, data=bc, k=1, scale="odds", method="Nelder-Mead"))["elapsed"]
     expect_true(time.deriv < time.noderiv)
+    
+    ## relative survival models
+    fseb <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="exponential", bhazard=bh)
+    expect_lt(deriv_error(fseb), err)
+    fswb <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull", bhazard=bh)
+    expect_lt(deriv_error(fswb), err)
+    fsgb <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="gompertz", bhazard=bh)
+    expect_lt(deriv_error(fsgb), err)
+    fssb <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=2, bhazard=bh)
+    expect_lt(deriv_error(fssb), err)
+    fssb <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=2, scale="odds", bhazard=bh)
+    expect_lt(deriv_error(fssb), err)
 })
 
 options(flexsurv.test.analytic.derivatives=FALSE)

@@ -390,8 +390,8 @@ test_that("Relative survival", {
     
     expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tol=1e-05)
     expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tol=1e-05)
-    expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tol=1e-05)
-    expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765, tol=1e-05)
+    expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tol=1e-04)
+    expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765, tol=1e-04)
     
     ## same results as 
     ## cd /home/chris/flexsurv/stata
