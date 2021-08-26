@@ -1,5 +1,32 @@
 -*- text -*-
 
+Version 2.0.1 (2021-08-??)
+-------------------------
+
+* Fix of a bug that affected models with baseline hazard offsets and
+  exponential, Weibull, Gompertz and hazard/odds-based spline models,
+  where convergence may have been falsely reported due to incorrect
+  likelihood derivatives. 
+  
+* Likelihood for relative survival models now includes the appropriate
+  constant term to allow comparison with standard models.
+
+* `start` parameter added to predict.flexsurvreg.
+
+* New function `pdf_flexsurmix` for the fitted density function in a
+  `flexsurvmix` model.
+
+* Fix for tidy method with one-parameter exponential models.
+
+* Fixes for h/Hgamma and h/Hlnorm with log = TRUE.
+
+* Minor numerical improvements to h/H functions for some distributions.
+
+* Bug fix for `simfs_bytrans` when some transitions don't happen.
+
+* `NaNs produced` warnings should occur less often during fitting.
+
+
 Version 2.0 (2021-02-22)
 --------------------
 

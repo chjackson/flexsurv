@@ -386,30 +386,13 @@ test_that("Relative survival", {
     bc$bh <- rep(0.01, nrow(bc))
 
     ## Compare with stata stgenreg, using Weibull PH model
-
-    hweibullPH <- function(x, shape, scale = 1, log=FALSE){
-        hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
-    }
-    HweibullPH <- function(x, shape, scale=1, log=FALSE){
-        Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
-    }
-    custom.weibullPH <- list(name="weibullPH", 
-                             pars=c("shape","scale"), location="scale",
-                             transforms=c(log, log), inv.transforms=c(exp, exp),
-                             inits = function(t){
-                                 c(1, median(t[t>0]) / log(2))
-                             })
-
-    suppressWarnings({  # warnings from temporary overflow during optimisation 
-      fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist=custom.weibullPH, bhazard=bh, dfns=list(h=hweibullPH, H=HweibullPH))
-      fs6bd <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
-    })
+    fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
     
     expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tol=1e-05)
     expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tol=1e-05)
     expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tol=1e-05)
     expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765, tol=1e-05)
-
+    
     ## same results as 
     ## cd /home/chris/flexsurv/stata
     ## use stpm/bc
@@ -420,6 +403,10 @@ test_that("Relative survival", {
     ## stgenreg, loghazard([ln_lambda] :+ [ln_gamma] :+ (exp([ln_gamma]) :- 1) :* log(#t)) nodes(100) ln_lambda(group2 group3) bhazard(bh)
 ### don't know what scale Stata returns the loglik on
 
+    bc$bhlo <- rep(0.000001, nrow(bc))
+    fs6b0 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH")
+    fs6blo <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bhlo)
+    expect_equal(fs6b0$loglik, fs6blo$loglik, tol=1e-01)
 })
 
 test_that("warning with strata", { 

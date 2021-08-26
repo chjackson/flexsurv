@@ -107,11 +107,18 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
             pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
             pmax <- call_distfn_quiet(dfns$p, pmaxargs)
             pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
-
         ## Right censoring times (lower bound for event time) 
             pargs <- fnargs.nevent
             pargs$q <- right.censor
             pmin <- call_distfn_quiet(dfns$p, pargs)
+            
+            ## Hazard adjustment for relative survival models
+            if (do.hazard) {  
+                base_surv_left <-  exp(-bhazard[!event]*left.censor) 
+                base_surv_right <- exp(-bhazard[!event]*right.censor) 
+                pmax <- 1 - (1 - pmax) * base_surv_left
+                pmin <- 1 - (1 - pmin) * base_surv_right
+            }
         }
         
         targs   <- fnargs
@@ -123,9 +130,14 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         targs$q <- rtrunc
         pupper <- call_distfn_quiet(dfns$p, targs)
         pupper[rtrunc==Inf] <- 1 # in case the user's function doesn't already do this
+        if (do.hazard) {
+            base_surv_lt <- exp(-bhazard*Y[,"start"])
+            base_surv_rt <- exp(-bhazard*rtrunc)
+            plower <- 1 - (1 - plower)*base_surv_lt
+            pupper <- 1 - (1 - pupper)*base_surv_rt
+        }
         pobs <- pupper - plower # prob of being observed = 1 - 0 if no truncation 
 
-        ## Hazard offset for relative survival models
         if (do.hazard){
             pargs   <- fnargs.event
             pargs$q <- event.times
