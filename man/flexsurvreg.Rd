@@ -83,7 +83,20 @@ environment.}
 \item{weights}{Optional variable giving case weights.}
 
 \item{bhazard}{Optional variable giving expected hazards for relative
-survival models (see Nelson et al.).}
+  survival models.  The model is described by Nelson et al. (2007).
+
+   \code{bhazard} should contain a vector of values for each person in
+  the data, but only the values for the individuals whose event is observed are
+  used. \code{bhazard} refers to the hazard at the observed event time.
+
+  If \code{bhazard} is supplied, then the parameter estimates returned by
+  \code{flexsurvreg} and the outputs returned by \code{summary.flexsurvreg}
+  describe the parametric model for relative survival.
+  
+  For relative survival models, the log-likelihood returned by \code{flexsurvreg} is a partial
+  log-likelihood, which omits a constant term defined by the sum of the
+  cumulative hazards at the event or censoring time for each individual.   
+  Hence this constant must be added if a full likelihood is needed.}
 
 \item{rtrunc}{Optional variable giving individual-specific right-truncation
   times.  Used for analysing data with "retrospective ascertainment".  For
@@ -229,8 +242,9 @@ parameters. Defaults to \code{TRUE}.}
 \item{hess.control}{List of options to control inversion of the Hessian to
   obtain a covariance matrix. Available options are \code{tol.solve}, the
   tolerance used for \code{\link{solve}} when inverting the Hessian (default
-  \code{.Machine$double.eps}), and \code{tol.evalues}, the accepted tolerance for negative
-  eigenvalues in the covariance matrix (default \code{1e-05}).
+  \code{.Machine$double.eps}), and \code{tol.evalues}, the accepted
+  tolerance for negative eigenvalues in the covariance matrix (default
+  \code{1e-05}).
 
   The Hessian is positive definite, thus invertible, at the maximum
   likelihood.  If the Hessian computed after optimisation convergence can't
@@ -240,8 +254,8 @@ parameters. Defaults to \code{TRUE}.}
   suspect that the Hessian was computed wrongly enough that it is not
   invertible, but not wrongly enough that the nearest valid inverse would be
   an inaccurate estimate of the covariance matrix, then these tolerance
-  values can be modified (reducing \code{tol.solve} or increasing \code{tol.evalues})
-  to allow the inverse to be computed.}
+  values can be modified (reducing \code{tol.solve} or increasing
+  \code{tol.evalues}) to allow the inverse to be computed.}
 
 \item{...}{Optional arguments to the general-purpose optimisation routine
 \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the
@@ -271,7 +285,12 @@ A list of class \code{"flexsurvreg"} containing information about
   \code{\link{flexsurvreg}} object simply returns this component.}
   \item{loglik}{Log-likelihood. This will differ from Stata, where the sum
   of the log uncensored survival times is added to the log-likelihood in
-  survival models, to remove dependency on the time scale.}
+  survival models, to remove dependency on the time scale.   
+  
+  For relative survival models specified with \code{bhazard}, this is a partial 
+  log-likelihood which omits a constant term defined by the sum of the
+  cumulative hazards over all event or censoring times. 
+  }
   \item{logliki}{Vector of individual contributions to the log-likelihood}
   \item{AIC}{Akaike's information criterion (-2*log likelihood + 2*number of
   estimated parameters)} \item{cov}{Covariance matrix of the parameters, on
@@ -301,7 +320,7 @@ The usage of \code{\link{flexsurvreg}} is intended to be similar to
   for use in \code{\link{flexsurvreg}}, construct a list with the following
   elements:
 
-  \describe{ \item{list("name")}{A string naming the distribution.  If this
+  \describe{ \item{"name"}{A string naming the distribution.  If this
   is called \code{"dist"}, for example, then there must be visible in the
   working environment, at least, either
 
@@ -349,85 +368,22 @@ arguments must be named as the parameters of the density function. The
 function must return a matrix with rows corresponding to times, and columns
 corresponding to the parameters of the distribution.  The derivatives are
 used, if available, to speed up the model fitting with \code{\link{optim}}.
-}\item{:}{A string naming the distribution.  If this is called
-\code{"dist"}, for example, then there must be visible in the working
-environment, at least, either
-
-a) a function called \code{ddist} which defines the probability density,
-
-or
-
-b) a function called \code{hdist} which defines the hazard.
-
-Ideally, in case a) there should also be a function called \code{pdist}
-which defines the probability distribution or cumulative density, and in
-case b) there should be a function called \code{Hdist} defining the
-cumulative hazard.  If these additional functions are not provided,
-\pkg{flexsurv} attempts to automatically create them by numerically
-integrating the density or hazard function.  However, model fitting will be
-much slower, or may not even work at all, if the analytic versions of these
-functions are not available.
-
-The functions must accept vector arguments (representing different times,
-or alternative values for each parameter) and return the results as a
-vector.  The function \code{\link{Vectorize}} may be helpful for doing
-this: see the example below.
-
-These functions may be in an add-on package (see below for an example) or
-may be user-written.  If they are user-written they must be defined in the
-global environment, or supplied explicitly through the \code{dfns} argument
-to \code{flexsurvreg}.  The latter may be useful if the functions are
-created dynamically (as in the source of \code{flexsurvspline}) and thus
-not visible through R's scoping rules.
-
-Arguments other than parameters must be named in the conventional way --
-for example \code{x} for the first argument of the density function or
-hazard, as in \code{\link{dnorm}(x, ...)} and \code{q} for the first
-argument of the probability function.  Density functions should also have
-an argument \code{log}, after the parameters, which when \code{TRUE},
-computes the log density, using a numerically stable additive formula if
-possible.
-
-Additional functions with names beginning with \code{"DLd"} and
-\code{"DLS"} may be defined to calculate the derivatives of the log density
-and log survival probability, with respect to the parameters of the
-distribution.  The parameters are expressed on the real line, for example
-after log transformation if they are defined as positive.  The first
-argument must be named \code{t}, representing the time, and the remaining
-arguments must be named as the parameters of the density function. The
-function must return a matrix with rows corresponding to times, and columns
-corresponding to the parameters of the distribution.  The derivatives are
-used, if available, to speed up the model fitting with \code{\link{optim}}.
-} \item{list("pars")}{Vector of strings naming the parameters of the
+} \item{"pars"}{Vector of strings naming the parameters of the
 distribution. These must be the same names as the arguments of the density
-and probability functions.  }\item{:}{Vector of strings naming the
-parameters of the distribution. These must be the same names as the
-arguments of the density and probability functions.  }
-\item{list("location")}{Name of the main parameter governing the mean of
+and probability functions.  }
+\item{"location"}{Name of the main parameter governing the mean of
 the distribution.  This is the default parameter on which covariates are
-placed in the \code{formula} supplied to \code{flexsurvreg}. }\item{:}{Name
-of the main parameter governing the mean of the distribution.  This is the
-default parameter on which covariates are placed in the \code{formula}
-supplied to \code{flexsurvreg}. } \item{list("transforms")}{List of R
+placed in the \code{formula} supplied to \code{flexsurvreg}. }
+\item{"transforms"}{List of R
 functions which transform the range of values taken by each parameter onto
 the real line.  For example, \code{c(log, log)} for a distribution with two
-positive parameters. }\item{:}{List of R functions which transform the
-range of values taken by each parameter onto the real line.  For example,
-\code{c(log, log)} for a distribution with two positive parameters. }
-\item{list("inv.transforms")}{List of R functions defining the
+positive parameters. }
+\item{"inv.transforms"}{List of R functions defining the
 corresponding inverse transformations.  Note these must be lists, even for
 single parameter distributions they should be supplied as, e.g.
-\code{c(exp)} or \code{list(exp)}. }\item{:}{List of R functions defining
-the corresponding inverse transformations.  Note these must be lists, even
-for single parameter distributions they should be supplied as, e.g.
-\code{c(exp)} or \code{list(exp)}. } \item{list("inits")}{A function of the
+\code{c(exp)} or \code{list(exp)}. }
+\item{"inits"}{A function of the
 observed survival times \code{t} (including right-censoring times, and
-using the halfway point for interval-censored times) which returns a vector
-of reasonable initial values for maximum likelihood estimation of each
-parameter.  For example, \code{function(t){ c(1, mean(t)) }} will always
-initialize the first of two parameters at 1, and the second (a scale
-parameter, for instance) at the mean of \code{t}.  }\item{:}{A function of
-the observed survival times \code{t} (including right-censoring times, and
 using the halfway point for interval-censored times) which returns a vector
 of reasonable initial values for maximum likelihood estimation of each
 parameter.  For example, \code{function(t){ c(1, mean(t)) }} will always

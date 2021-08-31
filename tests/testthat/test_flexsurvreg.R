@@ -401,12 +401,16 @@ test_that("Relative survival", {
     ## gen bh = 0.01
     ## stset recyrs, failure(censrec)
     ## stgenreg, loghazard([ln_lambda] :+ [ln_gamma] :+ (exp([ln_gamma]) :- 1) :* log(#t)) nodes(100) ln_lambda(group2 group3) bhazard(bh)
-### don't know what scale Stata returns the loglik on
 
-    bc$bhlo <- rep(0.000001, nrow(bc))
-    fs6b0 <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH")
-    fs6blo <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bhlo)
-    expect_equal(fs6b0$loglik, fs6blo$loglik, tol=1e-01)
+    ## Check we can convert from partial to full likelihood by adding the
+    ## sum of the cumulative hazards 
+    mdl_0 <- flexsurvreg(Surv(time/365, status == 2) ~ 1, data = lung, dist = "exp")
+    bhaz <- 0.1
+    mdl_1 <- flexsurvreg(Surv(time/365, status == 2) ~ 1, dist = "exp", data = lung, 
+                         inits = mdl_0$res[, "est"] - bhaz, 
+                         fixedpars = TRUE, bhazard = rep(bhaz, nrow(lung)))
+  
+    expect_equal(mdl_0$loglik, mdl_1$loglik - sum(bhaz * lung$time/365))
 })
 
 test_that("warning with strata", { 

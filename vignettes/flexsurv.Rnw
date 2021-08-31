@@ -300,6 +300,8 @@ supplied) the covariate effects have the opposite sign.
 \subsection{Additional modelling features}
 \label{sec:censtrunc}
 
+\subsubsection{Truncation and time-dependent covariates}
+
 \begin{sloppypar}
 If we also had left-truncation times in a variable called
 \code{start}, the response would be \code{Surv(start, recyrs,
@@ -317,13 +319,6 @@ would be of the form \code{Surv(start, stop, censrec)}, where
 \code{start} and \code{stop} are the limits of each interval, and
 \code{censrec} indicates whether a death was observed at \code{stop}.
 
-Relative survival models \citep{nelson:relative:survival} can be
-implemented by supplying the variable in the data that represents the
-expected mortality rate in the \code{bhazard} argument to
-\code{flexsurvreg}.  Case weights and data subsets can also be
-specified, as in standard \proglang{R} modelling functions, using \code{weights}
-or \code{subset} arguments.
-
 In versions of \pkg{flexsurv} since April 2020, models with
 individual-specific right-truncation times are also supported.   
 These are used for situations with ``retrospective ascertainment'',
@@ -331,6 +326,35 @@ where cases are only included in the data if they have died by a
 specific time.   These models are specified through an argument \code{rtrunc} to
 \code{flexsurvreg} that names the variable with the truncation times.
 See the Supplementary Examples vignette for a worked example. 
+
+
+\subsubsection{Relative survival} 
+
+In relative survival models \citep{nelson:relative:survival}, the survivor function
+is expressed as $S(t) = S^*(t)R(t)$, where $S^*(t)$ is the ``expected" or ``baseline" survival,
+and $R(t)$ is the \emph{relative} survival.  Equivalently, the hazard is defined as $h(t) = h^*(t) + \lambda(t)$,
+where $h^*()$ is the baseline hazard function, and $\lambda(t)$ is the excess mortality rate
+associated with the disease of interest.   The baseline represents a reference population, and
+is typically obtained from national routinely-collected mortality statistics, adjusted (e.g. by age/sex)
+to represent the population under study.   The parametric model is defined and estimated for $R(t)$. 
+
+These models are implemented in \pkg{flexsurv} by supplying the variable in the data that represents the
+expected mortality rate $h^*(t)$ in the \code{bhazard} argument to
+\code{flexsurvreg}.   This is only used for the individuals in the data
+who die, and \code{bhazard} describes the expected hazard at the death time.
+The values of \code{bhazard} for censored individuals are ignored. 
+
+Note that the parameters returned in the model fitted by \code{flexsurvreg} refer to the relative survival $R(t)$,
+rather than the absolute survival.  The likelihood returned by \code{flexsurvreg} here is a \emph{partial}
+likelihood defined \citep[as in][equations 4--5]{nelson:relative:survival} by omitting the term $\sum_i \log(S^*(t_i))$ (summed over all individuals $i$ in the data, including both censored and uncensored times $t_i$) from the full likelihood.  This term is equivalent to minus the sum of the cumulative hazards.   It can be omitted from the likelihood for the purpose of estimating the parameters of the relative survival model, since it does not depend on these parameters.  Hence if a full likelihood is required, (e.g. for model comparison) then this term should be added to the partial likelihood.
+
+Similarly, the predicted survival or hazard (e.g. as returned by \code{summary.flexsurvreg}, see Section~\ref{sec:plots}) from a relative survival model refers to $R(t)$ or $h(t)$. Hence if the overall survival or hazard is required, the predictions of relative survival should be converted to the ``absolute" scale by combining with the baseline, though no specific tools for doing this are provided by \pkg{flexsurv}. 
+
+
+\subsubsection{Weighting and subsetting}
+Case weights and data subsets can also be
+specified, as in standard \proglang{R} modelling functions, using \code{weights}
+or \code{subset} arguments.
 
 
 \subsection{Built-in models}
