@@ -1013,11 +1013,13 @@ print.flexsurvreg <- function(x, ...)
     }
     llname <- if (all(x$bhazard == 0)) "Log-likelihood" else "Partial log-likelihood"
     llname <- sprintf("\n%s = ", llname)
+    aicname <- if (all(x$bhazard == 0)) "AIC" else "Partial AIC"
+    aicname <- sprintf("\n%s = ", aicname)
     cat("\nN = ", x$N, ",  Events: ", x$events,
         ",  Censored: ", x$N - x$events,
         "\nTotal time at risk: ", x$trisk,
         llname, x$loglik, ", df = ", x$npars,
-        "\nAIC = ", x$AIC, "\n\n", sep="")
+        aicname, x$AIC, "\n\n", sep="")
 }
 
 form.model.matrix <- function(object, newdata, na.action=na.pass, forms=NULL){
