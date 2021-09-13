@@ -1,8 +1,8 @@
 Package: flexsurv
 Type: Package
 Title: Flexible Parametric Survival and Multi-State Models
-Version: 2.0.1
-Date: 2021-08-??
+Version: 2.1
+Date: 2021-09-13
 Authors@R: c(person("Christopher", "Jackson",
          email="chris.jackson@mrc-bsu.cam.ac.uk",
          role=c("aut", "cre")),
@@ -59,4 +59,4 @@ BugReports: https://github.com/chjackson/flexsurv-dev/issues
 VignetteBuilder: knitr
 LazyData: yes
 LinkingTo: Rcpp
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

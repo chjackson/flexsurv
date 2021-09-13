@@ -392,6 +392,16 @@ test_that("Relative survival", {
     expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tol=1e-05)
     expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tol=1e-04)
     expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765, tol=1e-04)
+
+    ## Check fit from 3 par model reduces to 1 par 
+    ## Deriv calculation bug causing false convergence fixed in 2.1
+    fshgg <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="gengamma", 
+                         inits=c(1,1,1), fixedpars=2:3, bhazard=bh)
+    fshe <-  flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="exponential", bhazard=bh)
+    fshw <-  flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull", 
+                         inits = c(1,10), fixedpars=1, bhazard=bh)
+    expect_equal(fshgg$loglik, fshe$loglik, tol=1e-06)
+    expect_equal(fshgg$loglik, fshw$loglik, tol=1e-06)
     
     ## same results as 
     ## cd /home/chris/flexsurv/stata

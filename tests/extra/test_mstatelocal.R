@@ -102,7 +102,7 @@ test_that("bootstrap CIs in multi state models",{
         totlos.simfs(bwei.list, t=5, trans=tmat, M=10, ci=TRUE, B=10)
     totlos.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), ci=TRUE, B=10)
     pmatrix.simfs(bwei.list, t=5, trans=tmat, M=100, ci=TRUE, B=10)
-    pmatrix.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), ci=TRUE, B=1
+    pmatrix.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), ci=TRUE, B=1)
 
 })
 

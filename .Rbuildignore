@@ -35,4 +35,4 @@ travis.md
 vignettes/_region_.tex
 R/simulate_flexsurvmix.R
 ^\.github$
-
+vignettes/Sweave.sty

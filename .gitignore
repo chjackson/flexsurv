@@ -16,3 +16,5 @@ travis.md
 R/simulate*
 man/simulate*
 tests/testthat/simulate*
+/doc/
+/Meta/

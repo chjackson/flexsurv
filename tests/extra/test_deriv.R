@@ -86,6 +86,7 @@ test_that("Analytic derivatives match numeric",{
     expect_true(time.deriv < time.noderiv)
     
     ## relative survival models
+    bc$bh <- rep(0.01, nrow(bc))
     fseb <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="exponential", bhazard=bh)
     expect_lt(deriv_error(fseb), err)
     fswb <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull", bhazard=bh)

@@ -1,6 +1,6 @@
 -*- text -*-
 
-Version 2.0.1 (2021-08-??)
+Version 2.1 (2021-09-13)
 -------------------------
 
 * Fix of a bug that affected models with baseline hazard offsets and
@@ -8,8 +8,8 @@ Version 2.0.1 (2021-08-??)
   where convergence may have been falsely reported due to incorrect
   likelihood derivatives. 
   
-* Likelihood for relative survival models now includes the appropriate
-  constant term to allow comparison with standard models.
+* New vignette section and better help page documentation about relative
+  survival models.
 
 * `start` parameter added to predict.flexsurvreg.
 

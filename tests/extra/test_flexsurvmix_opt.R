@@ -74,23 +74,6 @@ test_that("Variances in Aalen-Johansen",{
 })
 
 
-test_that("Partially observed outcomes",{
-  x <- flexsurvmix(list(icu = Surv(t, status) ~ 1, 
-                        death = Surv(t, status) ~ 1,
-                        discharge =  Surv(t1disc, t2disc, type="interval2") ~ 1),
-                   data=dat, event=event, 
-                   dists=c("gamma","gamma","gamma"), fixedpars=FALSE, optim.control = list(maxit=10000))
-  expect_equal(x$loglik, -2486.672, tol=1e-06)
-  
-  # time to discharge estimates wrong, as observation scheme is misspecified
-  xwrong <- flexsurvmix(Surv(t, status) ~ 1, 
-                        data=dat, event=event, 
-                        dists=c("gamma","gamma","gamma"), fixedpars=FALSE) 
-  
-})
-
-
-
 n <- 10000
 set.seed(1)
 x <- rnorm(n)
