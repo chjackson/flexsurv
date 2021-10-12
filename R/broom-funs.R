@@ -8,7 +8,7 @@
 #'
 #' @param conf.level The confidence level to use for the confidence interval if \code{conf.int = TRUE}. Default is \code{0.95}.
 #'
-#' @param pars Character vector for one of \code{"all"}, \code{"coefs"}, or \code{"baseline"} for all parameters, covariate effects (i.e. regression betas), or baseline distribution paramaters, respectively. Default is \code{"all"}.
+#' @param pars One of \code{"all"}, \code{"baseline"}, or \code{"coefs"} for all parameters, baseline distribution paramaters, or covariate effects (i.e. regression betas), respectively. Default is \code{"all"}.
 #'
 #' @param transform Character vector of transformations to apply to requested \code{pars}. Default is \code{"none"}, which returns \code{pars} as-is.
 #'
@@ -101,9 +101,9 @@ tidy.flexsurvreg <- function(x, conf.int = FALSE, conf.level = 0.95,
   )
 
   if (pars == "coefs") {
-    res[res$term %in% coef_pars, ]
-  } else if (pars == "bdist") {
-    res[res$term %in% dist_pars, ]
+    return(res[res$term %in% coef_pars, ])
+  } else if (pars == "baseline") {
+    return(res[res$term %in% dist_pars, ])
   } else {
     res
   }
