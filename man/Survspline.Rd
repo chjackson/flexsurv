@@ -171,7 +171,9 @@ to typical random number generation functions.
 \description{
 Probability density, distribution, quantile, random generation, hazard, 
 cumulative hazard, mean and restricted mean functions for the Royston/Parmar
-spline model.   These functions have all parameters of the distribution collecte together in a single argument \code{gamma}.  For the equivalent functions with one argument per parameter, see \code{\link{Survsplinek}}.
+spline model. These functions have all parameters of the distribution collected
+together in a single argument \code{gamma}. For the equivalent functions with
+one argument per parameter, see \code{\link{Survsplinek}}.
 }
 \examples{
 
