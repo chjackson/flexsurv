@@ -17,12 +17,18 @@ test_that("Spline distribution functions",{
     p2 <- psurvspline(1, gamma = c(-meanlog/sdlog, 1/sdlog), scale="normal")
     expect_equal(p1, p2)
 
+    p1 <- pweibull(1, shape=a, scale=b)
+    p2 <- psurvspline(1, gamma=c(log(1 / b^a), a))
+    
     ## other way round 
     gamma <- c(0.1, 0.2)
     d1 <- dweibull(1, shape=gamma[2], scale= exp(-gamma[1]/gamma[2]))
     d2 <- dsurvspline(1, gamma=gamma)
     expect_equal(d1, d2)
-
+    
+    scale <- exp(-gamma[1]/gamma[2])
+    d1 <- dweibullPH(1, shape=gamma[2], scale= scale^{-gamma[2]})
+    
     d1 <- dllogis(1, shape=gamma[2], scale= exp(-gamma[1]/gamma[2]))
     d2 <- dsurvspline(1, gamma=gamma, scale="odds")
     expect_equal(d1, d2)
