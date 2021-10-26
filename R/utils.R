@@ -209,7 +209,7 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
     ## Other args assumed to contain vectorisable parameters of the distribution.
     ## Replicate all to their maximum length, along with p
     matlen <- if(is.null(matargs)) NULL else sapply(args.mat, function(x){if(is.matrix(x))nrow(x) else 1})
-    veclen <- if (is.null(args)) NULL else sapply(args, length)
+    veclen <- if (length(args) == 0) NULL else sapply(args, length)
     maxlen <- max(c(length(p), veclen, matlen))
     for (i in seq(along=args))
         args[[i]] <- rep(args[[i]], length.out=maxlen)
