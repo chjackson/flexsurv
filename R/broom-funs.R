@@ -8,7 +8,7 @@
 #'
 #' @param conf.level The confidence level to use for the confidence interval if \code{conf.int = TRUE}. Default is \code{0.95}.
 #'
-#' @param pars One of \code{"all"}, \code{"baseline"}, or \code{"coefs"} for all parameters, baseline distribution paramaters, or covariate effects (i.e. regression betas), respectively. Default is \code{"all"}.
+#' @param pars One of \code{"all"}, \code{"baseline"}, or \code{"coefs"} for all parameters, baseline distribution parameters, or covariate effects (i.e. regression betas), respectively. Default is \code{"all"}.
 #'
 #' @param transform Character vector of transformations to apply to requested \code{pars}. Default is \code{"none"}, which returns \code{pars} as-is.
 #'

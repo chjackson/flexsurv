@@ -28,8 +28,8 @@ Tidy data frame containing both Aalen-Johansen and parametric
 }
 \description{
 Computes both parametric and comparable Aalen-Johansen nonparametric
-estimates from a flexible paramrtric multi-state model, and returns them
-together in a tidy data frame.  Only models w ith no covariates, or only
+estimates from a flexible parametric multi-state model, and returns them
+together in a tidy data frame.  Only models with no covariates, or only
 factor covariates, are supported.  If there are factor covariates, then the
 nonparametric estimates are computed for subgroups defined by combinations
 of the covariates.

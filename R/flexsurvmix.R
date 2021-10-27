@@ -128,7 +128,7 @@
 ##'   component-specific model, as would be supplied to
 ##'   \code{\link{flexsurvreg}}.   By default, a heuristic is used to obtain
 ##'   initial values, which depends on the parametric distribution being used,
-##'   but is usually based on the empirical mean and/or variance of the survial
+##'   but is usually based on the empirical mean and/or variance of the survival
 ##'   times.
 ##'
 ##' @param fixedpars Indexes of parameters to fix at their initial values and

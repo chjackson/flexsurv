@@ -34,7 +34,7 @@ Vector of restricted means survival times of the distribution at
 }
 \description{
 Generic function to find the restricted mean of a distribution, given the
-equivalent probability distribution function using numeric intergration.
+equivalent probability distribution function using numeric integration.
 }
 \details{
 This function is used by default for custom distributions for which an
