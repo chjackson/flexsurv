@@ -99,8 +99,10 @@ dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE){
     q <- rep(q, length=nret)
     offset <- rep(offset, length=nret)
 
-    gamma <- do.call("rbind", rep(list(gamma), nret))
-    knots <- do.call("rbind", rep(list(knots), nret))
+    gamma <- matrix(rep(as.numeric(t(gamma)), length.out = ncol(gamma) * nret),
+                    ncol = ncol(gamma), byrow = TRUE)
+    knots <- matrix(rep(as.numeric(t(knots)), length.out = ncol(knots) * nret),
+                    ncol = ncol(knots), byrow = TRUE)
 
     if (ncol(gamma) != ncol(knots)) {
         stop("length of gamma should equal number of knots")
