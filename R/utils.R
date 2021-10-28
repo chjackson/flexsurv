@@ -83,7 +83,7 @@ rbase <- function(dname, n, ...){
 ##' Generic function to find restricted mean survival of a distribution
 ##'
 ##' Generic function to find the restricted mean of a distribution, given the
-##' equivalent probability distribution function using numeric intergration.
+##' equivalent probability distribution function using numeric integration.
 ##'
 ##' This function is used by default for custom distributions for which an
 ##' rmst function is not provided.
@@ -286,7 +286,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
 #' @param seconds.warning time threshold in seconds to trigger message and
 #'    reduce the number of iterations for Richardson extrapolation of
 #'    numDeriv::hessian
-#' @param default.r default number of iterations (high-precicion recommendation
+#' @param default.r default number of iterations (high-precision recommendation
 #'    of numDeriv)
 #' @param min.r minial number of iteration, must be at least 2,
 #' @param ... further arguments passed to method.args of numDeriv::hessian

@@ -117,7 +117,7 @@ of CIs and SEs.}
 frame instead of a list.  This can help with using the \pkg{ggplot2}
 package to compare summaries for different covariate values.}
 
-\item{na.action}{Function determinining what should be done with missing values in \code{newdata}.  If \code{na.pass} (the default) then summaries of \code{NA} are produced for missing covariate values.  If \code{na.omit}, then missing values are dropped, the behaviour of \code{summary.flexsurvreg} before \code{flexsurv} version 1.2.}
+\item{na.action}{Function determining what should be done with missing values in \code{newdata}.  If \code{na.pass} (the default) then summaries of \code{NA} are produced for missing covariate values.  If \code{na.omit}, then missing values are dropped, the behaviour of \code{summary.flexsurvreg} before \code{flexsurv} version 1.2.}
 
 \item{...}{Further arguments passed to or from other methods.  Currently
 unused.}

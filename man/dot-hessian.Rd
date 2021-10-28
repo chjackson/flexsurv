@@ -15,7 +15,7 @@
 reduce the number of iterations for Richardson extrapolation of
 numDeriv::hessian}
 
-\item{default.r}{default number of iterations (high-precicion recommendation
+\item{default.r}{default number of iterations (high-precision recommendation
 of numDeriv)}
 
 \item{min.r}{minial number of iteration, must be at least 2,}
