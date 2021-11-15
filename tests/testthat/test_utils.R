@@ -67,3 +67,8 @@ test_that("WeibullPH",{
     expect_equal(coef(fitw)["rx"], -coef(fitwp)["rx"] / fitwp$res["shape","est"])
     
 })
+
+test_that("rmst_generic",{
+    expect_equal(rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138),
+                 rmst_generic(plnorm, t=500, start=250, meanlog=7.4225, sdlog = 1.1138))
+})

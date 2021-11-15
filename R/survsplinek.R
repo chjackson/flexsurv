@@ -22,49 +22,49 @@ NULL
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline0 <- function(gamma0, gamma1, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1), knots=knots, scale=scale, timescale=timescale)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline1 <- function(gamma0, gamma1, gamma2, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1, gamma2), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1, gamma2), knots=knots, scale=scale, timescale=timescale)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline2 <- function(gamma0, gamma1, gamma2, gamma3, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1, gamma2, gamma3), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1, gamma2, gamma3), knots=knots, scale=scale, timescale=timescale)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline3 <- function(gamma0, gamma1, gamma2, gamma3, gamma4, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4), knots=knots, scale=scale, timescale=timescale)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline4 <- function(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5), knots=knots, scale=scale, timescale=timescale)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline5 <- function(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6), knots=knots, scale=scale, timescale=timescale)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline6 <- function(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7), knots=knots, scale=scale, timescale=timescale)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 mean_survspline7 <- function(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, gamma8, knots=c(-10, 10), scale="hazard", timescale="log"){
-    mean_survspline(gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, gamma8), knots=knots, scale=scale, timescale=timescale)
+    mean_survspline(gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, gamma8), knots=knots, scale=scale, timescale=timescale)
 }
 
 
@@ -73,49 +73,49 @@ mean_survspline7 <- function(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gam
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline0 <- function(t, gamma0, gamma1, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline1 <- function(t, gamma0, gamma1, gamma2, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1, gamma2), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1, gamma2), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline2 <- function(t, gamma0, gamma1, gamma2, gamma3, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1, gamma2, gamma3), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1, gamma2, gamma3), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline3 <- function(t, gamma0, gamma1, gamma2, gamma3, gamma4, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline4 <- function(t, gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline5 <- function(t, gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline6 <- function(t, gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 ##' @rdname Survsplinek
 ##' @export
 rmst_survspline7 <- function(t, gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, gamma8, knots=c(-10, 10), scale="hazard", timescale="log", start=0){
-    rmst_survspline(t, gamma=c(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, gamma8), knots=knots, scale=scale, timescale=timescale, start=start)
+    rmst_survspline(t, gamma=cbind(gamma0, gamma1, gamma2, gamma3, gamma4, gamma5, gamma6, gamma7, gamma8), knots=knots, scale=scale, timescale=timescale, start=start)
 }
 
 

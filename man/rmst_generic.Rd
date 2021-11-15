@@ -4,7 +4,7 @@
 \alias{rmst_generic}
 \title{Generic function to find restricted mean survival of a distribution}
 \usage{
-rmst_generic(pdist, t, start = 0, matargs = NULL, ...)
+rmst_generic(pdist, t, start = 0, matargs = NULL, scalarargs = NULL, ...)
 }
 \arguments{
 \item{pdist}{Probability distribution function, for example,
@@ -14,7 +14,7 @@ and values.  It should also return the correct values for the entire real
 line, for example a positive distribution should have \code{pdist(x)==0}
 for \eqn{x<0}.}
 
-\item{t}{Vector of times to which rmst is evaluated}
+\item{t}{Vector of times at which rmst is evaluated}
 
 \item{start}{Optional left-truncation time or times.  The returned
 restricted mean survival will be conditioned on survival up to
@@ -23,13 +23,15 @@ this time.}
 \item{matargs}{Character vector giving the elements of \code{...} which
 represent vector parameters of the distribution.  Empty by default.  When
 vectorised, these will become matrices.  This is used for the arguments
-\code{gamma} and \code{knots} in \code{\link{qsurvspline}}.}
+\code{gamma} and \code{knots} in \code{\link{psurvspline}}.}
+
+\item{scalarargs}{Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.}
 
 \item{...}{The remaining arguments define parameters of the distribution
 \code{pdist}.  These MUST be named explicitly.}
 }
 \value{
-Vector of restricted means survival times of the distribution at
+Vector of restricted mean survival times of the distribution at
 \code{p}.
 }
 \description{
@@ -45,7 +47,7 @@ This assumes a suitably smooth, continuous distribution.
 \examples{
 
 rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138)
-rmst_generic(plnorm, 500, start=250, c(0.025, 0.975), meanlog=7.4225, sdlog = 1.1138)
+rmst_generic(plnorm, 500, start=250, meanlog=7.4225, sdlog = 1.1138)
 # must name the arguments
 
 }

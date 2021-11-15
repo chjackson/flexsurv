@@ -72,13 +72,6 @@ rbase <- function(dname, n, ...){
     c(li, args)
 }
 
-### Quantile function "qdist" for a generic distribution "dist".
-### Works using an interval search for the solution of pdist(q) = p.
-### Requires a probability function "pdist" for the same distribution
-### in the working environment.
-
-
-
 
 ##' Generic function to find restricted mean survival of a distribution
 ##'
@@ -96,38 +89,73 @@ rbase <- function(dname, n, ...){
 ##' and values.  It should also return the correct values for the entire real
 ##' line, for example a positive distribution should have \code{pdist(x)==0}
 ##' for \eqn{x<0}.
-##' @param t Vector of times to which rmst is evaluated
+##'
+##' @param t Vector of times at which rmst is evaluated
+##'
 ##' @param start Optional left-truncation time or times.  The returned
 ##' restricted mean survival will be conditioned on survival up to
 ##' this time.
+##'
 ##' @param matargs Character vector giving the elements of \code{...} which
 ##' represent vector parameters of the distribution.  Empty by default.  When
 ##' vectorised, these will become matrices.  This is used for the arguments
-##' \code{gamma} and \code{knots} in \code{\link{qsurvspline}}.
+##' \code{gamma} and \code{knots} in \code{\link{psurvspline}}.
+##'
+##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.
+##'
 ##' @param ...  The remaining arguments define parameters of the distribution
 ##' \code{pdist}.  These MUST be named explicitly.
-##' @return Vector of restricted means survival times of the distribution at
+##'
+##' @return Vector of restricted mean survival times of the distribution at
 ##' \code{p}.
-##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##'
+##' @author Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
+##'
 ##' @keywords distribution
+##'
 ##' @examples
 ##'
 ##' rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138)
-##' rmst_generic(plnorm, 500, start=250, c(0.025, 0.975), meanlog=7.4225, sdlog = 1.1138)
+##' rmst_generic(plnorm, 500, start=250, meanlog=7.4225, sdlog = 1.1138)
 ##' # must name the arguments
 ##'
 ##' @export
-rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
+rmst_generic <- function(pdist, t, start=0, matargs=NULL, scalarargs=NULL, ...)
 {
   args <- list(...)
+  args_mat <- args[matargs]
+  args_scalar <- args[scalarargs]
+  args[c(matargs,scalarargs)] <- NULL
+  matlen <- if(is.null(matargs)) NULL else sapply(args_mat, function(x){if(is.matrix(x))nrow(x) else 1})
+  veclen <- if (length(args) == 0) NULL else sapply(args, length)
   t_len <- length(t)
-  if(length(start) == 1) start <- rep(start, length(t))
-  ret <- numeric(t_len)
-  start_p = 1 - pdist(start,...)
-  for(i in seq_len(t_len)){
-    ret[i] <- integrate(
-      function(end) (1 - pdist(end,...))/ start_p[i], start[i], t[i]
-    )$value
+  maxlen <- max(c(t_len, veclen, matlen))  
+  if(length(start) == 1) start <- rep(start, length.out=maxlen)
+  for (i in seq(along=args))
+      args[[i]] <- rep(args[[i]], length.out=maxlen)
+  t <- rep(t, length.out=maxlen)
+  for (i in seq(along=args_mat)){
+      if (is.matrix(args_mat[[i]])){
+          args_mat[[i]] <- matrix(
+              apply(args_mat[[i]], 2, function(x)rep(x, length=maxlen)),
+              ncol=ncol(args_mat[[i]]),
+              byrow=F
+          )
+      }
+      else args_mat[[i]] <- matrix(args_mat[[i]], nrow=maxlen, ncol=length(args_mat[[i]]), byrow=TRUE)
+  }
+  ret <- numeric(maxlen)
+  for (i in seq_len(maxlen)){
+      fargs_vec <- lapply(args, function(x)x[i])
+      fargs_mat <- lapply(args_mat, function(x)x[i,,drop=FALSE])
+      pdargs <- c(list(start[i]), fargs_vec, fargs_mat, args_scalar)
+      start_p <- 1 - do.call(pdist, pdargs)
+      fn <- function(end){
+          pdargs <- c(list(end), fargs_vec, fargs_mat, args_scalar)
+          pd <- do.call(pdist, pdargs)
+          (1 - pd) / start_p
+      }
+    ret[i] <- integrate(fn, start[i], t[i])$value
   }
   ret[t<start] <- 0
   if (any(is.nan(ret))) warning("NaNs produced")
@@ -180,7 +208,7 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, ...)
 ##'
 ##' @return Vector of quantiles of the distribution at \code{p}.
 ##'
-##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##' @author Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 ##'
 ##' @keywords distribution
 ##'

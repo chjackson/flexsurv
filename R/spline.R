@@ -88,7 +88,6 @@ NULL
 
 ## Things to do that are common to d/p/q functions
 ## could be generalized to any function with vector of arguments 
-## TODO put in h,H functions
 ## TODO more special value handling
 
 dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE){
@@ -276,13 +275,22 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 ##' @rdname Survspline
 ##' @export
 rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, start=0){
-  rmst_generic(psurvspline, t, start=start, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+    rmst_generic(psurvspline, t, start=start,
+                 matargs = c("gamma", "knots"), scalarargs = c("scale", "timescale"), 
+                 gamma=gamma, knots=knots,
+                 beta=beta, X=X,
+                 scale=scale, timescale=timescale, offset=offset)
 }
 
 ##' @rdname Survspline
 ##' @export
 mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
-  rmst_generic(psurvspline, Inf, start=0, gamma=gamma, knots=knots, beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+    nt <- if (is.matrix(gamma)) nrow(gamma) else 1
+    rmst_generic(psurvspline, rep(Inf,nt), start=0,
+                 matargs = c("gamma", "knots"), 
+                 scalarargs = c("scale", "timescale"), 
+                 gamma=gamma, knots=knots,
+                 beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
 }
 
 ##' Natural cubic spline basis
