@@ -141,15 +141,3 @@ test_that("hazard ratio",{
     expect_equal(hr_flexsurvreg(fitw, t=t)$est,
                  hr_flexsurvreg(fitw, t=t, newdata=list(rxbin=c(0,1)))$est)
 })
-
-fitw <- flexsurvreg(formula = Surv(futime, fustat) ~ factor(rxbin), data = ovarian, dist = "weibull")
-predict(fitw)
-fitw <- survreg(formula = Surv(futime, fustat) ~ factor(rxbin), data = ovarian, dist = "weibull")
-predict(fitw) # whys this work. linear predictors stored in object
-
-debug(survival:::predict.survreg)
-
-mod <- lm(futime ~ factor(rxbin), data = ovarian)
-predict(mod) # whys this work
-mod <- glm(futime ~ factor(rxbin), data = ovarian)
-predict(mod)
