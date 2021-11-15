@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.}
 
-\item{type}{Character string for the type of residual desired. Currently only \code{"response"} is supported. More residual types may become available in future versions.}
+\item{type}{Character string for the type of residual desired. Currently only \code{"response"} and \code{"coxsnell"} are supported. More residual types may become available in future versions.}
 
 \item{...}{Not currently used.}
 }
@@ -21,11 +21,16 @@ Calculates residuals for \code{\link{flexsurvreg}} or \code{\link{flexsurvspline
 }
 \details{
 Residuals of \code{type = "response"} are calculated as the naive difference between the observed survival and the covariate-specific predicted mean survival from \code{\link{predict.flexsurvreg}}, ignoring whether the event time is observed or censored.
+
+\code{type="coxsnell"} returns the Cox-Snell residual, defined as the estimated cumulative hazard at each data point.  To check the fit of the
+A more fully featured utility for this is provided in the function \code{\link{coxsnell_flexsurvreg}}.
 }
 \examples{
 
 fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "gengamma")
-residuals(fitg)
+residuals(fitg, type="response")
+
+
 
 }
 \seealso{

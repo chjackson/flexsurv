@@ -1,5 +1,34 @@
 -*- text -*-
 
+Version 2.2 (2021-11-??)
+-------------------------
+
+* `summary.flexsurvreg` has been rewritten to make it cleaner and
+  faster.  User-visible changes: 
+
+  - Custom summary functions in `summary.flexsurvreg` must now be
+  vectorised
+
+  - A new argument `cross` specifies whether to compute summaries for
+  all combinations of times t and covariate values, or for covariate
+  values matched with corresponding times t, in custom summary
+  functions.
+  
+  - Covariate names when `tidy=FALSE` now consistently don't include
+  spaces.
+
+* New function `hr_flexsurvreg` to compute the hazard ratio from a
+  fitted flexsurvreg or flexsurvspline model as a function of time,
+  with confidence intervals.
+
+* New functions for Cox-Snell residuals: `coxsnell_flexsurvreg` or
+  residuals(..., type="coxsnell").
+
+* rmst_generic, mean_survspline, rmst_survspline and related functions
+  (e.g. mean_survspline1) handle alternative parameter values in a
+  vectorised way.
+
+
 Version 2.1 (2021-09-13)
 -------------------------
 
@@ -11,7 +40,7 @@ Version 2.1 (2021-09-13)
 * New vignette section and better help page documentation about relative
   survival models.
 
-* `start` parameter added to predict.flexsurvreg.
+* `start` parameter added to `predict.flexsurvreg`.
 
 * New function `pdf_flexsurmix` for the fitted density function in a
   `flexsurvmix` model.
