@@ -10,7 +10,8 @@ bln.markov <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist
 
 test_that("msfit.flexsurvreg",{
     mexp <- msfit.flexsurvreg(bexp, t=0.01, trans=tmat, tvar="trans")
-    summ <- summary(bexp, t=0.01, type="cumhaz", ci=FALSE, newdata=list(trans=factor(1:3, levels=1:3)))
+    summ <- summary(bexp, t=0.01, type="cumhaz", ci=FALSE, 
+                    newdata=list(trans=factor(1:3, levels=1:3)))
     summ <- as.numeric(unlist(lapply(summ, function(x)x$est[x$time==0.01])))   
     expect_equal(mexp$Haz$Haz[mexp$Haz$time==0.01], summ)
     mwei <- msfit.flexsurvreg(bwei, t=c(0.01, 0.02), trans=tmat, tvar="trans", B=10)

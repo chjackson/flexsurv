@@ -13,6 +13,7 @@
   t = NULL,
   quantiles = 0.5,
   start = 0,
+  cross = TRUE,
   ci = TRUE,
   se = FALSE,
   B = 1000,
@@ -81,8 +82,9 @@ Ignored if \code{"fn"} is specified.}
 \item{fn}{Custom function of the parameters to summarise against time.
 This has optional first two arguments \code{t} representing time, and
 \code{start} representing left-truncation points, and any remaining
-arguments must be parameters of the distribution.  It should return a
-vector of the same length as \code{t}.}
+arguments must be parameters of the distribution.  It should be vectorised, and
+return a vector corresponding to the vectors given by \code{t}, \code{start} and
+the parameter vectors.}
 
 \item{t}{Times to calculate fitted values for. By default, these are the
 sorted unique observation (including censoring) times in the data - for
@@ -100,6 +102,14 @@ in the usual case where this function is used to calculate a predicted
 trajectory for a single individual.  This is why the default \code{start}
 time was changed for version 0.4 of \pkg{flexsurv} - this was previously a
 vector of the start times observed in the data.}
+
+\item{cross}{If \code{TRUE} (the default) then summaries are calculated for all combinations of times
+specified in \code{t} and covariate vectors specifed in \code{newdata}.
+
+If \code{FALSE},
+then the times \code{t} should be of length equal to the number of rows in \code{newdata},
+and one summary is produced for each row of \code{newdata} paired with the corresponding
+element of \code{t}. This is used, e.g. when determining Cox-Snell residuals.}
 
 \item{ci}{Set to \code{FALSE} to omit confidence intervals.}
 

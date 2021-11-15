@@ -158,8 +158,8 @@ test_that("Model fit with covariates",{
 })
 
 test_that("Summary function: alternative ways to supply covariates",{
-    expect_equal(summary(fitg, X=c(0), ci=FALSE)[[1]],
-                 summary(fitg, newdata=data.frame(rx=1), ci=FALSE)[[1]])
+    expect_equal(summary(fitg, X=c(0), ci=FALSE)[[1]]$est,
+                 summary(fitg, newdata=data.frame(rx=1), ci=FALSE)[[1]]$est)
     expect_equal(summary(fitg, X=c(1), ci=FALSE)[[1]],
                  summary(fitg, newdata=data.frame(rx=2), ci=FALSE)[[1]])
     expect_equivalent(summary(fitg, X=matrix(c(0,1),ncol=1), ci=FALSE)[1:2],

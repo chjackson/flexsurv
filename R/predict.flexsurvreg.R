@@ -12,7 +12,10 @@
 #'   covariate values at which to obtain the fitted predictions.
 #'
 #'   If \code{newdata} is omitted, then the original data used to fit the model
-#'   are used, as extracted by \code{model.frame(object)}.
+#'   are used, as extracted by \code{model.frame(object)}. However this will
+#'   currently not work if the model formula contains functions, e.g.
+#'   \code{~ factor(x)}.   The names of the model frame must correspond to
+#'   variables in the original data. 
 #'
 #' @param type Character vector for the type of predictions desired.
 #'
