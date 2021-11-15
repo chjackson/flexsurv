@@ -127,6 +127,26 @@ legend("topright", lwd=c(2,2), col=c("red","darkgray"), bty="n",
        c("Generalized gamma: standard AFT", "Generalized gamma: proportional hazards"))
 @ 
 
+Since version 2.2 of \pkg{flexsurv}, however, the code above is obsolete, since the function \code{hr_flexsurvreg} can simply be used to calculate hazard ratios and their confidence intervals against time. 
+
+<<eval=FALSE,fig=FALSE>>=
+nd <- data.frame(group=c("Good","Medium"))
+hr_aft <- hr_flexsurvreg(fs2, t=t, newdata=nd)
+hr_ph <- hr_flexsurvreg(fs7, t=t, newdata=nd)
+
+plot(t, hr_aft$lcl, type="l", ylim=c(0, 10), col="red", xlab="Years",
+     ylab="Hazard ratio (Medium / Good)", lwd=1, lty=2)
+lines(t, hr_aft$ucl, col="red", lwd=1, lty=2)
+lines(t, hr_aft$est, col="red", lwd=2)
+
+lines(t, hr_ph$lcl, col="darkgray", lwd=1, lty=2)
+lines(t, hr_ph$ucl, col="darkgray", lwd=1, lty=2)
+lines(t, hr_ph$est, col="darkgray", lwd=2)
+legend("topright", lwd=c(2,2), col=c("red","darkgray"), bty="n",
+       c("Generalized gamma: standard AFT", "Generalized gamma: proportional hazards"))
+@
+
+
 \subsection{Restricted mean survival}
 
 The expected survival up to time $t$, from a model with cumulative distribution $F(t|\alpha)$, is 
@@ -136,33 +156,35 @@ The expected survival up to time $t$, from a model with cumulative distribution 
 %% TODO can t arg to summay fn be omitted if function is independent of time, so it returns one value?
 
 An estimate and confidence interval for this, for a specified
-covariate value, can be computed using a custom summary function as
-follows.  (Note that \code{summary.flexsurvreg} can be
-abbreviated to \code{summary}).  As in the
-\code{median.weibull} example in the user guide vignette, the
-summary function is independent of time, so any value can be specified
-for \code{t} in the call to \code{summary}.  The time horizon
-up to which to compute the mean is specified by the default value of
-the \code{horizon} argument to the custom function.  The mean survival
-is computed here up to 100 years.  Setting \code{horizon=Inf} 
-is theoretically also possible for an unrestricted mean, but the integral
-does not converge in this example. 
+covariate value, can be computed as follows.  
+
+In versions of \pkg{flexsurv} before version 2.2, this example used a custom
+function supplied to \code{summary.flexsurvreg}.   However, specific functions
+for estimating mean and restricted mean survival for built-in distributions have been 
+available since version 1.1 (2017).  
+
+Hence we can now calculate the restricted mean survival in various simpler ways.  
+
 <<>>=
-mean.gengamma <- function(mu, sigma, Q, horizon=100, ...){
-    surv <- function(t, ...) {  1 - pgengamma(q=t, mu=mu, sigma=sigma, Q=Q, ...) }
-    integrate(surv, 0, horizon, ...)$value
-}
-summary(fs2, newdata=list(group="Good"), t=1, fn=mean.gengamma)
-summary(fs2, newdata=list(group="Medium"), t=1, fn=mean.gengamma)
-summary(fs2, newdata=list(group="Poor"), t=1, fn=mean.gengamma)
+summary(fs2, type="rmst", t=100, tidy=TRUE)
+summary(fs2, fn=rmst_gengamma, t=100, tidy=TRUE)
 @ 
+
+Or for the baseline category of "Good": 
+<<>>=
+est <- fs2$res[,"est"]
+rmst_gengamma(t=100, mu=est[1], sigma=est[2], Q=est[3])
+@ 
+
 Note that the (unrestricted) median is more stable, and less than the restricted mean due to the skewness of this distribution. 
 <<>>=
-median.gengamma <- function(mu, sigma, Q) { 
-    qgengamma(0.5, mu=mu, sigma=sigma, Q=Q) 
-}
-summary(fs2, newdata=list(group="Good"), t=1, fn=median.gengamma)
+summary(fs2, type="median")
 @ 
+
+Note also that the custom function \code{fn} 
+supplied to \code{summary.flexsurvreg} must be vectorised - previous versions of this
+example used an unvectorised custom function called \code{mean.gengamma} which will 
+not work in version 2.2 or later.
 
 %\subsection{Custom summary functions with spline models}                   
 
