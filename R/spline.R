@@ -775,7 +775,9 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
     args$bhazard <- temp$bhazard
     args$rtrunc <- temp$rtrunc
     args$subset <- temp$subset
-    if (is.infinite(do.call("flexsurvreg", args)$loglik)){
+    lik_try <- do.call("flexsurvreg", args)$loglik
+    inits_fail <- is.infinite(lik_try) || is.na(lik_try)
+    if (inits_fail){
         args$dist$inits <- flexsurv.splineinits.cox
     }
     args$fixedpars <- fpold
