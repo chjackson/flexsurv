@@ -468,6 +468,7 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
     if (is.null(rawsim)){
       sim[,x$optpars] <- rmvnorm(B, x$opt$par, x$cov)
       sim[,x$fixedpars] <- rep(x$res.t[x$fixedpars,"est"],each=B)
+      rawsim <- sim
     } else {
       sim <- rawsim
     }
@@ -498,6 +499,7 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
         res <- as.data.frame(res)
     }
     attr(res, "X") <- X
+    attr(res, "rawsim") <- rawsim
     res
 }
 

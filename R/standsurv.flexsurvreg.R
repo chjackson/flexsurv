@@ -1,14 +1,121 @@
-standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(), atreference = 1, type = "survival", t = NULL,
+#' Marginal survival and hazards of fitted flexsurvreg models
+#'
+#' Returns a tidy data.frame of marginal survival probabilities or the hazards 
+#' of the marginal survival at user-defined time points and covariate patterns.
+#' Standardization is performed over any undefined covariates in the model. 
+#' The user provides the data to standardize over. Contrasts can be calculated 
+#' resulting in estimates of the average treatment effect or the average 
+#' treatment effect in the treated if a treated subset of the data are supplied.
+#'
+#' The syntax of \code{standsurv.flexreg} follows closely that of Stata's 
+#' \code{standsurv} command written by Paul Lambert and Michael Crowther. The 
+#' function calculates standardized (marginal) measures including standardized
+#' survival functions, standardized restricted mean survival times and the 
+#' hazard of standardized survival. The standardized survival is defined as
+#' \deqn{S_s(t|X=x) = E(S(t|X=x,Z)) = \frac{1}{N} \sum_{i=1}^N S(t|X=x,Z=z_i)}{S(t|X=x) = E[S(t|X=x,Z)] = 1/N * sum(S(t|X=x,Z=z_i))}
+#' The hazard of the standardized survival is a weighted average of 
+#' individual hazard functions at time t, weighted by the survival
+#' function at this time:
+#' \deqn{h_s(t|X=x) = \frac{\sum_{i=1}^N S(t|X=x,Z=z_i)h(t|X=x,Z=z_i)}{\sum_{i=1}^N S(t|X=x,Z=z_i)}}{h(t|X=x) = sum(S(t|X=x,Z=z_i) * h(t|X=x,Z=z_i)) / sum(S(t|X=x,Z=z_i))}
+#' 
+#'
+#' @param object Output from \code{\link{flexsurvreg}} or
+#' \code{\link{flexsurvspline}}, representing a fitted survival model object.
+#' @param newdata Data frame containing covariate values to produce marginal
+##' values for. If not specified then the fitted model data.frame is used.
+##' There must be a column for every covariate in the model formula
+##' for which the user wishes to standardize over.  These are in the same format
+##' as the original data, with factors as a single variable, not 0/1 contrasts.
+##' Any covariates that are to be fixed should be specified in \code{at}. 
+##' There should be one row for every combination of covariates in which to 
+##' standardize over. 
+#' @param at A list of scenarios in which specific covariates are fixed to 
+#' certain values. Each element of \code{at} must itself be a list. For example,
+#' for a covariate \code{group} with levels "Good", "Medium" and "Poor", the 
+#' standardized survival plots for each group averaging over all other 
+#' covariates is specified using 
+#' \code{at=list(list(group="Good"), list(group="Medium"), list(group="Poor"))}.
+#' @param atreference The reference scenario for making contrasts. Default is 1,
+#' (i.e. the first element of \code{at}).
+#' @param type \code{"survival"} for marginal survival probabilities.
+##' 
+##' \code{"hazard"} for the hazard of the marginal survival probability.
+##' 
+##' \code{"rmst"} for standardized restricted mean survival.
+#' @param t Times to calculate marginal values at.
+#' @param ci Should confidence intervals be calculated (using bootstrapping)? 
+#' Defaults to FALSE
+#' @param B Number of simulations from the normal asymptotic distribution of the
+#' estimates used to calculate confidence intervals or standard errors. Decrease
+#' for greater speed at the expense of accuracy.
+#' @param cl Width of symmetric confidence intervals, relative to 1.
+#' @param contrast Contrasts between standardized measures defined by \code{at}
+#' scenarios. Options are \code{"difference"} and \code{"ratio"}. There will be
+#' n-1 new columns created where n is the number of \code{at} scenarios. Default
+#' is NULL (i.e. no contrasts are calculated).
+#' @param seed The random seed to use (for bootstrapping confidence intervals)
+#'
+#' @return A \code{tibble} containing one row for each 
+#' time-point. The column naming convention is \code{at{i}} for the ith scenario
+#' with corresponding confidence intervals (if specified) named \code{at{i}_lci}
+#' and \code{at{i}_uci}. Contrasts are named \code{contrast{k}_{j}} for the 
+#' comparison of the kth versus the jth \code{at} scenario.
+#' 
+#' In addition tidy long-format data.frames are returned in the attributes
+#' \code{standsurv_at} and \code{standsurv_contrast}. These can be passed to 
+#' \code{ggplot} for plotting purposes (see \code{\link{plot.standsurv}}).
+#' @export
+#' @author Michael Sweeting <michael.sweeting@@astrazeneca.com>
+#' @references Paul Lambert, 2021. "STANDSURV: Stata module to compute 
+#' standardized (marginal) survival and related functions," 
+#' Statistical Software Components S458991, Boston College Department of 
+#' Economics. https://ideas.repec.org/c/boc/bocode/s458991.html
+#' @examples
+#' ## Use bc dataset, with an age variable appended
+#' newbc <- bc 
+#' newbc$age <- rnorm(dim(bc)[1], mean = 65, sd = 5)
+#' 
+#' ## Fit a Weibull flexsurv model with group and age as covariates
+#' weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc, 
+#'                        dist="weibull")
+#'                        
+#'## Calculate standardized survival and the difference in standardized survival
+#'## for the three levels of group across a grid of survival times                        
+#'standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
+#'                                            at = list(list(group="Good"), 
+#'                                                      list(group="Medium"), 
+#'                                                      list(group="Poor")), 
+#'                                            t=seq(0,7, length=100),
+#'                                            contrast = "difference", ci=F)
+#'standsurv_weib_age
+#'
+#'## Calculate hazard of standardized survival and the marginal hazard ratio
+#'## for the three levels of group across a grid of survival times
+#'## 10 bootstraps for confidence intervals (this should be larger)          
+#'haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
+#'                                            at = list(list(group="Good"), 
+#'                                                      list(group="Medium"), 
+#'                                                      list(group="Poor")), 
+#'                                            t=seq(0,7, length=100),
+#'                                            type="hazard",
+#'                                            contrast = "ratio", B=10, ci=T)
+#'haz_standsurv_weib_age                                            
+#'plot(haz_standsurv_weib_age, ci=T)
+#'## Hazard ratio plot shows a decreasing marginal HR since survivors become more
+#'## homogeneous in terms of age.
+#'## Whereas the conditional HR is constant (model is a PH model)
+#'plot(haz_standsurv_weib_age, contrast=T, ci=T)
+standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, type = "survival", t = NULL,
                                   ci = FALSE, B = 1000, cl =0.95, contrast = NULL, seed = NULL) {
   x <- object
   
   if(!is.null(seed)) set.seed(seed)
   
   ## Add checks
-  ## Currently restricted to survival or rmst 
-  type <- match.arg(type, c("survival", "rmst"))
+  ## Currently restricted to survival, hazard or rmst 
+  type <- match.arg(type, c("survival", "hazard", "rmst"))
   contrast <- match.arg(contrast, c("difference", "ratio"))
-  ## Currently does not calculate CIs 
+  
   
   ## Check that at is a list and that all elements of at are lists
   if(!is.list(at)){
@@ -20,33 +127,41 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(), atreferen
   
   ## Contrast numbers
   cnums <- (1:length(at))[-atreference]
-  
-  ## Standardise over fitted dataset by default
+
+  ## Standardize over fitted dataset by default
   if(is.null(newdata)){
     data <- model.frame(x)
   } else{
     data <- newdata
   }
 
-  ## If at is not specified then no further manipulation of data is required, we standardise over original or passes dataset
   stand.pred.list <- list()
   for(i in 1:length(at)){
     dat <- data
     covs <- at[[i]]
     covnames <- names(covs)
-    for (j in 1:length(covnames)) dat[, covnames[j]] <- covs[j]
- 
-    pred <- summary(object, type = type, tidy = T, newdata=dat, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := mean(est))
+    ## If at is not specified then no further manipulation of data is required, 
+    ## we standardize over original or passes dataset
+    if(!is.null(covnames)){
+      for(j in 1:length(covnames)) dat[, covnames[j]] <- covs[j]
+    } 
+   
+    predsum <- standsurv.fn(object, type = type, newdata=dat, t=t, i=i)  
     
     if(ci == TRUE){
-  
-      if(i==1)      rawsim <- normboot.flexsurvreg(object, B=B, raw=T) ## only run this once, not for every specified _at
+      
+      if(i==1)      rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
   
       X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
       sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
-      
-      stand.pred <- apply(sim.pred, c(2,3), mean)
+      if(type=="hazard"){
+        # Weight individual hazards by survival function to get hazard of the standardized survival
+        haz <- sim.pred
+        surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
+        stand.pred <- apply(haz*surv, c(2,3),sum) / apply(surv,c(2,3),sum)
+      } else {
+        stand.pred <- apply(sim.pred, c(2,3), mean)
+      }
       stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
       stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
       
@@ -82,8 +197,179 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(), atreferen
       }
     }
   }
+  label <- unlist(lapply(at,function(k){paste(names(k),k,sep="=",collapse=", ")}))
+  attr(standpred, "label") <- label
+  attr(standpred, "type") <- type
+  attr(standpred, "contrast") <- contrast
+  attr(standpred, "at") <- at
+  attr(standpred, "atreference") <- atreference
+  class(standpred) <- c(class(standpred), "standsurv")
+  
+  ## Create tidy versions of the data.frame and store as attributes
+  standpred <- tidy(standpred)
   
   standpred
 }
 
+
+standsurv.fn <- function(object, type, newdata, t, i){
+  if(type!="hazard"){
+    pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := mean(est))
+  } else if(type=="hazard"){
+    pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
+    names(pred)[names(pred)=="est"] <- "h"
+    pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := weighted.mean(h,S))
+  }
+  predsum
+}
+
+
+#' Tidy a standsurv object. 
+#' 
+#' This function is used internally by \code{standsurv.flexsurvreg} and tidy
+#' data.frames are automatically returned by the function.
+#'
+#' @param object A standsurv object.
+#'
+#' @return Returns additional tidy data.frames (tibbles)
+#' stored as attributes named standpred_at and standpred_contrast.
+#' @export
+#'
+tidy.standsurv <- function(object){
+  standpred <- object
+  at <-attributes(standpred)$at
+  atreference <- attributes(standpred)$atreference
+  type <- attributes(standpred)$type
+  label <- attributes(standpred)$label
+  contrast <- attributes(standpred)$contrast
+  ci <- any(grepl("_lci",names(standpred)))
+  
+  class(standpred) <- class(standpred)[class(standpred)!="standsurv"]
+
+  standpred_at <- standpred %>% 
+    select(c("time",matches("at[0-9]+$"))) %>%
+    pivot_longer(cols=matches("at[0-9]+$"),
+                 names_to = "at",
+                 values_to = type,
+                 names_prefix = "at")
+  if(ci){
+    standpred_at_lci <- standpred %>% 
+      select(c("time",matches("at[0-9]+_lci"))) %>%
+      pivot_longer(cols=matches("at[0-9]+_lci"),
+                   names_to = "at",
+                   names_pattern = "at(.+)_lci",
+                   values_to = paste0(type,"_lci"))
+    standpred_at_uci <- standpred %>% 
+      select(c("time",matches("at[0-9]+_uci"))) %>%
+      pivot_longer(cols=matches("at[0-9]+_uci"),
+                   names_to = "at",
+                   names_pattern = "at(.+)_uci",
+                   values_to = paste0(type,"_uci"))
+    standpred_at <- standpred_at %>% inner_join(standpred_at_lci, by=c("time","at")) %>%
+      inner_join(standpred_at_uci, by=c("time","at"))
+  }
+  for(i in 1:length(at)){
+    standpred_at <- standpred_at %>% 
+      mutate(at = replace(at, at==i,
+                          label[i]))
+  }  
+  attr(standpred,"standpred_at") <- standpred_at
+  if(!is.null(contrast)){
+    ## Contrast numbers
+    cnums <- (1:length(at))[-atreference]
+    standpred_contrast <- standpred %>% 
+      select(c("time",matches("contrast[0-9]+_[0-9]+$"))) %>%
+      pivot_longer(cols=matches("contrast[0-9]+_[0-9]+$"),
+                   names_to = "contrast",
+                   values_to = contrast,
+                   names_prefix = "contrast")
+    if(ci){
+      standpred_contrast_lci <- standpred %>% 
+        select(c("time",matches("contrast[0-9]+_[0-9]+_lci"))) %>%
+        pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_lci"),
+                     names_to = "contrast",
+                     names_pattern = "contrast(.+)_lci",
+                     values_to = paste0(contrast,"_lci"))
+      standpred_contrast_uci <- standpred %>% 
+        select(c("time",matches("contrast[0-9]+_[0-9]+_uci"))) %>%
+        pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_uci"),
+                     names_to = "contrast",
+                     names_pattern = "contrast(.+)_uci",
+                     values_to = paste0(contrast,"_uci"))
+      standpred_contrast <- standpred_contrast %>% inner_join(standpred_contrast_lci, by=c("time","contrast")) %>%
+        inner_join(standpred_contrast_uci, by=c("time","contrast"))
+    }
+    for(i in cnums){
+      standpred_contrast <- standpred_contrast %>% 
+        mutate(contrast = replace(contrast, contrast==paste0(i,"_",atreference),
+                                  paste0(label[i]," vs ",label[atreference])))
+    }  
+    attr(standpred,"standpred_contrast") <- standpred_contrast
+  }
+  class(standpred) <- c("standsurv",class(standpred))
+  standpred
+}
+
+
+#' Plot standardized metrics from a fitted flexsurv model
+#'
+#' Plot standardized metrics such as the marginal survival, restricted mean 
+#' survival and hazard, based on a fitted flexsurv model.
+#' 
+#' @param x A standsurv object returned by \code{standsurv.flexsurvreg}
+#' @param contrast Should contrasts of standardized metrics be plotted. Defaults
+#' to FALSe
+#' @param ci Should confidence intervals be plotted (if calculated in 
+#' \code{standsurv.flexsurvreg})? 
+#'
+#' @return A ggplot showing the standardized metric calculated by 
+#' \code{standsurv.flexsurvreg} over time. Modification of the plot is
+#' possible by adding further ggplot objects, see Examples.
+#' @export
+#'
+#' @examples
+#'## Use bc dataset, with an age variable appended
+#'## mean age is higher in those with smaller observed survival times 
+#'newbc <- bc
+#'newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=F), sd = 5)
+#'
+#'## Fit a Weibull flexsurv model with group and age as covariates
+#'weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc,
+#'                        dist="weibull")
+#'## Calculate standardized survival and the difference in standardized survival
+#'## for the three levels of group across a grid of survival times
+#'standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
+#'                                            at = list(list(group="Good"),
+#'                                                      list(group="Medium"),
+#'                                                      list(group="Poor")),
+#'                                            t=seq(0,7, length=100),
+#'                                            contrast = "difference", ci=T,
+#'                                            B=10, seed=123)
+#'plot(standsurv_weib_age)
+#'plot(standsurv_weib_age) + theme_bw() + ylab("Survival") +
+#'  xlab("Time (years)") + guides(color=guide_legend(title="Prognosis"),
+#'                                fill=guide_legend(title="Prognosis"))
+#'plot(standsurv_weib_age, contrast=T, ci=T) + ylab("Difference in survival") 
+plot.standsurv <- function(x, contrast = FALSE, ci = TRUE){
+  if(!contrast){
+    obj <- attributes(x)$standpred_at
+    y <- attributes(x)$type
+    group <- "at"
+  } else {
+    obj <- attributes(x)$standpred_contrast
+    y <- attributes(x)$contrast
+    group <- "contrast"
+  }
+  p <- ggplot(obj, aes(x=time)) + geom_line(aes_(y=as.name(y),color=as.name(group))) + xlab("Time")
+  if(ci){
+    if(any(grepl("_lci",names(obj)))){
+      p <- p + geom_ribbon(aes_(ymin=as.name(paste0(y,"_lci")),ymax=as.name(paste0(y,"_uci")),
+                              fill= as.name(group)),alpha=0.2)
+    } else warning("Confidence intervals have not been calculated in standsurv. None will be plotted")
+  }
+  p
+}
+                           
 
