@@ -18,3 +18,5 @@ man/simulate*
 tests/testthat/simulate*
 /doc/
 /Meta/
+.#*
+R/#*
