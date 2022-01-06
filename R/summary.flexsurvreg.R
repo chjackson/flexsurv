@@ -178,9 +178,9 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
      }
      if (se) res$se <-  res.ci[3,]
  }
- nodata <- is.null(x[["data"]])
+ nodata <- is.null(attr(args, "newdata")) 
  if (x$ncovs > 0 && !nodata) {
-   res <- cbind(res, attr(args, "newdata"))
+     res <- cbind(res, attr(args, "newdata"))
  }
  rownames(res) <- NULL
  if (!tidy){ ## For backwards compatibility
@@ -203,10 +203,17 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
 
 
 newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
-    if (!is.null(X)) return(X)
+    if (!is.null(X)) {
+        X <- as.matrix(X)
+        if (!is.matrix(X) || (is.matrix(X) && ncol(X) != x$ncoveffs)) {
+            plural <- if (x$ncoveffs > 1) "s" else ""
+            stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " element", plural)
+        }
+        attr(X, "newdata") <- as.data.frame(X)
+    }
     else if (is.null(x[["data"]]))
         stop("Covariate contrasts matrix `X` should be supplied explicitly if the data are not included in the model object")
-    if (is.null(newdata)){
+    else if (is.null(newdata)){
         Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
         isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
         if (is.vector(X)) X <- matrix(X, nrow=1)
@@ -228,15 +235,12 @@ newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
             }
         }
         else if (is.null(X)) X <- as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1))
-        else if (!is.matrix(X) || (is.matrix(X) && ncol(X) != x$ncoveffs)) {
-            plural <- if (x$ncoveffs > 1) "s" else ""
-            stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " element", plural)
-        }
         else {
             attr(X, "newdata") <- X
             colnames(attr(X, "newdata")) <- colnames(model.matrix(x))
         }
-    } else
+    }
+    else
         X <- form.model.matrix(x, as.data.frame(newdata), na.action=na.action)
     X	
 }
