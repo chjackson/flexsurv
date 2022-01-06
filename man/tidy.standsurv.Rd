@@ -4,10 +4,12 @@
 \alias{tidy.standsurv}
 \title{Tidy a standsurv object.}
 \usage{
-\method{tidy}{standsurv}(object)
+\method{tidy}{standsurv}(x, ...)
 }
 \arguments{
-\item{object}{A standsurv object.}
+\item{x}{A standsurv object.}
+
+\item{...}{Not currently used.}
 }
 \value{
 Returns additional tidy data.frames (tibbles)

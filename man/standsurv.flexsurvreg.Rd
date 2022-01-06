@@ -97,9 +97,10 @@ function at this time:
 \deqn{h_s(t|X=x) = \frac{\sum_{i=1}^N S(t|X=x,Z=z_i)h(t|X=x,Z=z_i)}{\sum_{i=1}^N S(t|X=x,Z=z_i)}}{h(t|X=x) = sum(S(t|X=x,Z=z_i) * h(t|X=x,Z=z_i)) / sum(S(t|X=x,Z=z_i))}
 }
 \examples{
-## Use bc dataset, with an age variable appended
-newbc <- bc 
-newbc$age <- rnorm(dim(bc)[1], mean = 65, sd = 5)
+## mean age is higher in those with smaller observed survival times 
+newbc <- bc
+newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE),
+ sd = 5)
 
 ## Fit a Weibull flexsurv model with group and age as covariates
 weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc, 
@@ -112,7 +113,7 @@ standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
                                                      list(group="Medium"), 
                                                      list(group="Poor")), 
                                            t=seq(0,7, length=100),
-                                           contrast = "difference", ci=F)
+                                           contrast = "difference", ci=FALSE)
 standsurv_weib_age
 
 ## Calculate hazard of standardized survival and the marginal hazard ratio
@@ -124,13 +125,12 @@ haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
                                                      list(group="Poor")), 
                                            t=seq(0,7, length=100),
                                            type="hazard",
-                                           contrast = "ratio", B=10, ci=T)
+                                           contrast = "ratio", B=10, ci=TRUE)
 haz_standsurv_weib_age                                            
-plot(haz_standsurv_weib_age, ci=T)
-## Hazard ratio plot shows a decreasing marginal HR since survivors become more
-## homogeneous in terms of age.
+plot(haz_standsurv_weib_age, ci=TRUE)
+## Hazard ratio plot shows a decreasing marginal HR 
 ## Whereas the conditional HR is constant (model is a PH model)
-plot(haz_standsurv_weib_age, contrast=T, ci=T)
+plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
 }
 \references{
 Paul Lambert, 2021. "STANDSURV: Stata module to compute 

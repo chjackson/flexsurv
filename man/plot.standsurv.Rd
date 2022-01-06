@@ -4,16 +4,18 @@
 \alias{plot.standsurv}
 \title{Plot standardized metrics from a fitted flexsurv model}
 \usage{
-\method{plot}{standsurv}(x, contrast = FALSE, ci = TRUE)
+\method{plot}{standsurv}(x, contrast = FALSE, ci = TRUE, ...)
 }
 \arguments{
 \item{x}{A standsurv object returned by \code{standsurv.flexsurvreg}}
 
 \item{contrast}{Should contrasts of standardized metrics be plotted. Defaults
-to FALSe}
+to FALSE}
 
 \item{ci}{Should confidence intervals be plotted (if calculated in 
 \code{standsurv.flexsurvreg})?}
+
+\item{...}{Not currently used}
 }
 \value{
 A ggplot showing the standardized metric calculated by 
@@ -28,7 +30,8 @@ survival and hazard, based on a fitted flexsurv model.
 ## Use bc dataset, with an age variable appended
 ## mean age is higher in those with smaller observed survival times 
 newbc <- bc
-newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=F), sd = 5)
+newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE), 
+sd = 5)
 
 ## Fit a Weibull flexsurv model with group and age as covariates
 weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc,
@@ -40,11 +43,13 @@ standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
                                                      list(group="Medium"),
                                                      list(group="Poor")),
                                            t=seq(0,7, length=100),
-                                           contrast = "difference", ci=T,
+                                           contrast = "difference", ci=TRUE,
                                            B=10, seed=123)
 plot(standsurv_weib_age)
-plot(standsurv_weib_age) + theme_bw() + ylab("Survival") +
- xlab("Time (years)") + guides(color=guide_legend(title="Prognosis"),
-                               fill=guide_legend(title="Prognosis"))
-plot(standsurv_weib_age, contrast=T, ci=T) + ylab("Difference in survival") 
+plot(standsurv_weib_age) + ggplot2::theme_bw() + ggplot2::ylab("Survival") +
+ ggplot2::xlab("Time (years)") + 
+ ggplot2::guides(color=ggplot2::guide_legend(title="Prognosis"),
+                               fill=ggplot2::guide_legend(title="Prognosis"))
+plot(standsurv_weib_age, contrast=TRUE, ci=TRUE) + 
+ ggplot2::ylab("Difference in survival") 
 }

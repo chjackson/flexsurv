@@ -64,6 +64,10 @@
 #' In addition tidy long-format data.frames are returned in the attributes
 #' \code{standsurv_at} and \code{standsurv_contrast}. These can be passed to 
 #' \code{ggplot} for plotting purposes (see \code{\link{plot.standsurv}}).
+#' @importFrom tibble as_tibble
+#' @importFrom rlang :=
+#' @importFrom dplyr bind_cols
+#' @importFrom dplyr inner_join
 #' @export
 #' @author Michael Sweeting <michael.sweeting@@astrazeneca.com>
 #' @references Paul Lambert, 2021. "STANDSURV: Stata module to compute 
@@ -71,9 +75,10 @@
 #' Statistical Software Components S458991, Boston College Department of 
 #' Economics. https://ideas.repec.org/c/boc/bocode/s458991.html
 #' @examples
-#' ## Use bc dataset, with an age variable appended
-#' newbc <- bc 
-#' newbc$age <- rnorm(dim(bc)[1], mean = 65, sd = 5)
+#'## mean age is higher in those with smaller observed survival times 
+#' newbc <- bc
+#' newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE),
+#'  sd = 5)
 #' 
 #' ## Fit a Weibull flexsurv model with group and age as covariates
 #' weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc, 
@@ -86,7 +91,7 @@
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
 #'                                            t=seq(0,7, length=100),
-#'                                            contrast = "difference", ci=F)
+#'                                            contrast = "difference", ci=FALSE)
 #'standsurv_weib_age
 #'
 #'## Calculate hazard of standardized survival and the marginal hazard ratio
@@ -98,13 +103,12 @@
 #'                                                      list(group="Poor")), 
 #'                                            t=seq(0,7, length=100),
 #'                                            type="hazard",
-#'                                            contrast = "ratio", B=10, ci=T)
+#'                                            contrast = "ratio", B=10, ci=TRUE)
 #'haz_standsurv_weib_age                                            
-#'plot(haz_standsurv_weib_age, ci=T)
-#'## Hazard ratio plot shows a decreasing marginal HR since survivors become more
-#'## homogeneous in terms of age.
+#'plot(haz_standsurv_weib_age, ci=TRUE)
+#'## Hazard ratio plot shows a decreasing marginal HR 
 #'## Whereas the conditional HR is constant (model is a PH model)
-#'plot(haz_standsurv_weib_age, contrast=T, ci=T)
+#'plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
 standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, type = "survival", t = NULL,
                                   ci = FALSE, B = 1000, cl =0.95, contrast = NULL, seed = NULL) {
   x <- object
@@ -163,7 +167,8 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
         stand.pred <- apply(sim.pred, c(2,3), mean)
       }
       stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
-      stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
+      stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% 
+        rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
       
       predsum <- predsum %>% bind_cols(stand.pred.quant)
       stand.pred.list[[i]] <- stand.pred
@@ -211,16 +216,18 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   standpred
 }
 
-
+#' @importFrom dplyr group_by
+#' @importFrom dplyr summarise
+#' @import rlang
 standsurv.fn <- function(object, type, newdata, t, i){
   if(type!="hazard"){
     pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := mean(est))
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := mean(.data$est))
   } else if(type=="hazard"){
     pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
     names(pred)[names(pred)=="est"] <- "h"
     pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := weighted.mean(h,S))
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := weighted.mean(.data$h,.data$S))
   }
   predsum
 }
@@ -231,14 +238,20 @@ standsurv.fn <- function(object, type, newdata, t, i){
 #' This function is used internally by \code{standsurv.flexsurvreg} and tidy
 #' data.frames are automatically returned by the function.
 #'
-#' @param object A standsurv object.
+#' @param x A standsurv object.
+#' @param ... Not currently used.
 #'
 #' @return Returns additional tidy data.frames (tibbles)
 #' stored as attributes named standpred_at and standpred_contrast.
+#' @importFrom dplyr select
+#' @importFrom dplyr inner_join
+#' @importFrom dplyr mutate
+#' @importFrom tidyr pivot_longer
+#' @importFrom tidyselect matches
 #' @export
 #'
-tidy.standsurv <- function(object){
-  standpred <- object
+tidy.standsurv <- function(x, ...){
+  standpred <- x
   at <-attributes(standpred)$at
   atreference <- attributes(standpred)$atreference
   type <- attributes(standpred)$type
@@ -320,20 +333,23 @@ tidy.standsurv <- function(object){
 #' 
 #' @param x A standsurv object returned by \code{standsurv.flexsurvreg}
 #' @param contrast Should contrasts of standardized metrics be plotted. Defaults
-#' to FALSe
+#' to FALSE
 #' @param ci Should confidence intervals be plotted (if calculated in 
 #' \code{standsurv.flexsurvreg})? 
+#' @param ... Not currently used
 #'
 #' @return A ggplot showing the standardized metric calculated by 
 #' \code{standsurv.flexsurvreg} over time. Modification of the plot is
 #' possible by adding further ggplot objects, see Examples.
+#' @import ggplot2
 #' @export
 #'
 #' @examples
 #'## Use bc dataset, with an age variable appended
 #'## mean age is higher in those with smaller observed survival times 
 #'newbc <- bc
-#'newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=F), sd = 5)
+#'newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE), 
+#' sd = 5)
 #'
 #'## Fit a Weibull flexsurv model with group and age as covariates
 #'weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc,
@@ -345,14 +361,16 @@ tidy.standsurv <- function(object){
 #'                                                      list(group="Medium"),
 #'                                                      list(group="Poor")),
 #'                                            t=seq(0,7, length=100),
-#'                                            contrast = "difference", ci=T,
+#'                                            contrast = "difference", ci=TRUE,
 #'                                            B=10, seed=123)
 #'plot(standsurv_weib_age)
-#'plot(standsurv_weib_age) + theme_bw() + ylab("Survival") +
-#'  xlab("Time (years)") + guides(color=guide_legend(title="Prognosis"),
-#'                                fill=guide_legend(title="Prognosis"))
-#'plot(standsurv_weib_age, contrast=T, ci=T) + ylab("Difference in survival") 
-plot.standsurv <- function(x, contrast = FALSE, ci = TRUE){
+#'plot(standsurv_weib_age) + ggplot2::theme_bw() + ggplot2::ylab("Survival") +
+#'  ggplot2::xlab("Time (years)") + 
+#'  ggplot2::guides(color=ggplot2::guide_legend(title="Prognosis"),
+#'                                fill=ggplot2::guide_legend(title="Prognosis"))
+#'plot(standsurv_weib_age, contrast=TRUE, ci=TRUE) + 
+#'  ggplot2::ylab("Difference in survival") 
+plot.standsurv <- function(x, contrast = FALSE, ci = TRUE, ...){
   if(!contrast){
     obj <- attributes(x)$standpred_at
     y <- attributes(x)$type

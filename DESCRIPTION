@@ -44,12 +44,12 @@ Imports:
     tibble,
     tidyr,
     dplyr,
-    tidyselect
+    tidyselect,
+    ggplot2
 Encoding: UTF-8
 Suggests:
     colorspace,
     eha,
-    ggplot2,
     knitr,
     msm,
     testthat,

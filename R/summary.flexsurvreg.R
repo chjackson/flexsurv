@@ -517,7 +517,7 @@ normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B, raw
       fncall0[[names(x$aux)[j]]] <- x$aux[[j]]
     for (k in 1:nrow(X)){
         for (i in seq(length=B)) {
-          fncall <- c(fncall0, lapply(sim[[k]][i,], function(z) z))
+          fncall <- c(fncall0, lapply(sim[[k]][i,seq(along=x$dlist$pars)], function(z) z))
           ret[k,i,] <- do.call(fn, fncall)
         }
     }
