@@ -20,3 +20,5 @@ tests/testthat/simulate*
 /Meta/
 .#*
 R/#*
+/temp/
+

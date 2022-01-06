@@ -433,6 +433,12 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 ##' effects, rather than the default of adjusting the baseline parameters for
 ##' covariates.
 ##'
+##' @param rawsim allows input of raw samples from a previous run of 
+##' \code{normboot.flexsurvreg}. This is useful if running 
+##' \code{normboot.flexsurvreg} multiple time on the same dataset but with 
+##' counterfactual contrasts, e.g. treat =0 vs. treat  =1.
+##' Used in \code{standsurv.flexsurvreg}.
+##' 
 ##' @param tidy If \code{FALSE} (the default) then
 ##' a list is returned.  If \code{TRUE} a data frame is returned, consisting
 ##' of the list elements \code{rbind}ed together, with integer variables
@@ -459,7 +465,7 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 ##'     normboot.flexsurvreg(fite, B=10, newdata=list(age=0))  ## closer to...
 ##'     fite$res
 ##' @export
-normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, raw=FALSE, tidy=FALSE){
+normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, raw=FALSE, tidy=FALSE, rawsim=NULL){
     if (x$ncovs > 0 && !raw) {
         if (is.null(X)) {
             if (is.null(newdata)) stop("neither \"newdata\" nor \"X\" supplied")
@@ -469,8 +475,13 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
     sim <- matrix(nrow=B, ncol=nrow(x$res))
     colnames(sim) <- rownames(x$res)
     if (is.na(x$cov[1])) stop("Covariance matrix not available from non-converged model")
-    sim[,x$optpars] <- rmvnorm(B, x$opt$par, x$cov)
-    sim[,x$fixedpars] <- rep(x$res.t[x$fixedpars,"est"],each=B)
+    if (is.null(rawsim)){
+      sim[,x$optpars] <- rmvnorm(B, x$opt$par, x$cov)
+      sim[,x$fixedpars] <- rep(x$res.t[x$fixedpars,"est"],each=B)
+      rawsim <- sim
+    } else {
+      sim <- rawsim
+    }
     if (x$ncovs > 0 && !raw){
         beta <- sim[, x$covpars, drop=FALSE]
         if (nrow(X)==1){
@@ -498,6 +509,7 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
         res <- as.data.frame(res)
     }
     attr(res, "X") <- X
+    attr(res, "rawsim") <- rawsim
     res
 }
 
@@ -505,19 +517,18 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
 ### defined function, at supplied times t and covariates X, using
 ### random sample of size B from the assumed MVN distribution of MLEs.
 
-normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B){
-    sim <- normboot.flexsurvreg(x, B, newdata=newdata, X=X)
+normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B, rawsim=NULL){
+    sim <- normboot.flexsurvreg(x, B, newdata=newdata, X=X, rawsim=rawsim)
     X <- attr(sim, "X")
     if (!is.list(sim)) sim <- list(sim)
     ret <- array(NA_real_, dim=c(nrow(X), B, length(t)))
+    fncall0 <- list(t,start)
+    for (j in seq_along(x$aux))
+      fncall0[[names(x$aux)[j]]] <- x$aux[[j]]
     for (k in 1:nrow(X)){
         for (i in seq(length=B)) {
-            fncall <- list(t,start)
-            for (j in seq(along=x$dlist$pars))
-                fncall[[x$dlist$pars[j]]] <- sim[[k]][i,j]
-            for (j in seq_along(x$aux))
-                fncall[[names(x$aux)[j]]] <- x$aux[[j]]
-            ret[k,i,] <- do.call(fn, fncall)
+          fncall <- c(fncall0, lapply(sim[[k]][i,seq(along=x$dlist$pars)], function(z) z))
+          ret[k,i,] <- do.call(fn, fncall)
         }
     }
     if (nrow(X)==1) ret[1,,,drop=FALSE] else ret

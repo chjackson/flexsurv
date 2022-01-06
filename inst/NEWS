@@ -1,6 +1,6 @@
 -*- text -*-
 
-Version 2.2 (2021-11-??)
+Version 2.2 (2022-01-??)
 -------------------------
 
 * `summary.flexsurvreg` has been rewritten to make it cleaner and
@@ -20,6 +20,10 @@ Version 2.2 (2021-11-??)
 * New function `hr_flexsurvreg` to compute the hazard ratio from a
   fitted flexsurvreg or flexsurvspline model as a function of time,
   with confidence intervals.
+
+* New function `standsurv.flexsurvreg` for survival and hazards
+  standardised over an observed distribution for covariates. 
+  Contributed by Michael Sweeting <michael.sweeting@@astrazeneca.com>. 
 
 * New functions for Cox-Snell residuals: `coxsnell_flexsurvreg` or
   residuals(..., type="coxsnell").

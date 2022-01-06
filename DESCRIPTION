@@ -12,6 +12,8 @@ Authors@R: c(person("Christopher", "Jackson",
          role=c("ctb")),
          person("Matthew T.", "Warkentin",
          role = c("ctb")),
+         person("Michael", "Sweeting",
+         role = c("ctb")),
          person("Kevin", "Kunzmann",
          role = c("ctb"))
 	   )
@@ -44,12 +46,12 @@ Imports:
     tibble,
     tidyr,
     dplyr,
-    tidyselect
+    tidyselect,
+    ggplot2
 Encoding: UTF-8
 Suggests:
     colorspace,
     eha,
-    ggplot2,
     knitr,
     msm,
     testthat,
