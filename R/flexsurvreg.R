@@ -988,8 +988,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
 ##' @export
 print.flexsurvreg <- function(x, ...)
 {
-    covmeans <- colMeans(model.matrix(x))
-    covs <- names(covmeans)
+    covs <- names(x$datameans)
     covinds <- match(covs, rownames(x$res))
     cat("Call:\n")
     dput(x$call)
@@ -1002,7 +1001,7 @@ print.flexsurvreg <- function(x, ...)
             colnames(ecoefs) <- c("exp(est)", colnames(res)[2:3])
             means <- rep(NA,nrow(x$res))
             ecoefs[covinds,] <- exp(x$res[covinds,1:3,drop=FALSE])
-            means[covinds] <- covmeans
+            means[covinds] <- x$datameans
             res <- cbind(means, res, ecoefs)
             colnames(res)[1] <- "data mean"
         }
