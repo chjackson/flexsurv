@@ -58,17 +58,20 @@
 NULL
 
 ##' @export
+##' @rdname Llogis
 dllogis <- function(x, shape=1, scale=1, log = FALSE)
 {
     dllogis_work(x, shape, scale, log)
 }
 
 ##' @export
+##' @rdname Llogis
 pllogis <- function(q, shape=1, scale=1, lower.tail = TRUE, log.p = FALSE) {
     pllogis_work(q, shape, scale, lower.tail, log.p)
 }
 
 ##' @export
+##' @rdname Llogis
 qllogis <- function(p, shape=1, scale=1, lower.tail = TRUE, log.p = FALSE) {
     d <- dbase("llogis", lower.tail=lower.tail, log=log.p, p=p, shape=shape, scale=scale)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
@@ -78,6 +81,7 @@ qllogis <- function(p, shape=1, scale=1, lower.tail = TRUE, log.p = FALSE) {
 }
 
 ##' @export
+##' @rdname Llogis
 rllogis <- function(n, shape=1, scale=1){
     r <- rbase("llogis", n=n, shape=shape, scale=scale)
     for (i in seq_along(r)) assign(names(r)[i], r[[i]])
@@ -86,6 +90,7 @@ rllogis <- function(n, shape=1, scale=1){
 } 
 
 ##' @export
+##' @rdname Llogis
 hllogis <- function(x, shape=1, scale=1, log = FALSE) 
 {
     h <- dbase("llogis", log=log, x=x, shape=shape, scale=scale)
@@ -96,6 +101,7 @@ hllogis <- function(x, shape=1, scale=1, log = FALSE)
 }
 
 ##' @export
+##' @rdname Llogis
 Hllogis <- function(x, shape=1, scale=1, log = FALSE) 
 {
     ret <- - pllogis(x, shape, scale, lower.tail=FALSE, log.p=TRUE)
@@ -122,6 +128,7 @@ DLSllogis <- function(t, shape, scale){
 }
 
 ##' @export
+##' @rdname means
 mean_llogis <- function(shape=1, scale=1){
     ifelse(shape > 1,
        {b <- pi/shape
@@ -130,6 +137,7 @@ mean_llogis <- function(shape=1, scale=1){
 }
 
 ##' @export
+##' @rdname means
 rmst_llogis = function(t, shape=1, scale=1, start=0){
   rmst_generic(pllogis, t, start=start, shape=shape, scale=scale)
 }
