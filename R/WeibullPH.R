@@ -51,11 +51,13 @@
 NULL
 
 ##' @export
+##' @rdname WeibullPH
 dweibullPH <- function(x, shape, scale = 1, log=FALSE) {
     dweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
 }
 
 ##' @export
+##' @rdname WeibullPH
 pweibullPH <- function(q, shape, scale = 1,
                        lower.tail=TRUE, log.p=FALSE) {
     pweibull(q, shape=shape, scale=scale^{-1/shape},
@@ -63,32 +65,38 @@ pweibullPH <- function(q, shape, scale = 1,
 }
 
 ##' @export
+##' @rdname WeibullPH
 qweibullPH <- function(p, shape, scale = 1, lower.tail=TRUE, log.p=FALSE) {
     qweibull(p, shape=shape, scale=scale^{-1/shape},
              lower.tail=lower.tail, log.p=log.p)
 }
 
 ##' @export
+##' @rdname WeibullPH
 hweibullPH <- function(x, shape, scale = 1, log=FALSE) {
     hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
 }
 
 ##' @export
+##' @rdname WeibullPH
 HweibullPH <- function(x, shape, scale=1, log=FALSE) {
     Hweibull(x, shape=shape, scale=scale^{-1/shape}, log=log)
 }
 
 ##' @export
+##' @rdname WeibullPH
 rweibullPH <- function(n, shape, scale=1) {
     rweibull(n, shape=shape, scale=scale^{-1/shape})
 }
 
 ##' @export
+##' @rdname means
 rmst_weibullPH = function(t, shape, scale=1, start=0){
   rmst_generic(pweibullPH, t, start=start, shape=shape, scale=scale)
 }
 
 ##' @export
+##' @rdname means
 mean_weibullPH = function(shape, scale=1){
   mean_weibull(shape=shape, scale=scale^{-1/shape})
 }

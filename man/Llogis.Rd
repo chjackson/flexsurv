@@ -9,13 +9,21 @@
 \alias{Hllogis}
 \alias{rllogis}
 \title{The log-logistic distribution}
+\usage{
+dllogis(x, shape = 1, scale = 1, log = FALSE)
+
+pllogis(q, shape = 1, scale = 1, lower.tail = TRUE, log.p = FALSE)
+
+qllogis(p, shape = 1, scale = 1, lower.tail = TRUE, log.p = FALSE)
+
+rllogis(n, shape = 1, scale = 1)
+
+hllogis(x, shape = 1, scale = 1, log = FALSE)
+
+Hllogis(x, shape = 1, scale = 1, log = FALSE)
+}
 \arguments{
 \item{x, q}{vector of quantiles.}
-
-\item{p}{vector of probabilities.}
-
-\item{n}{number of observations. If \code{length(n) > 1}, the
-length is taken to be the number required.}
 
 \item{shape, scale}{vector of shape and scale parameters.}
 
@@ -24,6 +32,11 @@ log(p).}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are
 \eqn{P(X \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{vector of probabilities.}
+
+\item{n}{number of observations. If \code{length(n) > 1}, the
+length is taken to be the number required.}
 }
 \value{
 \code{dllogis} gives the density, \code{pllogis} gives the
