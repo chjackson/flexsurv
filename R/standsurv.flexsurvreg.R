@@ -208,7 +208,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   attr(standpred, "contrast") <- contrast
   attr(standpred, "at") <- at
   attr(standpred, "atreference") <- atreference
-  class(standpred) <- c(class(standpred), "standsurv")
+  class(standpred) <- c("standsurv", class(standpred))
   
   ## Create tidy versions of the data.frame and store as attributes
   standpred <- tidy(standpred)
