@@ -35,7 +35,7 @@
 #' standardized survival plots for each group averaging over all other 
 #' covariates is specified using 
 #' \code{at=list(list(group="Good"), list(group="Medium"), list(group="Poor"))}.
-#' @param atreference The reference scenario for making contrasts. Default is 1,
+#' @param atreference The reference scenario for making contrasts. Default is 1
 #' (i.e. the first element of \code{at}).
 #' @param type \code{"survival"} for marginal survival probabilities.
 ##' 
@@ -77,6 +77,7 @@
 #' @examples
 #'## mean age is higher in those with smaller observed survival times 
 #' newbc <- bc
+#' set.seed(1)
 #' newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE),
 #'  sd = 5)
 #' 
@@ -96,7 +97,8 @@
 #'
 #'## Calculate hazard of standardized survival and the marginal hazard ratio
 #'## for the three levels of group across a grid of survival times
-#'## 10 bootstraps for confidence intervals (this should be larger)          
+#'## 10 bootstraps for confidence intervals (this should be larger)
+#'\dontrun{          
 #'haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
@@ -109,6 +111,7 @@
 #'## Hazard ratio plot shows a decreasing marginal HR 
 #'## Whereas the conditional HR is constant (model is a PH model)
 #'plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
+#'}
 standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, type = "survival", t = NULL,
                                   ci = FALSE, B = 1000, cl =0.95, contrast = NULL, seed = NULL) {
   x <- object

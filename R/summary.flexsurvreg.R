@@ -178,12 +178,13 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
      }
      if (se) res$se <-  res.ci[3,]
  }
- if (x$ncovs > 0) {
-   res <- cbind(res, attr(args, "newdata"))
+ nodata <- is.null(attr(args, "newdata")) 
+ if (x$ncovs > 0 && !nodata) {
+     res <- cbind(res, attr(args, "newdata"))
  }
  rownames(res) <- NULL
  if (!tidy){ ## For backwards compatibility
-     if (x$ncovs == 0) res <- list(res)
+     if (x$ncovs == 0 || nodata) res <- list(res)
      else { 
          nd <- attr(args, "newdata")
          covnames_untidy <- apply(as.data.frame(nd), 1, 
@@ -202,9 +203,19 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
 
 
 newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
-    Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
-    isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
-    if (is.null(newdata)){
+    if (!is.null(X)) {
+        X <- as.matrix(X)
+        if (!is.matrix(X) || (is.matrix(X) && ncol(X) != x$ncoveffs)) {
+            plural <- if (x$ncoveffs > 1) "s" else ""
+            stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " element", plural)
+        }
+        attr(X, "newdata") <- as.data.frame(X)
+    }
+    else if (is.null(x[["data"]]))
+        stop("Covariate contrasts matrix `X` should be supplied explicitly if the data are not included in the model object")
+    else if (is.null(newdata)){
+        Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
+        isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
         if (is.vector(X)) X <- matrix(X, nrow=1)
         if (x$ncovs > 0 && is.null(X)) {
             ## if any continuous covariates, calculate fitted survival for "average" covariate value
@@ -224,15 +235,12 @@ newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
             }
         }
         else if (is.null(X)) X <- as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1))
-        else if (!is.matrix(X) || (is.matrix(X) && ncol(X) != x$ncoveffs)) {
-            plural <- if (x$ncoveffs > 1) "s" else ""
-            stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " element", plural)
-        }
         else {
             attr(X, "newdata") <- X
             colnames(attr(X, "newdata")) <- colnames(model.matrix(x))
         }
-    } else
+    }
+    else
         X <- form.model.matrix(x, as.data.frame(newdata), na.action=na.action)
     X	
 }
@@ -270,6 +278,7 @@ xt_to_fnargs <- function(x, X, t, quantiles=0.5, start=0, type="survival", cross
 
 
 summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0){
+  nodata_msg <- "prediction times `t` should be defined explicitly if the data are not included in the model object"
   if(type == "mean"){
     if(!is.null(t)) 
       warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
@@ -292,11 +301,16 @@ summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0)
     t <- rep(t,length(start))
   }
   else if(type == "rmst"){
-    if (is.null(t))
-      t <- max(x$data$Y[,"time1"])
+      if (is.null(x[["data"]]))
+          stop(nodata_msg)
+      if (is.null(t))
+          t <- max(x$data$Y[,"time1"])
   }
-  else if (is.null(t))
-    t <- sort(unique(x$data$Y[,"stop"]))
+  else if (is.null(t)){
+      if (is.null(x[["data"]]))
+          stop(nodata_msg)
+      t <- sort(unique(x$data$Y[,"stop"]))
+  }
   if (length(start)==1)
     start <- rep(start, length(t))
   else if (length(start) != length(t))

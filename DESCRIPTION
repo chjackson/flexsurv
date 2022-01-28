@@ -12,6 +12,8 @@ Authors@R: c(person("Christopher", "Jackson",
          role=c("ctb")),
          person("Matthew T.", "Warkentin",
          role = c("ctb")),
+         person("Michael", "Sweeting",
+         role = c("ctb")),
          person("Kevin", "Kunzmann",
          role = c("ctb"))
 	   )
