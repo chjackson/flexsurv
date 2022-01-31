@@ -147,6 +147,12 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     dat <- data
     covs <- at[[i]]
     covnames <- names(covs)
+    ## If all covariate have been specified in 'at' then we have no further covariates
+    ## to standardize over, so just use 1 row of data
+    allcovs <- all.vars(formula(x)[-2])
+    if(all(allcovs %in% covnames)){
+      dat <- dat[1,,drop=F]
+    }
     ## If at is not specified then no further manipulation of data is required, 
     ## we standardize over original or passes dataset
     if(!is.null(covnames)){
