@@ -29,7 +29,10 @@ for which the user wishes to standardize over.  These are in the same format
 as the original data, with factors as a single variable, not 0/1 contrasts.
 Any covariates that are to be fixed should be specified in \code{at}. 
 There should be one row for every combination of covariates in which to 
-standardize over.}
+standardize over. If newdata contains a variable named '(weights)' then a 
+weighted mean will be used to create the standardized estimates. This is the
+default behaviour if the fitted model contains case weights, which are stored 
+in the fitted model data.frame.}
 
 \item{at}{A list of scenarios in which specific covariates are fixed to 
 certain values. Each element of \code{at} must itself be a list. For example,

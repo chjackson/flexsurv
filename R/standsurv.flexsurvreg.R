@@ -28,7 +28,10 @@
 ##' as the original data, with factors as a single variable, not 0/1 contrasts.
 ##' Any covariates that are to be fixed should be specified in \code{at}. 
 ##' There should be one row for every combination of covariates in which to 
-##' standardize over. 
+##' standardize over. If newdata contains a variable named '(weights)' then a 
+##' weighted mean will be used to create the standardized estimates. This is the
+##' default behaviour if the fitted model contains case weights, which are stored 
+##' in the fitted model data.frame.
 #' @param at A list of scenarios in which specific covariates are fixed to 
 #' certain values. Each element of \code{at} must itself be a list. For example,
 #' for a covariate \code{group} with levels "Good", "Medium" and "Poor", the 
@@ -141,6 +144,14 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   } else{
     data <- newdata
   }
+  ## Was weighted regression used, and do these weights feature in newdata?
+  weighted <- FALSE
+  if("(weights)" %in% names(data)){
+    if(var(data$`(weights)`)!=0){
+      weighted <- TRUE
+      message("Weighted regression was used, standardization will be weighted accordingly")
+    }
+  }
 
   stand.pred.list <- list()
   for(i in 1:length(at)){
@@ -150,7 +161,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     ## If all covariate have been specified in 'at' then we have no further covariates
     ## to standardize over, so just use 1 row of data
     allcovs <- all.vars(formula(x)[-2])
-    if(all(allcovs %in% covnames)){
+    if(all(allcovs %in% covnames) & !weighted){
       dat <- dat[1,,drop=F]
     }
     ## If at is not specified then no further manipulation of data is required, 
@@ -159,21 +170,25 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
       for(j in 1:length(covnames)) dat[, covnames[j]] <- covs[j]
     } 
    
-    predsum <- standsurv.fn(object, type = type, newdata=dat, t=t, i=i)  
+    predsum <- standsurv.fn(object, type = type, newdata=dat, t=t, i=i, weighted=weighted)  
     
     if(ci == TRUE){
-      
       if(i==1)      rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
   
       X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
       sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
+      if(weighted){
+        weights <- array(dat$`(weights)`, dim(sim.pred))
+      } else {
+        weights <- array(1, dim(sim.pred))
+      }
       if(type=="hazard"){
         # Weight individual hazards by survival function to get hazard of the standardized survival
         haz <- sim.pred
         surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
-        stand.pred <- apply(haz*surv, c(2,3),sum) / apply(surv,c(2,3),sum)
+        stand.pred <- apply(haz*surv*weights, c(2,3),sum) / apply(surv*weights,c(2,3),sum)
       } else {
-        stand.pred <- apply(sim.pred, c(2,3), mean)
+        stand.pred <- apply(sim.pred*weights, c(2,3), sum) / apply(weights,c(2,3),sum)
       }
       stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
       stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% 
@@ -228,15 +243,27 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @import rlang
-standsurv.fn <- function(object, type, newdata, t, i){
+standsurv.fn <- function(object, type, newdata, t, i, weighted){
   if(type!="hazard"){
     pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := mean(.data$est))
+    if(weighted){
+      pred$weights <- rep(newdata$`(weights)`, each=length(t))
+      predsum <- pred %>% group_by(time) %>% 
+        summarise("at{i}" := weighted.mean(.data$est, .data$weights))
+    } else {
+      predsum <- pred %>% group_by(time) %>% summarise("at{i}" := mean(.data$est))
+    }
   } else if(type=="hazard"){
     pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
     names(pred)[names(pred)=="est"] <- "h"
     pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := weighted.mean(.data$h,.data$S))
+    if(weighted){
+      pred$weights <- rep(newdata$`(weights)`, each=length(t))
+      predsum <- pred %>% group_by(time) %>% 
+        summarise("at{i}" := weighted.mean(.data$h,.data$S * .data$weights))
+    } else{
+      predsum <- pred %>% group_by(time) %>% summarise("at{i}" := weighted.mean(.data$h,.data$S))
+    }
   }
   predsum
 }
