@@ -118,8 +118,9 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   ## Add checks
   ## Currently restricted to survival, hazard or rmst 
   type <- match.arg(type, c("survival", "hazard", "rmst"))
-  contrast <- match.arg(contrast, c("difference", "ratio"))
-  
+  if(!is.null(contrast)) {
+    contrast <- match.arg(contrast, c("difference", "ratio"))
+  }
   
   ## Check that at is a list and that all elements of at are lists
   if(!is.list(at)){
@@ -132,6 +133,11 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   ## Contrast numbers
   cnums <- (1:length(at))[-atreference]
 
+  ## If no contrasts (i.e. only one at() list) then 'contrast' should be NULL
+  if(length(cnums)==0 & !is.null(contrast)){
+    stop("'contrast' cannot be specified if length of 'at' < 2")
+  }
+  
   ## Standardize over fitted dataset by default
   if(is.null(newdata)){
     data <- model.frame(x)
@@ -182,23 +188,25 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     
   }
   
-  if(contrast == "difference"){
-    for(i in cnums){
-      standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] - .data[[paste0("at", atreference)]])
-      if(ci == TRUE){
-        stand.pred.quant <- apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
-        stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
-        standpred <- standpred %>% bind_cols(stand.pred.quant)
+  if(!is.null(contrast)){
+    if(contrast == "difference"){
+      for(i in cnums){
+        standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] - .data[[paste0("at", atreference)]])
+        if(ci == TRUE){
+          stand.pred.quant <- apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+          stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
+          standpred <- standpred %>% bind_cols(stand.pred.quant)
+        }
       }
     }
-  }
-  if(contrast == "ratio"){
-    for(i in cnums){
-      standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] / .data[[paste0("at", atreference)]])
-      if(ci == TRUE){
-        stand.pred.quant <- apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
-        stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
-        standpred <- standpred %>% bind_cols(stand.pred.quant)
+    if(contrast == "ratio"){
+      for(i in cnums){
+        standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] / .data[[paste0("at", atreference)]])
+        if(ci == TRUE){
+          stand.pred.quant <- apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+          stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
+          standpred <- standpred %>% bind_cols(stand.pred.quant)
+        }
       }
     }
   }
