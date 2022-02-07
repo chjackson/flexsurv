@@ -12,6 +12,7 @@ standsurv.flexsurvreg(
   type = "survival",
   t = NULL,
   ci = FALSE,
+  se = FALSE,
   B = 1000,
   cl = 0.95,
   contrast = NULL,
@@ -50,6 +51,9 @@ covariates is specified using
 \item{t}{Times to calculate marginal values at.}
 
 \item{ci}{Should confidence intervals be calculated (using bootstrapping)? 
+Defaults to FALSE}
+
+\item{se}{Should standard errors be calculated (using bootstrapping)? 
 Defaults to FALSE}
 
 \item{B}{Number of simulations from the normal asymptotic distribution of the

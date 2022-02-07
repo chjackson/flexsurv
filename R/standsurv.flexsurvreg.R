@@ -45,6 +45,8 @@
 #' @param t Times to calculate marginal values at.
 #' @param ci Should confidence intervals be calculated (using bootstrapping)? 
 #' Defaults to FALSE
+#' @param se Should standard errors be calculated (using bootstrapping)? 
+#' Defaults to FALSE
 #' @param B Number of simulations from the normal asymptotic distribution of the
 #' estimates used to calculate confidence intervals or standard errors. Decrease
 #' for greater speed at the expense of accuracy.
@@ -110,7 +112,7 @@
 #'## Whereas the conditional HR is constant (model is a PH model)
 #'plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
 standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, type = "survival", t = NULL,
-                                  ci = FALSE, B = 1000, cl =0.95, contrast = NULL, seed = NULL) {
+                                  ci = FALSE, se = FALSE, B = 1000, cl =0.95, contrast = NULL, seed = NULL) {
   x <- object
   
   if(!is.null(seed)) set.seed(seed)
@@ -158,7 +160,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
    
     predsum <- standsurv.fn(object, type = type, newdata=dat, t=t, i=i)  
     
-    if(ci == TRUE){
+    if(ci == TRUE | se == TRUE){
       
       if(i==1)      rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
   
@@ -172,11 +174,17 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
       } else {
         stand.pred <- apply(sim.pred, c(2,3), mean)
       }
-      stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
-      stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% 
-        rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
+      if(se == TRUE){
+        stand.pred.se <- tibble("at{i}_se" := apply(stand.pred, 2, sd, na.rm=TRUE))
+        predsum <- predsum %>% bind_cols(stand.pred.se)
+      }
+      if(ci == TRUE){
+        stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
+        stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% 
+          rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
+        predsum <- predsum %>% bind_cols(stand.pred.quant)
+      }
       
-      predsum <- predsum %>% bind_cols(stand.pred.quant)
       stand.pred.list[[i]] <- stand.pred
     }
     
@@ -197,6 +205,10 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
           stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
           standpred <- standpred %>% bind_cols(stand.pred.quant)
         }
+        if(se == TRUE){
+          stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
+          standpred <- standpred %>% bind_cols(stand.pred.se)
+        }
       }
     }
     if(contrast == "ratio"){
@@ -206,6 +218,10 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
           stand.pred.quant <- apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
           stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
           standpred <- standpred %>% bind_cols(stand.pred.quant)
+        }
+        if(se == TRUE){
+          stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
+          standpred <- standpred %>% bind_cols(stand.pred.se)
         }
       }
     }
