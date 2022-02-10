@@ -215,20 +215,22 @@ augment.flexsurvreg <- function(x, data = NULL, newdata = NULL,
   type.residuals <- match.arg(type.residuals, c("response"))
 
   if (is.null(newdata)) {
-    predictions <- tidyr::unnest(predict(x, type = type.predict, se.fit = TRUE),
-                                 .pred)
+    preds <- predict(x, type = type.predict, se.fit = TRUE)
     res <- tibble::as_tibble(data)
-    res <- tibble::add_column(res,
-                              .fitted = predictions$.pred,
-                              .se.fit = predictions$.std_error,
-                              .resid = residuals(x, type = type.residuals))
+    res <- tibble::add_column(
+      .data = res,
+      .fitted = preds$.pred,
+      .se.fit = preds$.std_error,
+      .resid = residuals(x, type = type.residuals)
+    )
   } else {
-    predictions <- tidyr::unnest(predict(x, type = type.predict, se.fit = TRUE),
-                                 .pred)
+    preds <- predict(x, type = type.predict, se.fit = TRUE, newdata = newdata)
     res <- tibble::as_tibble(newdata)
-    res <- tibble::add_column(res,
-                              .fitted = predictions$.pred,
-                              .se.fit = predictions$.std_error,)
+    res <- tibble::add_column(
+      .data = res,
+      .fitted = preds$.pred,
+      .se.fit = preds$.std_error
+    )
   }
   res
 }
