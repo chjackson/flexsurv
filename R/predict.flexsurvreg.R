@@ -181,7 +181,7 @@ predict.flexsurvreg <- function(object,
       cross = TRUE
     )
 
-    res <- tibble::as_tibble(tidy_rename(res))
+    res <- tidy_rename(res)
 
     if (nest_output) {
       if (stype == 'quantile') {
@@ -209,7 +209,8 @@ tidy_names <- function() {
 
 tidy_rename <- function(x) {
   names_tbl <- tidy_names()
-  to_keep <- names_tbl[names_tbl$old %in% names(x), ]
-  out <- dplyr::select(x, to_keep$old)
-  dplyr::rename_with(out, function(x) to_keep$new)
+  names_to_change <- names_tbl[names_tbl$old %in% names(x), ]
+  out <- dplyr::select(x, names_to_change$old)
+  colnames(out) <- names_to_change$new
+  tibble::as_tibble(out)
 }
