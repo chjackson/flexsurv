@@ -114,3 +114,10 @@ test_that('predictions with missing data', {
                type = 'survival', times = c(500, 1000))
   expect_equal(nrow(p), nrow(ovarian_miss))
 })
+
+test_that('test order (of age) stays the same', {
+  fitw <- flexsurvreg(Surv(futime, fustat) ~ age,
+                      data = ovarian, dist = "weibull")
+  s <- summary(fitw, newdata = ovarian, type = 'survival', t = 500, tidy = TRUE)
+  expect_equal(ovarian$age, s$age)
+})
