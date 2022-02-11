@@ -15,7 +15,7 @@
 #'   are used, as extracted by \code{model.frame(object)}. However this will
 #'   currently not work if the model formula contains functions, e.g.
 #'   \code{~ factor(x)}.   The names of the model frame must correspond to
-#'   variables in the original data. 
+#'   variables in the original data.
 #'
 #' @param type Character vector for the type of predictions desired.
 #'
@@ -166,20 +166,38 @@ predict.flexsurvreg <- function(object,
                         (stype %in% c("survival", "cumhaz", "hazard", "rmst") &&
                         length(times) > 1))
 
-    res <- summary(object = object, newdata = newdata, type = stype,
-                   quantiles = p, t = times, start = start,
-                   ci = conf.int, cl = conf.level, se = se.fit,
-                   tidy = FALSE)
+    res <- summary(
+      object = object,
+      newdata = newdata,
+      type = stype,
+      quantiles = p,
+      t = times,
+      start = start,
+      ci = conf.int,
+      cl = conf.level,
+      se = se.fit,
+      tidy = TRUE,
+      na.action = na.pass,
+      cross = TRUE
+    )
 
-    res <- rename_tidy(unname(res))
+    res <- tidy_rename(res)
 
-    res <- tibble::tibble(.pred = res)
-
-    if (!nest_output) {
-        res <- tidyr::unnest(res, .pred)
+    if (nest_output) {
+      if (stype == 'quantile') {
+        num_reps <- length(p)
+      } else {
+        num_reps <- length(times)
+      }
+      orig_nrow <- nrow(newdata)
+      res <- dplyr::mutate(res, .id = rep(1:orig_nrow, each = num_reps))
+      res <- dplyr::group_nest(res, .id, .key = '.pred')
+      res <- dplyr::select(res, .pred)
     }
     res
 }
+
+utils::globalVariables('.id')
 
 tidy_names <- function() {
     tibble::tibble(
@@ -189,11 +207,10 @@ tidy_names <- function() {
     )
 }
 
-rename_tidy <- function(x) {
-    lapply(x, function(x) {
-        for (i in seq_along(tidy_names()$old)) {
-            colnames(x)[colnames(x) == tidy_names()$old[i]] <- tidy_names()$new[i]
-        }
-        x
-    })
+tidy_rename <- function(x) {
+  names_tbl <- tidy_names()
+  names_to_change <- names_tbl[names_tbl$old %in% names(x), ]
+  out <- dplyr::select(x, names_to_change$old)
+  colnames(out) <- names_to_change$new
+  tibble::as_tibble(out)
 }
