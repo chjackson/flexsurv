@@ -44,7 +44,7 @@ standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
                                                      list(group="Poor")),
                                            t=seq(0,7, length=100),
                                            contrast = "difference", ci=TRUE,
-                                           B=10, seed=123)
+                                           boot = TRUE, B=10, seed=123)
 plot(standsurv_weib_age)
 plot(standsurv_weib_age) + ggplot2::theme_bw() + ggplot2::ylab("Survival") +
  ggplot2::xlab("Time (years)") + 

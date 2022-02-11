@@ -43,18 +43,29 @@
 ##' 
 ##' \code{"rmst"} for standardized restricted mean survival.
 #' @param t Times to calculate marginal values at.
-#' @param ci Should confidence intervals be calculated (using bootstrapping)? 
+#' @param ci Should confidence intervals be calculated? 
 #' Defaults to FALSE
-#' @param se Should standard errors be calculated (using bootstrapping)? 
+#' @param se Should standard errors be calculated? 
 #' Defaults to FALSE
-#' @param B Number of simulations from the normal asymptotic distribution of the
-#' estimates used to calculate confidence intervals or standard errors. Decrease
-#' for greater speed at the expense of accuracy.
+#' @param boot Should bootstrapping be used to calculate standard error and 
+#' confidence intervals? Defaults to FALSE, in which case the delta method is 
+#' used
+#' @param B Number of bootstrap simulations from the normal asymptotic 
+#' distribution of the estimates used to calculate confidence intervals or 
+#' standard errors. Decrease for greater speed at the expense of accuracy. Only 
+#' specify if \code{boot = TRUE}
 #' @param cl Width of symmetric confidence intervals, relative to 1.
+#' @param trans Transformation to apply when calculating standard errors via the
+#' delta method to obtain confidence intervals. The default transformation is 
+#' "log". Other possible names are "none", "loglog", "logit".
 #' @param contrast Contrasts between standardized measures defined by \code{at}
 #' scenarios. Options are \code{"difference"} and \code{"ratio"}. There will be
 #' n-1 new columns created where n is the number of \code{at} scenarios. Default
 #' is NULL (i.e. no contrasts are calculated).
+#' @param trans.contrast Transformation to apply when calculating standard errors
+#' for contrasts via the delta method to obtain confidence intervals. The default
+#' transformation is "none" for differences in survival, hazard or RMST, 
+#' and "log" for ratios of survival, hazard or RMST.
 #' @param seed The random seed to use (for bootstrapping confidence intervals)
 #'
 #' @return A \code{tibble} containing one row for each 
@@ -105,24 +116,32 @@
 #'                                                      list(group="Poor")), 
 #'                                            t=seq(0,7, length=100),
 #'                                            type="hazard",
-#'                                            contrast = "ratio", B=10, ci=TRUE)
+#'                                            contrast = "ratio", boot = TRUE,
+#'                                            B=10, ci=TRUE)
 #'haz_standsurv_weib_age                                            
 #'plot(haz_standsurv_weib_age, ci=TRUE)
 #'## Hazard ratio plot shows a decreasing marginal HR 
 #'## Whereas the conditional HR is constant (model is a PH model)
 #'plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
-standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, type = "survival", t = NULL,
-                                  ci = FALSE, se = FALSE, B = 1000, cl =0.95, contrast = NULL, seed = NULL) {
+standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, 
+                                  type = "survival", t = NULL, ci = FALSE, se = FALSE, 
+                                  boot = FALSE, B = NULL, cl =0.95, trans = "log", 
+                                  contrast = NULL, trans.contrast = NULL, seed = NULL) {
   x <- object
   
   if(!is.null(seed)) set.seed(seed)
   
   ## Add checks
-  ## Currently restricted to survival, hazard or rmst 
+  ## Currently type is restricted to survival, hazard or rmst 
   type <- match.arg(type, c("survival", "hazard", "rmst"))
   if(!is.null(contrast)) {
     contrast <- match.arg(contrast, c("difference", "ratio"))
+    if(is.null(trans.contrast)){
+      trans.contrast <- ifelse(contrast=="difference", "none", "log")
+      trans.contrast <- match.arg(trans.contrast, c("log", "none", "loglog", "logit"))
+    }
   }
+  trans <- match.arg(trans, c("log", "none", "loglog", "logit"))
   
   ## Check that at is a list and that all elements of at are lists
   if(!is.list(at)){
@@ -130,6 +149,17 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   }
   if(any(!sapply(at, is.list))){
     stop("All elements of 'at' must be lists")
+  }
+  
+  ## Check sensible transformations have been specified for type
+  if(boot == F & type %in% c("hazard", "rmst") & trans %in% c("loglog", "logit")){
+    warning(paste0("type ",type, " with transformation ",trans, " may not be sensible"))
+  }
+  if(boot == F & !is.null(B)){
+    stop(paste0("'boot'=FALSE but 'B' is non-null"))
+  }
+  if(boot == T & is.null(B)){
+    stop(paste("'B' must be specified if 'boot'=TRUE"))
   }
   
   ## Contrast numbers
@@ -147,7 +177,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     data <- newdata
   }
 
-  stand.pred.list <- list()
+  stand.pred.list <- dat.list <- list()
   for(i in 1:length(at)){
     dat <- data
     covs <- at[[i]]
@@ -157,35 +187,44 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     if(!is.null(covnames)){
       for(j in 1:length(covnames)) dat[, covnames[j]] <- covs[j]
     } 
-   
+    dat.list[[i]] <- dat
+    
     predsum <- standsurv.fn(object, type = type, newdata=dat, t=t, i=i)  
     
     if(ci == TRUE | se == TRUE){
       
-      if(i==1)      rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
-  
-      X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
-      sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
-      if(type=="hazard"){
-        # Weight individual hazards by survival function to get hazard of the standardized survival
-        haz <- sim.pred
-        surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
-        stand.pred <- apply(haz*surv, c(2,3),sum) / apply(surv,c(2,3),sum)
-      } else {
-        stand.pred <- apply(sim.pred, c(2,3), mean)
+      if(boot == TRUE){
+        if(i==1){
+          message("Calculating bootstrap standard errors / confidence intervals")          
+          rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
+        }
+        
+        X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
+        sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
+        if(type=="hazard"){
+          # Weight individual hazards by survival function to get hazard of the standardized survival
+          haz <- sim.pred
+          surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
+          stand.pred <- apply(haz*surv, c(2,3),sum) / apply(surv,c(2,3),sum)
+        } else {
+          stand.pred <- apply(sim.pred, c(2,3), mean)
+        }
+        if(se == TRUE){
+          stand.pred.se <- tibble("at{i}_se" := apply(stand.pred, 2, sd, na.rm=TRUE))
+          predsum <- predsum %>% bind_cols(stand.pred.se)
+        }
+        if(ci == TRUE){
+          stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
+          stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% 
+            rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
+          predsum <- predsum %>% bind_cols(stand.pred.quant)
+        }
+        
+        stand.pred.list[[i]] <- stand.pred
+      } else{
+        if(i==1) message("Calculating standard errors / confidence intervals using delta method")
+        predsum <- deltamethod.standsurv(object, newdata=dat, type, t, i, se, ci, predsum, trans, cl)
       }
-      if(se == TRUE){
-        stand.pred.se <- tibble("at{i}_se" := apply(stand.pred, 2, sd, na.rm=TRUE))
-        predsum <- predsum %>% bind_cols(stand.pred.se)
-      }
-      if(ci == TRUE){
-        stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
-        stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% 
-          rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
-        predsum <- predsum %>% bind_cols(stand.pred.quant)
-      }
-      
-      stand.pred.list[[i]] <- stand.pred
     }
     
     if(i == 1) {
@@ -197,32 +236,43 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   }
   
   if(!is.null(contrast)){
-    if(contrast == "difference"){
-      for(i in cnums){
-        standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] - .data[[paste0("at", atreference)]])
-        if(ci == TRUE){
-          stand.pred.quant <- apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
-          stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
-          standpred <- standpred %>% bind_cols(stand.pred.quant)
+    if(boot == TRUE){
+      message("Calculating bootstrap standard errors / confidence intervals for contrasts")
+      if(contrast == "difference"){
+        for(i in cnums){
+          standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] - .data[[paste0("at", atreference)]])
+          if(ci == TRUE){
+            stand.pred.quant <- apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+            stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
+            standpred <- standpred %>% bind_cols(stand.pred.quant)
+          }
+          if(se == TRUE){
+            stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
+            standpred <- standpred %>% bind_cols(stand.pred.se)
+          }
         }
-        if(se == TRUE){
-          stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
-          standpred <- standpred %>% bind_cols(stand.pred.se)
+      }
+      if(contrast == "ratio"){
+        for(i in cnums){
+          standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] / .data[[paste0("at", atreference)]])
+          if(ci == TRUE){
+            stand.pred.quant <- apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+            stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
+            standpred <- standpred %>% bind_cols(stand.pred.quant)
+          }
+          if(se == TRUE){
+            stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
+            standpred <- standpred %>% bind_cols(stand.pred.se)
+          }
         }
       }
     }
-    if(contrast == "ratio"){
+    else {
+      message("Calculating standard errors / confidence intervals for contrasts using delta method")
       for(i in cnums){
-        standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] / .data[[paste0("at", atreference)]])
-        if(ci == TRUE){
-          stand.pred.quant <- apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
-          stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
-          standpred <- standpred %>% bind_cols(stand.pred.quant)
-        }
-        if(se == TRUE){
-          stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
-          standpred <- standpred %>% bind_cols(stand.pred.se)
-        }
+        standpred <- deltamethod.contrast.standsurv(object, dat=dat.list[[i]], dat.ref=dat.list[[atreference]],
+                                       type, t, i, atreference, se, ci, standpred, trans.contrast, 
+                                       cl, contrast)
       }
     }
   }
@@ -243,18 +293,131 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @import rlang
-standsurv.fn <- function(object, type, newdata, t, i){
+standsurv.fn <- function(object, type, newdata, t, i, trans="none"){
+  tr.fun <- tr(trans)
   if(type!="hazard"){
     pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := mean(.data$est))
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
   } else if(type=="hazard"){
     pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
     names(pred)[names(pred)=="est"] <- "h"
     pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := weighted.mean(.data$h,.data$S))
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
   }
   predsum
 }
+
+tr <- function(trans){
+  switch(trans,
+         "log"= log,
+         "none"= function(x) x,
+         "loglog" = function(x) log(-log(1-x)),
+         "logit" = qlogis
+  )
+}
+
+inv.tr <- function(trans){
+  switch(trans,
+         "log"= exp,
+         "none"= function(x) x,
+         "loglog" = function(x) 1-exp(-exp(x)),
+         "logit" = plogis
+  )
+}
+
+#' @importFrom numDeriv grad
+deltamethod.standsurv <- function(object, newdata, type, t, i, se, ci, 
+                                  predsum, trans, cl){
+  g <- function(coef, t, trans) {
+    object$res[,"est"] <- object$res.t[,"est"] <- coef
+    standsurv.fn(object, type=type, newdata=newdata, t=t, i=i, trans)[,2,drop=T]
+  }
+  est <- standsurv.fn(object, type=type, newdata=newdata, t=t, i=i, trans="none")[,2,drop=T]
+  
+  var.none <- NULL
+  if(se==TRUE){
+    # Calculate for each value of t the untransformed standardized measure
+    var.none <- sapply(t, function(ti){
+      gd <- grad(g, coef(object), method="simple" ,t=ti, 
+                           trans="none")
+      gd %*% vcov(object) %*% gd
+    })
+    stand.pred.se <- as_tibble(sqrt(var.none)) %>% rename("at{i}_se" := "value")
+    predsum <- predsum %>% bind_cols(stand.pred.se)   
+  }  
+  if(ci==TRUE){
+    # Calculate for each value of t the transformed standardized measure
+    if(trans=="none" & !is.null(var.none)){
+      var.trans <- var.none ## use already calculated variances
+    } else {
+      var.trans <- sapply(t, function(ti){
+        gd <- grad(g, coef(object), method="simple" ,t=ti, 
+                             trans=trans)
+        gd %*% vcov(object) %*% gd
+      })
+    }
+    tr.fun <- tr(trans)
+    inv.tr.fun <- inv.tr(trans)
+    stand.pred.lcl <- as_tibble(inv.tr.fun(tr.fun(est)+qnorm((1-cl)/2, lower.tail=T)*sqrt(var.trans))) %>%
+      rename("at{i}_lci" := "value")
+    stand.pred.ucl <- as_tibble(inv.tr.fun(tr.fun(est)+qnorm((1-cl)/2, lower.tail=F)*sqrt(var.trans))) %>%
+      rename("at{i}_uci" := "value")
+    predsum <- predsum %>% bind_cols(stand.pred.lcl, stand.pred.ucl)   
+  }
+  predsum
+}
+
+#' @importFrom numDeriv grad
+deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
+                               type, t, i, atreference, se, ci, predsum, 
+                               trans.contrast, cl, contrast){
+  tr.fun <- tr(trans.contrast)
+  inv.tr.fun <- inv.tr(trans.contrast)
+  contrast.fn <- switch(contrast, "difference"= `-`, "ratio"= `/` )
+  
+  g <- function(coef, t, tr.fun, contrast.fn) {
+    object$res[,"est"] <- object$res.t[,"est"] <- coef
+    tr.fun(contrast.fn(standsurv.fn(object, type=type, newdata=dat, t=t, i=i, trans="none")[,2,drop=T], 
+                       standsurv.fn(object, type=type, newdata=dat.ref, t=t, i=i, trans="none")[,2,drop=T]))
+  }
+
+  est <- contrast.fn(standsurv.fn(object, type=type, newdata=dat, t=t, i=i, trans="none")[,2,drop=T],
+                     standsurv.fn(object, type=type, newdata=dat.ref, t=t, i=i, trans="none")[,2,drop=T])
+  stand.pred <- as_tibble(est) %>%
+    rename("contrast{i}_{atreference}" := "value")
+  predsum <- predsum %>% bind_cols(stand.pred)   
+  
+  var.none <- NULL
+  if(se==TRUE){
+    # Calculate for each value of t the untransformed standardized measure
+    var.none <- sapply(t, function(ti){
+      gd <- grad(g, coef(object), method="simple" ,t=ti, 
+                           tr.fun=function(x) x, contrast.fn)
+      gd %*% vcov(object) %*% gd
+    })
+    stand.pred.se <- as_tibble(sqrt(var.none)) %>% rename("contrast{i}_{atreference}_se" := "value") 
+    predsum <- predsum %>% bind_cols(stand.pred.se)   
+  }  
+  if(ci==TRUE){
+    # Calculate for each value of t the transformed standardized measure
+    if(trans.contrast=="none" & !is.null(var.none)){
+      var.trans <- var.none ## use already calculated variances
+    } else {
+      var.trans <- sapply(t, function(ti){
+        gd <- grad(g, coef(object), method="simple" ,t=ti, 
+                             tr.fun, contrast.fn)
+        gd %*% vcov(object) %*% gd
+      })
+    }
+    stand.pred.lcl <- as_tibble(inv.tr.fun(tr.fun(est)+qnorm((1-cl)/2, lower.tail=T)*sqrt(var.trans))) %>%
+      rename("contrast{i}_{atreference}_lci" := "value")
+    stand.pred.ucl <- as_tibble(inv.tr.fun(tr.fun(est)+qnorm((1-cl)/2, lower.tail=F)*sqrt(var.trans))) %>%
+      rename("contrast{i}_{atreference}_uci" := "value")
+    predsum <- predsum %>% bind_cols(stand.pred.lcl, stand.pred.ucl)   
+  }
+  predsum
+}
+    
 
 
 #' Tidy a standsurv object. 
@@ -386,7 +549,7 @@ tidy.standsurv <- function(x, ...){
 #'                                                      list(group="Poor")),
 #'                                            t=seq(0,7, length=100),
 #'                                            contrast = "difference", ci=TRUE,
-#'                                            B=10, seed=123)
+#'                                            boot = TRUE, B=10, seed=123)
 #'plot(standsurv_weib_age)
 #'plot(standsurv_weib_age) + ggplot2::theme_bw() + ggplot2::ylab("Survival") +
 #'  ggplot2::xlab("Time (years)") + 
@@ -414,4 +577,3 @@ plot.standsurv <- function(x, contrast = FALSE, ci = TRUE, ...){
   p
 }
                            
-

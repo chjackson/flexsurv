@@ -13,9 +13,12 @@ standsurv.flexsurvreg(
   t = NULL,
   ci = FALSE,
   se = FALSE,
-  B = 1000,
+  boot = FALSE,
+  B = NULL,
   cl = 0.95,
+  trans = "log",
   contrast = NULL,
+  trans.contrast = NULL,
   seed = NULL
 )
 }
@@ -50,22 +53,36 @@ covariates is specified using
 
 \item{t}{Times to calculate marginal values at.}
 
-\item{ci}{Should confidence intervals be calculated (using bootstrapping)? 
+\item{ci}{Should confidence intervals be calculated? 
 Defaults to FALSE}
 
-\item{se}{Should standard errors be calculated (using bootstrapping)? 
+\item{se}{Should standard errors be calculated? 
 Defaults to FALSE}
 
-\item{B}{Number of simulations from the normal asymptotic distribution of the
-estimates used to calculate confidence intervals or standard errors. Decrease
-for greater speed at the expense of accuracy.}
+\item{boot}{Should bootstrapping be used to calculate standard error and 
+confidence intervals? Defaults to FALSE, in which case the delta method is 
+used}
+
+\item{B}{Number of bootstrap simulations from the normal asymptotic 
+distribution of the estimates used to calculate confidence intervals or 
+standard errors. Decrease for greater speed at the expense of accuracy. Only 
+specify if \code{boot = TRUE}}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
+
+\item{trans}{Transformation to apply when calculating standard errors via the
+delta method to obtain confidence intervals. The default transformation is 
+"log". Other possible names are "none", "loglog", "logit".}
 
 \item{contrast}{Contrasts between standardized measures defined by \code{at}
 scenarios. Options are \code{"difference"} and \code{"ratio"}. There will be
 n-1 new columns created where n is the number of \code{at} scenarios. Default
 is NULL (i.e. no contrasts are calculated).}
+
+\item{trans.contrast}{Transformation to apply when calculating standard errors
+for contrasts via the delta method to obtain confidence intervals. The default
+transformation is "none" for differences in survival, hazard or RMST, 
+and "log" for ratios of survival, hazard or RMST.}
 
 \item{seed}{The random seed to use (for bootstrapping confidence intervals)}
 }
@@ -129,7 +146,8 @@ haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
                                                      list(group="Poor")), 
                                            t=seq(0,7, length=100),
                                            type="hazard",
-                                           contrast = "ratio", B=10, ci=TRUE)
+                                           contrast = "ratio", boot = TRUE,
+                                           B=10, ci=TRUE)
 haz_standsurv_weib_age                                            
 plot(haz_standsurv_weib_age, ci=TRUE)
 ## Hazard ratio plot shows a decreasing marginal HR 
