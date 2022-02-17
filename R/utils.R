@@ -155,7 +155,9 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, scalarargs=NULL, ...)
           pd <- do.call(pdist, pdargs)
           (1 - pd) / start_p
       }
-    ret[i] <- integrate(fn, start[i], t[i])$value
+      if (!is.na(fn((start[i]+t[i])/2)))
+        ret[i] <- integrate(fn, start[i], t[i])$value
+      else ret[i] <- NA
   }
   ret[t<start] <- 0
   if (any(is.nan(ret))) warning("NaNs produced")

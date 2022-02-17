@@ -325,8 +325,17 @@ check.gengamma.orig <- function(shape, scale, k){
     ret <- rep(TRUE, length(shape))
     if (missing(shape)) stop("shape parameter \"shape\" not given")
     if (missing(k)) stop("shape parameter \"k\" not given")
-    if (any(shape < 0)) {warning("Negative shape parameter \"shape\""); ret[shape<0] <- FALSE}
-    if (any(scale < 0)) {warning("Negative scale parameter"); ret[scale<0] <- FALSE}
-    if (any(k < 0)) {warning("Negative shape parameter \"k\""); ret[k<0] <- FALSE}
+    if (any(!is.na(shape) & shape < 0)) {
+        warning("Negative shape parameter \"shape\"")
+        ret[!is.na(shape) & shape < 0] <- FALSE
+    }
+    if (any(!is.na(scale) & scale < 0)) {
+        warning("Negative scale parameter");
+        ret[!is.na(scale) & scale < 0] <- FALSE
+    }
+    if (any(!is.na(k) & k < 0)) {
+        warning("Negative shape parameter \"k\"");
+        ret[!is.na(k) & k < 0] <- FALSE
+    }
     ret
 }
