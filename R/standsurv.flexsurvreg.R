@@ -28,14 +28,17 @@
 ##' as the original data, with factors as a single variable, not 0/1 contrasts.
 ##' Any covariates that are to be fixed should be specified in \code{at}. 
 ##' There should be one row for every combination of covariates in which to 
-##' standardize over. 
+##' standardize over. If newdata contains a variable named '(weights)' then a 
+##' weighted mean will be used to create the standardized estimates. This is the
+##' default behaviour if the fitted model contains case weights, which are stored 
+##' in the fitted model data.frame.
 #' @param at A list of scenarios in which specific covariates are fixed to 
 #' certain values. Each element of \code{at} must itself be a list. For example,
 #' for a covariate \code{group} with levels "Good", "Medium" and "Poor", the 
 #' standardized survival plots for each group averaging over all other 
 #' covariates is specified using 
 #' \code{at=list(list(group="Good"), list(group="Medium"), list(group="Poor"))}.
-#' @param atreference The reference scenario for making contrasts. Default is 1,
+#' @param atreference The reference scenario for making contrasts. Default is 1
 #' (i.e. the first element of \code{at}).
 #' @param type \code{"survival"} for marginal survival probabilities.
 ##' 
@@ -90,6 +93,7 @@
 #' @examples
 #'## mean age is higher in those with smaller observed survival times 
 #' newbc <- bc
+#' set.seed(1)
 #' newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE),
 #'  sd = 5)
 #' 
@@ -109,7 +113,8 @@
 #'
 #'## Calculate hazard of standardized survival and the marginal hazard ratio
 #'## for the three levels of group across a grid of survival times
-#'## 10 bootstraps for confidence intervals (this should be larger)          
+#'## 10 bootstraps for confidence intervals (this should be larger)
+#'\dontrun{          
 #'haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
@@ -176,12 +181,26 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   } else{
     data <- newdata
   }
+  ## Was weighted regression used, and do these weights feature in newdata?
+  weighted <- FALSE
+  if("(weights)" %in% names(data)){
+    if(var(data$`(weights)`)!=0){
+      weighted <- TRUE
+      message("Weighted regression was used, standardization will be weighted accordingly")
+    }
+  }
 
   stand.pred.list <- dat.list <- list()
   for(i in 1:length(at)){
     dat <- data
     covs <- at[[i]]
     covnames <- names(covs)
+    ## If all covariate have been specified in 'at' then we have no further covariates
+    ## to standardize over, so just use 1 row of data
+    allcovs <- all.vars(formula(x)[-2])
+    if(all(allcovs %in% covnames) & !weighted){
+      dat <- dat[1,,drop=F]
+    }
     ## If at is not specified then no further manipulation of data is required, 
     ## we standardize over original or passes dataset
     if(!is.null(covnames)){
@@ -189,7 +208,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     } 
     dat.list[[i]] <- dat
     
-    predsum <- standsurv.fn(object, type = type, newdata=dat, t=t, i=i)  
+    predsum <- standsurv.fn(object, type = type, newdata=dat, t=t, i=i, weighted=weighted)  
     
     if(ci == TRUE | se == TRUE){
       
@@ -201,13 +220,18 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
         
         X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
         sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
+        if(weighted){
+          weights <- array(dat$`(weights)`, dim(sim.pred))
+        } else {
+          weights <- array(1, dim(sim.pred))
+        }
         if(type=="hazard"){
           # Weight individual hazards by survival function to get hazard of the standardized survival
           haz <- sim.pred
           surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
-          stand.pred <- apply(haz*surv, c(2,3),sum) / apply(surv,c(2,3),sum)
+          stand.pred <- apply(haz*surv*weights, c(2,3),sum) / apply(surv*weights,c(2,3),sum)
         } else {
-          stand.pred <- apply(sim.pred, c(2,3), mean)
+          stand.pred <- apply(sim.pred*weights, c(2,3), sum) / apply(weights,c(2,3),sum)
         }
         if(se == TRUE){
           stand.pred.se <- tibble("at{i}_se" := apply(stand.pred, 2, sd, na.rm=TRUE))
@@ -224,6 +248,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
       } else{
         if(i==1) message("Calculating standard errors / confidence intervals using delta method")
         predsum <- deltamethod.standsurv(object, newdata=dat, type, t, i, se, ci, predsum, trans, cl)
+        
       }
     }
     
@@ -282,7 +307,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   attr(standpred, "contrast") <- contrast
   attr(standpred, "at") <- at
   attr(standpred, "atreference") <- atreference
-  class(standpred) <- c(class(standpred), "standsurv")
+  class(standpred) <- c("standsurv", class(standpred))
   
   ## Create tidy versions of the data.frame and store as attributes
   standpred <- tidy(standpred)
@@ -293,16 +318,31 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @import rlang
-standsurv.fn <- function(object, type, newdata, t, i, trans="none"){
+<<<<<<< HEAD
+standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted){
   tr.fun <- tr(trans)
   if(type!="hazard"){
     pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
+    if(weighted){
+      pred$weights <- rep(newdata$`(weights)`, each=length(t))
+      predsum <- pred %>% group_by(time) %>% 
+        summarise("at{i}" := tr.fun(weighted.mean(.data$est, .data$weights)))
+    } else {
+      predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
+    }
   } else if(type=="hazard"){
     pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
     names(pred)[names(pred)=="est"] <- "h"
     pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
+
+    if(weighted){
+      pred$weights <- rep(newdata$`(weights)`, each=length(t))
+      predsum <- pred %>% group_by(time) %>% 
+        summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights)))
+    } else{
+      predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
+    }
+        
   }
   predsum
 }

@@ -160,13 +160,13 @@ test_that("Model fit with covariates",{
 test_that("Summary function: alternative ways to supply covariates",{
     expect_equal(summary(fitg, X=c(0), ci=FALSE)[[1]]$est,
                  summary(fitg, newdata=data.frame(rx=1), ci=FALSE)[[1]]$est)
-    expect_equal(summary(fitg, X=c(1), ci=FALSE)[[1]],
-                 summary(fitg, newdata=data.frame(rx=2), ci=FALSE)[[1]])
+    expect_equal(summary(fitg, X=c(1), ci=FALSE)[[1]]$est,
+                 summary(fitg, newdata=data.frame(rx=2), ci=FALSE)[[1]]$est)
     expect_equivalent(summary(fitg, X=matrix(c(0,1),ncol=1), ci=FALSE)[1:2],
                       summary(fitg, newdata=data.frame(rx=c(1,2)), ci=FALSE)[1:2])
     fitg2 <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ factor(rx) + factor(ecog.ps), data = ovarian, dist="weibull")
     expect_equivalent(summary(fitg2, newdata=data.frame(rx=1,ecog.ps=2), ci=FALSE)[[1]][1:2],
-                      summary(fitg2, X=c(0,1))[[1]][1:2])
+                      summary(fitg2, X=matrix(c(0,1), nrow=1))[[1]][1:2])
 })
 
 test_that("summary with CIs",{
@@ -177,7 +177,8 @@ test_that("summary with CIs",{
 
 test_that("Errors in summary function",{
     expect_error(summary(fitg, newdata=list(foo=1)), "Value of covariate \"rx\" not supplied")
-    expect_error(summary(fitg, X=matrix(c(0,1),ncol=2), ci=FALSE), "expected X to be a matrix with 1 column or a vector with 1 element")
+    expect_error(summary(fitg, X=matrix(c(0,1),ncol=2), ci=FALSE), 
+                 "expected X to be a matrix with 1 column or a vector with 1 element")
     expect_error(summary(fitg, X=matrix(c(0,1),ncol=1), start=1:2, ci=FALSE), "length of \"start\"")
     expect_error(summary(fitg, start=1:2, ci=FALSE), "length of \"start\"")
 })

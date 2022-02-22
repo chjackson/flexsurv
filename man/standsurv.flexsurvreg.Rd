@@ -33,7 +33,10 @@ for which the user wishes to standardize over.  These are in the same format
 as the original data, with factors as a single variable, not 0/1 contrasts.
 Any covariates that are to be fixed should be specified in \code{at}. 
 There should be one row for every combination of covariates in which to 
-standardize over.}
+standardize over. If newdata contains a variable named '(weights)' then a 
+weighted mean will be used to create the standardized estimates. This is the
+default behaviour if the fitted model contains case weights, which are stored 
+in the fitted model data.frame.}
 
 \item{at}{A list of scenarios in which specific covariates are fixed to 
 certain values. Each element of \code{at} must itself be a list. For example,
@@ -42,7 +45,7 @@ standardized survival plots for each group averaging over all other
 covariates is specified using 
 \code{at=list(list(group="Good"), list(group="Medium"), list(group="Poor"))}.}
 
-\item{atreference}{The reference scenario for making contrasts. Default is 1,
+\item{atreference}{The reference scenario for making contrasts. Default is 1
 (i.e. the first element of \code{at}).}
 
 \item{type}{\code{"survival"} for marginal survival probabilities.
@@ -120,6 +123,7 @@ function at this time:
 \examples{
 ## mean age is higher in those with smaller observed survival times 
 newbc <- bc
+set.seed(1)
 newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE),
  sd = 5)
 
@@ -139,7 +143,8 @@ standsurv_weib_age
 
 ## Calculate hazard of standardized survival and the marginal hazard ratio
 ## for the three levels of group across a grid of survival times
-## 10 bootstraps for confidence intervals (this should be larger)          
+## 10 bootstraps for confidence intervals (this should be larger)
+\dontrun{          
 haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
                                            at = list(list(group="Good"), 
                                                      list(group="Medium"), 
@@ -153,6 +158,7 @@ plot(haz_standsurv_weib_age, ci=TRUE)
 ## Hazard ratio plot shows a decreasing marginal HR 
 ## Whereas the conditional HR is constant (model is a PH model)
 plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
+}
 }
 \references{
 Paul Lambert, 2021. "STANDSURV: Stata module to compute 
