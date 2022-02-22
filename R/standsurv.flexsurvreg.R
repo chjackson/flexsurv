@@ -263,7 +263,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   
   if(!is.null(contrast)){
     if(boot == TRUE){
-      message("Calculating bootstrap standard errors / confidence intervals for contrasts")
+      if(ci==TRUE | se==TRUE) message("Calculating bootstrap standard errors / confidence intervals for contrasts")
       if(contrast == "difference"){
         for(i in cnums){
           standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] - .data[[paste0("at", atreference)]])
@@ -294,7 +294,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
       }
     }
     else {
-      message("Calculating standard errors / confidence intervals for contrasts using delta method")
+      if(ci==TRUE | se==TRUE) message("Calculating standard errors / confidence intervals for contrasts using delta method")
       for(i in cnums){
         standpred <- deltamethod.contrast.standsurv(object, dat=dat.list[[i]], dat.ref=dat.list[[atreference]],
                                        type, t, i, atreference, se, ci, standpred, trans.contrast, 
@@ -432,7 +432,7 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
     # Calculate for each value of t the untransformed standardized measure
     var.none <- sapply(t, function(ti){
       gd <- grad(g, coef(object), method="simple" ,t=ti, 
-                           tr.fun=function(x) x, contrast.fn)
+                           tr.fun=function(x) x, contrast.fn=contrast.fn)
       gd %*% vcov(object) %*% gd
     })
     stand.pred.se <- as_tibble(sqrt(var.none)) %>% rename("contrast{i}_{atreference}_se" := "value") 
@@ -445,7 +445,7 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
     } else {
       var.trans <- sapply(t, function(ti){
         gd <- grad(g, coef(object), method="simple" ,t=ti, 
-                             tr.fun, contrast.fn)
+                             tr.fun=tr.fun, contrast.fn=contrast.fn)
         gd %*% vcov(object) %*% gd
       })
     }
