@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // dgenf_work
 Rcpp::NumericVector dgenf_work(const Rcpp::NumericVector& x, const Rcpp::NumericVector& mu, const Rcpp::NumericVector& sigma, const Rcpp::NumericVector& Q, const Rcpp::NumericVector& P, const bool log);
 RcppExport SEXP _flexsurv_dgenf_work(SEXP xSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP QSEXP, SEXP PSEXP, SEXP logSEXP) {

@@ -9,13 +9,21 @@
 \alias{HweibullPH}
 \alias{hweibullPH}
 \title{Weibull distribution in proportional hazards parameterisation}
+\usage{
+dweibullPH(x, shape, scale = 1, log = FALSE)
+
+pweibullPH(q, shape, scale = 1, lower.tail = TRUE, log.p = FALSE)
+
+qweibullPH(p, shape, scale = 1, lower.tail = TRUE, log.p = FALSE)
+
+hweibullPH(x, shape, scale = 1, log = FALSE)
+
+HweibullPH(x, shape, scale = 1, log = FALSE)
+
+rweibullPH(n, shape, scale = 1)
+}
 \arguments{
 \item{x, q}{Vector of quantiles.}
-
-\item{p}{Vector of probabilities.}
-
-\item{n}{number of observations. If \code{length(n) > 1}, the length is
-taken to be the number required.}
 
 \item{shape}{Vector of shape parameters.}
 
@@ -25,6 +33,11 @@ taken to be the number required.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
+
+\item{p}{Vector of probabilities.}
+
+\item{n}{number of observations. If \code{length(n) > 1}, the length is
+taken to be the number required.}
 }
 \value{
 \code{dweibullPH} gives the density, \code{pweibullPH} gives the
