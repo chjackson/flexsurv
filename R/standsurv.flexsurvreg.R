@@ -247,8 +247,9 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
         stand.pred.list[[i]] <- stand.pred
       } else{
         if(i==1) message("Calculating standard errors / confidence intervals using delta method")
+
         predsum <- deltamethod.standsurv(object, newdata=dat, type, t, i, se, ci, predsum, trans, cl, weighted)
-        
+
       }
     }
     
