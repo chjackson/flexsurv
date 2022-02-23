@@ -278,7 +278,9 @@ A list of class \code{"flexsurvreg"} containing information about
   \item{res}{Matrix of maximum likelihood estimates and confidence limits,
   with parameters on their natural scales.} \item{res.t}{Matrix of maximum
   likelihood estimates and confidence limits, with parameters all
-  transformed to the real line.  The \code{\link{coef}}, \code{\link{vcov}}
+  transformed to the real line (using a log transform for all built-in
+  models where this is necessary).  The
+  \code{\link{coef}}, \code{\link{vcov}}
   and \code{\link{confint}} methods for \code{flexsurvreg} objects work on
   this scale.} \item{coefficients}{The transformed maximum likelihood
   estimates, as in \code{res.t}. Calling \code{coef()} on a

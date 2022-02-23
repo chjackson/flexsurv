@@ -33,7 +33,7 @@ flexsurvrtrunc(
 
 \item{data}{Data frame containing \code{t}, \code{rtrunc} and \code{tinit}.}
 
-\item{method}{If \code{"joint"} then the joint-conditional method is used.  If \code{"final"} then the conditional-on-final method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).}
+\item{method}{If \code{"joint"} then the "joint-conditional" method is used.  If \code{"final"} then the "conditional-on-final" method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).}
 
 \item{dist}{Typically, one of the strings in the first column of the
   following table, identifying a built-in distribution.  This table also

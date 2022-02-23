@@ -758,10 +758,6 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
 ##' equivalent for time-inhomogeneous Markov ("clock-forward") models has
 ##' currently not been implemented.
 ##' 
-##' Note the random sampling method for \code{flexsurvspline} models is
-##' currently very inefficient, so that looping over the \code{M} individuals
-##' will be very slow.
-##' 
 ##' @param x A model fitted with \code{\link{flexsurvreg}}. See
 ##' \code{\link{msfit.flexsurvreg}} for the required form of the model and the
 ##' data.
