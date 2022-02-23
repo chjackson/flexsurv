@@ -50,8 +50,6 @@ test_that("Spline distribution functions",{
     expect_equal(-log(1 - psurvspline(0.2,g,knots=k,scale="normal")), Hsurvspline(0.2,g,knots=k,scale="normal"))
     expect_equal(dsurvspline(c(-1,0,NA,NaN,Inf), g, knots=k), c(0,0,NA,NA,NaN))
 
-    qsurvspline(0.2,g,knots=k)
-
     expect_equal(psurvspline(qsurvspline(0.2,g,knots=k), g, knots=k), 0.2)
     expect_equal(qsurvspline(psurvspline(0.2,g,knots=k), g, knots=k), 0.2)
 

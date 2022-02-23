@@ -64,6 +64,13 @@ test_that("newdata in summary.flexsurvreg: are missing values passed through or 
     expect_true(is.na(summ$est[1]))
     summ <- summary(fl3, newdata = luna, B = 0, t=100, tidy=TRUE, na.action=na.omit)
     expect_true(!is.na(summ$est[1]))
+    
+    fitw <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist = "weibull")
+    ovarian_miss <- ovarian[1:2,]
+    ovarian_miss$age[[1]] <- NA
+    summ <- summary(fitw, ovarian_miss, type = 'rmst', t = 500, tidy=TRUE)
+    expect_true(is.na(summ$est[1]))
+    expect_true(!is.na(summ$est[2]))
 })
 
 test_that("newdata in summary.flexsurvreg: missing covariates, factor not supplied as factor",{
