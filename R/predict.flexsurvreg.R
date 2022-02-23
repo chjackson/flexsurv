@@ -14,15 +14,16 @@
 #'   If \code{newdata} is omitted, then the original data used to fit the model
 #'   are used, as extracted by \code{model.frame(object)}. However this will
 #'   currently not work if the model formula contains functions, e.g.
-#'   \code{~ factor(x)}.   The names of the model frame must correspond to
+#'   \code{~ factor(x)}. The names of the model frame must correspond to
 #'   variables in the original data.
 #'
 #' @param type Character vector for the type of predictions desired.
 #'
-#' * \code{"response"} for mean survival (the default)
+#' * \code{"response"} for mean survival time (the default). \code{"mean"} is
+#'   an acceptable synonym
 #'
-#' * \code{"quantile"} for quantiles of the survival distribution specified by
-#'   \code{p}
+#' * \code{"quantile"} for quantiles of the survival distribution as specified
+#'   by \code{p}
 #'
 #' * \code{"rmst"} for restricted mean survival time
 #'
@@ -132,7 +133,7 @@ predict.flexsurvreg <- function(object,
                                           length(conf.level) == 1,
                                           msg = "`conf.level` must be length one and between 0 and 1")
 
-    type <- match.arg(type, c("response", "quantile", "link", "lp", "linear",
+    type <- match.arg(type, c("mean", "response", "quantile", "link", "lp", "linear",
                               "survival", "cumhaz", "hazard", "rmst"))
 
     stype <- switch(
@@ -166,22 +167,40 @@ predict.flexsurvreg <- function(object,
                         (stype %in% c("survival", "cumhaz", "hazard", "rmst") &&
                         length(times) > 1))
 
-    res <- summary(
-      object = object,
-      newdata = newdata,
-      type = stype,
-      quantiles = p,
-      t = times,
-      start = start,
-      ci = conf.int,
-      cl = conf.level,
-      se = se.fit,
-      tidy = TRUE,
-      na.action = na.pass,
-      cross = TRUE
-    )
+    res <- if (stype %in% c("survival", "hazard", "cumhaz", "rmst")) {
+      summary(
+        object = object,
+        newdata = newdata,
+        type = stype,
+        quantiles = p,
+        t = times,
+        start = start,
+        ci = conf.int,
+        cl = conf.level,
+        se = se.fit,
+        tidy = TRUE,
+        na.action = na.pass,
+        cross = TRUE
+      )
+    } else {
+      # Avoid passing `t = times` for non-time based predictions
+      # to avoid noisy warnings
+      summary(
+        object = object,
+        newdata = newdata,
+        type = stype,
+        quantiles = p,
+        start = start,
+        ci = conf.int,
+        cl = conf.level,
+        se = se.fit,
+        tidy = TRUE,
+        na.action = na.pass,
+        cross = TRUE
+      )
+    }
 
-    res <- tidy_rename(res)
+    res <- tidy_rename(res, stype)
 
     if (nest_output) {
       if (stype == 'quantile') {
@@ -207,10 +226,13 @@ tidy_names <- function() {
     )
 }
 
-tidy_rename <- function(x) {
+tidy_rename <- function(x, type) {
   names_tbl <- tidy_names()
   names_to_change <- names_tbl[names_tbl$old %in% names(x), ]
   out <- dplyr::select(x, names_to_change$old)
   colnames(out) <- names_to_change$new
-  tibble::as_tibble(out)
+  out <- tibble::as_tibble(out)
+  if (type == "mean") type <- "time"
+  name_with_type <- rlang::sym(paste0('.pred_', type))
+  dplyr::rename(out, !!name_with_type := .pred)
 }
