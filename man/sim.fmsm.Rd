@@ -90,10 +90,6 @@ This function is only valid for semi-Markov ("clock-reset") models, though
 no warning or error is currently given if the model is not of this type. An
 equivalent for time-inhomogeneous Markov ("clock-forward") models has
 currently not been implemented.
-
-Note the random sampling method for \code{flexsurvspline} models is
-currently very inefficient, so that looping over the \code{M} individuals
-will be very slow.
 }
 \examples{
 

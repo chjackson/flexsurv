@@ -26,7 +26,10 @@ Hlnorm <- function(x, meanlog=0, sdlog=1, log=FALSE){
 
 check.lnorm <- function(meanlog=0, sdlog=1){
     ret <- rep(TRUE, length(meanlog))
-    if (any(sdlog<0)) {warning("Negative SD parameter"); ret[sdlog<0] <- FALSE}
+    if (any(!is.na(sdlog) & sdlog<0)) {
+        warning("Negative SD parameter")
+        ret[!is.na(sdlog) & sdlog<0] <- FALSE
+    }
     ret
 }
 

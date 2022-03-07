@@ -23,7 +23,7 @@ supplied, these should be in the working environment.}
 \item{eps}{Small number that is added to \code{t} before implementing the
 time-reversed estimator, to ensure the risk set is consistent between
 forward and reverse time scales. It should be just large enough that
-\code{t+eps} is not \code{==t} This should not need changing from the
+\code{t+eps} is not \code{==t}. This should not need changing from the
 default of 0.001, unless \code{t} are extremely large or small and the
 data are rounded to integer.}
 

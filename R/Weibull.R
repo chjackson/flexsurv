@@ -30,8 +30,8 @@ Hweibull <- function (x, shape, scale = 1, log = FALSE)
 
 check.weibull <- function(shape, scale=1){
     ret <- rep(TRUE, length(shape))
-    if (any(shape<0)) {warning("Negative shape parameter"); ret[shape<0] <- FALSE}
-    if (any(scale<0)) {warning("Negative scale parameter"); ret[scale<0] <- FALSE}
+    if (any(!is.na(shape) & shape<0)) {warning("Negative shape parameter"); ret[!is.na(shape) & shape<0 ] <- FALSE}
+    if (any(!is.na(scale) & scale<0)) {warning("Negative scale parameter"); ret[!is.na(scale) & scale<0 ] <- FALSE}
     ret
 }
 
@@ -68,13 +68,6 @@ Hweibull <- function (x, shape, scale = 1, log = FALSE)
         ret[ind] <- shape * log(x/scale)
     else
         ret[ind] <- (x/scale)^shape
-    ret
-}
-
-check.weibull <- function(shape, scale=1){
-    ret <- rep(TRUE, length(shape))
-    if (any(shape<0)) {warning("Negative shape parameter"); ret[shape<0] <- FALSE}
-    if (any(scale<0)) {warning("Negative scale parameter"); ret[scale<0] <- FALSE}
     ret
 }
 

@@ -17,13 +17,16 @@ Version 2.2 (2022-01-??)
   - Covariate names when `tidy=FALSE` now consistently don't include
   spaces.
 
+* Better handling of NAs in summary and prediction functions. Thanks
+  to Matthew Warkentin.
+
 * New function `hr_flexsurvreg` to compute the hazard ratio from a
   fitted flexsurvreg or flexsurvspline model as a function of time,
   with confidence intervals.
 
 * New function `standsurv.flexsurvreg` for survival and hazards
   standardised over an observed distribution for covariates. 
-  Contributed by Michael Sweeting <michael.sweeting@@astrazeneca.com>. 
+  Contributed by Michael Sweeting <michael.sweeting@astrazeneca.com>. 
 
 * New functions for Cox-Snell residuals: `coxsnell_flexsurvreg` or
   residuals(..., type="coxsnell").

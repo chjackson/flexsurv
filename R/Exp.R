@@ -22,7 +22,7 @@ Hexp <- function(x, rate=1, log=FALSE){
 
 check.exp <- function(rate=1){
     ret <- rep(TRUE, length(rate))
-    if (any(rate<0)) {warning("Negative rate parameter"); ret[rate<0] <- FALSE}
+    if (any(!is.na(rate) & rate<0)) {warning("Negative rate parameter"); ret[!is.na(rate) & rate<0] <- FALSE}
     ret
 }
 

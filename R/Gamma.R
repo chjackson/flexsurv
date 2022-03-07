@@ -24,13 +24,13 @@ Hgamma <- function(x, shape, rate=1, log=FALSE){
 
 check.gamma <- function(shape, rate=1){
     ret <- rep(TRUE, length(shape))
-    if (any(shape<0)) {
+    if (any(!is.na(shape) & shape<0)) {
         warning("Negative shape parameter")
-        ret[shape<0] <- FALSE
+        ret[!is.na(shape) & shape<0] <- FALSE
     }
-    if (any(rate<0)) {
-        warning("Negative scale parameter")
-        ret[rate<0] <- FALSE
+    if (any(!is.na(rate) & rate<0)) {
+        warning("Negative rate parameter")
+        ret[!is.na(rate) & rate<0] <- FALSE
     }
     ret
 }

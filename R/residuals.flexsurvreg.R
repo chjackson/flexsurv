@@ -34,7 +34,7 @@ residuals.flexsurvreg <- function(object, type = "response", ...)
 
   if (type=="response"){ 
   obs_surv <- unname(object$data$Y[, 1])
-  fit_surv <- predict(object, type = type)$.pred
+  fit_surv <- predict(object, type = type)$.pred_time
   res <- obs_surv - fit_surv
   } else if (type=="coxsnell") {
       cx <- coxsnell_flexsurvreg(object)

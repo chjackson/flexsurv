@@ -131,8 +131,11 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, scalarargs=NULL, ...)
   t_len <- length(t)
   maxlen <- max(c(t_len, veclen, matlen))  
   if(length(start) == 1) start <- rep(start, length.out=maxlen)
-  for (i in seq(along=args))
+  na_inds <- rep(FALSE, maxlen)
+  for (i in seq(along=args)){
       args[[i]] <- rep(args[[i]], length.out=maxlen)
+      na_inds <- na_inds | is.na(args[[i]])
+  }
   t <- rep(t, length.out=maxlen)
   for (i in seq(along=args_mat)){
       if (is.matrix(args_mat[[i]])){
@@ -143,9 +146,11 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, scalarargs=NULL, ...)
           )
       }
       else args_mat[[i]] <- matrix(args_mat[[i]], nrow=maxlen, ncol=length(args_mat[[i]]), byrow=TRUE)
+      na_inds <- na_inds | apply(args_mat[[i]], 1, function(x)any(is.na(x)))
   }
   ret <- numeric(maxlen)
-  for (i in seq_len(maxlen)){
+  ret[na_inds] <- NA
+  for (i in seq_len(maxlen)[!na_inds]){
       fargs_vec <- lapply(args, function(x)x[i])
       fargs_mat <- lapply(args_mat, function(x)x[i,,drop=FALSE])
       pdargs <- c(list(start[i]), fargs_vec, fargs_mat, args_scalar)
@@ -155,7 +160,7 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, scalarargs=NULL, ...)
           pd <- do.call(pdist, pdargs)
           (1 - pd) / start_p
       }
-    ret[i] <- integrate(fn, start[i], t[i])$value
+      ret[i] <- integrate(fn, start[i], t[i])$value
   }
   ret[t<start] <- 0
   if (any(is.nan(ret))) warning("NaNs produced")
@@ -239,8 +244,11 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
     matlen <- if(is.null(matargs)) NULL else sapply(args.mat, function(x){if(is.matrix(x))nrow(x) else 1})
     veclen <- if (length(args) == 0) NULL else sapply(args, length)
     maxlen <- max(c(length(p), veclen, matlen))
-    for (i in seq(along=args))
+    na_inds <- rep(FALSE, length(ret))
+    for (i in seq(along=args)){
         args[[i]] <- rep(args[[i]], length.out=maxlen)
+        na_inds <- na_inds | is.na(args[[i]])
+    }
     for (i in seq(along=args.mat)){
         if (is.matrix(args.mat[[i]])){
             args.mat[[i]] <- matrix(
@@ -250,10 +258,12 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
             )
         }
         else args.mat[[i]] <- matrix(args.mat[[i]], nrow=maxlen, ncol=length(args.mat[[i]]), byrow=TRUE)
+        na_inds <- na_inds | apply(args.mat[[i]], 1, function(x)any(is.na(x)))
     }
     p <- rep(p, length.out=maxlen)
     ret[p < 0 | p > 1] <- NaN
-    ind <- (p > 0 & p < 1)
+    ret[na_inds] <- NA
+    ind <- (p > 0 & p < 1 & !na_inds)
     if (any(ind)) {
         hind <- seq(along=p)[ind]
         n <- length(p[ind])

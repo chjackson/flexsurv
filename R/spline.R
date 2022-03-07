@@ -268,6 +268,7 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
         eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
         eeta <- hlink(scale)(eta)
         ret[ind] <- dtsfn(q, timescale) * rowSums(dbasis(knots, tsfn(q, timescale)) * gamma) * eeta
+        ret[ind][ret[ind]<=0] <- 0 # these correspond to invalid decreasing cumulative hazard functions
     }
     as.numeric(ret)
 }

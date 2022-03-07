@@ -321,9 +321,18 @@ check.genf.orig <- function(mu, sigma, s1, s2){
     ret <- rep(TRUE, length(mu))
     if (missing(s1)) stop("shape parameter \"s1\" not given")
     if (missing(s2)) stop("shape parameter \"s2\" not given")
-    if (any(sigma < 0)) {warning("Negative scale parameter \"sigma\""); ret[sigma<0] <- FALSE}
-    if (any(s1 < 0)) {warning("Negative shape parameter \"s1\""); ret[s1<0] <- FALSE}
-    if (any(s2 < 0)) {warning("Negative shape parameter \"s2\""); ret[s2<0] <- FALSE}
+    if (any(!is.na(sigma) & sigma < 0)) {
+        warning("Negative scale parameter \"sigma\"")
+        ret[!is.na(sigma) & sigma < 0] <- FALSE
+    }
+    if (any(!is.na(s1) & s1 < 0)) {
+        warning("Negative shape parameter \"s1\"");
+        ret[!is.na(s1) & s1 < 0] <- FALSE
+    }
+    if (any(!is.na(s2) & s2 < 0)) {
+        warning("Negative shape parameter \"s2\"");
+        ret[!is.na(s2) & s2 < 0] <- FALSE
+    }
     ret
 }
 
