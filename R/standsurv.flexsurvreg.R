@@ -292,6 +292,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   ## Calculate individual expected survival and expected hazard 
   if((!missing(rmap) & !missing(ratetable))){
     message("Calculating marginal expected survival and hazard")
+    if(is.null(t)) t <- sort(unique(x$data$Y[,"stop"]))
     expsurv <- eval(substitute(expsurv.fn(t, rmap, ratetable, data, weighted, scale.ratetable)))
   } else expsurv <- NULL
   
@@ -301,10 +302,12 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     dat <- data
     covs <- at[[i]]
     covnames <- names(covs)
-    ## If all covariate have been specified in 'at' then we have no further covariates
+    ## If all covariates have been specified in 'at' then we have no further covariates
     ## to standardize over, so just use 1 row of data
+    ## do not use this shortcut for type2 = "acsurvival" or type2 = "achazard" as
+    ## we require individual expected survivals for these methods
     allcovs <- all.vars(formula(x)[-2])
-    if(all(allcovs %in% covnames) & !weighted){
+    if(all(allcovs %in% covnames) & !weighted & !(type2 %in% c("acsurvival", "achazard"))){
       dat <- dat[1,,drop=F]
     }
     ## If at is not specified then no further manipulation of data is required, 
@@ -428,6 +431,10 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     }
   } else if(type=="acsurvival"){
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
+    if(object$ncovs == 0){
+      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
+      rs <- rs %>% slice(rep(1:n(), dim(newdata)[1]))
+    }
     rs$id <- rep(1:dim(newdata)[1],each=length(t))
     names(rs)[names(rs)=="est"] <- "rs"
     pred <- rs %>% left_join(expsurv$expsurv, by=c("id","time"))
@@ -440,9 +447,17 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     }
   } else if(type=="achazard"){
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
+    if(object$ncovs == 0){
+      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
+      rs <- rs %>% slice(rep(1:n(), dim(newdata)[1]))
+    }
     rs$id <- rep(1:dim(newdata)[1],each=length(t))
     names(rs)[names(rs)=="est"] <- "rs"
     excessh <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F) ## this gives excess hazard
+    if(object$ncovs == 0){
+      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
+      excessh <- excessh %>% slice(rep(1:n(), dim(newdata)[1]))
+    }
     excessh$id <- rep(1:dim(newdata)[1],each=length(t))
     names(excessh)[names(excessh)=="est"] <- "excessh"
     pred <- rs %>% left_join(excessh, by=c("id", "time")) %>%
