@@ -4,7 +4,7 @@
 \alias{plot.standsurv}
 \title{Plot standardized metrics from a fitted flexsurv model}
 \usage{
-\method{plot}{standsurv}(x, contrast = FALSE, ci = TRUE, ...)
+\method{plot}{standsurv}(x, contrast = FALSE, ci = TRUE, expected = FALSE, ...)
 }
 \arguments{
 \item{x}{A standsurv object returned by \code{standsurv.flexsurvreg}}
@@ -14,6 +14,10 @@ to FALSE}
 
 \item{ci}{Should confidence intervals be plotted (if calculated in 
 \code{standsurv.flexsurvreg})?}
+
+\item{expected}{Should the marginal expected survival / hazard also be 
+plotted? This can only be invoked if \code{rmap} and \code{ratetable} have 
+been passed to \code{standsurv.flexsurvreg}}
 
 \item{...}{Not currently used}
 }

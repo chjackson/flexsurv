@@ -19,7 +19,10 @@ standsurv.flexsurvreg(
   trans = "log",
   contrast = NULL,
   trans.contrast = NULL,
-  seed = NULL
+  seed = NULL,
+  rmap,
+  ratetable,
+  scale.ratetable = 365.25
 )
 }
 \arguments{
@@ -48,11 +51,21 @@ covariates is specified using
 \item{atreference}{The reference scenario for making contrasts. Default is 1
 (i.e. the first element of \code{at}).}
 
-\item{type}{\code{"survival"} for marginal survival probabilities.
+\item{type}{\code{"survival"} for marginal survival probabilities. In a 
+relative survival framework this returns the marginal all-cause survival 
+(see details).
 
-\code{"hazard"} for the hazard of the marginal survival probability.
+\code{"hazard"} for the hazard of the marginal survival probability. In a 
+relative survival framework this returns the marginal all-cause hazard 
+(see details).
 
-\code{"rmst"} for standardized restricted mean survival.}
+\code{"rmst"} for standardized restricted mean survival.
+
+\code{"relsurvival"} for marginal relative survival (can only be specified
+if a relative survival model has been fitted in flexsurv).
+
+\code{"excesshazard"} for marginal excess hazards (can only be specified
+if a relative survival model has been fitted in flexsurv).}
 
 \item{t}{Times to calculate marginal values at.}
 
@@ -88,6 +101,20 @@ transformation is "none" for differences in survival, hazard or RMST,
 and "log" for ratios of survival, hazard or RMST.}
 
 \item{seed}{The random seed to use (for bootstrapping confidence intervals)}
+
+\item{rmap}{An list that maps data set names to expected ratetable names. 
+This must be specified if all-cause survival and hazards are required after
+fitting a relative survival model. This can also be specified if expected
+rates are required for plotting purposes. See the details section below.}
+
+\item{ratetable}{A table of expected event rates 
+(see \code{\link[survival]{ratetable}})}
+
+\item{scale.ratetable}{Transformation from the time scale of the fitted 
+flexsurv model to the time scale in \code{ratetable}. For example, if the 
+analysis time of the fitted model is in years and the ratetable is in 
+units/day then we should use \code{scale.ratetable = 365.25}. This is the 
+default as often the ratetable will be in units/day (see example).}
 }
 \value{
 A \code{tibble} containing one row for each 
@@ -119,6 +146,19 @@ The hazard of the standardized survival is a weighted average of
 individual hazard functions at time t, weighted by the survival
 function at this time:
 \deqn{h_s(t|X=x) = \frac{\sum_{i=1}^N S(t|X=x,Z=z_i)h(t|X=x,Z=z_i)}{\sum_{i=1}^N S(t|X=x,Z=z_i)}}{h(t|X=x) = sum(S(t|X=x,Z=z_i) * h(t|X=x,Z=z_i)) / sum(S(t|X=x,Z=z_i))}
+Marginal expected survival and hazards can be calculated by providing a 
+population-based lifetable of class ratetable in \code{ratetable} and a 
+mapping between stratification factors in the lifetable and the user dataset
+using \code{rmap}. If these stratification factors are not in the fitted
+survival model then the user must specify them in \code{newdata} along with
+the covariates of the model. The marginal expected survival is calculated 
+using the "Ederer" method that assumes no censoring as this is most relevant 
+approach for forecasting (see 
+\code{\link[survival]{expsurv}}). A worked example is given below.
+
+Marginal all-cause survival and hazards can be calculated after fitting a
+relative survival model, which utilise the expected survival from a population
+ratetable. See Rutherford et al. (Chapter 6) for further details.
 }
 \examples{
 ## mean age is higher in those with smaller observed survival times 
@@ -159,12 +199,44 @@ plot(haz_standsurv_weib_age, ci=TRUE)
 ## Whereas the conditional HR is constant (model is a PH model)
 plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
 }
+
+## Calculate standardized survival from a Weibull model together with expected
+## survival matching to US lifetables
+
+# age at diagnosis in days. This is required to match to US ratetable, whose
+# timescale is measured in days
+newbc$agedays <- floor(newbc$age * 365.25)  
+## Create some random diagnosis dates centred on 01/01/2010 with SD=1 year
+## These will be used to match to expected rates in the lifetable
+newbc$diag <- as.Date(floor(rnorm(dim(newbc)[1], 
+                     mean = as.Date("01/01/2010", "\%d/\%m/\%Y"), sd=365)), 
+                     origin="1970-01-01")
+## Create sex (assume all are female)
+newbc$sex <- factor("female")
+standsurv_weib_expected <- standsurv.flexsurvreg(weib_age, 
+                                           at = list(list(group="Good"), 
+                                                     list(group="Medium"), 
+                                                     list(group="Poor")), 
+                                           t=seq(0,7, length=100),
+                                           rmap=list(sex = sex,
+                                                     year = diag,
+                                                     age = agedays),
+                                           ratetable = survival::survexp.us,
+                                           scale.ratetable = 365.25,
+                                           newdata = newbc)
+## Plot marginal survival with expected survival superimposed                                            
+plot(standsurv_weib_expected, expected=TRUE)
 }
 \references{
 Paul Lambert, 2021. "STANDSURV: Stata module to compute 
 standardized (marginal) survival and related functions," 
 Statistical Software Components S458991, Boston College Department of 
 Economics. https://ideas.repec.org/c/boc/bocode/s458991.html
+
+Rutherford, MJ, Lambert PC, Sweeting MJ, Pennington B, Crowther MJ, Abrams KR,
+Latimer NR. 2020. "NICE DSU Technical Support Document 21: Flexible Methods 
+for Survival Analysis" 
+https://nicedsu.sites.sheffield.ac.uk/tsds/flexible-methods-for-survival-analysis-tsd
 }
 \author{
 Michael Sweeting <michael.sweeting@astrazeneca.com>
