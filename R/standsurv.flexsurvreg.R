@@ -289,10 +289,12 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     }
   }
 
+  ## Set t to be unique event times if NULL  
+  if(is.null(t)) t <- sort(unique(x$data$Y[,"stop"]))
+  
   ## Calculate individual expected survival and expected hazard 
   if((!missing(rmap) & !missing(ratetable))){
     message("Calculating marginal expected survival and hazard")
-    if(is.null(t)) t <- sort(unique(x$data$Y[,"stop"]))
     expsurv <- eval(substitute(expsurv.fn(t, rmap, ratetable, data, weighted, scale.ratetable)))
   } else expsurv <- NULL
   
