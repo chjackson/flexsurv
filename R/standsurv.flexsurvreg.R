@@ -814,14 +814,17 @@ plot.standsurv <- function(x, contrast = FALSE, ci = TRUE, expected = FALSE, ...
     if(expected) stop("Expected survival/hazard cannot be plotted with contrasts")
   }
   linetype <- c("Study" = "solid", "Expected" = "dashed")
-  p <- ggplot(obj, aes(x=time,linetype=Population)) + 
-    geom_line(aes_(y=as.name(y),color=as.name(group))) + xlab("Time") +
+  p <- ggplot() + 
+    geom_line(aes_(x= ~time, y=as.name(y), color=as.name(group), 
+                   linetype= ~Population), data=obj) + 
+    xlab("Time") +
     scale_linetype_manual(values = linetype, guide="none") 
     
   if(ci){
     if(any(grepl("_lci",names(obj)))){
-      p <- p + geom_ribbon(aes_(ymin=as.name(paste0(y,"_lci")),ymax=as.name(paste0(y,"_uci")),
-                              fill= as.name(group)),alpha=0.2) 
+      p <- p + geom_ribbon(aes_(x= ~ time, ymin=as.name(paste0(y,"_lci")),
+                                ymax=as.name(paste0(y,"_uci")),
+                              fill= as.name(group)), data = obj, alpha=0.2) 
     } else warning("Confidence intervals have not been calculated in standsurv. None will be plotted")
   }
   p
