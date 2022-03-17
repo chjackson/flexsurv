@@ -407,6 +407,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
 
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
+#' @importFrom dplyr left_join
 #' @import rlang
 standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv){
   tr.fun <- tr(trans)
@@ -795,6 +796,8 @@ plot.standsurv <- function(x, contrast = FALSE, ci = TRUE, expected = FALSE, ...
     if(expected){
       if(is.null(attributes(x)$expected)) 
         stop("Expected survival/hazards have not been calculated by standsurv.flexsurvreg")
+      if(!(y %in% c("hazard", "achazard", "survival", "acsurvival")))
+        stop(paste0("Expected survival/hazards cannot be plotted with type = ",y))
       if(y %in% c("hazard", "achazard"))
         y2 <- "exphaz"
       if(y %in% c("survival", "acsurvival"))
