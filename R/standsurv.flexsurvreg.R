@@ -346,6 +346,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     }
     
   }
+  if(any(is.na(standpred))) warning("Missing values present in newdata")
   
   if(!is.null(contrast)){
     if(boot == TRUE){
