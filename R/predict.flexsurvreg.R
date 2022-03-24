@@ -117,24 +117,40 @@ predict.flexsurvreg <- function(object,
 {
     if (missing(newdata)) newdata <- model.frame(object)
 
-    assertthat::assert_that(inherits(newdata, "data.frame"),
-                            msg = "`newdata` must inherit class `data.frame`")
-    assertthat::assert_that(is.logical(conf.int), is.logical(se.fit))
-    assertthat::assert_that(all(is.numeric(p), p <= 1, p >=0),
-                            msg = "`p` should be a vector of quantiles between 0 and 1")
-
     assertthat::assert_that(
-        is.numeric(start),
-        msg = "`start` must be a numeric vector of left-truncation times"
+      inherits(newdata, "data.frame"),
+      msg = "`newdata` must inherit the class `data.frame`"
     )
 
-    if (conf.int) assertthat::assert_that(is.numeric(conf.level),
-                                          conf.level > 0, conf.level < 1,
-                                          length(conf.level) == 1,
-                                          msg = "`conf.level` must be length one and between 0 and 1")
+    assertthat::assert_that(
+      is.logical(se.fit),
+      msg = '`se.fit` must be a logical (TRUE/FALSE).'
+    )
 
-    type <- match.arg(type, c("mean", "response", "quantile", "link", "lp", "linear",
-                              "survival", "cumhaz", "hazard", "rmst"))
+    assertthat::assert_that(
+      is.logical(conf.int),
+      msg = '`conf.int` must be a logical (TRUE/FALSE).'
+    )
+
+    assertthat::assert_that(
+      all(is.numeric(p), p <= 1, p >= 0),
+      msg = "`p` should be a vector of quantiles in the range [0, 1]"
+    )
+
+    assertthat::assert_that(
+      is.numeric(start),
+      msg = "`start` must be a numeric vector of left-truncation times"
+    )
+
+    if (conf.int) assertthat::assert_that(
+      is.numeric(conf.level),
+      conf.level > 0, conf.level < 1,
+      length(conf.level) == 1,
+      msg = "`conf.level` must be length one and between 0 and 1"
+    )
+
+    type <- match.arg(type, c("mean", "response", "quantile", "link", "lp",
+                              "linear", "survival", "cumhaz", "hazard", "rmst"))
 
     stype <- switch(
         type,
@@ -145,27 +161,32 @@ predict.flexsurvreg <- function(object,
     )
 
     if (stype %in% c("survival", "cumhaz", "hazard")) {
-        if (missing(times)) times <- object$data$Y[, 1][order(object$data$Y[, 1])]
-        assertthat::assert_that(all(is.numeric(times), times > 0),
-                                msg = "`times` must be a vector of positive real-valued numbers.")
+        if (missing(times)) times <- object$data$Y[,1][order(object$data$Y[,1])]
+        assertthat::assert_that(
+          all(is.numeric(times), times >= 0),
+          msg = "`times` must be a vector of non-negative real-valued numbers."
+        )
     } else if (stype == "rmst" && !missing(times)) {
-        assertthat::assert_that(all(is.numeric(times), times > 0),
-                                msg = "`times` must be a vector of positive real-valued numbers.")
+        assertthat::assert_that(
+          all(is.numeric(times), times >= 0),
+          msg = "`times` must be a vector of non-negative real-valued numbers."
+        )
     } else {
         times <- NULL
     }
 
     assertthat::assert_that(
-        length(start) == 1 | length(start) == length(times),
-        msg =
-            paste0(
-                "Length of `start` is ", length(start), ". Length should be 1, or the same length as `times`, which is ", length(times)
-            )
+      length(start) == 1 | length(start) == length(times),
+      msg = paste0(
+        "Length of `start` is ", length(start),
+        ". Length should be 1, or the same length as `times`, which is ",
+        length(times)
+      )
     )
 
     nest_output <- ((stype == "quantile" && length(p) > 1) |
-                        (stype %in% c("survival", "cumhaz", "hazard", "rmst") &&
-                        length(times) > 1))
+                      (stype %in% c("survival", "cumhaz", "hazard", "rmst") &&
+                         length(times) > 1))
 
     res <- if (stype %in% c("survival", "hazard", "cumhaz", "rmst")) {
       summary(
@@ -210,7 +231,7 @@ predict.flexsurvreg <- function(object,
       }
       orig_nrow <- nrow(newdata)
       res <- dplyr::mutate(res, .id = rep(1:orig_nrow, each = num_reps))
-      res <- dplyr::group_nest(res, .id, .key = '.pred')
+      res <- tidyr::nest(res, .pred = -.id)
       res <- dplyr::select(res, .pred)
     }
     res
