@@ -10,21 +10,19 @@ is.flexsurvlist <- function(x){
 form.msm.newdata <- function(x, newdata=NULL, tvar="trans", trans){
     tr <- sort(unique(na.omit(as.vector(trans))))
     ntr <- length(tr)
-    mfo <- model.frame(x)
-    if (!(tvar %in% colnames(mfo))){
+    if (!(tvar %in% x$covdata$covnames)){
         if (missing(tvar))
             stop("\"tvar\" not supplied and variable \"", tvar, "\" not in model")
         else stop("\"variable \"", tvar, "\" not in model")
     }
-    trobs <- unique(mfo[,tvar])
-    if (!all(trobs %in% tr)) stop("\"tvar\" contains elements not in the transition indicator matrix \"trans\"")
     if(is.null(newdata)){
-        newdata <- data.frame(trans=trobs); names(newdata) <- tvar
+        newdata <- data.frame(trans=factor(tr, levels=x$covdata$xlev[[tvar]]))
+        names(newdata) <- tvar
     } else {
         newdata <- as.data.frame(newdata)
         if (nrow(newdata)==1) newdata <- newdata[rep(1,ntr),,drop=FALSE]
         else if (nrow(newdata) != ntr) stop(sprintf("length of variables in \"newdata\" must be either 1 or number of transitions, %d", ntr))
-        newdata[,tvar] <- trobs
+        newdata[,tvar] <- factor(tr, levels=x$covdata$xlev[[tvar]])
     }
     newdata
 }
