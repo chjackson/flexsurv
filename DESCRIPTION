@@ -50,6 +50,10 @@ Imports:
     ggplot2
 Encoding: UTF-8
 Suggests:
+    flexsurvcure,
+    survminer,
+    lubridate,
+    rmarkdown,
     colorspace,
     eha,
     knitr,

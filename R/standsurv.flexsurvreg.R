@@ -25,7 +25,7 @@
 #' the covariates of the model. The marginal expected survival is calculated 
 #' using the "Ederer" method that assumes no censoring as this is most relevant 
 #' approach for forecasting (see 
-#' \code{\link[survival]{expsurv}}). A worked example is given below.
+#' \code{\link[survival]{survexp}}). A worked example is given below.
 #' 
 #' Marginal all-cause survival and hazards can be calculated after fitting a
 #' relative survival model, which utilise the expected survival from a population
@@ -409,6 +409,8 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @importFrom dplyr left_join
+#' @importFrom dplyr slice
+#' @importFrom dplyr n
 #' @import rlang
 standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv){
   tr.fun <- tr(trans)
@@ -788,7 +790,7 @@ tidy.standsurv <- function(x, ...){
 #'                                fill=ggplot2::guide_legend(title="Prognosis"))
 #'plot(standsurv_weib_age, contrast=TRUE, ci=TRUE) + 
 #'  ggplot2::ylab("Difference in survival") 
-plot.standsurv <- function(x, contrast = FALSE, ci = TRUE, expected = FALSE, ...){
+plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ...){
   if(!contrast){
     obj <- attributes(x)$standpred_at
     obj <- obj %>% mutate(Population = "Study")

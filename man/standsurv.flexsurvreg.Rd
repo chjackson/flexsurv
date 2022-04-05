@@ -154,7 +154,7 @@ survival model then the user must specify them in \code{newdata} along with
 the covariates of the model. The marginal expected survival is calculated 
 using the "Ederer" method that assumes no censoring as this is most relevant 
 approach for forecasting (see 
-\code{\link[survival]{expsurv}}). A worked example is given below.
+\code{\link[survival]{survexp}}). A worked example is given below.
 
 Marginal all-cause survival and hazards can be calculated after fitting a
 relative survival model, which utilise the expected survival from a population
