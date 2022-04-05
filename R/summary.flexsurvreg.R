@@ -211,8 +211,6 @@ newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
         }
         attr(X, "newdata") <- as.data.frame(X)
     }
-    else if (is.null(x[["data"]]))
-        stop("Covariate contrasts matrix `X` should be supplied explicitly if the data are not included in the model object")
     else if (is.null(newdata)){
         Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
         isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
