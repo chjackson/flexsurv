@@ -975,6 +975,9 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                   covpars=if (ncoveffs>0) (nbpars+1):npars else NULL,
                   AIC=-2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
+                  covdata = list(covnames = attr(dat$m, "covnames"),
+                                 terms = attr(dat$m, "terms"),
+                                 xlev = .getXlevels(attr(dat$m, "terms"), dat$m)),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
                   concat.formula=f2, all.formulae=forms, dfns=dfns),
              ret)
@@ -1024,11 +1027,9 @@ print.flexsurvreg <- function(x, ...)
 }
 
 form.model.matrix <- function(object, newdata, na.action=na.pass, forms=NULL){
-    mfo <- model.frame(object)
-
     ## If required covariate missing, give a slightly more informative error message than, e.g.
     ## "Error in eval(expr, envir, enclos) (from flexsurvreg.R#649) : object 'sex' not found"
-    covnames <- attr(mfo, "covnames")
+    covnames <- object$covdata$covnames
     missing.covs <- unique(covnames[!covnames %in% names(newdata)])
     if (length(missing.covs) > 0){
         missing.covs <- sprintf("\"%s\"", missing.covs)
@@ -1037,9 +1038,8 @@ form.model.matrix <- function(object, newdata, na.action=na.pass, forms=NULL){
     }
 
     ## as in predict.lm
-    tt <- attr(mfo, "terms")
-    Terms <- delete.response(tt)
-    mf <- model.frame(Terms, newdata, xlev = .getXlevels(tt, mfo), na.action=na.action)
+    Terms <- delete.response(object$covdata$terms)
+    mf <- model.frame(Terms, newdata, xlev = object$covdata$xlev, na.action=na.action)
     if (!is.null(cl <- attr(Terms, "dataClasses")))
         .checkMFClasses(cl, mf)
     if (is.null(forms))
