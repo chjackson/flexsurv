@@ -4,7 +4,7 @@
 \alias{plot.standsurv}
 \title{Plot standardized metrics from a fitted flexsurv model}
 \usage{
-\method{plot}{standsurv}(x, contrast = FALSE, ci = TRUE, expected = FALSE, ...)
+\method{plot}{standsurv}(x, contrast = FALSE, ci = FALSE, expected = FALSE, ...)
 }
 \arguments{
 \item{x}{A standsurv object returned by \code{standsurv.flexsurvreg}}

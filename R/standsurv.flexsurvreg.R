@@ -788,7 +788,7 @@ tidy.standsurv <- function(x, ...){
 #'                                fill=ggplot2::guide_legend(title="Prognosis"))
 #'plot(standsurv_weib_age, contrast=TRUE, ci=TRUE) + 
 #'  ggplot2::ylab("Difference in survival") 
-plot.standsurv <- function(x, contrast = FALSE, ci = TRUE, expected = FALSE, ...){
+plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ...){
   if(!contrast){
     obj <- attributes(x)$standpred_at
     obj <- obj %>% mutate(Population = "Study")

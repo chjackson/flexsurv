@@ -50,6 +50,7 @@ Imports:
     ggplot2
 Encoding: UTF-8
 Suggests:
+    rmarkdown,
     colorspace,
     eha,
     knitr,

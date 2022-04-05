@@ -6,3 +6,5 @@ flexsurv.bbl
 flexsurv.blg
 multistate.bbl
 multistate.blg
+*.html
+*.R
