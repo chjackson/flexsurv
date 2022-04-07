@@ -22,3 +22,4 @@ tests/testthat/simulate*
 R/#*
 /temp/
 
+inst/doc

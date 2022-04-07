@@ -4,7 +4,7 @@
 \alias{plot.standsurv}
 \title{Plot standardized metrics from a fitted flexsurv model}
 \usage{
-\method{plot}{standsurv}(x, contrast = FALSE, ci = TRUE, ...)
+\method{plot}{standsurv}(x, contrast = FALSE, ci = FALSE, expected = FALSE, ...)
 }
 \arguments{
 \item{x}{A standsurv object returned by \code{standsurv.flexsurvreg}}
@@ -14,6 +14,10 @@ to FALSE}
 
 \item{ci}{Should confidence intervals be plotted (if calculated in 
 \code{standsurv.flexsurvreg})?}
+
+\item{expected}{Should the marginal expected survival / hazard also be 
+plotted? This can only be invoked if \code{rmap} and \code{ratetable} have 
+been passed to \code{standsurv.flexsurvreg}}
 
 \item{...}{Not currently used}
 }
@@ -44,7 +48,7 @@ standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
                                                      list(group="Poor")),
                                            t=seq(0,7, length=100),
                                            contrast = "difference", ci=TRUE,
-                                           B=10, seed=123)
+                                           boot = TRUE, B=10, seed=123)
 plot(standsurv_weib_age)
 plot(standsurv_weib_age) + ggplot2::theme_bw() + ggplot2::ylab("Survival") +
  ggplot2::xlab("Time (years)") + 
