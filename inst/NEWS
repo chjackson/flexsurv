@@ -35,6 +35,9 @@ Version 2.2 (2022-01-??)
   (e.g. mean_survspline1) handle alternative parameter values in a
   vectorised way.
 
+* Allow output functions to work on models that have been stripped of
+  data with x$data <- NULL, if possible
+
 
 Version 2.1 (2021-09-13)
 -------------------------

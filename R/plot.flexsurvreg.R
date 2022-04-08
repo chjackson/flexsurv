@@ -95,6 +95,8 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                              col.ci=NULL,lty.ci=2,lwd.ci=1,ylim=NULL,
                              add=FALSE,...)
 {
+    if (is.null(x[["data"]]))
+        stop("Gooodness-of-fit plots are not available if the data have been removed from the model object")
     ## don't calculate or plot CIs by default if all covs are categorical -> multiple curves
     mf <- model.frame(x)
     Xraw <- mf[,attr(mf, "covnames.orig"), drop=FALSE]

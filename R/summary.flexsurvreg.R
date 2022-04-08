@@ -212,6 +212,8 @@ newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
         attr(X, "newdata") <- as.data.frame(X)
     }
     else if (is.null(newdata)){
+        if (is.null(x[["data"]]))
+            stop("`newdata` should be supplied if the data have been removed from the model object")
         Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
         isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
         if (is.vector(X)) X <- matrix(X, nrow=1)

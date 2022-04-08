@@ -1117,7 +1117,7 @@ model.matrix.flexsurvreg <- function(object, par=NULL, ...)
 logLik.flexsurvreg <- function(object, ...){
     val <- object$loglik
     attr(val, "df") <- object$npars
-    attr(val, "nobs") <- nrow(model.frame(object))
+    attr(val, "nobs") <- object$N
     class(val) <- "logLik"
     val
 }
