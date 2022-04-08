@@ -95,13 +95,11 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                              col.ci=NULL,lty.ci=2,lwd.ci=1,ylim=NULL,
                              add=FALSE,...)
 {
-    if (is.null(x[["data"]]))
-        stop("Gooodness-of-fit plots are not available if the data have been removed from the model object")
     ## don't calculate or plot CIs by default if all covs are categorical -> multiple curves
-    mf <- model.frame(x)
-    Xraw <- mf[,attr(mf, "covnames.orig"), drop=FALSE]
+  if (!add && is.null(x[["data"]]))
+    stop("Goodness-of-fit plots are not available if the data have been removed from the model object")
     if (is.null(ci))
-        ci <- ((x$ncovs == 0) || (!(sapply(Xraw,is.factor))))
+        ci <- ((x$ncovs == 0) || (!all(x$covdata$isfac)))
     if (!ci) B <- 0
     summ <- summary(x, newdata=newdata, X=X, type=type, fn=fn, t=t, start=start, ci=ci, B=B, cl=cl)
     t <- summ[[1]]$time
@@ -109,12 +107,13 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
     if (is.null(col.ci)) col.ci <- col
     if (is.null(lwd.ci)) lwd.ci <- lwd
     dat <- x$data
-    isfac <- sapply(Xraw,is.factor)
     if (!is.null(fn)) type <- ""
     if (!add) {
+        mf <- model.frame(x)
+        Xraw <- mf[,attr(mf, "covnames.orig"), drop=FALSE]
         mm <- as.data.frame(model.matrix(x))
         form <- "Surv(dat$Y[,\"start\"],dat$Y[,\"stop\"],dat$Y[,\"status\"]) ~ "
-        form <- paste(form, if (x$ncovs > 0 && all(isfac)) paste("mm[,",1:x$ncoveffs,"]", collapse=" + ") else 1)
+        form <- paste(form, if (x$ncovs > 0 && all(x$covdata$isfac)) paste("mm[,",1:x$ncoveffs,"]", collapse=" + ") else 1)
         form <- as.formula(form)
         ## If any continuous covariates, it is hard to define subgroups
         ## so just plot the population survival
@@ -131,7 +130,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
             plot.args <- list(...)[!names(list(...)) %in% names(formals(muhaz))]
             if (!all(dat$Y[,"start"]==0)) warning("Left-truncated data not supported by muhaz: ignoring truncation point when plotting observed hazard")
             if (any(dat$Y[,"status"] > 1)) stop("Interval-censored data not supported by muhaz")
-            if (!all(isfac)){
+            if (!all(x$covdata$isfac)){
                 haz <- do.call("muhaz", c(list(times=dat$Y[,"stop"], delta=dat$Y[,"status"]), muhaz.args))
                 do.call("plot", c(list(haz), list(col=col.obs, lty=lty.obs, lwd=lwd.obs), plot.args))
             }
@@ -156,7 +155,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
     }
     col <- rep(col, length=nrow(X)); lty=rep(lty, length=nrow(X)); lwd=rep(lwd, length=nrow(X))
     col.ci <- rep(col.ci, length=nrow(X)); lty.ci=rep(lty.ci, length=nrow(X)); lwd.ci=rep(lwd.ci, length=nrow(X))
-    for (i in 1:nrow(X)) {
+    for (i in 1:length(summ)) {
         if (est) lines(summ[[i]]$time, summ[[i]]$est, col=col[i], lty=lty[i], lwd=lwd[i])
         if (ci) {
             lines(summ[[i]]$time, summ[[i]]$lcl, col=col.ci[i], lty=lty.ci[i], lwd=lwd.ci[i])
