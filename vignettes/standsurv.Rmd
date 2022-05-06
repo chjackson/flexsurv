@@ -81,7 +81,7 @@ Through a simple syntax the user can specify the groups that they wish to calcul
 ## A worked example: the pbc dataset
 For this example we will use data from the German Breast Cancer Study Group 1984-1989, which is the R dataset `bc` found in the `flexsurv` package. This dataset has death, or censoring times for 686 primary node positive breast cancer patients together with a 3-level prognostic group variable with levels "Good", "Medium" and "Poor". For this demonstration we  collapse the prognostic variable into 2 levels: "Good" and "Medium/Poor". We also create some artificial ages and diagnosis dates for the patients, along with assuming all patients are female. We allow a correlation between the age at diagnosis for a patient and their survival time so that age is a prognostic variable. The mean age is 65 with a standard deviation of 5. We load this dataset and create these additional variables. 
 
-```{r, message = FALSE}
+```{r, message = FALSE, warning = FALSE}
 library(flexsurv)
 library(flexsurvcure)
 library(ggplot2)
@@ -116,7 +116,7 @@ kmsurvplot + xlab("Time from diagnosis (years)")
 ```
 
 ## A stratified Weibull model
-We start by fitting a Weibull proportional hazards model to each group separately. One way to do this is to fit a single saturated model whereby group affects both the scale and shape parameters of the Weibull distribution. This effectively means we have a separate scale and shape parameter for each group, which is equivalent to fitting two separate models. The saturated model approach has advantages as we can use the  model to easily investigate treatment effects using `standsurv.flexsurvreg` as we shall see later. Including group in the main formula of `flexsurvreg` allows group to affect the scale parameter of the Weibull distribution whilst we use the `anc` argument in `flexsurvreg` to additionally allow group to affect the shape parameter. 
+We start by fitting a Weibull model to each group separately. One way to do this is to fit a single saturated model whereby group affects both the scale and shape parameters of the Weibull distribution. This effectively means we have a separate scale and shape parameter for each group, which is equivalent to fitting two separate models. Such a model does not make a proportional hazards assumption and hence the hazard ratio will change over time. The saturated model approach has advantages as we can use the  model to easily investigate treatment effects using `standsurv.flexsurvreg` as we shall see later. Including group in the main formula of `flexsurvreg` allows group to affect the scale parameter of the Weibull distribution whilst we use the `anc` argument in `flexsurvreg` to additionally allow group to affect the shape parameter. 
 
 ```{r}
 model.weibull.sep <- flexsurvreg(Surv(recyrs, censrec)~group2, 
@@ -132,7 +132,7 @@ ggplot() + geom_line(aes(x=time, y=est, color = group2), data=predictions) +
   geom_step(aes(x=time, y=surv, group=strata), data=kmsurvplot$data.survplot)
 ```
 
-We will now show that the same predictions can be obtained from `standsurv.flexsurvreg` but with the benefit of addition flexibility.
+The Weibull model does not appear to fit the data very well and so we should try other parametric distributions. However, for illustration purposes we shall continue using the Weibull model. We will now show that the same predictions can be obtained from `standsurv.flexsurvreg` but with the benefit of addition flexibility.
 
 ## Using `standsurv.flexsurvreg` to calculate marginal survival
  `standsurv.flexsurvreg` works similarly to the `margins` command in `R` and `standsurv` in Stata by allowing the user to specify a list of scenarios in which specific covariates are fixed to certain values. This is done using the `at` argument of `standsurv.flexsurvreg` to provide the list of scenarios where each scenario is itself a list containing covariates that are to be fixed. In our worked example the two scenarios are `list(group2 = "Good")` and `list(group2 = "Medium/Poor")`. Any covariates not specified in the `at` scenarios are averaged over, hence creating marginal, or standardised, estimates of the metric of interest. In the example above, there are no other covariates in the model so we will get the same answer as obtained from `summary`. But the later worked example extends this to models containing other covariates. The default is to calculate survival probabilities at the event times in the data but this can be changed with the `type` and `t` arguments, respectively. The returned object is a tidy data.frame with columns named `at1` up to `atn` for the n scenarios specified in the `at` argument.
@@ -234,7 +234,7 @@ plot(ss.weibull.sep.boot, ci = TRUE) +
 
 ## Adding age as a covariate
 
-Suppose age has been added as a covariate to the survival model. If age is not included in our `at` scenarios `standsurv.flexsurvreg` will by default produce standardised estimates of survival averaged over the age distribution in our study population. Alternatively we could pass a new prediction dataset to `standsurv.flexsurvreg` and obtain standardised estimates for this population. As an example, we obtain marginal survival estimates after fitting a Weibull model, firstly standardised to the age-distribution of our study population and secondly standardised to an older population with mean age of 75 and standard deviation 5.
+Suppose age has been added as a covariate to the survival model. If age is not included in our `at` scenarios `standsurv.flexsurvreg` will by default produce standardised estimates of survival averaged over the age distribution in our study population. Alternatively we could pass a new prediction dataset to `standsurv.flexsurvreg` and obtain standardised estimates for this population. As an example, we obtain marginal survival estimates after fitting a stratified Weibull model, firstly standardised to the age-distribution of our study population and secondly standardised to an older population with mean age of 75 and standard deviation 5.
 ```{r}
 model.weibull.age.sep <- flexsurvreg(Surv(recyrs, censrec)~group2 + age, 
                                  anc = list(shape = ~ group2 + age), 
@@ -271,7 +271,7 @@ plot(ss.weibull.age.sep.surv) +
 
 
 ## Calculating expected survival and hazard in `standsurv.flexsurvreg`
-To overlay marginal expected survival or hazard curves we require a lifetable of population expected survival. To demonstrate we use the US lifetable that comes with the `survival` package, called `survexp.us`. Other lifetables can be obtained directly from the Human Mortality Database (HMD) using the `HMDHFDplus` package. 
+To overlay marginal expected survival or hazard curves we require a lifetable of population hazard rates. To demonstrate we use the US lifetable that comes with the `survival` package, called `survexp.us`. Other lifetables can be obtained directly from the Human Mortality Database (HMD) using the `HMDHFDplus` package. 
 
 The `survexp.us` lifetable is a `ratetable` object with stratification factors age, sex and year. It gives rates of mortality per person-day for combinations of the stratification factors. A summary of the `survexp.us` object shows that the time-scale is in days.
 ```{r}
@@ -344,7 +344,7 @@ bc <- bc %>% left_join(survexp.us.df, by = c("attained.age.yr"="age",
                                         "attained.year"="year", 
                                         "sex"="sex")) 
 
-# A saturated relative survival mixture-cure model
+# A stratified relative survival mixture-cure model
 model.weibull.sep.rs <- flexsurvcure(Surv(recyrs, censrec)~group2, 
                                  anc = list(shape = ~ group2,
                                             scale = ~ group2), 
@@ -412,7 +412,7 @@ plot(ss.weibull.sep.rs.excesshaz)
 
 
 # Conclusions
-`standsurv.flexsurvreg` is a powerful post-estimation command that allows easy calculation of a number of useful prediction metrics. Contrasts can be made between any counterfactual populations of interest and, through regression standardization, allows the targeting of marginal estimands. Confidence intervals, via the delta method or bootstrapping, are available and benchmarking against or incorporating background mortality rates is also supported.
+`standsurv.flexsurvreg` is a powerful post-estimation command that allows easy calculation of a number of useful prediction metrics. Contrasts can be made between any counterfactual populations of interest and, through regression standardisation, allows the targeting of marginal estimands. Confidence intervals, via the delta method or bootstrapping, are available and benchmarking against or incorporating background mortality rates is also supported.
 
 
 # References
