@@ -22,7 +22,8 @@ standsurv.flexsurvreg(
   seed = NULL,
   rmap,
   ratetable,
-  scale.ratetable = 365.25
+  scale.ratetable = 365.25,
+  n.gauss.quad = 100
 )
 }
 \arguments{
@@ -115,6 +116,10 @@ flexsurv model to the time scale in \code{ratetable}. For example, if the
 analysis time of the fitted model is in years and the ratetable is in 
 units/day then we should use \code{scale.ratetable = 365.25}. This is the 
 default as often the ratetable will be in units/day (see example).}
+
+\item{n.gauss.quad}{Number of Gaussian quadrature points used for integrating 
+the all-cause survival function when calculating RMST in a relative survival 
+framework (default = 100)}
 }
 \value{
 A \code{tibble} containing one row for each 
