@@ -3,7 +3,7 @@ test_that('survival predictions', {
                       data=bc, dist="weibull")
   
   # Single time predictions
-  ss <- standsurv.flexsurvreg(fitw, at=list(list(group="Good"), 
+  ss <- standsurv(fitw, at=list(list(group="Good"), 
                                             list(group="Medium"), 
                                             list(group="Poor")),
                               t = 4)
@@ -11,7 +11,7 @@ test_that('survival predictions', {
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est)
 
   # Multiple time predictions
-  ss <- standsurv.flexsurvreg(fitw, at=list(list(group="Good"), 
+  ss <- standsurv(fitw, at=list(list(group="Good"), 
                                             list(group="Medium"), 
                                             list(group="Poor")),
                               t = c(4,5))
@@ -25,7 +25,7 @@ test_that('hazard predictions', {
                       data=bc, dist="weibull")
   
   # Single time predictions
-  ss <- standsurv.flexsurvreg(fitw, type="hazard",
+  ss <- standsurv(fitw, type="hazard",
                               at=list(list(group="Good"), 
                                       list(group="Medium"), 
                                       list(group="Poor")),
@@ -34,7 +34,7 @@ test_that('hazard predictions', {
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est)
   
   # Multiple time predictions
-  ss <- standsurv.flexsurvreg(fitw, type="hazard",
+  ss <- standsurv(fitw, type="hazard",
                               at=list(list(group="Good"), 
                                       list(group="Medium"), 
                                       list(group="Poor")),
@@ -48,7 +48,7 @@ test_that('rmst predictions', {
                       data=bc, dist="weibull")
   
   # Single time predictions
-  ss <- standsurv.flexsurvreg(fitw, type="rmst",
+  ss <- standsurv(fitw, type="rmst",
                               at=list(list(group="Good"), 
                                       list(group="Medium"), 
                                       list(group="Poor")),
@@ -57,7 +57,7 @@ test_that('rmst predictions', {
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est)
   
   # Multiple time predictions
-  ss <- standsurv.flexsurvreg(fitw, type="rmst",
+  ss <- standsurv(fitw, type="rmst",
                               at=list(list(group="Good"), 
                                       list(group="Medium"), 
                                       list(group="Poor")),
@@ -74,7 +74,7 @@ test_that('marginal_predictions', {
   # Single time marginal predictions for survival
   fitw2 <- flexsurvreg(Surv(recyrs, censrec) ~ group + age, 
                        data=bc, dist="weibull")
-  ss <- standsurv.flexsurvreg(fitw2, at=list(list(group="Good"), 
+  ss <- standsurv(fitw2, at=list(list(group="Good"), 
                                              list(group="Medium"), 
                                              list(group="Poor")),
                               t = 4)
@@ -88,7 +88,7 @@ test_that('marginal_predictions', {
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s.marginal)
   
   # Single time marginal predictions for hazard
-  ss <- standsurv.flexsurvreg(fitw2, type="hazard",
+  ss <- standsurv(fitw2, type="hazard",
                               at=list(list(group="Good"), 
                                       list(group="Medium"), 
                                       list(group="Poor")),
@@ -105,7 +105,7 @@ test_that('marginal_predictions', {
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s.marginal)
   
   # Single time marginal predictions for rmst
-  ss <- standsurv.flexsurvreg(fitw2, type="rmst",
+  ss <- standsurv(fitw2, type="rmst",
                               at=list(list(group="Good"), 
                                       list(group="Medium"), 
                                       list(group="Poor")),
@@ -132,7 +132,7 @@ test_that('predictions with missing data', {
   fitw2 <- flexsurvreg(Surv(recyrs, censrec) ~ group + age, 
                        data=bc_miss, dist="weibull")
   # Single time predictions
-  expect_warning(standsurv.flexsurvreg(fitw2, type="rmst",
+  expect_warning(standsurv(fitw2, type="rmst",
                               at=list(list(group="Good"), 
                                       list(group="Medium"), 
                                       list(group="Poor")),

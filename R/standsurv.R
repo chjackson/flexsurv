@@ -7,7 +7,7 @@
 #' resulting in estimates of the average treatment effect or the average 
 #' treatment effect in the treated if a treated subset of the data are supplied.
 #'
-#' The syntax of \code{standsurv.flexreg} follows closely that of Stata's 
+#' The syntax of \code{standsurv} follows closely that of Stata's 
 #' \code{standsurv} command written by Paul Lambert and Michael Crowther. The 
 #' function calculates standardized (marginal) measures including standardized
 #' survival functions, standardized restricted mean survival times and the 
@@ -146,7 +146,7 @@
 #'                        
 #'## Calculate standardized survival and the difference in standardized survival
 #'## for the three levels of group across a grid of survival times                        
-#'standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
+#'standsurv_weib_age <- standsurv(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
@@ -158,7 +158,7 @@
 #'## for the three levels of group across a grid of survival times
 #'## 10 bootstraps for confidence intervals (this should be larger)
 #'\dontrun{          
-#'haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
+#'haz_standsurv_weib_age <- standsurv(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
@@ -186,7 +186,7 @@
 #'                      origin="1970-01-01")
 #'## Create sex (assume all are female)
 #'newbc$sex <- factor("female")
-#'standsurv_weib_expected <- standsurv.flexsurvreg(weib_age, 
+#'standsurv_weib_expected <- standsurv(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
@@ -199,7 +199,7 @@
 #'                                            newdata = newbc)
 #'## Plot marginal survival with expected survival superimposed                                            
 #'plot(standsurv_weib_expected, expected=TRUE)
-standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, 
+standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1, 
                                   type = "survival", t = NULL, ci = FALSE, se = FALSE, 
                                   boot = FALSE, B = NULL, cl =0.95, trans = "log", 
                                   contrast = NULL, trans.contrast = NULL, seed = NULL, 
@@ -422,6 +422,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
 #' @importFrom dplyr left_join
 #' @importFrom dplyr slice
 #' @importFrom dplyr n
+#' @importFrom statmod gauss.quad
 #' @import rlang
 standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv, rmap, ratetable, scale.ratetable){
   tr.fun <- tr(trans)
@@ -516,7 +517,7 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     dat <- newdata
     dat$id <- 1:dim(dat)[1]
     n.gauss.quad <- 100
-    gaussxw <- statmod::gauss.quad(n.gauss.quad)
+    gaussxw <- gauss.quad(n.gauss.quad)
     pred <- vector()
     for(j in seq_along(t)){
       if(t[j]==0){
@@ -711,7 +712,7 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
 
 #' Tidy a standsurv object. 
 #' 
-#' This function is used internally by \code{standsurv.flexsurvreg} and tidy
+#' This function is used internally by \code{standsurv} and tidy
 #' data.frames are automatically returned by the function.
 #'
 #' @param x A standsurv object.
@@ -807,18 +808,18 @@ tidy.standsurv <- function(x, ...){
 #' Plot standardized metrics such as the marginal survival, restricted mean 
 #' survival and hazard, based on a fitted flexsurv model.
 #' 
-#' @param x A standsurv object returned by \code{standsurv.flexsurvreg}
+#' @param x A standsurv object returned by \code{standsurv}
 #' @param contrast Should contrasts of standardized metrics be plotted. Defaults
 #' to FALSE
 #' @param ci Should confidence intervals be plotted (if calculated in 
-#' \code{standsurv.flexsurvreg})? 
+#' \code{standsurv})? 
 #' @param expected Should the marginal expected survival / hazard also be 
 #' plotted? This can only be invoked if \code{rmap} and \code{ratetable} have 
-#' been passed to \code{standsurv.flexsurvreg}
+#' been passed to \code{standsurv}
 #' @param ... Not currently used
 #'
 #' @return A ggplot showing the standardized metric calculated by 
-#' \code{standsurv.flexsurvreg} over time. Modification of the plot is
+#' \code{standsurv} over time. Modification of the plot is
 #' possible by adding further ggplot objects, see Examples.
 #' @import ggplot2
 #' @export
@@ -835,7 +836,7 @@ tidy.standsurv <- function(x, ...){
 #'                        dist="weibull")
 #'## Calculate standardized survival and the difference in standardized survival
 #'## for the three levels of group across a grid of survival times
-#'standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
+#'standsurv_weib_age <- standsurv(weib_age,
 #'                                            at = list(list(group="Good"),
 #'                                                      list(group="Medium"),
 #'                                                      list(group="Poor")),
@@ -857,7 +858,7 @@ plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ..
     group <- "at"
     if(expected){
       if(is.null(attributes(x)$expected)) 
-        stop("Expected survival/hazards have not been calculated by standsurv.flexsurvreg")
+        stop("Expected survival/hazards have not been calculated by standsurv")
       if(!(y %in% c("hazard", "achazard", "survival", "acsurvival")))
         stop(paste0("Expected survival/hazards cannot be plotted with type = ",y))
       if(y %in% c("hazard", "achazard"))
@@ -871,7 +872,7 @@ plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ..
     }
   } else {
     if(is.null(attributes(x)$standpred_contrast)) 
-      stop("Contrasts have not been calculated by standsurv.flexsurvreg")
+      stop("Contrasts have not been calculated by standsurv")
     obj <- attributes(x)$standpred_contrast
     obj <- obj %>% mutate(Population = "Study")
     y <- attributes(x)$contrast
