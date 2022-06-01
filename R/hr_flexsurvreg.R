@@ -18,8 +18,12 @@
 ##'
 ##' @export
 hr_flexsurvreg <- function(x, newdata=NULL, t=NULL, start=0, ci=TRUE, B=1000, cl=0.95, na.action=na.pass){
-    if (is.null(newdata))
-        newdata <- hr_default_newdata(x)
+    if (is.null(newdata)){
+        if (is.null(x$data))
+            stop("`newdata` must be specified explicitly if the data have been removed from the model object")
+        else 
+            newdata <- hr_default_newdata(x)
+    }
     if (is.null(newdata))
         stop("`newdata` must be specified unless the model has a single covariate")
   newdata <- as.data.frame(newdata)

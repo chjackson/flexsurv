@@ -122,7 +122,7 @@
 #' @importFrom dplyr bind_cols
 #' @importFrom dplyr inner_join
 #' @export
-#' @author Michael Sweeting <michael.sweeting@@astrazeneca.com>
+#' @author Michael Sweeting <mikesweeting79@@gmail.com>
 #' @references Paul Lambert, 2021. "STANDSURV: Stata module to compute 
 #' standardized (marginal) survival and related functions," 
 #' Statistical Software Components S458991, Boston College Department of 

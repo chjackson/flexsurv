@@ -976,6 +976,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                   AIC=-2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
                   covdata = list(covnames = attr(dat$m, "covnames"),
+                                 isfac = sapply(dat$m[,attr(dat$m,"covnames.orig"),drop=FALSE], is.factor),
                                  terms = attr(dat$m, "terms"),
                                  xlev = .getXlevels(attr(dat$m, "terms"), dat$m)),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
@@ -1117,7 +1118,7 @@ model.matrix.flexsurvreg <- function(object, par=NULL, ...)
 logLik.flexsurvreg <- function(object, ...){
     val <- object$loglik
     attr(val, "df") <- object$npars
-    attr(val, "nobs") <- nrow(model.frame(object))
+    attr(val, "nobs") <- object$N
     class(val) <- "logLik"
     val
 }
