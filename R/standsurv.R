@@ -7,7 +7,7 @@
 #' resulting in estimates of the average treatment effect or the average 
 #' treatment effect in the treated if a treated subset of the data are supplied.
 #'
-#' The syntax of \code{standsurv.flexreg} follows closely that of Stata's 
+#' The syntax of \code{standsurv} follows closely that of Stata's 
 #' \code{standsurv} command written by Paul Lambert and Michael Crowther. The 
 #' function calculates standardized (marginal) measures including standardized
 #' survival functions, standardized restricted mean survival times and the 
@@ -104,6 +104,9 @@
 #' analysis time of the fitted model is in years and the ratetable is in 
 #' units/day then we should use \code{scale.ratetable = 365.25}. This is the 
 #' default as often the ratetable will be in units/day (see example).
+#' @param n.gauss.quad Number of Gaussian quadrature points used for integrating 
+#' the all-cause survival function when calculating RMST in a relative survival 
+#' framework (default = 100)
 #'
 #' @return A \code{tibble} containing one row for each 
 #' time-point. The column naming convention is \code{at{i}} for the ith scenario
@@ -143,7 +146,7 @@
 #'                        
 #'## Calculate standardized survival and the difference in standardized survival
 #'## for the three levels of group across a grid of survival times                        
-#'standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
+#'standsurv_weib_age <- standsurv(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
@@ -155,7 +158,7 @@
 #'## for the three levels of group across a grid of survival times
 #'## 10 bootstraps for confidence intervals (this should be larger)
 #'\dontrun{          
-#'haz_standsurv_weib_age <- standsurv.flexsurvreg(weib_age, 
+#'haz_standsurv_weib_age <- standsurv(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
@@ -183,7 +186,7 @@
 #'                      origin="1970-01-01")
 #'## Create sex (assume all are female)
 #'newbc$sex <- factor("female")
-#'standsurv_weib_expected <- standsurv.flexsurvreg(weib_age, 
+#'standsurv_weib_expected <- standsurv(weib_age, 
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
@@ -196,11 +199,12 @@
 #'                                            newdata = newbc)
 #'## Plot marginal survival with expected survival superimposed                                            
 #'plot(standsurv_weib_expected, expected=TRUE)
-standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atreference = 1, 
+standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1, 
                                   type = "survival", t = NULL, ci = FALSE, se = FALSE, 
                                   boot = FALSE, B = NULL, cl =0.95, trans = "log", 
                                   contrast = NULL, trans.contrast = NULL, seed = NULL, 
-                                  rmap, ratetable, scale.ratetable = 365.25) {
+                                  rmap, ratetable, scale.ratetable = 365.25, 
+                                  n.gauss.quad = 100) {
   x <- object
   
   if(!is.null(seed)) set.seed(seed)
@@ -216,9 +220,6 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   
   ## Checks for relative survival models
   if("bhazard" %in% names(x$call)){
-    ## RMST still to be implemented with relative survival models
-    if(type=="rmst") stop("'rmst' not yet implemented with relative survival models")
-    
     if(type %in% c("survival", "hazard") & (missing(rmap) | missing(ratetable))) 
       stop("'rmap' and 'ratetable' must be specified to calculate all-cause survival/hazard in a relative survival model")
     # Swap type to acsurvival (all-cause survival) or achazard (all-cause hazard) if survival or hazard is specified
@@ -228,10 +229,17 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
            "hazard"= "achazard",
            "relsurvival" = "survival",
            "excesshazard" = "hazard",
+           "rmst" = "acrmst"
     )
     
     if(type2 == "acsurvival") message("Marginal all-cause survival will be calculated")
     if(type2 == "achazard") message("Marginal all-cause hazard will be calculated")
+    if(type2 == "acrmst"){
+      message("Marginal restricted mean survival will be calculated")
+      if(length(t)>2){
+        message("Marginal RMST is currently slow. We suggest using only one or two time points")
+      }
+    }
     
     if(!missing(rmap) & is.null(newdata)) 
       stop("Must provide a 'newdata' data.frame containing all covariates and matching variables with 'rmap'")
@@ -295,7 +303,7 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
   ## Calculate individual expected survival and expected hazard 
   if((!missing(rmap) & !missing(ratetable))){
     message("Calculating marginal expected survival and hazard")
-    expsurv <- eval(substitute(expsurv.fn(t, rmap, ratetable, data, weighted, scale.ratetable)))
+    expsurv <- expsurv.fn(t, substitute(rmap), ratetable, data, weighted, scale.ratetable)
   } else expsurv <- NULL
   
   ## Loop over at()
@@ -306,10 +314,10 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
     covnames <- names(covs)
     ## If all covariates have been specified in 'at' then we have no further covariates
     ## to standardize over, so just use 1 row of data
-    ## do not use this shortcut for type2 = "acsurvival" or type2 = "achazard" as
+    ## do not use this shortcut for type2 = "acsurvival", type2 = "achazard", or type = "acrmst" as
     ## we require individual expected survivals for these methods
     allcovs <- all.vars(formula(x)[-2])
-    if(all(allcovs %in% covnames) & !weighted & !(type2 %in% c("acsurvival", "achazard"))){
+    if(all(allcovs %in% covnames) & !weighted & !(type2 %in% c("acsurvival", "achazard", "acrmst"))){
       dat <- dat[1,,drop=F]
     }
     ## If at is not specified then no further manipulation of data is required, 
@@ -318,7 +326,8 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
       for(j in 1:length(covnames)) dat[, covnames[j]] <- covs[j]
     } 
     dat.list[[i]] <- dat
-    predsum <- standsurv.fn(object, type = type2, newdata=dat, t=t, i=i, weighted=weighted, expsurv=expsurv)
+    predsum <- standsurv.fn(object, type = type2, newdata=dat, t=t, i=i, weighted=weighted, expsurv=expsurv,
+                            rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)
     
     if(ci == TRUE | se == TRUE){
       
@@ -335,7 +344,8 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
       } else{
         if(i==1) message("Calculating standard errors / confidence intervals using delta method")
         predsum <- deltamethod.standsurv(object, newdata=dat, type2, t, i, se, ci, predsum, 
-                                         trans, cl, weighted, expsurv)
+                                         trans, cl, weighted, expsurv,
+                                         rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)
       }
     }
     
@@ -385,7 +395,8 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
       for(i in cnums){
         standpred <- deltamethod.contrast.standsurv(object, dat=dat.list[[i]], dat.ref=dat.list[[atreference]],
                                        type2, t, i, atreference, se, ci, standpred, trans.contrast, 
-                                       cl, contrast, weighted, expsurv)
+                                       cl, contrast, weighted, expsurv,
+                                       rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)
       }
     }
   }
@@ -411,10 +422,11 @@ standsurv.flexsurvreg <- function(object, newdata = NULL, at = list(list()), atr
 #' @importFrom dplyr left_join
 #' @importFrom dplyr slice
 #' @importFrom dplyr n
+#' @importFrom statmod gauss.quad
 #' @import rlang
-standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv){
+standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv, rmap, ratetable, scale.ratetable){
   tr.fun <- tr(trans)
-  if(! type %in% c("hazard", "acsurvival", "achazard")){
+  if(! type %in% c("hazard", "acsurvival", "achazard", "acrmst")){
     pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
     if(weighted){
       pred$weights <- rep(newdata$`(weights)`, each=length(t))
@@ -476,6 +488,48 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
       predsum <- pred %>% group_by(time) %>% 
         summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es)))
     }
+  } else if(type=="acrmst"){
+    # Function to integrate - this is the marginal all-cause survival  average(S*(t)R*(t))
+    int.fn <- function(t1, dat, rmap, ratetable, scale.ratetable){
+      # Relative survival
+      rs <- summary(object, type = "survival", tidy = T, newdata=dat, t=t1, ci=F)
+      if(object$ncovs == 0){
+        # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
+        rs <- rs %>% slice(rep(1:n(), dim(dat)[1]))
+      }
+      rs$id <- rep(1:dim(dat)[1],each=length(t1))
+      rs <- rs %>% left_join(dat, by="id")
+      ## Expected survival
+      rs$t1.scale <- rs$time * scale.ratetable
+      rs$es <- do.call("survexp", list(formula = t1.scale~1, 
+                                             rmap = rmap, method="individual.s", 
+                                             ratetable = ratetable, data=rs
+      ))
+      if(weighted){
+        rssum <- rs %>% group_by(time) %>% 
+          summarise(rmst = tr.fun(weighted.mean(.data$est*.data$es, .data$weights)))
+      } else {
+        rssum <- rs %>% group_by(time) %>% summarise(rmst = tr.fun(mean(.data$est*.data$es)))
+      }
+      rssum$rmst
+    }
+    # Using Gauss-Legendre quadrature
+    dat <- newdata
+    dat$id <- 1:dim(dat)[1]
+    n.gauss.quad <- 100
+    gaussxw <- gauss.quad(n.gauss.quad)
+    pred <- vector()
+    for(j in seq_along(t)){
+      if(t[j]==0){
+        pred[j] <- 0
+      } else {
+        scale <- t[j]/2
+        points <- scale*(gaussxw$nodes + 1)
+        eval_fn <- int.fn(points, dat=dat, rmap=rmap, ratetable=ratetable, scale.ratetable=scale.ratetable)
+        pred[j] <- scale*sum(gaussxw$weights * eval_fn)
+      }
+    }
+    predsum <- tibble(time=t, "at{i}":=pred)
   }
   predsum
 }
@@ -551,14 +605,15 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
 
 #' @importFrom numDeriv grad
 deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci, 
-                                  predsum, trans, cl, weighted, expsurv){
+                                  predsum, trans, cl, weighted, expsurv,
+                                  rmap, ratetable, scale.ratetable){
   g <- function(coef, t, trans) {
     object$res[,"est"] <- object$res.t[,"est"] <- coef
     standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
-                 weighted=weighted, expsurv=expsurv)[,2,drop=T]
+                 weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable)[,2,drop=T]
   }
   est <- standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans="none", 
-                      weighted=weighted, expsurv=expsurv)[,2,drop=T]
+                      weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable)[,2,drop=T]
   
   var.none <- NULL
   if(se==TRUE){
@@ -596,7 +651,8 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
 #' @importFrom numDeriv grad
 deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
                                type2, t, i, atreference, se, ci, predsum, 
-                               trans.contrast, cl, contrast, weighted, expsurv){
+                               trans.contrast, cl, contrast, weighted, expsurv,
+                               rmap, ratetable, scale.ratetable){
   tr.fun <- tr(trans.contrast)
   inv.tr.fun <- inv.tr(trans.contrast)
   contrast.fn <- switch(contrast, "difference"= `-`, "ratio"= `/` )
@@ -604,15 +660,19 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
   g <- function(coef, t, tr.fun, contrast.fn) {
     object$res[,"est"] <- object$res.t[,"est"] <- coef
     tr.fun(contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
-                                    trans="none", weighted=weighted, expsurv=expsurv)[,2,drop=T], 
+                                    trans="none", weighted=weighted, expsurv=expsurv,
+                                    rmap, ratetable, scale.ratetable)[,2,drop=T], 
                        standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
-                                    trans="none", weighted=weighted, expsurv=expsurv)[,2,drop=T]))
+                                    trans="none", weighted=weighted, expsurv=expsurv,
+                                    rmap, ratetable, scale.ratetable)[,2,drop=T]))
   }
 
   est <- contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
-                                  trans="none", weighted=weighted, expsurv=expsurv)[,2,drop=T],
+                                  trans="none", weighted=weighted, expsurv=expsurv,
+                                  rmap, ratetable, scale.ratetable)[,2,drop=T],
                      standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
-                                  trans="none", weighted=weighted, expsurv=expsurv)[,2,drop=T])
+                                  trans="none", weighted=weighted, expsurv=expsurv,
+                                  rmap, ratetable, scale.ratetable)[,2,drop=T])
   stand.pred <- as_tibble(est) %>%
     rename("contrast{i}_{atreference}" := "value")
   predsum <- predsum %>% bind_cols(stand.pred)   
@@ -652,7 +712,7 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
 
 #' Tidy a standsurv object. 
 #' 
-#' This function is used internally by \code{standsurv.flexsurvreg} and tidy
+#' This function is used internally by \code{standsurv} and tidy
 #' data.frames are automatically returned by the function.
 #'
 #' @param x A standsurv object.
@@ -748,18 +808,18 @@ tidy.standsurv <- function(x, ...){
 #' Plot standardized metrics such as the marginal survival, restricted mean 
 #' survival and hazard, based on a fitted flexsurv model.
 #' 
-#' @param x A standsurv object returned by \code{standsurv.flexsurvreg}
+#' @param x A standsurv object returned by \code{standsurv}
 #' @param contrast Should contrasts of standardized metrics be plotted. Defaults
 #' to FALSE
 #' @param ci Should confidence intervals be plotted (if calculated in 
-#' \code{standsurv.flexsurvreg})? 
+#' \code{standsurv})? 
 #' @param expected Should the marginal expected survival / hazard also be 
 #' plotted? This can only be invoked if \code{rmap} and \code{ratetable} have 
-#' been passed to \code{standsurv.flexsurvreg}
+#' been passed to \code{standsurv}
 #' @param ... Not currently used
 #'
 #' @return A ggplot showing the standardized metric calculated by 
-#' \code{standsurv.flexsurvreg} over time. Modification of the plot is
+#' \code{standsurv} over time. Modification of the plot is
 #' possible by adding further ggplot objects, see Examples.
 #' @import ggplot2
 #' @export
@@ -776,7 +836,7 @@ tidy.standsurv <- function(x, ...){
 #'                        dist="weibull")
 #'## Calculate standardized survival and the difference in standardized survival
 #'## for the three levels of group across a grid of survival times
-#'standsurv_weib_age <- standsurv.flexsurvreg(weib_age,
+#'standsurv_weib_age <- standsurv(weib_age,
 #'                                            at = list(list(group="Good"),
 #'                                                      list(group="Medium"),
 #'                                                      list(group="Poor")),
@@ -798,7 +858,7 @@ plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ..
     group <- "at"
     if(expected){
       if(is.null(attributes(x)$expected)) 
-        stop("Expected survival/hazards have not been calculated by standsurv.flexsurvreg")
+        stop("Expected survival/hazards have not been calculated by standsurv")
       if(!(y %in% c("hazard", "achazard", "survival", "acsurvival")))
         stop(paste0("Expected survival/hazards cannot be plotted with type = ",y))
       if(y %in% c("hazard", "achazard"))
@@ -812,7 +872,7 @@ plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ..
     }
   } else {
     if(is.null(attributes(x)$standpred_contrast)) 
-      stop("Contrasts have not been calculated by standsurv.flexsurvreg")
+      stop("Contrasts have not been calculated by standsurv")
     obj <- attributes(x)$standpred_contrast
     obj <- obj %>% mutate(Population = "Study")
     y <- attributes(x)$contrast
@@ -841,13 +901,23 @@ expsurv.fn <- function(t, rmap, ratetable, data, weighted, scale.ratetable){
   expsurv <- exphaz <- tibble()
   for(l in 1:length(t)){
     data$t.temp <- t[l] * scale.ratetable
-    es <- eval(substitute(survexp(t.temp~1, rmap = rmap, method="individual.s", ratetable = ratetable, data=data))) 
+    es <- do.call("survexp", list(formula = t.temp~1, 
+                                        rmap = rmap, method="individual.s", 
+                                        ratetable = ratetable, data = data  
+                                        ))
     expsurv <- expsurv %>% bind_rows(tibble(time = t[l], es = es, id = 1:dim(data)[1]))
     # individual hazards from difference in cumulative hazards / epsilon
     epsilon <- 0.001
     data$t.temp.epsilon <- data$t.temp + epsilon
-    eh <- scale.ratetable * (eval(substitute(survexp(t.temp.epsilon~1, rmap = rmap, method="individual.h", ratetable = ratetable, data=data))) -
-             eval(substitute(survexp(t.temp~1, rmap = rmap, method="individual.h", ratetable = ratetable, data=data)))) / epsilon
+    eh.epsilon <- do.call("survexp", list(formula = t.temp.epsilon~1, 
+                                  rmap = rmap, method="individual.h", 
+                                  ratetable = ratetable, data = data  
+    ))
+    eh.epsilon0 <- do.call("survexp", list(formula = t.temp~1, 
+                                           rmap = rmap, method="individual.h", 
+                                           ratetable = ratetable, data=data
+    ))
+    eh <- scale.ratetable * (eh.epsilon -  eh.epsilon0) / epsilon
     exphaz <- exphaz %>% bind_rows(tibble(time = t[l], eh=eh, id=1:dim(data)[1]))
   }
   expsurv <- expsurv %>% inner_join(exphaz, by= c("id", "time"))
@@ -863,3 +933,5 @@ expsurv.fn <- function(t, rmap, ratetable, data, weighted, scale.ratetable){
   }
   return(list(marginal=marginal, expsurv=expsurv))
 }
+
+
