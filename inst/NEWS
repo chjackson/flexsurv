@@ -1,13 +1,13 @@
 -*- text -*-
 
-Version 2.2 (2022-01-??)
+Version 2.2 (2022-06-16)
 -------------------------
 
 * `summary.flexsurvreg` has been rewritten to make it cleaner and
   faster.  User-visible changes: 
 
   - Custom summary functions in `summary.flexsurvreg` must now be
-  vectorised
+  vectorised.
 
   - A new argument `cross` specifies whether to compute summaries for
   all combinations of times t and covariate values, or for covariate
