@@ -24,9 +24,9 @@ Version 2.2 (2022-06-16)
   fitted flexsurvreg or flexsurvspline model as a function of time,
   with confidence intervals.
 
-* New function `standsurv.flexsurvreg` for survival and hazards
+* New function `standsurv` for survival and hazards
   standardised over an observed distribution for covariates. 
-  Contributed by Michael Sweeting <michael.sweeting@astrazeneca.com>. 
+  Contributed by Michael Sweeting <mikesweeting79@gmail.com>. 
 
 * New functions for Cox-Snell residuals: `coxsnell_flexsurvreg` or
   residuals(..., type="coxsnell").
