@@ -969,19 +969,20 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                     loglik=-opt$value, logliki=attr(minusloglik,"indiv"),
                     cl=cl, opt=opt)
     }
+    covdata  <- list(covnames = attr(dat$m, "covnames"),
+                     isfac = sapply(dat$m[,attr(dat$m,"covnames.orig"),drop=FALSE], is.factor),
+                     terms = attr(dat$m, "terms"),
+                     xlev = .getXlevels(attr(dat$m, "terms"), dat$m))
     ret <- c(list(call=call, dlist=dlist, aux=aux,
                   ncovs=ncovs, ncoveffs=ncoveffs,
                   mx=mx, basepars=1:nbpars,
                   covpars=if (ncoveffs>0) (nbpars+1):npars else NULL,
                   AIC=-2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
-                  covdata = list(covnames = attr(dat$m, "covnames"),
-                                 isfac = sapply(dat$m[,attr(dat$m,"covnames.orig"),drop=FALSE], is.factor),
-                                 terms = attr(dat$m, "terms"),
-                                 xlev = .getXlevels(attr(dat$m, "terms"), dat$m)),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
                   concat.formula=f2, all.formulae=forms, dfns=dfns),
-             ret)
+             ret,
+             list(covdata = covdata)) # temporary position so cyclomort doesn't break
     if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
         && (dfns$deriv) ) {
         if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }

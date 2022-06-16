@@ -186,12 +186,14 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
  if (!tidy){ ## For backwards compatibility
      if (x$ncovs == 0 || nodata) res <- list(res)
      else { 
-         nd <- attr(args, "newdata")
+         nd <- attr(args, "newdata.orig")
          covnames_untidy <- apply(as.data.frame(nd), 1, 
                                   function(x)paste0(names(nd), "=", x, collapse=","))
-         covnames_untidy <- factor(covnames_untidy, levels=unique(covnames_untidy)) # preserve order
+         nx <- attr(args, "nx")
+         nt <- attr(args, "nt")
          resdf <- res[,setdiff(names(res), colnames(nd)),drop=FALSE]
-         res <- split(resdf, covnames_untidy)
+         res <- split(resdf, rep(1:nx, each=nt))
+         names(res) <- covnames_untidy
          res <- lapply(res, function(x)setNames(as.data.frame(x), names(resdf)))
          for (i in seq_along(res)) row.names(res[[i]]) <- NULL
      }
@@ -250,14 +252,14 @@ newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
 xt_to_fnargs <- function(x, X, t, quantiles=0.5, start=0, type="survival", cross=TRUE){
  tstart <- summfn_to_tstart(x, type, t, quantiles, start)
  t <- tstart$t
- nd <- attr(X, "newdata")
+ nd <- ndorig <- attr(X, "newdata")
+ nt <- length(t)
+ nx <- if (x$ncovs > 0) nrow(X) else 1
  if (!cross){
-  if (length(t) != nrow(X)){
-   stop(sprintf("length(t)=%s, should equal nrow(X)=%s", length(t), nrow(X)))
+  if (nt != nrow(X)){
+   stop(sprintf("length(t)=%s, should equal nrow(X)=%s", nt, nrow(X)))
   }
  } else {
-  nt <- length(t)
-  nx <- if (x$ncovs > 0) nrow(X) else 1
   tstart$t <- rep(t, nx)
   tstart$start <- rep(tstart$start, nx)
   X <- X[rep(1:nx, each=nt),,drop=FALSE]
@@ -272,6 +274,9 @@ xt_to_fnargs <- function(x, X, t, quantiles=0.5, start=0, type="survival", cross
    fnargs[[names(x$aux)[j]]] <- x$aux[[j]]
  }
  attr(fnargs, "newdata") <- nd
+ attr(fnargs, "nx") <- nx
+ attr(fnargs, "nt") <- nt
+ attr(fnargs, "newdata.orig") <- ndorig
  attr(fnargs, "X") <- X
  fnargs 
 }
