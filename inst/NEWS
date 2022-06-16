@@ -3,6 +3,15 @@
 Version 2.2 (2022-06-16)
 -------------------------
 
+* New function `standsurv` for survival and hazards
+  standardised over an observed distribution for covariates. 
+  Contributed by Michael Sweeting <mikesweeting79@gmail.com>.
+  See the new vignette about it.
+
+* New function `hr_flexsurvreg` to compute the hazard ratio from a
+  fitted flexsurvreg or flexsurvspline model as a function of time,
+  with confidence intervals.
+
 * `summary.flexsurvreg` has been rewritten to make it cleaner and
   faster.  User-visible changes: 
 
@@ -19,14 +28,6 @@ Version 2.2 (2022-06-16)
 
 * Better handling of NAs in summary and prediction functions. Thanks
   to Matthew Warkentin.
-
-* New function `hr_flexsurvreg` to compute the hazard ratio from a
-  fitted flexsurvreg or flexsurvspline model as a function of time,
-  with confidence intervals.
-
-* New function `standsurv` for survival and hazards
-  standardised over an observed distribution for covariates. 
-  Contributed by Michael Sweeting <mikesweeting79@gmail.com>. 
 
 * New functions for Cox-Snell residuals: `coxsnell_flexsurvreg` or
   residuals(..., type="coxsnell").

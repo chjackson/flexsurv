@@ -203,7 +203,6 @@ plot(haz_standsurv_weib_age, ci=TRUE)
 ## Hazard ratio plot shows a decreasing marginal HR 
 ## Whereas the conditional HR is constant (model is a PH model)
 plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
-}
 
 ## Calculate standardized survival from a Weibull model together with expected
 ## survival matching to US lifetables
@@ -232,6 +231,7 @@ standsurv_weib_expected <- standsurv(weib_age,
 ## Plot marginal survival with expected survival superimposed                                            
 plot(standsurv_weib_expected, expected=TRUE)
 }
+}
 \references{
 Paul Lambert, 2021. "STANDSURV: Stata module to compute 
 standardized (marginal) survival and related functions," 
@@ -244,5 +244,5 @@ for Survival Analysis"
 https://nicedsu.sites.sheffield.ac.uk/tsds/flexible-methods-for-survival-analysis-tsd
 }
 \author{
-Michael Sweeting <michael.sweeting@astrazeneca.com>
+Michael Sweeting <mikesweeting79@gmail.com>
 }

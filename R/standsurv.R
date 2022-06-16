@@ -171,7 +171,6 @@
 #'## Hazard ratio plot shows a decreasing marginal HR 
 #'## Whereas the conditional HR is constant (model is a PH model)
 #'plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
-#'}
 #'
 #'## Calculate standardized survival from a Weibull model together with expected
 #'## survival matching to US lifetables
@@ -199,6 +198,7 @@
 #'                                            newdata = newbc)
 #'## Plot marginal survival with expected survival superimposed                                            
 #'plot(standsurv_weib_expected, expected=TRUE)
+#'}
 standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1, 
                                   type = "survival", t = NULL, ci = FALSE, se = FALSE, 
                                   boot = FALSE, B = NULL, cl =0.95, trans = "log", 

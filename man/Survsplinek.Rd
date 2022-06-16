@@ -910,22 +910,16 @@ and log-normal respectively.  The scale must be common to all times.}
 \item{timescale}{\code{"log"} or \code{"identity"} as described in
 \code{\link{flexsurvspline}}.}
 
-\item{t}{Vector of times.}
-
 \item{start}{Optional left-truncation time or times.  The returned
 restricted mean survival will be conditioned on survival up to
 this time.}
 
-\item{x}{Vector of times.}
+\item{x, q, t}{Vector of times.}
 
-\item{log}{Return log density or probability.}
-
-\item{q}{Vector of times.}
+\item{log, log.p}{Return log density or probability.}
 
 \item{lower.tail}{logical; if TRUE (default), probabilities are \eqn{P(X
 \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.}
-
-\item{log.p}{Return log density or probability.}
 
 \item{p}{Vector of probabilities.}
 

@@ -1,9 +1,9 @@
 ---
-title: "standsurv"
-author: "Michael Sweeting, AstraZeneca"
+title: "Calculating standardized survival measures in flexsurv using `standsurv`"
+author: "Michael Sweeting^[mikesweeting79@gmail.com]"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{standsurv}
+  %\VignetteIndexEntry{Standardized survival measures}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: "standsurv.bib"
