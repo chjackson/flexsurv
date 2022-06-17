@@ -116,6 +116,13 @@ test_that("summary.flexsurvreg tidy output",{
     expect_equivalent(st[1,"agecat"], ">=65")
 })
 
+test_that("summary.flexsurvreg untidy output back compatibility",{
+  nd <- lung[c(1,1,2),]
+  s1 <- summary(fl3, newdata = nd, B=0, tidy=TRUE, t=c(5,10))
+  s2 <- summary(fl3, newdata = nd, B=0, tidy=FALSE, t=c(5,10))
+  expect_equal(s1[3,"est"], s2[[2]][1,"est"])  
+})
+
 test_that("hazard ratio",{
     t <- c(100,200,300)
     haz2 <- summary(fl3, type="hazard", t=t, newdata=list(age=60, sex="2"), ci=FALSE, tidy=TRUE)
