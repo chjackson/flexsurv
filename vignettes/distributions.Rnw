@@ -191,7 +191,7 @@ S_L(t ~ | ~ \mu, \sigma) &  (Q = 0)\\
 where $w = (\log(t) - \mu)/\sigma$, $S_G(t | a,1)$ is the survivor function of the gamma distribution with shape $a$ and scale $1$, $S_L(t |\mu,\sigma)$ is the survivor function of the log-normal distribution with log-scale mean $\mu$ and standard deviation $\sigma$, $\mu,Q$ are  unrestricted, and $\sigma$ is positive.
 
 \[
-  \mu_j = \exp(z_j \bbeta), \quad TAF = \exp(-\bbeta)
+  \mu_j = z_j \bbeta, \quad TAF = \exp(-\bbeta)
 \]
 
 \subsection*{Generalised gamma (Stacy)}
