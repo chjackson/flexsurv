@@ -9,7 +9,7 @@ namespace {
     if (lower_tail) {
       if (give_log) {return R_NegInf;} else {return 0;}
     } else {
-      if (give_log) {return 0;} else {return R_NegInf;}
+      if (give_log) {return 0;} else {return 1;}
     } 
   }
 
