@@ -288,22 +288,23 @@ summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0)
     if(!is.null(t)) 
       warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
     # Type = mean same as RMST w/ time = Inf
-    t <- rep(Inf,length(start))
+    t <- rep_len(Inf,length(start))
   }
   else if(type == "median"){
     if(!is.null(t)) warning("Median selected, but time specified.")
-    t <- rep(0.5,length(start))
+    t <- rep_len(0.5,length(start))
   }
   else if(type == "link"){
     if(!is.null(t)) warning("`link` selected, but time specified.")
-    t <- rep(0,length(start))
+    t <- rep_len(0,length(start))
   }
   else if(type == "quantile"){
     t <- quantiles
     if((any(t<0) | any(t>1))){
       stop("Quantiles should not be less than 0 or greater than 1")
     }
-    t <- rep(t,length(start))
+    maxlen <- max(length(t), length(start))
+    t <- rep_len(t,maxlen)
   }
   else if(type == "rmst"){
       if (is.null(x[["data"]]))
@@ -317,7 +318,7 @@ summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0)
       t <- sort(unique(x$data$Y[,"stop"]))
   }
   if (length(start)==1)
-    start <- rep(start, length(t))
+    start <- rep_len(start, length(t))
   else if (length(start) != length(t))
     stop("length of \"start\" is ",length(start),". Should be 1, or length of \"t\" which is ",length(t))
   list(t=t, start=start)

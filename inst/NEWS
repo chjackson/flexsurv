@@ -1,5 +1,16 @@
 -*- text -*-
 
+Version 2.2.1 (2022-09-??)
+-------------------------
+
+* New `simulate.flexsurvreg` method to simulate data from a fitted
+  flexsurvreg or flexsurvspline model.  Thanks to Mark Clements for
+  help with this.
+
+* Fix of bug for summary() method with type = "quantile" or "median"
+  and left-truncation in the prediction (start > 0). 
+
+
 Version 2.2 (2022-06-16)
 -------------------------
 
