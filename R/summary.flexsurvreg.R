@@ -352,14 +352,14 @@ summary.fns <- function(x, type){
                ret
            },
            "median" = function(start,...) {
-             start_p = 1 - x$dfns$p(start,...)
-             med_from_start = start_p/2
+             start_p = x$dfns$p(start,...)
+             med_from_start = start_p + (1 - start_p)/2
              ret = x$dfns$q(med_from_start,...)
            },
            "quantile" = function(t=0.5, start,...) {
-             start_p = 1 - x$dfns$p(start,...)
-             med_from_start = start_p * t
-             ret = x$dfns$q(med_from_start,...)
+             start_p = x$dfns$p(start,...)
+             qu_from_start = start_p + (1 - start_p)* t
+             ret = x$dfns$q(qu_from_start,...)
            },
            "hazard" = function(t,start,...) {
                ret <- x$dfns$h(t,...) * (1 - x$dfns$p(start,...))

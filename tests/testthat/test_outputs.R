@@ -155,3 +155,26 @@ test_that("hazard ratio",{
     expect_equal(hr_flexsurvreg(fitw, t=t)$est,
                  hr_flexsurvreg(fitw, t=t, newdata=list(rxbin=c(0,1)))$est)
 })
+
+test_that("summary.flexsurvreg quantiles",{
+  fitw <- flexsurvreg(Surv(futime, fustat) ~ factor(rx), data = ovarian, dist="weibull")
+  nd <- list(rx=c("1","2"))
+  cf <- fitw$res[,"est"]; sh <- cf["shape"]; sc <- cf["scale"]
+
+  qu <- summary(fitw, newdata=nd, type="quantile", q=0.4, tidy=TRUE)
+  q1 <- qweibull(0.4, shape=sh, scale=sc)
+  q2 <- qweibull(0.4, shape=sh, scale=sc*exp(cf["factor(rx)2"]))
+  expect_equal(qu$est[1], q1)
+  expect_equal(qu$est[2], q2)
+
+  ## Quantiles of truncated distribution 
+  qu <- summary(fitw, newdata=nd, type="quantile", q=0.4, tidy=TRUE, start=100)
+  pstart1 <- pweibull(100, shape=sh, scale=sc)
+  pstart2 <- pweibull(100, shape=sh, scale=sc*exp(cf["factor(rx)2"]))
+  q1 <- qweibull(pstart1+(1-pstart1)*0.4, shape=sh, scale=sc)
+  q2 <- qweibull(pstart2+(1-pstart2)*0.4, shape=sh, scale=sc*exp(cf["factor(rx)2"]))
+  expect_equal(qu$est[1], q1)
+  expect_equal(qu$est[2], q2)
+  expect_equal((pweibull(q1, shape=sh, scale=sc) - pweibull(100, shape=sh, scale=sc))/ 
+    (1 - pweibull(100, shape=sh, scale=sc)), 0.4)
+})
