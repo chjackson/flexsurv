@@ -252,6 +252,38 @@ test_that("Covariates on ancillary parameters",{
   }, NA)
 })
 
+test_that("formula can contain dot", {
+  fit_dot <- flexsurvreg(
+    formula = Surv(ovarian$futime, ovarian$fustat) ~ .,
+    data = ovarian,
+    dist = "weibull"
+  )
+  exp_fit <- flexsurvreg(
+    formula = Surv(ovarian$futime, ovarian$fustat) ~ age + resid.ds + rx + ecog.ps,
+    data = ovarian,
+    dist = "weibull"
+  )
+  call_index <- 1
+  expect_equal(fit_dot[-call_index], exp_fit[-call_index])
+
+  fit_dot <- flexsurvreg(
+    formula = Surv(ovarian$futime, ovarian$fustat) ~ .,
+    data = ovarian,
+    anc = list(sigma = ~ age),
+    dist = "gengamma",
+    fixedpars=TRUE
+  )
+  exp_fit <- flexsurvreg(
+    formula = Surv(ovarian$futime, ovarian$fustat) ~ age + resid.ds + rx + ecog.ps,
+    data = ovarian,
+    anc = list(sigma = ~ age),
+    dist = "gengamma",
+    fixedpars=TRUE
+  )
+  call_index <- 1
+  expect_equal(fit_dot[-call_index], exp_fit[-call_index])
+})
+
 test_that("Various errors",{
     expect_error(flexsurvreg(data = ovarian, dist="genf", inits = c(1,2,3)),"\"formula\" is missing")
     expect_error(flexsurvreg(formula="foo", data = ovarian, dist="genf", inits = c(1,2,3)),"\"formula\" must be a formula")

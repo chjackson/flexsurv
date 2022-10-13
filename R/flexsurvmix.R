@@ -62,6 +62,9 @@
 ##'
 ##'   where for this individual, \code{(t1di, t2di) = (0, Inf)} and \code{(t1de,
 ##'   status_de)  = (t, 0)}.
+##'   
+##'   The "dot" notation commonly used to indicate "all remaining variables" in a
+##'   formula is not supported in \code{flexsurvmix}.
 ##'
 ##'
 ##' @param data Data frame containing variables mentioned in \code{formula},
@@ -87,6 +90,9 @@
 ##' @param pformula Formula describing covariates to include on the component
 ##'   membership proabilities by multinomial logistic regression.  The first
 ##'   component is treated as the baseline.
+##'   
+##'   The "dot" notation commonly used to indicate "all remaining variables" in a
+##'   formula is not supported.
 ##'
 ##' @param anc List of component-specific lists, of length equal to the number
 ##'   of components.   Each component-specific list is a list of formulae
@@ -190,7 +196,13 @@
 ##'   estimates and associated information.
 ##'
 ##'
-##' @references Larson, M. G., & Dinse, G. E. (1985). A mixture model for the
+##' @references Jackson, C. H. and Tom, B. D. M. and Kirwan, P. D. and Mandal, S.
+##' and Seaman, S. R. and Kunzmann, K. and Presanis, A. M. and De Angelis, D. (2022)
+##' A comparison of two frameworks for multi-state modelling, applied to outcomes
+##' after hospital admissions with COVID-19.  Statistical Methods in Medical Research
+##' 31(9) 1656-1674. 
+##'
+##'   Larson, M. G., & Dinse, G. E. (1985). A mixture model for the
 ##'   regression analysis of competing risks data. Journal of the Royal
 ##'   Statistical Society: Series C (Applied Statistics), 34(3), 201-211.
 ##'
@@ -257,7 +269,7 @@ flexsurvmix <- function(formula, data, event, dists,
   }
   names(dlists) <- names(dfns) <- names(dists)
 
-  check.formula.flexsurvmix(formula, dlists[[1]]) # TESTME
+  check.formula.flexsurvmix(formula, dlists[[1]], data) # TESTME
   if (is.list(formula)) formula <- clean_listarg(formula, "formula", evnames)
 
   ## Build covariate model formulae
@@ -268,13 +280,13 @@ flexsurvmix <- function(formula, data, event, dists,
   for (k in 1:K){
     msg <- sprintf("anc[[%s]] must be a list of formulae", k)
     fk <- if (is.list(formula)) formula[[k]] else formula
-    ancm[[k]] <- anc_from_formula(fk, anc[[k]], dlists[[k]], msg)
+    ancm[[k]] <- anc_from_formula(fk, anc[[k]], dlists[[k]], msg, data)
   }
   locform <- forms <- vector(K, mode="list")
   for (k in 1:K) {
     ancnames <- setdiff(dlists[[k]]$pars, dlists[[k]]$location)
     fk <- if (is.list(formula)) formula[[k]] else formula
-    locform[[k]]  <- get.locform(fk, ancnames)
+    locform[[k]]  <- get.locform(fk, ancnames, data)
     loc <- dlists[[k]]$location
     if (loc %in% names(ancm[[k]])){
       ## Add any extra covariates on the location parameter found in "anc" (usually we'll be adding to ~1)
@@ -301,7 +313,7 @@ flexsurvmix <- function(formula, data, event, dists,
   ## one model frame for each component.  may be different if different response terms in formula
   m <- vector(K, mode="list")
   for (k in 1:K){
-    f2 <- concat.formulae(locform[[k]], c(unlist(forms), pformula))
+    f2 <- concat.formulae(locform[[k]], c(unlist(forms), pformula), data=data)
     temp[["formula"]] <- f2
     m[[k]] <- eval(temp, parent.frame())
     m[[k]] <- droplevels(m[[k]]) # remove unused factor levels after subset applied
@@ -323,6 +335,8 @@ flexsurvmix <- function(formula, data, event, dists,
     whichparcov[[k]] <- rep(names(npc), npc)
   }
   if (is.null(pformula)) pformula <- ~1
+  if ("." %in% all.vars(pformula))
+    stop("`.` in formulae is not supported in flexsurvmix")
   Xp <- model.matrix(pformula, m[[1]])[,-1,drop=FALSE]
 
   ## Convert event internally to numbers based on factor levels
@@ -721,7 +735,7 @@ flexsurvmix <- function(formula, data, event, dists,
   res
 }
 
-check.formula.flexsurvmix <- function(formula, dlist){
+check.formula.flexsurvmix <- function(formula, dlist, data=NULL){
   if (!is.list(formula)){
     if (!inherits(formula,"formula")) stop("\"formula\" must be a formula object")
     formula <- list(formula)
@@ -729,7 +743,9 @@ check.formula.flexsurvmix <- function(formula, dlist){
   for (i in seq_along(formula)){
     if (!inherits(formula[[i]],"formula"))
       stop(sprintf("\"formula[[%s]]\" must be a formula object", i))
-    labs <- attr(terms(formula[[i]]), "term.labels")
+    if ("." %in% all.vars(formula[[i]]))
+      stop("`.` in formulae is not supported in flexsurvmix")
+    labs <- attr(terms(formula[[i]], data=data), "term.labels")
     if (!("strata" %in% dlist$pars)){
       strat <- grep("strata\\((.+)\\)",labs)
       if (length(strat) > 0){

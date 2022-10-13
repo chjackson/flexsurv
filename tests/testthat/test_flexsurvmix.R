@@ -125,6 +125,16 @@ test_that("flexsurvmix with covariates on mixing probabilities",{
 })
 
 
+test_that("dot in formulae in flexsurvmix",{
+  expect_error(flexsurvmix(Surv(t, status) ~ ., data=dat, event=evname, 
+                           dists=c("gamma","gamma"),  fixedpars=TRUE),
+               "`.` in formulae is not supported")
+  expect_error(flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
+                           dists=c("gamma","gamma"),  pformula=~., fixedpars=TRUE),
+               "`.` in formulae is not supported")
+})
+
+
 ## Partially-observed outcomes
 n <- 1000
 set.seed(1)

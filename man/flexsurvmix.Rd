@@ -59,7 +59,10 @@ flexsurvmix(
   "death" = Surv(t1de, status_de))}
 
   where for this individual, \code{(t1di, t2di) = (0, Inf)} and \code{(t1de,
-  status_de)  = (t, 0)}.}
+  status_de)  = (t, 0)}.
+  
+  The "dot" notation commonly used to indicate "all remaining variables" in a
+  formula is not supported in \code{flexsurvmix}.}
 
 \item{data}{Data frame containing variables mentioned in \code{formula},
 \code{event} and \code{anc}.}
@@ -83,7 +86,10 @@ component. The same distributions are supported as in
 
 \item{pformula}{Formula describing covariates to include on the component
 membership proabilities by multinomial logistic regression.  The first
-component is treated as the baseline.}
+component is treated as the baseline.
+
+The "dot" notation commonly used to indicate "all remaining variables" in a
+formula is not supported.}
 
 \item{anc}{List of component-specific lists, of length equal to the number
   of components.   Each component-specific list is a list of formulae
@@ -259,7 +265,13 @@ expectation-maximisation (EM) algorithm, by wrapping
 and M steps.
 }
 \references{
-Larson, M. G., & Dinse, G. E. (1985). A mixture model for the
+Jackson, C. H. and Tom, B. D. M. and Kirwan, P. D. and Mandal, S.
+and Seaman, S. R. and Kunzmann, K. and Presanis, A. M. and De Angelis, D. (2022)
+A comparison of two frameworks for multi-state modelling, applied to outcomes
+after hospital admissions with COVID-19.  Statistical Methods in Medical Research
+31(9) 1656-1674. 
+
+  Larson, M. G., & Dinse, G. E. (1985). A mixture model for the
   regression analysis of competing risks data. Journal of the Royal
   Statistical Society: Series C (Applied Statistics), 34(3), 201-211.
 
