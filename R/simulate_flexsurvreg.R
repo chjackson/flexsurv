@@ -73,7 +73,7 @@ simulate.flexsurvreg <- function(object, nsim=1, seed=NULL,
   if (length(censtime) ==1) 
     censtime <- rep(censtime, nd)
   if (length(censtime)!=nd)
-    stop(sprintf("censtime of length %s, should be of length %s = nrow(newdata)"),
+    stop(sprintf("`censtime` of length %s, should be of length %s = nrow(newdata)"),
          length(censtime), nd)
   censtime <- rep(censtime, each = nsim)
   event <- as.numeric(time <= censtime)
