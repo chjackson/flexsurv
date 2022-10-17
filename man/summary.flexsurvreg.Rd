@@ -94,7 +94,8 @@ left-truncated datasets these are the "stop" times.}
 
 \item{start}{Optional left-truncation time or times.  The returned
 survival, hazard or cumulative hazard will be conditioned on survival up to
-this time.
+this time.   Predicted times returned with \code{"rmst"}, \code{"mean"}, \code{"median"} or \code{"quantile"}
+will be times since time zero, not times since the \code{start} time. 
 
 A vector of the same length as \code{t} can be supplied to allow different
 truncation times for each prediction time, though this doesn't make sense

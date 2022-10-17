@@ -131,7 +131,7 @@ default, these are assumed to be equal for each component.}
 
 \item{inits}{List of component-specific vectors. Each component-specific
 vector contains the initial values for the parameters of the
-component-specific model, as would be supplied to
+component-specific model, as would be supplied as the \code{inits} argument of
 \code{\link{flexsurvreg}}.   By default, a heuristic is used to obtain
 initial values, which depends on the parametric distribution being used,
 but is usually based on the empirical mean and/or variance of the survival
@@ -263,6 +263,9 @@ The model is fitted by maximum likelihood, either directly or by using an
 expectation-maximisation (EM) algorithm, by wrapping
 \code{\link{flexsurvreg}} to compute the likelihood or to implement the E
 and M steps.
+
+Some worked examples are given in the package vignette about multi-state
+modelling, which can be viewed by running \code{vignette("multistate", package="flexsurv")}.
 }
 \references{
 Jackson, C. H. and Tom, B. D. M. and Kirwan, P. D. and Mandal, S.
