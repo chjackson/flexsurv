@@ -255,7 +255,7 @@ xt_to_fnargs <- function(x, X, t, quantiles=0.5, start=0, type="survival", cross
  t <- tstart$t
  nd <- ndorig <- attr(X, "newdata")
  nt <- length(t)
- nx <- if (x$ncovs > 0) nrow(X) else 1
+ nx <- nrow(X)
  if (!cross){
   if (nt != nrow(X)){
    stop(sprintf("length(t)=%s, should equal nrow(X)=%s", nt, nrow(X)))
