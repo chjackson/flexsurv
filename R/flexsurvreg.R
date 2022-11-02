@@ -210,9 +210,9 @@ check.dlist <- function(dlist){
 ## named like this, then such model functions will be interpreted as
 ## parameters and will not work
 
-check.formula <- function(formula, dlist){
+check.formula <- function(formula, dlist, data = NULL){
     if (!inherits(formula,"formula")) stop("\"formula\" must be a formula object")
-    labs <- attr(terms(formula), "term.labels")
+    labs <- attr(terms(formula, data = data), "term.labels")
     if (!("strata" %in% dlist$pars)){
         strat <- grep("strata\\((.+)\\)",labs)
         if (length(strat) > 0){
@@ -236,15 +236,16 @@ check.fixedpars <- function(fixedpars, npars) {
     }
 }
 
-anc_from_formula <- function(formula, anc, dlist, 
-                             msg = "\"anc\" must be a list of formulae") { 
+anc_from_formula <- function(formula, anc, dlist,
+                             msg = "\"anc\" must be a list of formulae",
+                             data = NULL) {
     parnames <- dlist$pars
     ancnames <- setdiff(parnames, dlist$location)
     if (is.null(anc)){
         anc <- vector(mode="list", length=length(ancnames))
         names(anc) <- ancnames
         for (i in ancnames){
-            anc[[i]] <- ancpar.formula(formula, i)
+            anc[[i]] <- ancpar.formula(formula, i, data)
         }
     }
     else {
@@ -259,8 +260,8 @@ anc_from_formula <- function(formula, anc, dlist,
     anc
 }
 
-ancpar.formula <- function(formula, par){
-    labs <- attr(terms(formula), "term.labels")
+ancpar.formula <- function(formula, par, data = NULL){
+    labs <- attr(terms(formula, data = data), "term.labels")
     pattern <- paste0(par,"\\((.+)\\)")
     labs <- grep(pattern,labs,value=TRUE)
     if (length(labs)==0) return(NULL)
@@ -273,18 +274,18 @@ ancpar.formula <- function(formula, par){
 ## Omit formula terms containing ancillary parameters, leaving only
 ## the formula for the location parameter
 
-get.locform <- function(formula, ancnames){
-    labs <- attr(terms(formula), "term.labels")
+get.locform <- function(formula, ancnames, data = NULL){
+    labs <- attr(terms(formula, data = data), "term.labels")
     dropx <- unlist(lapply(ancnames, function(x){grep(paste0(x,"\\((.+)\\)"),labs)}))
-    formula(terms(formula)[c(0,setdiff(seq_along(labs),dropx))])
+    formula(terms(formula, data = data)[c(0,setdiff(seq_along(labs),dropx))])
 }
 
 ## Concatenate location formula (that includes Surv response term)
 ## with list of ancillary formulae, giving a merged formula to obtain
 ## the model frame
 
-concat.formulae <- function(formula,forms){
-    covnames <- unlist(lapply(forms, function(x)attr(terms(x),"term.labels")))
+concat.formulae <- function(formula,forms, data = NULL){
+    covnames <- unlist(lapply(forms, function(x)attr(terms(x, data = data),"term.labels")))
     covform <- if(length(covnames)==0) "1" else paste(covnames, collapse=" + ")
     respname <- as.character(formula[2])
     form <- paste0(respname, " ~ ", covform)
@@ -292,7 +293,7 @@ concat.formulae <- function(formula,forms){
     environment(f2) <- environment(formula)
     ## names of variables in the data, not the formula, with functions such as factor() stripped
     ## used for error message with incomplete "newdata" in summary()
-    covnames.bare <- unlist(lapply(forms, function(x)all.vars(delete.response(terms(x)))))
+    covnames.bare <- unlist(lapply(forms, function(x)all.vars(delete.response(terms(x, data = data)))))
     attr(f2, "covnames") <- covnames.bare
     attr(f2, "covnames.orig") <- covnames
     f2
@@ -393,6 +394,11 @@ compress.model.matrices <- function(mml){
 ##'
 ##'   If there are no covariates, specify \code{1} on the right hand side, for
 ##'   example \code{Surv(time, dead) ~ 1}.
+##'
+##'   If the right hand side is specified as \code{.} all remaining variables are
+##'   included as covariates. For example, \code{Surv(time, dead) ~ .}
+##'   corresponds to \code{Surv(time, dead) ~ age + sex} if \code{data} contains
+##'   the variables \code{time}, \code{dead}, \code{age}, and \code{sex}.
 ##'
 ##'   By default, covariates are placed on the ``location'' parameter of the
 ##'   distribution, typically the "scale" or "rate" parameter, through a linear
@@ -797,16 +803,17 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                         integ.opts=NULL, sr.control=survreg.control(), hessian=TRUE, hess.control=NULL, ...)
 {
     call <- match.call()
+    if (missing(data)) data <- NULL
     if (missing(dist)) stop("Distribution \"dist\" not specified")
     dlist <- parse.dist(dist)
     dfns <- form.dp(dlist, dfns, integ.opts)
     parnames <- dlist$pars
 
-    check.formula(formula, dlist)
-    anc <- anc_from_formula(formula, anc, dlist)
-    
+    check.formula(formula, dlist, data)
+    anc <- anc_from_formula(formula, anc, dlist, data = data)
+
     ancnames <- setdiff(parnames, dlist$location)
-    forms <- c(location=get.locform(formula, ancnames), anc)
+    forms <- c(location=get.locform(formula, ancnames, data), anc)
     names(forms)[[1]] <- dlist$location
 
     ## a) calling model.frame() directly doesn't work.  it only looks in
@@ -824,7 +831,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     temp <- call[c(1, indx)]
     temp[[1]] <- as.name("model.frame")
 
-    f2 <- concat.formulae(formula,forms)
+    f2 <- concat.formulae(formula,forms, data)
     temp[["formula"]] <- f2
     if (missing(data)) temp[["data"]] <- environment(formula)
     m <- eval(temp, parent.frame())

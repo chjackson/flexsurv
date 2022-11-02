@@ -25,6 +25,7 @@ fmixmsm <- function(...){
   pathways <- get_pathways(evlist[1], evlist, plist)
   ret <- args
   attr(ret, "pathways") <- pathways$pathways
+  attr(ret, "cycle") <- isTRUE(pathways$has_cycle)
   attr(ret, "pathway_str") <- sapply(attr(ret, "pathways"), function(x)paste(x,collapse="-"))
   ret
 }
@@ -35,21 +36,22 @@ get_pathways <- function(mod_current, mods, ret){
   fromstate <- names(mod_current)
   tostates <- mod_current[[1]]
   absorbing <- setdiff(unlist(mods),names(mods))
-  ret$pathway_current <- c(ret$pathway_current, fromstate)
   ret$transient_visited <- c(ret$transient_visited, fromstate)
   ret$transient_unvisited <- setdiff(ret$transient_unvisited, fromstate)
   nd <- length(tostates)
-  pcurr <- ret$pathway_current 
+  pcurr <- c(ret$pathway_current, fromstate)
   for (j in 1:nd){
-    if (tostates[j] %in% ret$transient_visited){
+    pathway_new <- c(pcurr, tostates[j])
+    if (any(duplicated(pathway_new))){
       return(list(has_cycle=TRUE))  # could we carry on, ignore cycles, return all paths to absorption?  don't do unless we need. 
     } 
-    else if (tostates[j] %in% ret$transient_unvisited){
+    else if (tostates[j] %in% absorbing){
+      ret$pathways <- c(ret$pathways, list(pathway_new))
+    }
+    else {
+      ret$pathway_current <- pcurr
       ret <- get_pathways(mods[tostates[j]], mods, ret)
     }
-    else if (tostates[j] %in% absorbing){
-      ret$pathways <- c(ret$pathways, list(c(pcurr, tostates[j])))
-    } else stop("Shouldn't reach here, please report a bug")
   }
   ret
 }

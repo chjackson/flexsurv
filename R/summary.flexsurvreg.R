@@ -77,7 +77,8 @@
 ##' 
 ##' @param start Optional left-truncation time or times.  The returned
 ##' survival, hazard or cumulative hazard will be conditioned on survival up to
-##' this time.
+##' this time.   Predicted times returned with \code{"rmst"}, \code{"mean"}, \code{"median"} or \code{"quantile"}
+##' will be times since time zero, not times since the \code{start} time. 
 ##' 
 ##' A vector of the same length as \code{t} can be supplied to allow different
 ##' truncation times for each prediction time, though this doesn't make sense
@@ -254,7 +255,7 @@ xt_to_fnargs <- function(x, X, t, quantiles=0.5, start=0, type="survival", cross
  t <- tstart$t
  nd <- ndorig <- attr(X, "newdata")
  nt <- length(t)
- nx <- if (x$ncovs > 0) nrow(X) else 1
+ nx <- nrow(X)
  if (!cross){
   if (nt != nrow(X)){
    stop(sprintf("length(t)=%s, should equal nrow(X)=%s", nt, nrow(X)))
@@ -288,22 +289,23 @@ summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0)
     if(!is.null(t)) 
       warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
     # Type = mean same as RMST w/ time = Inf
-    t <- rep(Inf,length(start))
+    t <- rep_len(Inf,length(start))
   }
   else if(type == "median"){
     if(!is.null(t)) warning("Median selected, but time specified.")
-    t <- rep(0.5,length(start))
+    t <- rep_len(0.5,length(start))
   }
   else if(type == "link"){
     if(!is.null(t)) warning("`link` selected, but time specified.")
-    t <- rep(0,length(start))
+    t <- rep_len(0,length(start))
   }
   else if(type == "quantile"){
     t <- quantiles
     if((any(t<0) | any(t>1))){
       stop("Quantiles should not be less than 0 or greater than 1")
     }
-    t <- rep(t,length(start))
+    maxlen <- max(length(t), length(start))
+    t <- rep_len(t,maxlen)
   }
   else if(type == "rmst"){
       if (is.null(x[["data"]]))
@@ -317,7 +319,7 @@ summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0)
       t <- sort(unique(x$data$Y[,"stop"]))
   }
   if (length(start)==1)
-    start <- rep(start, length(t))
+    start <- rep_len(start, length(t))
   else if (length(start) != length(t))
     stop("length of \"start\" is ",length(start),". Should be 1, or length of \"t\" which is ",length(t))
   list(t=t, start=start)
@@ -352,14 +354,14 @@ summary.fns <- function(x, type){
                ret
            },
            "median" = function(start,...) {
-             start_p = 1 - x$dfns$p(start,...)
-             med_from_start = start_p/2
+             start_p = x$dfns$p(start,...)
+             med_from_start = start_p + (1 - start_p)/2
              ret = x$dfns$q(med_from_start,...)
            },
            "quantile" = function(t=0.5, start,...) {
-             start_p = 1 - x$dfns$p(start,...)
-             med_from_start = start_p * t
-             ret = x$dfns$q(med_from_start,...)
+             start_p = x$dfns$p(start,...)
+             qu_from_start = start_p + (1 - start_p)* t
+             ret = x$dfns$q(qu_from_start,...)
            },
            "hazard" = function(t,start,...) {
                ret <- x$dfns$h(t,...) * (1 - x$dfns$p(start,...))

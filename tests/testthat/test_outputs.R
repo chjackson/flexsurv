@@ -155,3 +155,41 @@ test_that("hazard ratio",{
     expect_equal(hr_flexsurvreg(fitw, t=t)$est,
                  hr_flexsurvreg(fitw, t=t, newdata=list(rxbin=c(0,1)))$est)
 })
+
+test_that("summary.flexsurvreg quantiles",{
+  fitw <- flexsurvreg(Surv(futime, fustat) ~ factor(rx), data = ovarian, dist="weibull")
+  nd <- list(rx=c("1","2"))
+  cf <- fitw$res[,"est"]; sh <- cf["shape"]; sc <- cf["scale"]
+
+  qu <- summary(fitw, newdata=nd, type="quantile", q=0.4, tidy=TRUE)
+  q1 <- qweibull(0.4, shape=sh, scale=sc)
+  q2 <- qweibull(0.4, shape=sh, scale=sc*exp(cf["factor(rx)2"]))
+  expect_equal(qu$est[1], q1)
+  expect_equal(qu$est[2], q2)
+
+  ## Quantiles of truncated distribution 
+  qu <- summary(fitw, newdata=nd, type="quantile", q=0.4, tidy=TRUE, start=100)
+  pstart1 <- pweibull(100, shape=sh, scale=sc)
+  pstart2 <- pweibull(100, shape=sh, scale=sc*exp(cf["factor(rx)2"]))
+  q1 <- qweibull(pstart1+(1-pstart1)*0.4, shape=sh, scale=sc)
+  q2 <- qweibull(pstart2+(1-pstart2)*0.4, shape=sh, scale=sc*exp(cf["factor(rx)2"]))
+  expect_equal(qu$est[1], q1)
+  expect_equal(qu$est[2], q2)
+  expect_equal((pweibull(q1, shape=sh, scale=sc) - pweibull(100, shape=sh, scale=sc))/ 
+    (1 - pweibull(100, shape=sh, scale=sc)), 0.4)
+})
+
+test_that("newdata in summary and predict with no covariates",{
+  fitw <- flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist="weibull")
+  nd <- model.frame(fitw)
+  expect_equal(nrow(summary(fitw, newdata=nd, type="quantile", tidy=TRUE, ci=FALSE)), nrow(nd))
+  fitw <- flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist="weibull")
+  summ <- summary(fitw, newdata=nd, type="mean", tidy=TRUE, ci=FALSE)
+  expect_equal(nrow(summ), nrow(nd))
+  summ <- summary(fitw, newdata=nd, type="quantile", quantiles=c(0.1, 0.9), tidy=TRUE, ci=FALSE)
+  expect_equal(nrow(summ), nrow(nd)*2)
+  pred <- predict(fitw, newdata=nd, type="quantile", p=0.5)
+  expect_equal(nrow(pred), nrow(nd))
+  pred <- predict(fitw, newdata=nd, type="quantile", p=c(0.1, 0.9))
+  expect_equal(nrow(pred), nrow(nd))
+})

@@ -303,6 +303,8 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
   # use solve(.) over chol2inv(chol(.)) to get an inverse even if not PD
   # less efficient but more stable
   inv_hessian <- solve(hessian, tol = tol.solve)
+  if (any(is.infinite(inv_hessian)))
+    stop("Inverse Hessian has infinite values.  This might indicate that the model is too complex to be identifiable from the data")
   evalues <- eigen(inv_hessian, symmetric = TRUE, only.values = TRUE)$values
   if (min(evalues) < -tol.evalues)
     warning(sprintf(

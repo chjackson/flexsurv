@@ -42,6 +42,11 @@ flexsurvreg(
   If there are no covariates, specify \code{1} on the right hand side, for
   example \code{Surv(time, dead) ~ 1}.
 
+  If the right hand side is specified as \code{.} all remaining variables are
+  included as covariates. For example, \code{Surv(time, dead) ~ .}
+  corresponds to \code{Surv(time, dead) ~ age + sex} if \code{data} contains
+  the variables \code{time}, \code{dead}, \code{age}, and \code{sex}.
+
   By default, covariates are placed on the ``location'' parameter of the
   distribution, typically the "scale" or "rate" parameter, through a linear
   model, or a log-linear model if this parameter must be positive.  This
