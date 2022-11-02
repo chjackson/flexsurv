@@ -70,7 +70,7 @@ tidy.flexsurvreg <- function(x, conf.int = FALSE, conf.level = 0.95,
 
   if (conf.int) cis <- confint(x, level = conf.level) else cis <- NULL
 
-  if (!"baseline.real" %in% transform) {
+  if (!"baseline.real" %in% transform && any(rownames(cis) %in% dist_pars)) {
     cis[rownames(cis) %in% dist_pars, 1] <-
       purrr::map2_dbl(cis[rownames(cis) %in% dist_pars, 1], x$dlist$inv.transforms, ~.y(.x))
 
