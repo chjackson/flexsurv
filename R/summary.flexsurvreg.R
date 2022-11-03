@@ -58,7 +58,7 @@
 ##' 
 ##' \code{"quantile"} for quantiles of the survival time distribution.
 ##'
-##' \code{"link"} for the fitted value of the location parameter (i.e. the "linear predictor")
+##' \code{"link"} for the fitted value of the location parameter (i.e. the "linear predictor" but on the natural scale of the parameter, not on the log scale)
 ##' 
 ##' Ignored if \code{"fn"} is specified.
 ##' 
