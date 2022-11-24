@@ -450,10 +450,6 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     }
   } else if(type=="acsurvival"){
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
-    if(object$ncovs == 0){
-      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-      rs <- rs %>% slice(rep(1:n(), dim(newdata)[1]))
-    }
     rs$id <- rep(1:dim(newdata)[1],each=length(t))
     names(rs)[names(rs)=="est"] <- "rs"
     pred <- rs %>% left_join(expsurv$expsurv, by=c("id","time"))
@@ -466,17 +462,9 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     }
   } else if(type=="achazard"){
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
-    if(object$ncovs == 0){
-      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-      rs <- rs %>% slice(rep(1:n(), dim(newdata)[1]))
-    }
     rs$id <- rep(1:dim(newdata)[1],each=length(t))
     names(rs)[names(rs)=="est"] <- "rs"
     excessh <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F) ## this gives excess hazard
-    if(object$ncovs == 0){
-      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-      excessh <- excessh %>% slice(rep(1:n(), dim(newdata)[1]))
-    }
     excessh$id <- rep(1:dim(newdata)[1],each=length(t))
     names(excessh)[names(excessh)=="est"] <- "excessh"
     pred <- rs %>% left_join(excessh, by=c("id", "time")) %>%
@@ -518,10 +506,6 @@ acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted, t
 acrmst.int.fn <- function(t1, object, dat, rmap, ratetable, scale.ratetable, weighted){
   # Relative survival
   rs <- summary(object, type = "survival", tidy = T, newdata=dat, t=t1, ci=F)
-  if(object$ncovs == 0){
-    # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-    rs <- rs %>% slice(rep(1:n(), dim(dat)[1]))
-  }
   rs$id <- rep(1:dim(dat)[1],each=length(t1))
   rs <- rs %>% left_join(dat, by="id")
   ## Expected survival
