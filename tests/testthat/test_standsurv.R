@@ -141,3 +141,39 @@ test_that('predictions with missing data', {
 })
 
 
+test_that('model with no covariates', {
+  fitw <- flexsurvreg(Surv(recyrs, censrec) ~ 1, 
+                       data=bc, dist="weibull")
+  # Single time prediction - checking survival with predict.flexsurvreg
+  expect_equal(as.numeric(standsurv(fitw, t = 4, newdata = bc)[1,2]), 
+               as.numeric(predict(fitw, type = "survival", times = 4, 
+                                  newdata = bc)[1,2]))
+  
+  # Single time prediction - checking all-cause survival from an RS model
+  # with predict.flexsurvreg, where background rates are zero
+  set.seed(136)
+  bc$age <- rnorm(dim(bc)[1], mean = 65 - bc$recyrs, sd = 5)
+  bc$agedays <- floor(bc$age * 365.25)
+  ## Create some random diagnosis dates centred on 01/01/2010 with SD=1 year
+  bc$diag <- as.Date(floor(rnorm(dim(bc)[1], mean = as.Date("01/01/2010", "%d/%m/%Y"), sd=365)), origin="1970-01-01")
+  ## Create sex (assume all are female)
+  bc$sex <- factor("female")
+  ## Assume background hazard of zero
+  bc$bhazard <- 0
+  ## ratetable (used by standsurv)
+  new.ratetable <- survexp.us 
+  new.ratetable[!is.na(new.ratetable)] <- 0
+  fitw2 <- flexsurvreg(Surv(recyrs, censrec) ~ 1, 
+                       data=bc, dist="weibull", bhazard=bhazard)
+  pred1 <- as.numeric(predict(fitw, type = "survival", times = 4, 
+                              newdata = bc)[1,2])
+  pred2 <- as.numeric(standsurv(fitw2, t=4, newdata=bc, type="survival",
+            rmap=list(sex = sex,
+                      year = diag,
+                      age = agedays
+            ),
+            ratetable = new.ratetable,
+            scale.ratetable = 365.25)[1,2])
+  expect_equal(pred1, pred2)
+})
+
