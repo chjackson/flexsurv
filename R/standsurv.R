@@ -336,7 +336,8 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
           message("Calculating bootstrap standard errors / confidence intervals")      
         rawsim <- NULL
         bootresults <- boot.standsurv(object, B, dat, i, t, type, type2, weighted, 
-                                      se, ci, cl, rawsim, predsum, expsurv)  
+                                      se, ci, cl, rawsim, predsum, expsurv,
+                                      rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)  
         stand.pred.list[[i]] <- bootresults$stand.pred
         predsum <- bootresults$predsum
         if(is.null(rawsim)) 
@@ -449,10 +450,6 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     }
   } else if(type=="acsurvival"){
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
-    if(object$ncovs == 0){
-      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-      rs <- rs %>% slice(rep(1:n(), dim(newdata)[1]))
-    }
     rs$id <- rep(1:dim(newdata)[1],each=length(t))
     names(rs)[names(rs)=="est"] <- "rs"
     pred <- rs %>% left_join(expsurv$expsurv, by=c("id","time"))
@@ -465,17 +462,9 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     }
   } else if(type=="achazard"){
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
-    if(object$ncovs == 0){
-      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-      rs <- rs %>% slice(rep(1:n(), dim(newdata)[1]))
-    }
     rs$id <- rep(1:dim(newdata)[1],each=length(t))
     names(rs)[names(rs)=="est"] <- "rs"
     excessh <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F) ## this gives excess hazard
-    if(object$ncovs == 0){
-      # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-      excessh <- excessh %>% slice(rep(1:n(), dim(newdata)[1]))
-    }
     excessh$id <- rep(1:dim(newdata)[1],each=length(t))
     names(excessh)[names(excessh)=="est"] <- "excessh"
     pred <- rs %>% left_join(excessh, by=c("id", "time")) %>%
@@ -489,49 +478,49 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
         summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es)))
     }
   } else if(type=="acrmst"){
-    # Function to integrate - this is the marginal all-cause survival  average(S*(t)R*(t))
-    int.fn <- function(t1, dat, rmap, ratetable, scale.ratetable){
-      # Relative survival
-      rs <- summary(object, type = "survival", tidy = T, newdata=dat, t=t1, ci=F)
-      if(object$ncovs == 0){
-        # when no covariates are in the model summary.flexsurvreg does not provide individual-level predictions
-        rs <- rs %>% slice(rep(1:n(), dim(dat)[1]))
-      }
-      rs$id <- rep(1:dim(dat)[1],each=length(t1))
-      rs <- rs %>% left_join(dat, by="id")
-      ## Expected survival
-      rs$t1.scale <- rs$time * scale.ratetable
-      rs$es <- do.call("survexp", list(formula = t1.scale~1, 
-                                             rmap = rmap, method="individual.s", 
-                                             ratetable = ratetable, data=rs
-      ))
-      if(weighted){
-        rssum <- rs %>% group_by(time) %>% 
-          summarise(rmst = tr.fun(weighted.mean(.data$est*.data$es, .data$weights)))
-      } else {
-        rssum <- rs %>% group_by(time) %>% summarise(rmst = tr.fun(mean(.data$est*.data$es)))
-      }
-      rssum$rmst
-    }
-    # Using Gauss-Legendre quadrature
-    dat <- newdata
-    dat$id <- 1:dim(dat)[1]
-    n.gauss.quad <- 100
-    gaussxw <- gauss.quad(n.gauss.quad)
-    pred <- vector()
-    for(j in seq_along(t)){
-      if(t[j]==0){
-        pred[j] <- 0
-      } else {
-        scale <- t[j]/2
-        points <- scale*(gaussxw$nodes + 1)
-        eval_fn <- int.fn(points, dat=dat, rmap=rmap, ratetable=ratetable, scale.ratetable=scale.ratetable)
-        pred[j] <- scale*sum(gaussxw$weights * eval_fn)
-      }
-    }
+    pred <- acrmst(object, dat=newdata, t, rmap, ratetable, scale.ratetable, weighted, tr.fun)
     predsum <- tibble(time=t, "at{i}":=pred)
   }
   predsum
+}
+
+acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted, tr.fun = tr("none"), n.gauss.quad = 100){
+  # Using Gauss-Legendre quadrature
+  dat$id <- 1:dim(dat)[1]
+  gaussxw <- gauss.quad(n.gauss.quad)
+  pred <- vector()
+  for(j in seq_along(t)){
+    if(t[j]==0){
+      pred[j] <- 0
+    } else {
+      scale <- t[j]/2
+      points <- scale*(gaussxw$nodes + 1)
+      eval_fn <- acrmst.int.fn(points, object, dat, rmap, ratetable, scale.ratetable, weighted)
+      pred[j] <- tr.fun(scale*sum(gaussxw$weights * eval_fn))
+    }
+  }
+  pred
+}
+
+# Function to integrate all-cause RMST - this is the marginal all-cause survival  average(S*(t)R*(t))
+acrmst.int.fn <- function(t1, object, dat, rmap, ratetable, scale.ratetable, weighted){
+  # Relative survival
+  rs <- summary(object, type = "survival", tidy = T, newdata=dat, t=t1, ci=F)
+  rs$id <- rep(1:dim(dat)[1],each=length(t1))
+  rs <- rs %>% left_join(dat, by="id")
+  ## Expected survival
+  rs$t1.scale <- rs$time * scale.ratetable
+  rs$es <- do.call("survexp", list(formula = t1.scale~1, 
+                                   rmap = rmap, method="individual.s", 
+                                   ratetable = ratetable, data=rs
+  ))
+  if(weighted){
+    rssum <- rs %>% group_by(time) %>% 
+      summarise(rmst = weighted.mean(.data$est*.data$es, .data$weights))
+  } else {
+    rssum <- rs %>% group_by(time) %>% summarise(rmst = mean(.data$est*.data$es))
+  }
+  rssum$rmst
 }
 
 tr <- function(trans){
@@ -553,41 +542,56 @@ inv.tr <- function(trans){
 }
 
 boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, cl, 
-                           rawsim, predsum, expsurv){
+                           rawsim, predsum, expsurv, rmap, ratetable, scale.ratetable, tr.fun){
   if(is.null(rawsim))
     rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
   
   X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
-  if(!(type2 %in% c("acsurvival", "achazard"))){
-    sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type2), B=B, rawsim=rawsim) # pts, sims, times
-  } else {
-    sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
-  }
-  if(weighted){
-    weights <- array(dat$`(weights)`, dim(sim.pred))
-  } else {
-    weights <- array(1, dim(sim.pred))
-  }
-  if(type2=="hazard"){
-    # Weight individual hazards by survival function to get hazard of the standardized survival
-    haz <- sim.pred
-    surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
-    stand.pred <- apply(haz*surv*weights, c(2,3),sum) / apply(surv*weights,c(2,3),sum)
-  } else if(type2=="acsurvival"){
-    rs <- sim.pred
-    es <- array(expsurv$expsurv$es, dim= dim(rs)[c(1,3,2)])
-    es <- aperm(es, c(1, 3, 2))
-    stand.pred <- apply(es*rs*weights, c(2,3),sum) / apply(weights,c(2,3),sum)
-  } else if(type2=="achazard"){
-    excessh <- sim.pred
-    rs <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
-    es <- array(expsurv$expsurv$es, dim= dim(rs)[c(1,3,2)])
-    es <- aperm(es, c(1, 3, 2))
-    eh <- array(expsurv$expsurv$eh, dim= dim(rs)[c(1,3,2)])
-    eh <- aperm(eh, c(1, 3, 2))
-    stand.pred <- apply(rs*es*weights*(excessh+eh), c(2,3),sum) / apply(rs*es*weights,c(2,3),sum)
-  } else {
-    stand.pred <- apply(sim.pred*weights, c(2,3), sum) / apply(weights,c(2,3),sum)
+  if(type2 != "acrmst"){
+    if(!(type2 %in% c("acsurvival", "achazard"))){
+      sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type2), B=B, rawsim=rawsim) # pts, sims, times
+    } else {
+      sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
+    }
+    
+    if(weighted){
+      weights <- array(dat$`(weights)`, dim(sim.pred))
+    } else {
+      weights <- array(1, dim(sim.pred))
+    }
+    if(type2=="hazard"){
+      # Weight individual hazards by survival function to get hazard of the standardized survival
+      haz <- sim.pred
+      surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
+      stand.pred <- apply(haz*surv*weights, c(2,3),sum) / apply(surv*weights,c(2,3),sum)
+    } else if(type2=="acsurvival"){
+      rs <- sim.pred
+      es <- array(expsurv$expsurv$es, dim= dim(rs)[c(1,3,2)])
+      es <- aperm(es, c(1, 3, 2))
+      stand.pred <- apply(es*rs*weights, c(2,3),sum) / apply(weights,c(2,3),sum)
+    } else if(type2=="achazard"){
+      excessh <- sim.pred
+      rs <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
+      es <- array(expsurv$expsurv$es, dim= dim(rs)[c(1,3,2)])
+      es <- aperm(es, c(1, 3, 2))
+      eh <- array(expsurv$expsurv$eh, dim= dim(rs)[c(1,3,2)])
+      eh <- aperm(eh, c(1, 3, 2))
+      stand.pred <- apply(rs*es*weights*(excessh+eh), c(2,3),sum) / apply(rs*es*weights,c(2,3),sum)
+    } else {
+      stand.pred <- apply(sim.pred*weights, c(2,3), sum) / apply(weights,c(2,3),sum)
+    }
+  } else { ## if type2=="acrmst"
+    ## This for now manipulates rawsim within acrmst. This code could be made more slick.
+    stand.pred <- matrix(nrow=B, ncol=length(t))
+    for(b in seq(length=B)) {
+      newobject <- object
+      newobject$res.t[,"est"] <- rawsim[b,]
+      newobject$res[newobject$covpars,"est"] <- rawsim[b, newobject$covpars]
+      newobject$res[newobject$dlist$pars,"est"] <- NA  ## setting to NA to be safe
+      newobject$res.t[,-1] <- newobject$res[,-1] <- NA ## setting to NA to be safe
+      ## standardisation (averaging across patients) is done within acrmst itself 
+      stand.pred[b,] <- acrmst(newobject, dat, t, rmap, ratetable, scale.ratetable, weighted, n.gauss.quad = 100)
+    }
   }
   if(se == TRUE){
     stand.pred.se <- tibble("at{i}_se" := apply(stand.pred, 2, sd, na.rm=TRUE))
