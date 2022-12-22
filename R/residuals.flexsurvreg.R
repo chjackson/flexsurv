@@ -49,46 +49,23 @@ residuals.flexsurvreg <- function(object, type = "response", ...)
 ##' @param x Object returned by \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}} representing a fitted survival model
 ##'
 ##' @return A data frame with a column called \code{est} giving the Cox-Snell residual, defined as the fitted cumulative hazard at each data point.
-##'  fitted cumulative hazard at the given observed data point, and other columns indicating the observation time
-##'  and covariate values defining the data at this point.   
+##'  fitted cumulative hazard at the given observed data point, and other columns indicating the observation time,
+##'  observed event status, and covariate values defining the data at this point.   
 ##'
-##' An extra column \code{"(qexp)"} gives the equally-spaced quantiles of a standard 
-##' exponential distribution in the same order as \code{est}.   To check the fit of the model, 
-##' \code{"(qexp)"} is plotted against \code{est}, and the points should form a straight line 
-##' through the origin with slope 1. 
+##' The cumulative hazards \code{est} should form a censored sample from an Exponential(1).  
+##' Therefore to check the fit of the model, plot a nonparametric estimate of the cumulative
+##' hazard curve against a diagonal line through the origin, which is the theoretical cumulative
+##' hazard trajectory of the Exponential(1).   
 ##' 
 ##' @examples
 ##'
 ##'   fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "gengamma")
 ##'   cs <- coxsnell_flexsurvreg(fitg)
 ##'   
-##'   ## Model doesn't appear to fit well since the cumulative hazards are underestimated.
-##'   ## In this example, this is probably because the dataset is small, 
-##'   ## hence the point estimate is noisy.
-##'   plot(cs$"(qexp)", cs$est, pch=19, xlab="Theoretical quantiles", ylab="Cumulative hazard")
-##'   abline(a=0,b=1,col="red",lwd=2)
-##'   
-##'   ## Alternative way to produce the same plot using "qqplot"
-##'   qy <- qexp(ppoints(nrow(cs),0))
-##'   qqplot(qy, cs$est)
-##'   abline(a=0,b=1, col="red", lwd=2)
-##'   
-##'   ## A log transform may or may not bring out the pattern more clearly
-##'   plot(log(cs$"(qexp)"), log(cs$est), pch=19)
-##'   abline(a=0,b=1, col="red", lwd=2)
-##'   
-##'   ## In the model `fitg`, the fitted cumulative hazard is lower than the true cumulative hazard
-##'   ## Another way to show this is to compare parametric vs nonparametric estimates of 
-##'   ## the cumulative hazard 
-##'   plot(fitg, type="cumhaz", ci=FALSE)
-##'   
-##'   ## Alternative example: where the true model is fitted to simulated data
-##'   ## The model fits well
-##'   y <- rweibull(10000, 2, 2)
-##'   fite <- flexsurvreg(Surv(y) ~ 1, dist="weibull")
-##'   cs <- coxsnell_flexsurvreg(fite)
-##'   plot(cs$"(qexp)", cs$est, pch=19, xlab="Theoretical quantiles", ylab="Cumulative hazard")
-##'   abline(a=0,b=1,col="red",lwd=2)
+##'   ## Model appears to fit well, with some small sample noise 
+##'   surv <- survfit(Surv(cs$est, ovarian$fustat) ~ 1)
+##'   plot(surv, fun="cumhaz")
+##'   abline(0, 1, col="red")
 ##'   
 ##' @export
 coxsnell_flexsurvreg <- function(x){
@@ -98,7 +75,7 @@ coxsnell_flexsurvreg <- function(x){
     nd <- mf[,covnames,drop=FALSE]
     res <- summary(x, type="cumhaz", t=t, newdata=nd, cross=FALSE, 
                    ci=FALSE, se=FALSE, tidy=TRUE)
-    res$"(qexp)" <- NA
-    res$"(qexp)"[order(res$est)] <- qexp(ppoints(nrow(res), 0))
+    res$status <- mf[,1][,"status"]
+    res <- res[c("time","status", setdiff(names(res), c("time","status","est")), "est")]
     res    
 }
