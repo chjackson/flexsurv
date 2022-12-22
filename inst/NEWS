@@ -1,6 +1,6 @@
 -*- text -*-
 
-Version 2.2.1 (2022-09-??)
+Version 2.2.1 (2022-12-22)
 -------------------------
 
 * New `simulate.flexsurvreg` method to simulate data from a fitted
@@ -9,6 +9,8 @@ Version 2.2.1 (2022-09-??)
 
 * Fix of bug for summary() method with type = "quantile" or "median"
   and left-truncation in the prediction (start > 0). 
+
+* Correction to the examples and interpretation of Cox-Snell residuals.
 
 
 Version 2.2 (2022-06-16)
