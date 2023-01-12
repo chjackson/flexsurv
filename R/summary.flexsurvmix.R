@@ -540,7 +540,7 @@ ajfit_flexsurvmix <- function(x, maxt=NULL, startname="Start", B=NULL){
   }
   names(ajlong)[names(ajlong)=="time"] <- "t"
   if (is.null(maxt)) maxt <- max(ajlong$t)
-  times <- seq(0, maxt, length=100)
+  times <- seq(0, maxt, length.out=100)
   modcomp <- 
     p_flexsurvmix(x, t=times, newdata=newdata, startname=startname, B=B) %>%
     dplyr::mutate(model="Parametric mixture") %>%

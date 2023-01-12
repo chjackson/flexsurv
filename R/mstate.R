@@ -276,7 +276,7 @@ pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
         X <- form.model.matrix(x, newdata, na.action=na.omit)
         basepar <- add.covs(x, pars=x$res.t[x$dlist$pars,"est"], beta=x$res.t[x$covpars,"est"], X=X)
         ntrans <- length(na.omit(as.vector(trans)))
-        basepar <- split(basepar, seq(length=ntrans))
+        basepar <- split(basepar, seq_len(ntrans))
         basepar <- lapply(basepar, function(y){y <- matrix(y,nrow=1); colnames(y) <- x$dlist$pars; y})
 
     } else

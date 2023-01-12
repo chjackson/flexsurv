@@ -150,7 +150,7 @@
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
-#'                                            t=seq(0,7, length=100),
+#'                                            t=seq(0,7, length.out=100),
 #'                                            contrast = "difference", ci=FALSE)
 #'standsurv_weib_age
 #'
@@ -162,7 +162,7 @@
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
-#'                                            t=seq(0,7, length=100),
+#'                                            t=seq(0,7, length.out=100),
 #'                                            type="hazard",
 #'                                            contrast = "ratio", boot = TRUE,
 #'                                            B=10, ci=TRUE)
@@ -189,7 +189,7 @@
 #'                                            at = list(list(group="Good"), 
 #'                                                      list(group="Medium"), 
 #'                                                      list(group="Poor")), 
-#'                                            t=seq(0,7, length=100),
+#'                                            t=seq(0,7, length.out=100),
 #'                                            rmap=list(sex = sex,
 #'                                                      year = diag,
 #'                                                      age = agedays),
@@ -583,7 +583,7 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
   } else { ## if type2=="acrmst"
     ## This for now manipulates rawsim within acrmst. This code could be made more slick.
     stand.pred <- matrix(nrow=B, ncol=length(t))
-    for(b in seq(length=B)) {
+    for(b in seq(length.out=B)) {
       newobject <- object
       newobject$res.t[,"est"] <- rawsim[b,]
       newobject$res[newobject$covpars,"est"] <- rawsim[b, newobject$covpars]

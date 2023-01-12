@@ -72,7 +72,7 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
   pmat <- vector(ncovvals, mode="list")
   if (is.null(maxt)) 
     maxt <- max(pt$time)
-  times <- seq(0, maxt, length=100)
+  times <- seq(0, maxt, length.out=100)
   for (i in 1:ncovvals){  # note newdata doesn't support multiple covs 
     pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,], start=1, t=times, tidy=TRUE, ci=FALSE)
     covvals <- newdata[i,][rep(1,nrow(pmat[[i]])),]
