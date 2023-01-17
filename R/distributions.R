@@ -1,3 +1,14 @@
+survreg_wrap <- function(args){
+  opts <- options()
+  on.exit(options(opts))
+  options(
+    warnPartialMatchArgs = TRUE,
+    warnPartialMatchAttr = TRUE,
+    warnPartialMatchDollar = TRUE
+  )
+  do.call(survreg, args)
+}
+
 sr.weib.inits <- function(t,aux){
     if (aux$counting){
         lt <- log(t[t>0])
@@ -7,7 +18,7 @@ sr.weib.inits <- function(t,aux){
         aux$formula <- aux$forms[[1]]
         aux$forms <- NULL
         aux$dist <- "weibull"
-        sr <- do.call(survreg, aux)
+        sr <- survreg_wrap(aux)
         sr2fswei(sr)
     }
 }
@@ -22,7 +33,7 @@ sr.weibPH.inits <- function(aux){
         aux$formula <- aux$forms[[1]]
         aux$forms <- NULL
         aux$dist <- "weibull"
-        sr <- do.call(survreg, aux)
+        sr <- survreg_wrap(aux)
         sr2fswei(sr, ph=TRUE)
     }
 }
@@ -34,7 +45,7 @@ sr.exp.inits <- function(t,aux){
         aux$formula <- aux$forms[[1]]
         aux$forms <- NULL
         aux$dist <- "exponential"
-        sr <- do.call(survreg, aux)
+        sr <- survreg_wrap(aux)
         sr2fsexp(sr)
     }
 }
@@ -47,7 +58,7 @@ sr.ln.inits <- function(t,aux){
         aux$formula <- aux$forms[[1]]
         aux$forms <- NULL
         aux$dist <- "lognormal"
-        sr <- do.call(survreg, aux)
+        sr <- survreg_wrap(aux)
         sr2fsln(sr)
     }
 }
@@ -62,7 +73,7 @@ sr.llog.inits <- function(t,aux){
         aux$formula <- aux$forms[[1]]
         aux$forms <- NULL
         aux$dist <- "lognormal"
-        sr <- do.call(survreg, aux)
+        sr <- survreg_wrap(aux)
         sr2fsllog(sr)
     }
 }

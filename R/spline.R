@@ -95,8 +95,8 @@ dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE){
     if(!is.matrix(knots)) knots <- matrix(knots, nrow=1)
     lg <- nrow(gamma)
     nret <- max(length(q), lg)
-    q <- rep(q, length=nret)
-    offset <- rep(offset, length=nret)
+    q <- rep(q, length.out=nret)
+    offset <- rep(offset, length.out=nret)
 
     gamma <- matrix(rep(as.numeric(t(gamma)), length.out = ncol(gamma) * nret),
                     ncol = ncol(gamma), byrow = TRUE)
