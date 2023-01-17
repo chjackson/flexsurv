@@ -126,11 +126,11 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
         else if (type=="hazard") {
             muhaz.args <- list(...)[names(list(...)) %in% names(formals(muhaz))]
             if (is.null(muhaz.args$min.time)) muhaz.args$min.time <- 0
-            if (is.null(muhaz.args$max.time)) muhaz.args$max.time <- with(as.data.frame(dat$Y), max(time[status==1]))
             plot.args <- list(...)[!names(list(...)) %in% names(formals(muhaz))]
             if (!all(dat$Y[,"start"]==0)) warning("Left-truncated data not supported by muhaz: ignoring truncation point when plotting observed hazard")
             if (any(dat$Y[,"status"] > 1)) stop("Interval-censored data not supported by muhaz")
             if (!all(x$covdata$isfac)){
+                if (is.null(muhaz.args$max.time)) muhaz.args$max.time <- with(as.data.frame(dat$Y), max(time[status==1]))
                 haz <- do.call("muhaz", c(list(times=dat$Y[,"stop"], delta=dat$Y[,"status"]), muhaz.args))
                 do.call("plot", c(list(haz), list(col=col.obs, lty=lty.obs, lwd=lwd.obs), plot.args))
             }
@@ -139,8 +139,10 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                 group <- if(x$ncovs>0) do.call("interaction", mm) else factor(rep(0,nrow(dat$Y)))
                 Xgroup <- factor(do.call("interaction", as.data.frame(X)), levels=levels(group))
                 haz <- list()
-                for (i in 1:nrow(X)) {
-                    haz[[i]] <- do.call("muhaz", c(list(times=dat$Y[,"time"], delta=dat$Y[,"status"], subset=(group==Xgroup[i])), muhaz.args))
+              for (i in 1:nrow(X)) {
+                    mha <- muhaz.args
+                    if (is.null(mha$max.time)) mha$max.time <- with(as.data.frame(dat$Y[group==Xgroup[i],,drop=FALSE]), max(time[status==1]))
+                    haz[[i]] <- do.call("muhaz", c(list(times=dat$Y[,"time"], delta=dat$Y[,"status"], subset=(group==Xgroup[i])), mha))
                 }
                 if (missing(ylim))
                     ylim <- range(sapply(haz, function(x)range(x$haz.est)))

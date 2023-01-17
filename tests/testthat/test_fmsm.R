@@ -25,7 +25,7 @@ test_that("pfinal_fmsm", {
   expect_equal(pfinal_fmsm(weic, newdata=nd, fromstate="State 1")$val[1:2], c(0.715828147070156, 0.715333178039627))
   expect_true(is.numeric(pfinal_fmsm(weim, fromstate="State 1", B=3)$lower))
   expect_equal(pfinal_fmsm(weim, fromstate="State 1", maxt=100000)$val,
-               pfinal_fmsm(weim, fromstate="State 1", maxt=10000000)$val, tol=1e-06)
+               pfinal_fmsm(weim, fromstate="State 1", maxt=10000000)$val, tolerance=1e-06)
   expect_error(pfinal_fmsm(weim, fromstate="1"), "not found")
 })
 
@@ -36,7 +36,7 @@ test_that("simfinal_fmsm",{
   expect_equal(sm$val[sm$quantity=="50%"], c(2.25618202292384, 4.67377970752349))
   sm2 <- simfinal_fmsm(weim, probs=c(0.25, 0.75))
   sm3 <- simfinal_fmsm(weim, probs=c(0.25, 0.75), t=10000)
-  expect_equal(sm2$val[sm$quantity=="prob"], sm3$val[sm$quantity=="prob"], tol=0.1)
+  expect_equal(sm2$val[sm$quantity=="prob"], sm3$val[sm$quantity=="prob"], tolerance=0.1)
   sm2 <- simfinal_fmsm(weim, probs=c(0.25, 0.75), M=1000, B=10)
   
   expect_error(simfinal_fmsm(weic), "`newdata` should be supplied")

@@ -6,7 +6,7 @@ test_that("Generalized F",
           {
     expect_equal(dgenf(c(-1,1,2,3,4), mu=0, sigma=1, Q=0, P=1),
                                         # FIXME add limiting value for x=0
-                 c(0, 0.353553390593274, 0.140288989252053, 0.067923038519582, 0.038247711235678), tol=tol)
+                 c(0, 0.353553390593274, 0.140288989252053, 0.067923038519582, 0.038247711235678), tolerance=tol)
     expect_error(Hgenf(c(-1,1,2,3,4), mu=0, sigma=1, P=1), "argument \"Q\" is missing")
     expect_error(Hgenf(c(-1,1,2,3,4), mu=0, sigma=1, Q=1), "argument \"P\" is missing")
 })
@@ -30,7 +30,7 @@ s1 <- 2 / (Q^2 + 2*P + Q*delta); s2 <- 2 / (Q^2 + 2*P - Q*delta)
 test_that("Generalized F reduces to log logistic",
           {
     expect_equal(dgenf(x, mu=mu, sigma=sigma, Q=Q, P=P),
-                 dllogis(x, shape=sqrt(2)/sigma, scale=exp(mu)), tol=tol)
+                 dllogis(x, shape=sqrt(2)/sigma, scale=exp(mu)), tolerance=tol)
 })
 
 test_that("Generalized F reduces to gamma",{
@@ -102,19 +102,19 @@ test_that("Avoid underflow in pgenf",{
     expw <- xlow^(delta/sigma) * exp(-mu*delta/sigma)
     pbeta(s2/(s2 + s1*expw), s2, s1, lower.tail=FALSE) # underflows 
     pbeta(s1*expw/(s2 + s1*expw), s1, s2, lower.tail=TRUE) # works 
-    expect_equal(pgenf(xlow, mu, sigma, Q, P), 0.03214437, tol=1e-05)
+    expect_equal(pgenf(xlow, mu, sigma, Q, P), 0.03214437, tolerance=1e-05)
 
     xmid <- 3000
     expw <- xmid^(delta/sigma) * exp(-mu*delta/sigma)
     pbeta(s2/(s2 + s1*expw), s2, s1, lower.tail=FALSE)
     pbeta(s1*expw/(s2 + s1*expw), s1, s2, lower.tail=TRUE) # both work
-    expect_equal(pgenf(xmid, mu, sigma, Q, P), 0.7276473, tol=1e-05)
+    expect_equal(pgenf(xmid, mu, sigma, Q, P), 0.7276473, tolerance=1e-05)
 
     xhi <- 1e+5
     expw <- xhi^(delta/sigma) * exp(-mu*delta/sigma)
     pbeta(s2/(s2 + s1*expw), s2, s1, lower.tail=FALSE) # works 
     pbeta(s1*expw/(s2 + s1*expw), s1, s2, lower.tail=TRUE) # underflows
-    expect_equal(pgenf(xhi, mu, sigma, Q, P), 0.9933716, tol=1e-05)
+    expect_equal(pgenf(xhi, mu, sigma, Q, P), 0.9933716, tolerance=1e-05)
 })
 
 ## When x is small, thus s2/(s2 + s1*expw) is close to 1, use second pbeta construction 

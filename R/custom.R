@@ -134,7 +134,7 @@ integrate.dh <- function(fn, dlist, integ.opts, what="dens"){
         names(pars) <- dlist$pars
         args.done <- numeric()
         ## if argument is unnamed, assume it is supplied in the default order
-        for (i in seq(along=dlist$pars)){
+        for (i in seq_along(dlist$pars)){
             if(any(names(args)==dlist$pars[i])) {
                 pars[[i]] <- args[[dlist$pars[i]]]
                 args.done <- c(args.done, match(dlist$pars[i], names(args)))
@@ -147,8 +147,8 @@ integrate.dh <- function(fn, dlist, integ.opts, what="dens"){
         rest <- args[setdiff(seq_along(args), args.done)] 
         ## replicate all arguments to have the length of the longest one (=n)
         n <- max(sapply(c(list(q),pars), length))
-        q <- rep(q, length=n)
-        for (i in seq_along(pars)) pars[[i]] <- rep(pars[[i]], length=n)
+        q <- rep(q, length.out=n)
+        for (i in seq_along(pars)) pars[[i]] <- rep(pars[[i]], length.out=n)
         ret <- numeric(n)                       
         du <- function(u, ...)fn(u,...)
         ## then return a vector of length n

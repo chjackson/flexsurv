@@ -425,9 +425,9 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
         for (i in 1:ntr){
             xi <- if (is.flexsurvlist(x)) x[[i]] else x 
             hcall <- list(x=t)
-            for (j in seq(along=xi$dlist$pars))
+            for (j in seq_along(xi$dlist$pars))
                 hcall[[xi$dlist$pars[j]]] <- parms$par[[i]][j]
-            for (j in seq(along=xi$aux))
+            for (j in seq_along(xi$aux))
                 hcall[[names(xi$aux)[j]]] <- xi$aux[[j]]
             haz[i] <- do.call(xi$dfns$h, hcall)
         }
@@ -615,7 +615,7 @@ totlos.fs <- function(x, trans=NULL, t=1, newdata=NULL, ci=FALSE,
             xi <- if (is.flexsurvlist(x)) x[[i]] else x 
 
             hcall <- list(x=t)
-            for (j in seq(along=xi$dlist$pars))
+            for (j in seq_along(xi$dlist$pars))
                 hcall[[xi$dlist$pars[j]]] <- parms$par[[i]][j]
             hcall <- c(hcall, parms$aux[[i]])
             haz[i] <- do.call(xi$dfns$h, hcall)

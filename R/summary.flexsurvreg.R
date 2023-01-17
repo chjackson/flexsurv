@@ -398,7 +398,7 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
     nres <- nrow(X)
     if (!is.matrix(pars)) pars <- matrix(pars, nrow=nres, ncol=length(pars), byrow=TRUE)
     if (!is.matrix(beta)) beta <- matrix(beta, nrow=1)
-    for (j in seq(along=x$dlist$pars)){
+    for (j in seq_along(x$dlist$pars)){
         covinds <- x$mx[[x$dlist$pars[j]]]
         if (length(covinds) > 0){
             pars[,j] <- pars[,j] + beta[,covinds] %*% t(X[,covinds,drop=FALSE])
@@ -508,7 +508,7 @@ normboot.flexsurvreg <- function(x, B, newdata=NULL, X=NULL, transform=FALSE, ra
     } else {
         res <- sim
         if (!transform){
-            for (j in seq(along=x$dlist$pars)){
+            for (j in seq_along(x$dlist$pars)){
                 res[,j] <- x$dlist$inv.transforms[[j]](res[,j])
             }
         }
@@ -538,7 +538,7 @@ normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B, raw
       fncall0[[names(x$aux)[j]]] <- x$aux[[j]]
     for (k in 1:nrow(X)){
         for (i in seq_len(B)) {
-          fncall <- c(fncall0, lapply(sim[[k]][i,seq(along=x$dlist$pars)], function(z) z))
+          fncall <- c(fncall0, lapply(sim[[k]][i,seq_along(x$dlist$pars)], function(z) z))
           ret[k,i,] <- do.call(fn, fncall)
         }
     }

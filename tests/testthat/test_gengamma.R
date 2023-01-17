@@ -52,7 +52,7 @@ test_that("Generalized gamma reductions: q",{
          c(0,0,0,1,2,3,4))
     expect_equal(qlnorm(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1.2, Q=0), meanlog=0, sdlog=1.2),
          c(0,0,0,1,2,3,4))
-    expect_equal(qlnorm(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1, Q=0, log=TRUE), meanlog=0, sdlog=1, log=TRUE),
+    expect_equal(qlnorm(pgengamma(q=c(-2,-1,0,1,2,3,4), mu=0, sigma=1, Q=0, log.p=TRUE), meanlog=0, sdlog=1, log.p=TRUE),
          c(0,0,0,1,2,3,4))
     expect_equal(qgengamma(p=0.25, mu=0, sigma=1, Q=1, lower.tail=TRUE), qgeneric(pgengamma, p=0.25, mu=0, sigma=1, Q=1, lower.tail=TRUE))
 })

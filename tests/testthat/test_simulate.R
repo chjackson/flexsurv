@@ -7,7 +7,7 @@ test_that("simulate.flexsurvreg",{
   sim <- simulate(fit, newdata=nd)
   expect_true(all(sim$time_1 > 0))
   sim <- simulate(fit, seed=1002, newdata=nd)
-  expect_equal(sim$time_1, c(575, 2392), tol=1)
+  expect_equal(sim$time_1, c(575, 2392), tolerance=1)
   sim <- simulate(fit, seed=1002, newdata=nd, nsim=5)
   expect_true(all(sim$time_2 > 0))
   sim <- simulate(fit, seed=1002, newdata=nd, nsim=5, censtime = 1000, tidy=TRUE)

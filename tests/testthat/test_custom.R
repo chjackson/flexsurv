@@ -66,7 +66,7 @@ test_that("Custom distributions: hazard only",{
     ## with covariates.  Approximation is less good.  Many more integrations needed
     fitf <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist=custom.bar, dfns=list(h=hbar))
     fite <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="exp")
-    expect_equal(fitf$loglik, fite$loglik, tol=1e-05)
+    expect_equal(fitf$loglik, fite$loglik, tolerance=1e-05)
 
     ## options to integrate()
     flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.bar, dfns=list(h=hbar), integ.opts=list(rel.tol=0.01))
@@ -90,7 +90,7 @@ test_that("Custom distributions: density only",{
     ## with covariates
     fitf <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist=custom.baz, dfns=list(d=dbaz), inits=c(9e-07, 0.12))
     fite <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="exp")
-    expect_equal(fitf$loglik, fite$loglik, tol=1e-05)
+    expect_equal(fitf$loglik, fite$loglik, tolerance=1e-05)
 })
 
 ## Integration breaks for the Gompertz

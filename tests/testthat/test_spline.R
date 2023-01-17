@@ -27,6 +27,7 @@ test_that("flexsurvspline summary method",{
 
 if (interactive()){
     test_that("flexsurvspline plot method",{
+      expect_no_error({
         plot(spl, col=c("red","blue","green"))
         plot(spl, ci=TRUE, B=40)
         plot(spl, type="cumhaz")
@@ -39,6 +40,7 @@ if (interactive()){
         lines(spl, X=rbind(c(1,0,0,0)),  col="purple")
         lines(spl, X=rbind(c(0,1,0,0)), col="blue")
         legend("bottomleft", levels(bc$group), col=c("red","purple","blue"), lwd=2)
+      })
     })
 }
 

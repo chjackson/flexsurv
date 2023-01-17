@@ -186,6 +186,6 @@ dat$evnamef <- factor(dat$evname)
 test_that("With no censored data, we get the obvious estimates of the event probabilities",{
   ## Observed proportions 0.52, 0.48 should be MLEs of the probs.  EM looks to work better here.
   fse <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"))
-  expect_equal(fse$res$est[fse$res$terms=="prob1"], sum(event==1)/length(event), tol=1e-04)
-  expect_equal(fse$loglik, -1344.29387018376, tol=1e-05)
+  expect_equal(fse$res$est[fse$res$terms=="prob1"], sum(event==1)/length(event), tolerance=1e-04)
+  expect_equal(fse$loglik, -1344.29387018376, tolerance=1e-05)
 })

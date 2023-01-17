@@ -41,14 +41,14 @@ test_that("Errors in msfit.flexsurvreg",{
 
 test_that("pmatrix.fs",{
     pmat <- pmatrix.fs(bexp.markov, t=c(5,10), trans=tmat)
-    expect_equal(pmat$"5"[1,2], 0.267218506920585, tol=1e-04)
+    expect_equal(pmat$"5"[1,2], 0.267218506920585, tolerance=1e-04)
     pmat <- pmatrix.fs(bexp.markov.cov, t=c(5,10), trans=tmat, newdata=list(x=1))
-    expect_equal(pmat$"5"[1,2], 0.259065437633427, tol=1e-04)
+    expect_equal(pmat$"5"[1,2], 0.259065437633427, tolerance=1e-04)
 })
 
 test_that("totlos.fs",{
     tl <- totlos.fs(bexp.markov, t=c(5), trans=tmat)
-    expect_equal(as.numeric(tl), c(2.89231556324412, 0, 0, 1.06822543404334, 2.77639174263866, 0, 1.03945900271255, 2.22360825736133, 5), tol=1e-06)
+    expect_equal(as.numeric(tl), c(2.89231556324412, 0, 0, 1.06822543404334, 2.77639174263866, 0, 1.03945900271255, 2.22360825736133, 5), tolerance=1e-06)
     tl <- totlos.fs(bexp.markov.cov, t=c(5), trans=tmat, newdata=list(x=1))
     expect_equal(as.numeric(tl), c(2.76115934740386, 0, 0, 1.08844199049896, 2.64568022609759, 0, 1.15039866209718, 2.35431977390241, 5))
     tl <- totlos.fs(bexp.markov, t=c(5,10), trans=tmat)
@@ -118,19 +118,19 @@ test_that("list format in output functions", {
 test_that("list and non-list format give same estimates", { 
     expect_equal(
         as.numeric(pars.fmsm(bwei, trans=tmat)[[1]]),
-        as.numeric(pars.fmsm(bwei.list, trans=tmat)[[1]]), tol=1e-04)
+        as.numeric(pars.fmsm(bwei.list, trans=tmat)[[1]]), tolerance=1e-04)
     bexpci <- flexsurvreg(Surv(years, status) ~ trans*x, data=bosms3, dist="exp")
     expect_equal(
         as.numeric(pars.fmsm(bexpci, newdata=list(x=1), trans=tmat)[[2]]),
-        as.numeric(pars.fmsm(bexpc.list, newdata=list(x=1), trans=tmat)[[2]]), tol=1e-05)
+        as.numeric(pars.fmsm(bexpc.list, newdata=list(x=1), trans=tmat)[[2]]), tolerance=1e-05)
 
-    expect_equal(pmatrix.fs(bwei, trans=tmat), pmatrix.fs(bwei.list, trans=tmat), tol=1e-04)
-    expect_equal(totlos.fs(bwei, trans=tmat), totlos.fs(bwei.list, trans=tmat), tol=1e-04)
+    expect_equal(pmatrix.fs(bwei, trans=tmat), pmatrix.fs(bwei.list, trans=tmat), tolerance=1e-04)
+    expect_equal(totlos.fs(bwei, trans=tmat), totlos.fs(bwei.list, trans=tmat), tolerance=1e-04)
 
     expect_equal(msfit.flexsurvreg(bwei, trans=tmat, t=1:10, variance=FALSE), 
-                 msfit.flexsurvreg(bwei.list, trans=tmat, t=1:10, variance=FALSE), tol=1e-04)
+                 msfit.flexsurvreg(bwei.list, trans=tmat, t=1:10, variance=FALSE), tolerance=1e-04)
     expect_equal(msfit.flexsurvreg(bexpci, newdata=list(x=1), trans=tmat, t=1:10, variance=FALSE),
-                 msfit.flexsurvreg(bexpc.list, newdata=list(x=1), trans=tmat, t=1:10, variance=FALSE), tol=1e-05)
+                 msfit.flexsurvreg(bexpc.list, newdata=list(x=1), trans=tmat, t=1:10, variance=FALSE), tolerance=1e-05)
 })
 
 
@@ -141,15 +141,15 @@ blist <- vector(3, mode="list")
 blist[[1]] <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==1), data=bosms3, dist="exp")
 blist[[2]] <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==2), data=bosms3, dist="gamma")
 blist[[3]] <- flexsurvreg(Surv(years, status) ~ 1, subset=(trans==3), data=bosms3, dist="weibull")
-expect_equal(pmatrix.fs(blist, t=c(5,10), trans=tmat)$`5`[1,2], 0.2423839, tol=1e-04)
-expect_equal(totlos.fs(blist, trans=tmat)[1,2], 0.08277735, tol=1e-04)
+expect_equal(pmatrix.fs(blist, t=c(5,10), trans=tmat)$`5`[1,2], 0.2423839, tolerance=1e-04)
+expect_equal(totlos.fs(blist, trans=tmat)[1,2], 0.08277735, tolerance=1e-04)
 
 blistx <- vector(3, mode="list")
 blistx[[1]] <- flexsurvreg(Surv(years, status) ~ x, subset=(trans==1), data=bosms3, dist="exp")
 blistx[[2]] <- flexsurvreg(Surv(years, status) ~ x, subset=(trans==2), data=bosms3, dist="gamma")
 blistx[[3]] <- flexsurvreg(Surv(years, status) ~ x, subset=(trans==3), data=bosms3, dist="weibull")
-expect_equal(pmatrix.fs(blistx, t=c(5,10), trans=tmat, newdata=list(x=1))$`5`[1,2], 0.2291726, tol=1e-04)
-expect_equal(totlos.fs(blistx, trans=tmat, newdata=list(x=1))[1,2],0.08698692 , tol=1e-04)
+expect_equal(pmatrix.fs(blistx, t=c(5,10), trans=tmat, newdata=list(x=1))$`5`[1,2], 0.2291726, tolerance=1e-04)
+expect_equal(totlos.fs(blistx, trans=tmat, newdata=list(x=1))[1,2],0.08698692 , tolerance=1e-04)
 
     
 })

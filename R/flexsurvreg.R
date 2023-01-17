@@ -878,7 +878,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     if (!is.numeric(inits)) stop ("initial values must be a numeric vector")
     nin <- length(inits)
     if (nin < npars && ncoveffs > 0)
-        inits <- c(inits, rep(0,length=npars-nin))
+        inits <- c(inits, rep(0,length.out=npars-nin))
     else if (nin > npars){
         inits <- inits[1:npars]
         warning("Initial values are a vector length > ", npars, ": using only the first ", npars)

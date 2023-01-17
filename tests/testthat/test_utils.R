@@ -62,8 +62,8 @@ test_that("WeibullPH",{
 
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ rx, data = ovarian, dist="weibull")
     fitwp <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ rx, data = ovarian, dist="weibullPH")
-    expect_equal(fitw$res["shape","est"], fitwp$res["shape","est"], tol=1e-06)
-    expect_equal(fitw$res["scale","est"], fitwp$res["scale","est"]^(-1/fitwp$res["shape","est"]), tol=1e-05)
+    expect_equal(fitw$res["shape","est"], fitwp$res["shape","est"], tolerance=1e-06)
+    expect_equal(fitw$res["scale","est"], fitwp$res["scale","est"]^(-1/fitwp$res["shape","est"]), tolerance=1e-05)
     expect_equal(coef(fitw)["rx"], -coef(fitwp)["rx"] / fitwp$res["shape","est"])
     
 })

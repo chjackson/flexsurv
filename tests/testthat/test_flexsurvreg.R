@@ -16,16 +16,16 @@ test_that("Generalized gamma fit",{
     fitffix <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="genf",
                            fixedpars=4, inits=c(NA,NA,NA,1e-05))
     expect_equal(fitffix$loglik, sum(fitffix$logliki))
-    expect_equal(fitffix$res[1:3,"est"], fitg$res[1:3,"est"], tol=1e-03)
-    expect_equal(fitffix$res[1:3,2:3], fitg$res[1:3,2:3], tol=1e-02)
+    expect_equal(fitffix$res[1:3,"est"], fitg$res[1:3,"est"], tolerance=1e-03)
+    expect_equal(fitffix$res[1:3,2:3], fitg$res[1:3,2:3], tolerance=1e-02)
 })
 
 test_that("Same answers as survreg for Weibull regression",{
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull")
     fitws <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull")
-    expect_equal(fitw$loglik, fitws$loglik[1], tol=1e-04)
-    expect_equal(fitws$scale, 1 / fitw$res["shape","est"], tol=1e-03)
-    expect_equal(as.numeric(coef(fitws)[1]), log(fitw$res["scale","est"]), tol=1e-03)
+    expect_equal(fitw$loglik, fitws$loglik[1], tolerance=1e-04)
+    expect_equal(fitws$scale, 1 / fitw$res["shape","est"], tolerance=1e-03)
+    expect_equal(as.numeric(coef(fitws)[1]), log(fitw$res["scale","est"]), tolerance=1e-03)
 })
 
 test_that("Exponential",{
@@ -47,7 +47,7 @@ test_that("Weighted fits",{
     wt[c(1,3,5,7,9)] <- 10
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull", weights=wt)
     fitws <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull", weights=wt)
-    expect_equal(fitws$loglik[2],fitw$loglik,tol=1e-06)
+    expect_equal(fitws$loglik[2],fitw$loglik,tolerance=1e-06)
 })
 
 test_that("subset",{
@@ -68,23 +68,23 @@ test_that("na.action",{
 
 test_that("Log-normal",{
     fitln <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="lnorm")
-    expect_equal(fitln$loglik, -97.12174204265681, tol=1e-06)
+    expect_equal(fitln$loglik, -97.12174204265681, tolerance=1e-06)
 })
 
 test_that("Gompertz",{
     fitgo <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="gompertz", fixedpars=TRUE) # model fit is unstable
-    expect_equal(fitgo$loglik, -112.8294446076947, tol=1e-06)
+    expect_equal(fitgo$loglik, -112.8294446076947, tolerance=1e-06)
 })
 
 test_that("Log-logistic",{
     fitlls <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ age, data = ovarian, dist="loglogistic")
     fitll <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist="llogis")
-    expect_equal(fitll$loglik, fitlls$loglik[2], tol=1e-06)
+    expect_equal(fitll$loglik, fitlls$loglik[2], tolerance=1e-06)
 })
 
 test_that("Gamma",{
     fitga <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="gamma")
-    expect_equal(fitga$loglik,  -97.86379723453011, tol=1e-06)
+    expect_equal(fitga$loglik,  -97.86379723453011, tolerance=1e-06)
 })
 
 test_that("Loglikelihoods of flexible distributions reduce to less flexible ones for certain parameters",{
@@ -96,7 +96,7 @@ test_that("Loglikelihoods of flexible distributions reduce to less flexible ones
                            fixedpars=TRUE, inits=c(0,1,0,1e-08))
     fitgfix <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="gengamma",
                            fixedpars=TRUE, inits=c(0,1,0))
-    expect_equal(fitgfix$loglik, fitffix$loglik, tol=1e-02)
+    expect_equal(fitgfix$loglik, fitffix$loglik, tolerance=1e-02)
     ## Weib = GG with q=1
     fitgfix <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="gengamma",
                            fixedpars=TRUE, inits=c(6,0.8,1))
@@ -119,40 +119,40 @@ test_that("Loglikelihoods of flexible distributions reduce to less flexible ones
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull",
                         inits=c(1/0.8,exp(6)))
     fitw2 <- survreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull")
-    expect_equal(1 / fitw2$scale, fitw$res["shape","est"], tol=1e-03)
-    expect_equal(as.numeric(coef(fitw2)[1]), log(fitw$res["scale","est"]), tol=1e-03)
+    expect_equal(1 / fitw2$scale, fitw$res["shape","est"], tolerance=1e-03)
+    expect_equal(as.numeric(coef(fitw2)[1]), log(fitw$res["scale","est"]), tolerance=1e-03)
 })
 
 test_that("Fits of flexible distributions reduce to less flexible ones with fixed parameters",{
     fitgfix <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="gengamma.orig",
                            fixedpars=3, inits=c(NA,NA,1))
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull")
-    expect_equal(logLik(fitgfix), logLik(fitw), tol=1e-06)
+    expect_equal(logLik(fitgfix), logLik(fitw), tolerance=1e-06)
     fitgfix <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="gengamma.orig",
                            fixedpars=1, inits=c(1,NA,NA))
     fitga <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="gamma")
-    expect_equal(logLik(fitgfix), logLik(fitga), tol=1e-06)
+    expect_equal(logLik(fitgfix), logLik(fitga), tolerance=1e-06)
 
     fite <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="exp")
     fitw <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull", inits=c(1, mean(ovarian$futime)), fixedpars=1)
 
-    expect_equal(logLik(fite), logLik(fitw), tol=1e-06)
-    expect_equal(fitw$res["scale",1], 1 / fite$res["rate",1], tol=1e-06)
+    expect_equal(logLik(fite), logLik(fitw), tolerance=1e-06)
+    expect_equal(fitw$res["scale",1], 1 / fite$res["rate",1], tolerance=1e-06)
 })
 
 fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ factor(rx), data = ovarian, dist="weibull")
 
 test_that("Model fit with covariates",{
-    expect_equal(fitg$loglik, -97.3641506645869, tol=1e-06)
+    expect_equal(fitg$loglik, -97.3641506645869, tolerance=1e-06)
     if (interactive()) {
-        plot.flexsurvreg(fitg, ci=TRUE)
-        plot.flexsurvreg(fitg, X=rbind(c(0), c(1)), ci=TRUE, col="red")
-        lines.flexsurvreg(fitg, X=rbind(c(1.1), c(1.2)), ci=TRUE, col="blue")
-        plot.flexsurvreg(fitg, type="hazard")
-        plot.flexsurvreg(fitg, type="cumhaz")
+        plot(fitg, ci=TRUE)
+        plot(fitg, X=rbind(c(0), c(1)), ci=TRUE, col="red")
+        lines(fitg, X=rbind(c(1.1), c(1.2)), ci=TRUE, col="blue")
+        plot(fitg, type="hazard")
+        plot(fitg, type="cumhaz")
 
         fitg1 <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, data = ovarian, dist="weibull")
-        plot.flexsurvreg(fitg1, type="hazard")
+        plot(fitg1, type="hazard")
 
     }
 })
@@ -193,9 +193,8 @@ test_that("Model fit with covariates and simulated data",{
     if (interactive()) {
         fit # estimate should be -0.2
         summary(fit)
-        plot.flexsurvreg(fit)
-        lines.flexsurvreg(fit, X=matrix(c(1,2),nrow=2))
         plot(fit)
+        lines(fit, X=matrix(c(1,2),nrow=2))
         plot(fit, type="hazard", min.time=0, max.time=25)
         lines(fit, type="hazard", X=matrix(c(1,2),nrow=2))
         x2 <- factor(rbinom(500, 1, 0.5))
@@ -393,7 +392,7 @@ test_that("Interval censoring",{
 test_that("inits",{
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma", inits=c(6,1,-1))
     fitg2 <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma")
-    expect_equal(fitg$loglik, fitg2$loglik, tol=1e-05)
+    expect_equal(fitg$loglik, fitg2$loglik, tolerance=1e-05)
 })
 
 test_that("fixedpars",{
@@ -421,10 +420,10 @@ test_that("Relative survival", {
     ## Compare with stata stgenreg, using Weibull PH model
     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
     
-    expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tol=1e-05)
-    expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tol=1e-05)
-    expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tol=1e-04)
-    expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765, tol=1e-04)
+    expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tolerance=1e-05)
+    expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tolerance=1e-05)
+    expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tolerance=1e-04)
+    expect_equal(fs6b$res["groupPoor","est"], 1.799204192587765, tolerance=1e-04)
 
     ## Check fit from 3 par model reduces to 1 par 
     ## Deriv calculation bug causing false convergence fixed in 2.1
@@ -433,8 +432,8 @@ test_that("Relative survival", {
     fshe <-  flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="exponential", bhazard=bh)
     fshw <-  flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibull", 
                          inits = c(1,10), fixedpars=1, bhazard=bh)
-    expect_equal(fshgg$loglik, fshe$loglik, tol=1e-06)
-    expect_equal(fshgg$loglik, fshw$loglik, tol=1e-06)
+    expect_equal(fshgg$loglik, fshe$loglik, tolerance=1e-06)
+    expect_equal(fshgg$loglik, fshw$loglik, tolerance=1e-06)
     
     ## same results as 
     ## cd /home/chris/flexsurv/stata
@@ -465,7 +464,7 @@ test_that("warning with strata", {
 test_that("Distribution names are case insensitive",{
   fs1 = flexsurvreg(Surv(rectime, censrec)~group,dist="weibull",data=bc)
   fs2 = flexsurvreg(Surv(rectime, censrec)~group,dist="Weibull",data=bc)
- expect_equal(fs1$loglik, fs2$loglik, tol=1e-06)
+ expect_equal(fs1$loglik, fs2$loglik, tolerance=1e-06)
 })
 
 test_that("Weibull hazards from summary are reliable",{
@@ -479,13 +478,13 @@ test_that("No events in the data",{
     tmin <- rexp(100, 1) 
     tmax <- tmin + 0.1
     mod <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="exponential")
-    expect_equal(mod$loglik, -337.9815, tol=1e-03)
+    expect_equal(mod$loglik, -337.9815, tolerance=1e-03)
 })
 
 test_that("No censoring in the data",{
     bcev <- bc[bc$censrec==1,]
     mod <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bcev, dist="weibull")
-    expect_equal(mod$loglik, -477.2455, tol=1e-03)
+    expect_equal(mod$loglik, -477.2455, tolerance=1e-03)
 })
 
 test_that("summary type=quantile is consistent",{
