@@ -1,12 +1,12 @@
 ##' Summaries of fitted flexible survival models
-##' 
+##'
 ##' Return fitted survival, cumulative hazard or hazard at a series of times
 ##' from a fitted \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}
 ##' model.
-##' 
+##'
 ##' Time-dependent covariates are not currently supported.  The covariate
 ##' values are assumed to be constant through time for each fitted curve.
-##' 
+##'
 ##' @param object Output from \code{\link{flexsurvreg}} or
 ##' \code{\link{flexsurvspline}}, representing a fitted survival model object.
 ##'
@@ -16,7 +16,7 @@
 ##' every combination of covariates the fitted values are wanted for.  These
 ##' are in the same format as the original data, with factors as a single
 ##' variable, not 0/1 contrasts.
-##' 
+##'
 ##' If this is omitted, if there are any continuous covariates, then a single
 ##' summary is provided with all covariates set to their mean values in the
 ##' data - for categorical covariates, the means of the 0/1 indicator variables
@@ -27,13 +27,13 @@
 ##' values for.  Since version 0.4, \code{newdata} is an easier way that
 ##' doesn't require the user to create factor contrasts, but \code{X} has been
 ##' kept for backwards compatibility.
-##' 
+##'
 ##' Columns of \code{X} represent different covariates, and rows represent
 ##' multiple combinations of covariate values.  For example
 ##' \code{matrix(c(1,2),nrow=2)} if there is only one covariate in the model,
 ##' and we want survival for covariate values of 1 and 2.  A vector can also be
 ##' supplied if just one combination of covariates is needed.
-##' 
+##'
 ##' For ``factor'' (categorical) covariates, the values of the contrasts
 ##' representing factor levels (as returned by the \code{\link{contrasts}}
 ##' function) should be used.  For example, for a covariate \code{agegroup}
@@ -45,47 +45,37 @@
 ##' \code{40-49}.
 ##'
 ##' @param type \code{"survival"} for survival probabilities.
-##' 
+##'
 ##' \code{"cumhaz"} for cumulative hazards.
-##' 
+##'
 ##' \code{"hazard"} for hazards.
-##' 
+##'
 ##' \code{"rmst"} for restricted mean survival.
-##' 
+##'
 ##' \code{"mean"} for mean survival.
-##' 
+##'
 ##' \code{"median"} for median survival (alternative to \code{type="quantile"} with \code{quantiles=0.5}).
-##' 
+##'
 ##' \code{"quantile"} for quantiles of the survival time distribution.
 ##'
 ##' \code{"link"} for the fitted value of the location parameter (i.e. the "linear predictor" but on the natural scale of the parameter, not on the log scale)
-##' 
+##'
 ##' Ignored if \code{"fn"} is specified.
-##' 
+##'
 ##' @param fn Custom function of the parameters to summarise against time.
 ##' This has optional first two arguments \code{t} representing time, and
 ##' \code{start} representing left-truncation points, and any remaining
 ##' arguments must be parameters of the distribution.  It should be vectorised, and
 ##' return a vector corresponding to the vectors given by \code{t}, \code{start} and
 ##' the parameter vectors.
-##' 
+##'
 ##' @param t Times to calculate fitted values for. By default, these are the
 ##' sorted unique observation (including censoring) times in the data - for
 ##' left-truncated datasets these are the "stop" times.
-##' 
+##'
 ##' @param quantiles If \code{type="quantile"}, this specifies the quantiles of the survival time distribution to return estimates for.
-##' 
-##' @param start Optional left-truncation time or times.  The returned
-##' survival, hazard or cumulative hazard will be conditioned on survival up to
-##' this time.   Predicted times returned with \code{"rmst"}, \code{"mean"}, \code{"median"} or \code{"quantile"}
-##' will be times since time zero, not times since the \code{start} time. 
-##' 
-##' A vector of the same length as \code{t} can be supplied to allow different
-##' truncation times for each prediction time, though this doesn't make sense
-##' in the usual case where this function is used to calculate a predicted
-##' trajectory for a single individual.  This is why the default \code{start}
-##' time was changed for version 0.4 of \pkg{flexsurv} - this was previously a
-##' vector of the start times observed in the data.
+##'
+##' @template start
 ##'
 ##' @param cross If \code{TRUE} (the default) then summaries are calculated for all combinations of times
 ##' specified in \code{t} and covariate vectors specifed in \code{newdata}.
@@ -94,11 +84,11 @@
 ##' then the times \code{t} should be of length equal to the number of rows in \code{newdata},
 ##' and one summary is produced for each row of \code{newdata} paired with the corresponding
 ##' element of \code{t}. This is used, e.g. when determining Cox-Snell residuals.
-##' 
+##'
 ##' @param ci Set to \code{FALSE} to omit confidence intervals.
-##' 
+##'
 ##' @param se Set to \code{TRUE} to include standard errors.
-##' 
+##'
 ##' @param B Number of simulations from the normal asymptotic distribution of
 ##' the estimates used to calculate confidence intervals or standard errors.
 ##' Decrease for greater
@@ -123,19 +113,19 @@
 ##' estimated survival (or cumulative hazard, or hazard) and 95\% confidence
 ##' limits.  These list components are named with the covariate names and
 ##' values which define them.
-##' 
+##'
 ##' If \code{tidy=TRUE}, a data frame is returned instead.  This is formed by
 ##' stacking the above list components, with additional columns to identify the
 ##' covariate values that each block corresponds to.
-##' 
+##'
 ##' If there are multiple summaries, an additional list component named
 ##' \code{X} contains a matrix with the exact values of contrasts (dummy
 ##' covariates) defining each summary.
-##' 
+##'
 ##' The \code{\link{plot.flexsurvreg}} function can be used to quickly plot
 ##' these model-based summaries against empirical summaries such as
 ##' Kaplan-Meier curves, to diagnose model fit.
-##' 
+##'
 ##' Confidence intervals are obtained by sampling randomly from the asymptotic
 ##' normal distribution of the maximum likelihood estimates and then taking quantiles
 ##' (see, e.g. Mandel (2013)).
@@ -150,9 +140,9 @@
 ##'
 ##' @keywords models
 ##' @export
-summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival", 
-                                    fn=NULL, t=NULL, quantiles=0.5, start=0, cross=TRUE, 
-                                    ci=TRUE, se=FALSE, B=1000, cl=0.95, 
+summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
+                                    fn=NULL, t=NULL, quantiles=0.5, start=0, cross=TRUE,
+                                    ci=TRUE, se=FALSE, B=1000, cl=0.95,
                                     tidy=FALSE, na.action=na.pass, ...){
  x <- object
  X <- newdata_to_X(x, newdata, X, na.action)
@@ -173,22 +163,22 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
  else res <- data.frame(time = args$t, est=est)
  if (ci || se){
      res.ci <- cisumm.flexsurvreg.new(x, args$t, args$start, attr(args, "X"), fn=fn, B=B, cl=cl)
-     if (ci) { 
+     if (ci) {
          res$lcl <- res.ci[1,]
          res$ucl <-  res.ci[2,]
      }
      if (se) res$se <-  res.ci[3,]
  }
- nodata <- is.null(attr(args, "newdata")) 
+ nodata <- is.null(attr(args, "newdata"))
  if (x$ncovs > 0 && !nodata) {
      res <- cbind(res, attr(args, "newdata"))
  }
  rownames(res) <- NULL
  if (!tidy){ ## For backwards compatibility
      if (x$ncovs == 0 || nodata) res <- list(res)
-     else { 
+     else {
          nd <- attr(args, "newdata.orig")
-         covnames_untidy <- apply(as.data.frame(nd), 1, 
+         covnames_untidy <- apply(as.data.frame(nd), 1,
                                   function(x)paste0(names(nd), "=", x, collapse=","))
          nx <- attr(args, "nx")
          nt <- attr(args, "nt")
@@ -245,7 +235,7 @@ newdata_to_X <- function(x, newdata=NULL, X=NULL, na.action=na.pass){
     }
     else
         X <- form.model.matrix(x, as.data.frame(newdata), na.action=na.action)
-    X	
+    X
 }
 
 
@@ -279,14 +269,14 @@ xt_to_fnargs <- function(x, X, t, quantiles=0.5, start=0, type="survival", cross
  attr(fnargs, "nt") <- nt
  attr(fnargs, "newdata.orig") <- ndorig
  attr(fnargs, "X") <- X
- fnargs 
+ fnargs
 }
 
 
 summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0){
   nodata_msg <- "prediction times `t` should be defined explicitly if the data are not included in the model object"
   if(type == "mean"){
-    if(!is.null(t)) 
+    if(!is.null(t))
       warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
     # Type = mean same as RMST w/ time = Inf
     t <- rep_len(Inf,length(start))
@@ -416,13 +406,13 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 
 
 ##' Simulate from the asymptotic normal distribution of parameter estimates.
-##' 
+##'
 ##' Produce a matrix of alternative parameter estimates under sampling
 ##' uncertainty, at covariate values supplied by the user.  Used by
 ##' \code{\link{summary.flexsurvreg}} for obtaining confidence intervals around
 ##' functions of parameters.
-##' 
-##' 
+##'
+##'
 ##' @param x A fitted model from \code{\link{flexsurvreg}} (or \code{\link{flexsurvspline}}).
 ##'
 ##' @param B Number of samples.
@@ -444,21 +434,21 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 ##' effects, rather than the default of adjusting the baseline parameters for
 ##' covariates.
 ##'
-##' @param rawsim allows input of raw samples from a previous run of 
-##' \code{normboot.flexsurvreg}. This is useful if running 
-##' \code{normboot.flexsurvreg} multiple time on the same dataset but with 
+##' @param rawsim allows input of raw samples from a previous run of
+##' \code{normboot.flexsurvreg}. This is useful if running
+##' \code{normboot.flexsurvreg} multiple time on the same dataset but with
 ##' counterfactual contrasts, e.g. treat =0 vs. treat  =1.
 ##' Used in \code{standsurv.flexsurvreg}.
-##' 
+##'
 ##' @param tidy If \code{FALSE} (the default) then
 ##' a list is returned.  If \code{TRUE} a data frame is returned, consisting
 ##' of the list elements \code{rbind}ed together, with integer variables
-##' labelling the covariate number and simulation replicate number. 
+##' labelling the covariate number and simulation replicate number.
 ##'
 ##' @return If \code{newdata} includes only one covariate combination, a matrix
 ##' will be returned with \code{B} rows, and one column for each named
 ##' parameter of the survival distribution.
-##' 
+##'
 ##' If more than one covariate combination is requested (e.g. \code{newdata} is
 ##' a data frame with more than one row), then a list of matrices will be
 ##' returned, one for each covariate combination.
@@ -469,7 +459,7 @@ add.covs <- function(x, pars, beta, X, transform=FALSE){  ## TODO option to tran
 ##' press).
 ##' @keywords models
 ##' @examples
-##' 
+##'
 ##'     fite <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="exp")
 ##'     normboot.flexsurvreg(fite, B=10, newdata=list(age=50))
 ##'     normboot.flexsurvreg(fite, B=10, X=matrix(50,nrow=1))
@@ -589,7 +579,7 @@ summary.flexsurvreg.old <- function(object, newdata=NULL, X=NULL, type="survival
         }
     } else
         X <- form.model.matrix(object, as.data.frame(newdata), na.action=na.action)
-    
+
     if(type == "mean"){
       if(!is.null(t)) warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
       # Type = mean same as RMST w/ time = Inf

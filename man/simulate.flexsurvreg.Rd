@@ -26,7 +26,17 @@ function, as described in \code{\link{simulate}} for the \code{lm} method.}
 \item{newdata}{Data frame defining alternative sets of covariate values to simulate with.
 If omitted, this defaults to the data originally used to fit the model.}
 
-\item{start}{Delayed entry (left-truncation) time.  If omitted, no delayed entry is assumed.}
+\item{start}{Optional left-truncation time or times.  The returned
+survival, hazard or cumulative hazard will be conditioned on survival up to
+this time.   Predicted times returned with \code{"rmst"}, \code{"mean"}, \code{"median"} or \code{"quantile"}
+will be times since time zero, not times since the \code{start} time.
+
+A vector of the same length as \code{t} can be supplied to allow different
+truncation times for each prediction time, though this doesn't make sense
+in the usual case where this function is used to calculate a predicted
+trajectory for a single individual.  This is why the default \code{start}
+time was changed for version 0.4 of \pkg{flexsurv} - this was previously a
+vector of the start times observed in the data.}
 
 \item{censtime}{A right-censoring time, or vector of times matching the rows
   of \code{newdata}.  If \code{NULL} (the default) then uncensored times to events
@@ -34,7 +44,7 @@ are simulated.}
 
 \item{tidy}{If \code{TRUE} then a "tidy" or "long"-format data frame is
   returned, with rows defined by combinations of covariates and simulation
-  replicates.  The simulation replicate is indicated in the column named \code{i}. 
+  replicates.  The simulation replicate is indicated in the column named \code{i}.
 
   If \code{FALSE}, then a data frame is returned with one row per set of
   covariate values, and different columns for different simulation
