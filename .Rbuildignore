@@ -36,3 +36,4 @@ vignettes/_region_.tex
 ^\.github$
 vignettes/Sweave.sty
 ^revdep$
+^man-roxygen$
