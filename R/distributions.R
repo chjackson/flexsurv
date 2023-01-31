@@ -2,9 +2,9 @@ survreg_wrap <- function(args){
   opts <- options()
   on.exit(options(opts))
   options(
-    warnPartialMatchArgs = TRUE,
-    warnPartialMatchAttr = TRUE,
-    warnPartialMatchDollar = TRUE
+    warnPartialMatchArgs = FALSE,
+    warnPartialMatchAttr = FALSE,
+    warnPartialMatchDollar = FALSE
   )
   do.call(survreg, args)
 }
