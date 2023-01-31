@@ -42,9 +42,9 @@ a list is returned.  If \code{TRUE} a data frame is returned, consisting
 of the list elements \code{rbind}ed together, with integer variables
 labelling the covariate number and simulation replicate number.}
 
-\item{rawsim}{allows input of raw samples from a previous run of 
-\code{normboot.flexsurvreg}. This is useful if running 
-\code{normboot.flexsurvreg} multiple time on the same dataset but with 
+\item{rawsim}{allows input of raw samples from a previous run of
+\code{normboot.flexsurvreg}. This is useful if running
+\code{normboot.flexsurvreg} multiple time on the same dataset but with
 counterfactual contrasts, e.g. treat =0 vs. treat  =1.
 Used in \code{standsurv.flexsurvreg}.}
 }
