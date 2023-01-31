@@ -110,7 +110,7 @@ ppath_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
     if (final) { 
       ppath <- ppath %>% 
         dplyr::group_by(dplyr::across(c(names(newdata), "final"))) %>% 
-        dplyr::summarise(val=sum(.data$val))
+        dplyr::reframe(val=sum(.data$val))
     } 
     
     if (is.numeric(B) && B > 1){
@@ -188,7 +188,7 @@ meanfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL){
     meanp <- meanp %>% 
       dplyr::left_join(probs, by=c(names(newdata), "pathway", "final")) %>%
       dplyr::group_by(dplyr::across(c(names(newdata), "final"))) %>% 
-      dplyr::summarise(val=sum(.data$val*.data$prob)/sum(.data$prob))
+      dplyr::reframe(val=sum(.data$val*.data$prob)/sum(.data$prob))
   } 
   if (is.numeric(B) && B > 1){
     res <- matrix(nrow=B, ncol=length(meanp$val))
@@ -267,8 +267,8 @@ qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=
     } else {
       simsum[[p]] <- simsumdf %>%
       dplyr::group_by(dplyr::across(c("pathway", colnames(newdata))))  %>%
-      dplyr::summarise(probs=probs,
-                       val = quantile(.data$sm, p=probs,na.rm=TRUE))
+      dplyr::reframe(probs=probs,
+                     val = quantile(.data$sm, p=probs,na.rm=TRUE))
     }
   }
   resq <- do.call("rbind", simsum)
@@ -277,8 +277,8 @@ qfinal_fmixmsm <- function(x, newdata=NULL, final=FALSE, B=NULL, n=10000, probs=
     resq <- resq %>% 
       dplyr::ungroup() %>%
       dplyr::group_by(dplyr::across(c("final", colnames(newdata))))  %>%
-      dplyr::summarise(probs=probs,
-                       val = quantile(.data$sm, p=probs,na.rm=TRUE))
+      dplyr::reframe(probs=probs,
+                     val = quantile(.data$sm, p=probs,na.rm=TRUE))
   }
 
   rownames(resq) <- NULL
