@@ -245,7 +245,7 @@ utils::globalVariables('.id')
 tidy_names <- function() {
     tibble::tibble(
         old = c("time", "quantile", "est", "se", "lcl", "ucl"),
-        new = c(".time", ".quantile", ".pred", ".std_error",
+        new = c(".eval_time", ".quantile", ".pred", ".std_error",
                 ".pred_lower", ".pred_upper")
     )
 }
