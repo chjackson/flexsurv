@@ -1,10 +1,17 @@
 -*- text -*-
 
+Version 2.3 (2023-??-??)
+-------------------------
+
+* Column name of predict() output changed from "time" to "eval_time"
+  for consistency with tidymodels update.
+
+
 Version 2.2.2 (2023-01-31)
 -------------------------
 
 * Allow unicode characters in vignette, to satisfy R CMD check on
-  r-devel. 
+  r-devel.
 
 
 Version 2.2.1 (2022-12-22)
