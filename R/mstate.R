@@ -976,8 +976,8 @@ simfs_bytrans <- function(simfs){
 ##' bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans, data=bosms3, dist="exp")
 ##' 
 ##' summfn <- function(x, t){
-##'  resp <-  pmatrix.fs(x, trans=tmat, t=t)
-##'  rest <- totlos.fs(x, trans=tmat, t=t)
+##'  resp <-  flexsurv::pmatrix.fs(x, trans=tmat, t=t)
+##'  rest <- flexsurv::totlos.fs(x, trans=tmat, t=t)
 ##'  list(resp, rest)
 ##' }
 ##'

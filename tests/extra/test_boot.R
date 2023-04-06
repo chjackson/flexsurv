@@ -35,3 +35,14 @@ test_that("bootstrapping a function within a function",{
         fun(bexp.markov.cov, t=5, trans=tmat, newdata=list(x=1), M=1000, ci=TRUE, B=3, cores=2)
         ,NA)
 })
+
+test_that("bootstrap CIs with custom function",{
+  summfn <- function(x, t){
+    resp <- flexsurv::pmatrix.fs(x, trans=tmat, t=t)
+    rest <- flexsurv::totlos.fs(x, trans=tmat, t=t)
+    list(resp, rest)
+  }
+  expect_error(
+  bootci.fmsm(bexp.markov, B=50, fn=summfn, t=10, cores=4)
+  ,NA)
+})
