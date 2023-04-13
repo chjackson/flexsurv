@@ -343,7 +343,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
     dat.list[[i]] <- dat
     predsum <- standsurv.fn(object, type = type2, newdata=dat, t=t, i=i, weighted=weighted, expsurv=expsurv,
                             rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable,
-                            quantiles=quantiles, interval=interval)
+                            quantiles=quantiles, interval=interval, n.gauss.quad=n.gauss.quad)
     
     if(ci == TRUE | se == TRUE){
       
@@ -354,7 +354,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
         bootresults <- boot.standsurv(object, B, dat, i, t, type, type2, weighted, 
                                       se, ci, cl, rawsim, predsum, expsurv,
                                       rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable,
-                                      quantiles=quantiles, interval=interval)  
+                                      quantiles=quantiles, interval=interval, n.gauss.quad=n.gauss.quad)  
         stand.pred.list[[i]] <- bootresults$stand.pred
         predsum <- bootresults$predsum
         if(is.null(rawsim)) 
@@ -365,7 +365,8 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
                                          trans, cl, weighted, expsurv,
                                          rmap=substitute(rmap), ratetable=ratetable, 
                                          scale.ratetable=scale.ratetable,
-                                         quantiles=quantiles, interval=interval)
+                                         quantiles=quantiles, interval=interval, 
+                                         n.gauss.quad=n.gauss.quad)
       }
     }
     
@@ -418,7 +419,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
                                        type2, t, i, atreference, se, ci, standpred, trans.contrast, 
                                        cl, contrast, weighted, expsurv,
                                        rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable,
-                                       quantiles=quantiles, interval=interval)
+                                       quantiles=quantiles, interval=interval, n.gauss.quad=n.gauss.quad)
       }
     }
   }
@@ -447,7 +448,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
 #' @importFrom statmod gauss.quad
 #' @import rlang
 standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv, rmap, ratetable, 
-                         scale.ratetable, quantiles, interval){
+                         scale.ratetable, quantiles, interval, n.gauss.quad){
   tr.fun <- tr(trans)
   if(! type %in% c("hazard", "acsurvival", "achazard", "acrmst", "quantile", "acquantile")){
     predsum <- standsurv.fn.generic(t, object, type, newdata, i, weighted, tr.fun)
@@ -460,17 +461,18 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
     #   predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
     # }
   } else if(type == "hazard"){
-    pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
-    names(pred)[names(pred)=="est"] <- "h"
-    pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
-
-    if(weighted){
-      pred$weights <- rep(newdata$`(weights)`, each=length(t))
-      predsum <- pred %>% group_by(time) %>% 
-        summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights)))
-    } else{
-      predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
-    }
+    predsum <- standsurv.fn.hazard(t, object, type, newdata, i, weighted, tr.fun)
+    # pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
+    # names(pred)[names(pred)=="est"] <- "h"
+    # pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
+    # 
+    # if(weighted){
+    #   pred$weights <- rep(newdata$`(weights)`, each=length(t))
+    #   predsum <- pred %>% group_by(time) %>% 
+    #     summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights)))
+    # } else{
+    #   predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
+    # }
   } else if(type == "quantile"){
     quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
       as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
@@ -482,6 +484,7 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
       predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
     }
   } else if(type=="acsurvival"){
+    # predsum <- standsurv.fn.acsurvival(t, object, type, newdata, i, weighted, tr.fun)
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
     rs$id <- rep(1:dim(newdata)[1],each=length(t))
     names(rs)[names(rs)=="est"] <- "rs"
@@ -511,10 +514,10 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
         summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es)))
     }
   } else if(type=="acrmst"){
-    pred <- acrmst(object, dat=newdata, t, rmap, ratetable, scale.ratetable, weighted, tr.fun)
+    pred <- acrmst(object, dat=newdata, t, rmap, ratetable, scale.ratetable, weighted, tr.fun, n.gauss.quad)
     predsum <- tibble(time=t, "at{i}":=pred)
   } else if(type=="acquantile"){
-    error("All-cause quantiles not yet implemented")
+    stop("All-cause quantities not yet implemented")
   }
   predsum
 }
@@ -532,7 +535,23 @@ standsurv.fn.generic <- function(t, object, type, newdata, i, weighted, tr.fun){
   predsum
 }
 
-acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted, tr.fun = tr("none"), n.gauss.quad = 100){
+# hazard standardisation function, for use with type "hazard"
+standsurv.fn.hazard <- function(t, object, type, newdata, i, weighted, tr.fun){
+  pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
+  names(pred)[names(pred)=="est"] <- "h"
+  pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
+  
+  if(weighted){
+    pred$weights <- rep(newdata$`(weights)`, each=length(t))
+    predsum <- pred %>% group_by(time) %>% 
+      summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights)))
+  } else{
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
+  }
+}
+
+acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted, 
+                   tr.fun = tr("none"), n.gauss.quad = 100){
   # Using Gauss-Legendre quadrature
   dat$id <- 1:dim(dat)[1]
   gaussxw <- gauss.quad(n.gauss.quad)
@@ -543,15 +562,15 @@ acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted, t
     } else {
       scale <- t[j]/2
       points <- scale*(gaussxw$nodes + 1)
-      eval_fn <- acrmst.int.fn(points, object, dat, rmap, ratetable, scale.ratetable, weighted)
+      eval_fn <- acsurv.int.fn(points, object, dat, rmap, ratetable, scale.ratetable, weighted)
       pred[j] <- tr.fun(scale*sum(gaussxw$weights * eval_fn))
     }
   }
   pred
 }
 
-# Function to integrate all-cause RMST - this is the marginal all-cause survival  average(S*(t)R*(t))
-acrmst.int.fn <- function(t1, object, dat, rmap, ratetable, scale.ratetable, weighted){
+# Function to marginal all-cause survival at any given time points average(S*(t)R*(t))
+acsurv.int.fn <- function(t1, object, dat, rmap, ratetable, scale.ratetable, weighted){
   # Relative survival
   rs <- summary(object, type = "survival", tidy = T, newdata=dat, t=t1, ci=F)
   rs$id <- rep(1:dim(dat)[1],each=length(t1))
@@ -564,12 +583,14 @@ acrmst.int.fn <- function(t1, object, dat, rmap, ratetable, scale.ratetable, wei
   ))
   if(weighted){
     rssum <- rs %>% group_by(time) %>% 
-      summarise(rmst = weighted.mean(.data$est*.data$es, .data$weights))
+      summarise(acsurv = weighted.mean(.data$est*.data$es, .data$weights))
   } else {
-    rssum <- rs %>% group_by(time) %>% summarise(rmst = mean(.data$est*.data$es))
+    rssum <- rs %>% group_by(time) %>% summarise(acsurv = mean(.data$est*.data$es))
   }
-  rssum$rmst
+  rssum$acsurv
 }
+
+
 
 tr <- function(trans){
   switch(trans,
@@ -591,7 +612,7 @@ inv.tr <- function(trans){
 
 boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, cl, 
                            rawsim, predsum, expsurv, rmap, ratetable, scale.ratetable, tr.fun, 
-                           quantiles, interval){
+                           quantiles, interval, n.gauss.quad){
   if(is.null(rawsim))
     rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
   
@@ -640,7 +661,7 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
       newobject$res[newobject$dlist$pars,"est"] <- NA  ## setting to NA to be safe
       newobject$res.t[,-1] <- newobject$res[,-1] <- NA ## setting to NA to be safe
       ## standardisation (averaging across patients) is done within acrmst itself 
-      stand.pred[b,] <- acrmst(newobject, dat, t, rmap, ratetable, scale.ratetable, weighted, n.gauss.quad = 100)
+      stand.pred[b,] <- acrmst(newobject, dat, t, rmap, ratetable, scale.ratetable, weighted, n.gauss.quad)
     }
   }
   if(type2=="quantile"){
@@ -666,17 +687,18 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
 #' @importFrom numDeriv grad
 deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci, 
                                   predsum, trans, cl, weighted, expsurv,
-                                  rmap, ratetable, scale.ratetable, quantiles, interval){
+                                  rmap, ratetable, scale.ratetable, quantiles, interval,
+                                  n.gauss.quad){
   if(type2 %in% c("quantile","acquantile")) stop("deltamethod not yet implemented with quantile")
   g <- function(coef, t, trans) {
     object$res[,"est"] <- object$res.t[,"est"] <- coef
     standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
                  weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
-                 quantiles, interval)[,2,drop=T]
+                 quantiles, interval, n.gauss.quad)[,2,drop=T]
   }
   est <- standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans="none", 
                       weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
-                      quantiles, interval)[,2,drop=T]
+                      quantiles, interval, n.gauss.quad)[,2,drop=T]
   
   var.none <- NULL
   if(se==TRUE){
@@ -715,7 +737,8 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
 deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
                                type2, t, i, atreference, se, ci, predsum, 
                                trans.contrast, cl, contrast, weighted, expsurv,
-                               rmap, ratetable, scale.ratetable, quantiles, interval){
+                               rmap, ratetable, scale.ratetable, quantiles, interval,
+                               n.gauss.quad){
   tr.fun <- tr(trans.contrast)
   inv.tr.fun <- inv.tr(trans.contrast)
   contrast.fn <- switch(contrast, "difference"= `-`, "ratio"= `/` )
@@ -724,18 +747,22 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
     object$res[,"est"] <- object$res.t[,"est"] <- coef
     tr.fun(contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
                                     trans="none", weighted=weighted, expsurv=expsurv,
-                                    rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T], 
+                                    rmap, ratetable, scale.ratetable, quantiles, interval,
+                                    n.gauss.quad)[,2,drop=T], 
                        standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
                                     trans="none", weighted=weighted, expsurv=expsurv,
-                                    rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T]))
+                                    rmap, ratetable, scale.ratetable, quantiles, interval,
+                                    n.gauss.quad)[,2,drop=T]))
   }
 
   est <- contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
                                   trans="none", weighted=weighted, expsurv=expsurv,
-                                  rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T],
+                                  rmap, ratetable, scale.ratetable, quantiles, interval,
+                                  n.gauss.quad)[,2,drop=T],
                      standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
                                   trans="none", weighted=weighted, expsurv=expsurv,
-                                  rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T])
+                                  rmap, ratetable, scale.ratetable, quantiles, interval,
+                                  n.gauss.quad)[,2,drop=T])
   stand.pred <- as_tibble(est) %>%
     rename("contrast{i}_{atreference}" := "value")
   predsum <- predsum %>% bind_cols(stand.pred)   
