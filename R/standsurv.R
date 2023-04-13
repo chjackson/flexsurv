@@ -68,6 +68,9 @@
 ##' 
 ##' \code{"excesshazard"} for marginal excess hazards (can only be specified
 ##' if a relative survival model has been fitted in flexsurv).
+##' 
+##' \code{"quantile"} for quantiles of the marginal all-cause survival 
+##' distribution. The \code{quantiles} option also needs to be provided.
 #' @param t Times to calculate marginal values at.
 #' @param ci Should confidence intervals be calculated? 
 #' Defaults to FALSE
@@ -90,8 +93,8 @@
 #' is NULL (i.e. no contrasts are calculated).
 #' @param trans.contrast Transformation to apply when calculating standard errors
 #' for contrasts via the delta method to obtain confidence intervals. The default
-#' transformation is "none" for differences in survival, hazard or RMST, 
-#' and "log" for ratios of survival, hazard or RMST.
+#' transformation is "none" for differences in survival, hazard, quantiles, or RMST, 
+#' and "log" for ratios of survival, hazard, quantiles or RMST.
 #' @param seed The random seed to use (for bootstrapping confidence intervals)
 #' @param rmap An list that maps data set names to expected ratetable names. 
 #' This must be specified if all-cause survival and hazards are required after
@@ -107,6 +110,10 @@
 #' @param n.gauss.quad Number of Gaussian quadrature points used for integrating 
 #' the all-cause survival function when calculating RMST in a relative survival 
 #' framework (default = 100)
+#' @param quantiles If \code{type="quantile"}, this specifies the quantiles of 
+#' the survival time distribution to return estimates for.
+#' @param interval Interval of survival times for quantile root finding. 
+#' Default is c(1e-08, 500). 
 #'
 #' @return A \code{tibble} containing one row for each 
 #' time-point. The column naming convention is \code{at{i}} for the ith scenario
@@ -200,18 +207,20 @@
 #'plot(standsurv_weib_expected, expected=TRUE)
 #'}
 standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1, 
-                                  type = "survival", t = NULL, ci = FALSE, se = FALSE, 
-                                  boot = FALSE, B = NULL, cl =0.95, trans = "log", 
-                                  contrast = NULL, trans.contrast = NULL, seed = NULL, 
+                                  type = "survival", t = NULL, 
+                                  ci = FALSE, se = FALSE, boot = FALSE, B = NULL, 
+                                  cl =0.95, trans = "log", contrast = NULL, 
+                                  trans.contrast = NULL, seed = NULL, 
                                   rmap, ratetable, scale.ratetable = 365.25, 
-                                  n.gauss.quad = 100) {
+                                  n.gauss.quad = 100, quantiles = 0.5,
+                                  interval = c(1e-08, 500)) {
   x <- object
   
   if(!is.null(seed)) set.seed(seed)
   
   ## Add checks
-  ## Currently type is restricted to survival, hazard, rmst, or relsurvival or excesshazard (for relative survival models)
-  type <- match.arg(type, c("survival", "hazard", "rmst", "relsurvival", "excesshazard"))
+  ## Currently type is restricted to survival, hazard, rmst, quantile, or relsurvival or excesshazard (for relative survival models)
+  type <- match.arg(type, c("survival", "hazard", "rmst", "quantile", "relsurvival", "excesshazard"))
   # Check that models is a relative survival model if relsurv or excesshazard are specified
   if(type %in% c("relsurvival", "excesshazard") & !("bhazard" %in% names(x$call))){
     stop(paste0(type, " can only be specified for a relative survival flexsurv model"))
@@ -220,13 +229,14 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
   
   ## Checks for relative survival models
   if("bhazard" %in% names(x$call)){
-    if(type %in% c("survival", "hazard") & (missing(rmap) | missing(ratetable))) 
+    if(type %in% c("quantile", "survival", "hazard") & (missing(rmap) | missing(ratetable))) 
       stop("'rmap' and 'ratetable' must be specified to calculate all-cause survival/hazard in a relative survival model")
     # Swap type to acsurvival (all-cause survival) or achazard (all-cause hazard) if survival or hazard is specified
     # Swap type to survival or hazard if relsurv or excesshazard are specified
     type2 <- switch(type, 
            "survival"= "acsurvival",
            "hazard"= "achazard",
+           "quantile" = "acquantile",
            "relsurvival" = "survival",
            "excesshazard" = "hazard",
            "rmst" = "acrmst"
@@ -234,6 +244,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
     
     if(type2 == "acsurvival") message("Marginal all-cause survival will be calculated")
     if(type2 == "achazard") message("Marginal all-cause hazard will be calculated")
+    if(type2 == "acquantile") message("Quantiles of marginal all-cause survival will be calculated")
     if(type2 == "acrmst"){
       message("Marginal restricted mean survival will be calculated")
       if(length(t)>2){
@@ -245,6 +256,10 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
       stop("Must provide a 'newdata' data.frame containing all covariates and matching variables with 'rmap'")
     
   }
+  
+  # checks for type="quantile"
+  if(type == "quantile" & !is.numeric(quantiles)) 
+    stop("'quantiles' argument must be provided as a numeric vector for type='quantile'")
   
   if(!is.null(contrast)) {
     contrast <- match.arg(contrast, c("difference", "ratio"))
@@ -264,7 +279,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
   }
   
   ## Check sensible transformations have been specified for type
-  if(boot == F & type %in% c("hazard", "rmst") & trans %in% c("loglog", "logit")){
+  if(boot == F & type %in% c("hazard", "rmst", "quantile") & trans %in% c("loglog", "logit")){
     warning(paste0("type ",type, " with transformation ",trans, " may not be sensible"))
   }
   if(boot == F & !is.null(B)){
@@ -314,10 +329,10 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
     covnames <- names(covs)
     ## If all covariates have been specified in 'at' then we have no further covariates
     ## to standardize over, so just use 1 row of data
-    ## do not use this shortcut for type2 = "acsurvival", type2 = "achazard", or type = "acrmst" as
-    ## we require individual expected survivals for these methods
+    ## do not use this shortcut for type2 = "acsurvival", type2 = "achazard", type = "acrmst"
+    ## or type = "acquantile" as we require individual expected survivals for these methods
     allcovs <- all.vars(formula(x)[-2])
-    if(all(allcovs %in% covnames) & !weighted & !(type2 %in% c("acsurvival", "achazard", "acrmst"))){
+    if(all(allcovs %in% covnames) & !weighted & !(type2 %in% c("acsurvival", "achazard", "acrmst", "acquantile"))){
       dat <- dat[1,,drop=F]
     }
     ## If at is not specified then no further manipulation of data is required, 
@@ -327,7 +342,8 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
     } 
     dat.list[[i]] <- dat
     predsum <- standsurv.fn(object, type = type2, newdata=dat, t=t, i=i, weighted=weighted, expsurv=expsurv,
-                            rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)
+                            rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable,
+                            quantiles=quantiles, interval=interval)
     
     if(ci == TRUE | se == TRUE){
       
@@ -337,7 +353,8 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
         rawsim <- NULL
         bootresults <- boot.standsurv(object, B, dat, i, t, type, type2, weighted, 
                                       se, ci, cl, rawsim, predsum, expsurv,
-                                      rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)  
+                                      rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable,
+                                      quantiles=quantiles, interval=interval)  
         stand.pred.list[[i]] <- bootresults$stand.pred
         predsum <- bootresults$predsum
         if(is.null(rawsim)) 
@@ -346,14 +363,17 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
         if(i==1) message("Calculating standard errors / confidence intervals using delta method")
         predsum <- deltamethod.standsurv(object, newdata=dat, type2, t, i, se, ci, predsum, 
                                          trans, cl, weighted, expsurv,
-                                         rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)
+                                         rmap=substitute(rmap), ratetable=ratetable, 
+                                         scale.ratetable=scale.ratetable,
+                                         quantiles=quantiles, interval=interval)
       }
     }
     
     if(i == 1) {
       standpred <- predsum
     } else {
-      standpred <- standpred %>% inner_join(predsum, by ="time")
+      by <- ifelse(type2 %in% c("quantile","acquantile"), "probability", "time")
+      standpred <- standpred %>% inner_join(predsum, by = by)
     }
     
   }
@@ -397,7 +417,8 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
         standpred <- deltamethod.contrast.standsurv(object, dat=dat.list[[i]], dat.ref=dat.list[[atreference]],
                                        type2, t, i, atreference, se, ci, standpred, trans.contrast, 
                                        cl, contrast, weighted, expsurv,
-                                       rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable)
+                                       rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable,
+                                       quantiles=quantiles, interval=interval)
       }
     }
   }
@@ -425,17 +446,19 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
 #' @importFrom dplyr n
 #' @importFrom statmod gauss.quad
 #' @import rlang
-standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv, rmap, ratetable, scale.ratetable){
+standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv, rmap, ratetable, 
+                         scale.ratetable, quantiles, interval){
   tr.fun <- tr(trans)
-  if(! type %in% c("hazard", "acsurvival", "achazard", "acrmst")){
-    pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
-    if(weighted){
-      pred$weights <- rep(newdata$`(weights)`, each=length(t))
-      predsum <- pred %>% group_by(time) %>% 
-        summarise("at{i}" := tr.fun(weighted.mean(.data$est, .data$weights)))
-    } else {
-      predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
-    }
+  if(! type %in% c("hazard", "acsurvival", "achazard", "acrmst", "quantile", "acquantile")){
+    predsum <- standsurv.fn.generic(t, object, type, newdata, i, weighted, tr.fun)
+    # pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
+    # if(weighted){
+    #   pred$weights <- rep(newdata$`(weights)`, each=length(t))
+    #   predsum <- pred %>% group_by(time) %>% 
+    #     summarise("at{i}" := tr.fun(weighted.mean(.data$est, .data$weights)))
+    # } else {
+    #   predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
+    # }
   } else if(type == "hazard"){
     pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
     names(pred)[names(pred)=="est"] <- "h"
@@ -447,6 +470,16 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
         summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights)))
     } else{
       predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
+    }
+  } else if(type == "quantile"){
+    quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
+      as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
+    }
+    predsum <- tibble()
+    for(q in quantiles){
+      root <- uniroot(quantile.root.fn, interval = interval,
+              q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
+      predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
     }
   } else if(type=="acsurvival"){
     rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
@@ -480,6 +513,21 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
   } else if(type=="acrmst"){
     pred <- acrmst(object, dat=newdata, t, rmap, ratetable, scale.ratetable, weighted, tr.fun)
     predsum <- tibble(time=t, "at{i}":=pred)
+  } else if(type=="acquantile"){
+    error("All-cause quantiles not yet implemented")
+  }
+  predsum
+}
+
+# generic standardisation function, for use with types "survival", "relsurv", "excesshazard"
+standsurv.fn.generic <- function(t, object, type, newdata, i, weighted, tr.fun){
+  pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F)
+  if(weighted){
+    pred$weights <- rep(newdata$`(weights)`, each=length(t))
+    predsum <- pred %>% group_by(time) %>% 
+      summarise("at{i}" := tr.fun(weighted.mean(.data$est, .data$weights)))
+  } else{
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
   }
   predsum
 }
@@ -542,12 +590,13 @@ inv.tr <- function(trans){
 }
 
 boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, cl, 
-                           rawsim, predsum, expsurv, rmap, ratetable, scale.ratetable, tr.fun){
+                           rawsim, predsum, expsurv, rmap, ratetable, scale.ratetable, tr.fun, 
+                           quantiles, interval){
   if(is.null(rawsim))
     rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
   
   X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
-  if(type2 != "acrmst"){
+  if(!(type2 %in% c("acrmst","quantile","acquantile"))){
     if(!(type2 %in% c("acsurvival", "achazard"))){
       sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type2), B=B, rawsim=rawsim) # pts, sims, times
     } else {
@@ -580,7 +629,8 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
     } else {
       stand.pred <- apply(sim.pred*weights, c(2,3), sum) / apply(weights,c(2,3),sum)
     }
-  } else { ## if type2=="acrmst"
+  } 
+  if(type2=="acrmst") { ## if type2=="acrmst"
     ## This for now manipulates rawsim within acrmst. This code could be made more slick.
     stand.pred <- matrix(nrow=B, ncol=length(t))
     for(b in seq(length.out=B)) {
@@ -592,6 +642,12 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
       ## standardisation (averaging across patients) is done within acrmst itself 
       stand.pred[b,] <- acrmst(newobject, dat, t, rmap, ratetable, scale.ratetable, weighted, n.gauss.quad = 100)
     }
+  }
+  if(type2=="quantile"){
+    stop("bootstrap not yet applied with quantile") 
+  }
+  if(type2=="acquantile"){
+    stop("bootstrap not yet applied with acquantile")
   }
   if(se == TRUE){
     stand.pred.se <- tibble("at{i}_se" := apply(stand.pred, 2, sd, na.rm=TRUE))
@@ -610,14 +666,17 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
 #' @importFrom numDeriv grad
 deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci, 
                                   predsum, trans, cl, weighted, expsurv,
-                                  rmap, ratetable, scale.ratetable){
+                                  rmap, ratetable, scale.ratetable, quantiles, interval){
+  if(type2 %in% c("quantile","acquantile")) stop("deltamethod not yet implemented with quantile")
   g <- function(coef, t, trans) {
     object$res[,"est"] <- object$res.t[,"est"] <- coef
     standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
-                 weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable)[,2,drop=T]
+                 weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
+                 quantiles, interval)[,2,drop=T]
   }
   est <- standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans="none", 
-                      weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable)[,2,drop=T]
+                      weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
+                      quantiles, interval)[,2,drop=T]
   
   var.none <- NULL
   if(se==TRUE){
@@ -656,7 +715,7 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
 deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
                                type2, t, i, atreference, se, ci, predsum, 
                                trans.contrast, cl, contrast, weighted, expsurv,
-                               rmap, ratetable, scale.ratetable){
+                               rmap, ratetable, scale.ratetable, quantiles, interval){
   tr.fun <- tr(trans.contrast)
   inv.tr.fun <- inv.tr(trans.contrast)
   contrast.fn <- switch(contrast, "difference"= `-`, "ratio"= `/` )
@@ -665,18 +724,18 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
     object$res[,"est"] <- object$res.t[,"est"] <- coef
     tr.fun(contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
                                     trans="none", weighted=weighted, expsurv=expsurv,
-                                    rmap, ratetable, scale.ratetable)[,2,drop=T], 
+                                    rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T], 
                        standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
                                     trans="none", weighted=weighted, expsurv=expsurv,
-                                    rmap, ratetable, scale.ratetable)[,2,drop=T]))
+                                    rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T]))
   }
 
   est <- contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
                                   trans="none", weighted=weighted, expsurv=expsurv,
-                                  rmap, ratetable, scale.ratetable)[,2,drop=T],
+                                  rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T],
                      standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
                                   trans="none", weighted=weighted, expsurv=expsurv,
-                                  rmap, ratetable, scale.ratetable)[,2,drop=T])
+                                  rmap, ratetable, scale.ratetable, quantiles, interval)[,2,drop=T])
   stand.pred <- as_tibble(est) %>%
     rename("contrast{i}_{atreference}" := "value")
   predsum <- predsum %>% bind_cols(stand.pred)   
@@ -739,11 +798,12 @@ tidy.standsurv <- function(x, ...){
   label <- attributes(standpred)$label
   contrast <- attributes(standpred)$contrast
   ci <- any(grepl("_lci",names(standpred)))
+  by <- ifelse(type == "quantile", "probability", "time")
   
   class(standpred) <- class(standpred)[class(standpred)!="standsurv"]
 
   standpred_at <- standpred %>% 
-    select(c("time",matches("at[0-9]+$"))) %>%
+    select(c(by, matches("at[0-9]+$"))) %>%
     pivot_longer(cols=matches("at[0-9]+$"),
                  names_to = "at",
                  values_to = type,
