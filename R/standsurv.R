@@ -452,27 +452,8 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
   tr.fun <- tr(trans)
   if(! type %in% c("hazard", "acsurvival", "achazard", "acrmst", "quantile", "acquantile")){
     predsum <- standsurv.fn.generic(t, object, type, newdata, i, weighted, tr.fun)
-    # pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions based on MLEs (no bootstrapping for point estimates)
-    # if(weighted){
-    #   pred$weights <- rep(newdata$`(weights)`, each=length(t))
-    #   predsum <- pred %>% group_by(time) %>% 
-    #     summarise("at{i}" := tr.fun(weighted.mean(.data$est, .data$weights)))
-    # } else {
-    #   predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
-    # }
   } else if(type == "hazard"){
-    predsum <- standsurv.fn.hazard(t, object, type, newdata, i, weighted, tr.fun)
-    # pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
-    # names(pred)[names(pred)=="est"] <- "h"
-    # pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
-    # 
-    # if(weighted){
-    #   pred$weights <- rep(newdata$`(weights)`, each=length(t))
-    #   predsum <- pred %>% group_by(time) %>% 
-    #     summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights)))
-    # } else{
-    #   predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
-    # }
+    predsum <- standsurv.fn.hazard(t, object, newdata, i, weighted, tr.fun)
   } else if(type == "quantile"){
     quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
       as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
@@ -484,40 +465,15 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
       predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
     }
   } else if(type=="acsurvival"){
-    # predsum <- standsurv.fn.acsurvival(t, object, type, newdata, i, weighted, tr.fun)
-    rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
-    rs$id <- rep(1:dim(newdata)[1],each=length(t))
-    names(rs)[names(rs)=="est"] <- "rs"
-    pred <- rs %>% left_join(expsurv$expsurv, by=c("id","time"))
-    if(weighted){
-      pred$weights <- rep(newdata$`(weights)`, each=length(t))
-      predsum <- pred %>% group_by(time) %>% 
-        summarise("at{i}" := tr.fun(weighted.mean(.data$rs*.data$es, .data$weights)))
-    } else {
-      predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$rs*.data$es)))
-    }
+    predsum <- standsurv.fn.acsurvival(t, object, newdata, i, weighted, tr.fun, expsurv)
   } else if(type=="achazard"){
-    rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
-    rs$id <- rep(1:dim(newdata)[1],each=length(t))
-    names(rs)[names(rs)=="est"] <- "rs"
-    excessh <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F) ## this gives excess hazard
-    excessh$id <- rep(1:dim(newdata)[1],each=length(t))
-    names(excessh)[names(excessh)=="est"] <- "excessh"
-    pred <- rs %>% left_join(excessh, by=c("id", "time")) %>%
-                               left_join(expsurv$expsurv, by=c("id","time"))
-    if(weighted){
-      pred$weights <- rep(newdata$`(weights)`, each=length(t))
-      predsum <- pred %>% group_by(time) %>% 
-        summarise("at{i}" := tr.fun(weighted.mean(.data$excessh*.data$eh, .data$rs*.data$es * .data$weights)))
-    } else {
-      predsum <- pred %>% group_by(time) %>% 
-        summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es)))
-    }
+    predsum <- standsurv.fn.achazard(t, object, newdata, i, weighted, tr.fun, expsurv)
   } else if(type=="acrmst"){
-    pred <- acrmst(object, dat=newdata, t, rmap, ratetable, scale.ratetable, weighted, tr.fun, n.gauss.quad)
+    pred <- standsurv.fn.acrmst(t, object, newdata, i, rmap, ratetable, scale.ratetable, weighted, tr.fun, n.gauss.quad)
     predsum <- tibble(time=t, "at{i}":=pred)
   } else if(type=="acquantile"){
-    stop("All-cause quantities not yet implemented")
+    predsum <- standsurv.fn.acquantile(t, object, newdata, i,  rmap, ratetable, scale.ratetable,
+                                       weighted, tr.fun, quantiles, interval)
   }
   predsum
 }
@@ -536,7 +492,7 @@ standsurv.fn.generic <- function(t, object, type, newdata, i, weighted, tr.fun){
 }
 
 # hazard standardisation function, for use with type "hazard"
-standsurv.fn.hazard <- function(t, object, type, newdata, i, weighted, tr.fun){
+standsurv.fn.hazard <- function(t, object, newdata, i, weighted, tr.fun){
   pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
   names(pred)[names(pred)=="est"] <- "h"
   pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
@@ -550,10 +506,46 @@ standsurv.fn.hazard <- function(t, object, type, newdata, i, weighted, tr.fun){
   }
 }
 
-acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted, 
+# acsurvival standardisation function, for use with type "acsurvival"
+standsurv.fn.acsurvival <- function(t, object, newdata, i, weighted, tr.fun, expsurv){
+  rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
+  rs$id <- rep(1:dim(newdata)[1],each=length(t))
+  names(rs)[names(rs)=="est"] <- "rs"
+  pred <- rs %>% left_join(expsurv$expsurv, by=c("id","time"))
+  if(weighted){
+    pred$weights <- rep(newdata$`(weights)`, each=length(t))
+    predsum <- pred %>% group_by(time) %>%
+      summarise("at{i}" := tr.fun(weighted.mean(.data$rs*.data$es, .data$weights)))
+  } else {
+    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$rs*.data$es)))
+  }
+  predsum
+}
+
+# achazard standardisation function, for use with type "achazard"
+standsurv.fn.achazard <- function(t, object, newdata, i, weighted, tr.fun, expsurv){
+  rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F) ## this gives predictions of relative survival for each individual
+  rs$id <- rep(1:dim(newdata)[1],each=length(t))
+  names(rs)[names(rs)=="est"] <- "rs"
+  excessh <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F) ## this gives excess hazard
+  excessh$id <- rep(1:dim(newdata)[1],each=length(t))
+  names(excessh)[names(excessh)=="est"] <- "excessh"
+  pred <- rs %>% left_join(excessh, by=c("id", "time")) %>%
+    left_join(expsurv$expsurv, by=c("id","time"))
+  if(weighted){
+    pred$weights <- rep(newdata$`(weights)`, each=length(t))
+    predsum <- pred %>% group_by(time) %>% 
+      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh*.data$eh, .data$rs*.data$es * .data$weights)))
+  } else {
+    predsum <- pred %>% group_by(time) %>% 
+      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es)))
+  }
+}
+
+standsurv.fn.acrmst <- function(t, object, newdata, i, rmap, ratetable, scale.ratetable, weighted, 
                    tr.fun = tr("none"), n.gauss.quad = 100){
   # Using Gauss-Legendre quadrature
-  dat$id <- 1:dim(dat)[1]
+  newdata$id <- 1:dim(newdata)[1]
   gaussxw <- gauss.quad(n.gauss.quad)
   pred <- vector()
   for(j in seq_along(t)){
@@ -562,7 +554,7 @@ acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted,
     } else {
       scale <- t[j]/2
       points <- scale*(gaussxw$nodes + 1)
-      eval_fn <- acsurv.int.fn(points, object, dat, rmap, ratetable, scale.ratetable, weighted)
+      eval_fn <- acsurv.int.fn(points, object, newdata, rmap, ratetable, scale.ratetable, weighted)
       pred[j] <- tr.fun(scale*sum(gaussxw$weights * eval_fn))
     }
   }
@@ -570,11 +562,11 @@ acrmst <- function(object, dat, t, rmap, ratetable, scale.ratetable, weighted,
 }
 
 # Function to marginal all-cause survival at any given time points average(S*(t)R*(t))
-acsurv.int.fn <- function(t1, object, dat, rmap, ratetable, scale.ratetable, weighted){
+acsurv.int.fn <- function(t1, object, newdata, rmap, ratetable, scale.ratetable, weighted){
   # Relative survival
-  rs <- summary(object, type = "survival", tidy = T, newdata=dat, t=t1, ci=F)
-  rs$id <- rep(1:dim(dat)[1],each=length(t1))
-  rs <- rs %>% left_join(dat, by="id")
+  rs <- summary(object, type = "survival", tidy = T, newdata=newdata, t=t1, ci=F)
+  rs$id <- rep(1:dim(newdata)[1],each=length(t1))
+  rs <- rs %>% left_join(newdata, by="id")
   ## Expected survival
   rs$t1.scale <- rs$time * scale.ratetable
   rs$es <- do.call("survexp", list(formula = t1.scale~1, 
@@ -590,6 +582,22 @@ acsurv.int.fn <- function(t1, object, dat, rmap, ratetable, scale.ratetable, wei
   rssum$acsurv
 }
 
+
+# acquantile standardisation function, for use with type "acquantile"
+standsurv.fn.acquantile <- function(t, object, newdata, i,  rmap, ratetable, scale.ratetable,
+                                    weighted, tr.fun, quantiles, interval){
+  newdata$id <- 1:dim(newdata)[1]
+  quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
+      acsurv.int.fn(t, object, newdata, rmap, ratetable, scale.ratetable, weighted) - q
+  }
+  predsum <- tibble()
+  for(q in quantiles){
+    root <- uniroot(quantile.root.fn, interval = interval,
+                    q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
+    predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
+  }
+  predsum
+}
 
 
 tr <- function(trans){
@@ -611,7 +619,7 @@ inv.tr <- function(trans){
 }
 
 boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, cl, 
-                           rawsim, predsum, expsurv, rmap, ratetable, scale.ratetable, tr.fun, 
+                           rawsim, predsum, expsurv, rmap, ratetable, scale.ratetable, 
                            quantiles, interval, n.gauss.quad){
   if(is.null(rawsim))
     rawsim <- attributes(normboot.flexsurvreg(object, B=B, raw=T))$rawsim ## only run this once, not for every specified _at
@@ -661,7 +669,8 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
       newobject$res[newobject$dlist$pars,"est"] <- NA  ## setting to NA to be safe
       newobject$res.t[,-1] <- newobject$res[,-1] <- NA ## setting to NA to be safe
       ## standardisation (averaging across patients) is done within acrmst itself 
-      stand.pred[b,] <- acrmst(newobject, dat, t, rmap, ratetable, scale.ratetable, weighted, n.gauss.quad)
+      stand.pred[b,] <- standsurv.fn.acrmst(t, newobject, newdat=dat, i, rmap, ratetable, scale.ratetable, weighted, 
+                                            tr.fun=tr("none"), n.gauss.quad)
     }
   }
   if(type2=="quantile"){
