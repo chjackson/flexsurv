@@ -455,15 +455,17 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
   } else if(type == "hazard"){
     predsum <- standsurv.fn.hazard(t, object, newdata, i, weighted, tr.fun)
   } else if(type == "quantile"){
-    quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
-      as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
-    }
-    predsum <- tibble()
-    for(q in quantiles){
-      root <- uniroot(quantile.root.fn, interval = interval,
-              q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
-      predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
-    }
+    predsum <- standsurv.fn.quantile(object, newdata, i, weighted, tr.fun, 
+                                     quantiles, interval)
+    # quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
+    #   as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
+    # }
+    # predsum <- tibble()
+    # for(q in quantiles){
+    #   root <- uniroot(quantile.root.fn, interval = interval,
+    #           q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
+    #   predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
+    # }
   } else if(type=="acsurvival"){
     predsum <- standsurv.fn.acsurvival(t, object, newdata, i, weighted, tr.fun, expsurv)
   } else if(type=="achazard"){
@@ -504,6 +506,20 @@ standsurv.fn.hazard <- function(t, object, newdata, i, weighted, tr.fun){
   } else{
     predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
   }
+}
+
+# quantile standardisation function, for use with type "quantile"
+standsurv.fn.quantile <- function(object, newdata, i, weighted, tr.fun, quantiles, interval){
+  quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
+    as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
+  }
+  predsum <- tibble()
+  for(q in quantiles){
+    root <- uniroot(quantile.root.fn, interval = interval,
+                    q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
+    predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
+  }
+  predsum
 }
 
 # acsurvival standardisation function, for use with type "acsurvival"
@@ -660,7 +676,7 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
     }
   } 
   if(type2=="acrmst") { ## if type2=="acrmst"
-    ## This for now manipulates rawsim within acrmst. This code could be made more slick.
+    ## This for now manipulates rawsim within standsurv.fn.acrmst. This code could be made more slick.
     stand.pred <- matrix(nrow=B, ncol=length(t))
     for(b in seq(length.out=B)) {
       newobject <- object
@@ -674,7 +690,18 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
     }
   }
   if(type2=="quantile"){
-    stop("bootstrap not yet applied with quantile") 
+    ## This for now manipulates rawsim within standsurv.fn.quantile. This code could be made more slick.
+    stand.pred <- matrix(nrow=B, ncol=length(quantiles))
+    for(b in seq(length.out=B)) {
+      newobject <- object
+      newobject$res.t[,"est"] <- rawsim[b,]
+      newobject$res[newobject$covpars,"est"] <- rawsim[b, newobject$covpars]
+      newobject$res[newobject$dlist$pars,"est"] <- NA  ## setting to NA to be safe
+      newobject$res.t[,-1] <- newobject$res[,-1] <- NA ## setting to NA to be safe
+      ## standardisation (averaging across patients) is done within standsurv.fn.quantile itself 
+      stand.pred[b,] <- pull(standsurv.fn.quantile(newobject, newdata=dat, i, weighted, tr.fun=tr("none"), 
+                                              quantiles, interval)[,2])
+    }
   }
   if(type2=="acquantile"){
     stop("bootstrap not yet applied with acquantile")
@@ -846,19 +873,19 @@ tidy.standsurv <- function(x, ...){
                  names_prefix = "at")
   if(ci){
     standpred_at_lci <- standpred %>% 
-      select(c("time",matches("at[0-9]+_lci"))) %>%
+      select(c(by, matches("at[0-9]+_lci"))) %>%
       pivot_longer(cols=matches("at[0-9]+_lci"),
                    names_to = "at",
                    names_pattern = "at(.+)_lci",
                    values_to = paste0(type,"_lci"))
     standpred_at_uci <- standpred %>% 
-      select(c("time",matches("at[0-9]+_uci"))) %>%
+      select(c(by, matches("at[0-9]+_uci"))) %>%
       pivot_longer(cols=matches("at[0-9]+_uci"),
                    names_to = "at",
                    names_pattern = "at(.+)_uci",
                    values_to = paste0(type,"_uci"))
-    standpred_at <- standpred_at %>% inner_join(standpred_at_lci, by=c("time","at")) %>%
-      inner_join(standpred_at_uci, by=c("time","at"))
+    standpred_at <- standpred_at %>% inner_join(standpred_at_lci, by=c(by,"at")) %>%
+      inner_join(standpred_at_uci, by=c(by, "at"))
   }
   for(i in 1:length(at)){
     standpred_at <- standpred_at %>% 
@@ -870,26 +897,26 @@ tidy.standsurv <- function(x, ...){
     ## Contrast numbers
     cnums <- (1:length(at))[-atreference]
     standpred_contrast <- standpred %>% 
-      select(c("time",matches("contrast[0-9]+_[0-9]+$"))) %>%
+      select(c(by, matches("contrast[0-9]+_[0-9]+$"))) %>%
       pivot_longer(cols=matches("contrast[0-9]+_[0-9]+$"),
                    names_to = "contrast",
                    values_to = contrast,
                    names_prefix = "contrast")
     if(ci){
       standpred_contrast_lci <- standpred %>% 
-        select(c("time",matches("contrast[0-9]+_[0-9]+_lci"))) %>%
+        select(c(by, matches("contrast[0-9]+_[0-9]+_lci"))) %>%
         pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_lci"),
                      names_to = "contrast",
                      names_pattern = "contrast(.+)_lci",
                      values_to = paste0(contrast,"_lci"))
       standpred_contrast_uci <- standpred %>% 
-        select(c("time",matches("contrast[0-9]+_[0-9]+_uci"))) %>%
+        select(c(by, matches("contrast[0-9]+_[0-9]+_uci"))) %>%
         pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_uci"),
                      names_to = "contrast",
                      names_pattern = "contrast(.+)_uci",
                      values_to = paste0(contrast,"_uci"))
-      standpred_contrast <- standpred_contrast %>% inner_join(standpred_contrast_lci, by=c("time","contrast")) %>%
-        inner_join(standpred_contrast_uci, by=c("time","contrast"))
+      standpred_contrast <- standpred_contrast %>% inner_join(standpred_contrast_lci, by=c(by, "contrast")) %>%
+        inner_join(standpred_contrast_uci, by=c(by, "contrast"))
     }
     for(i in cnums){
       standpred_contrast <- standpred_contrast %>% 
