@@ -510,14 +510,15 @@ standsurv.fn.hazard <- function(t, object, newdata, i, weighted, tr.fun){
 
 # quantile standardisation function, for use with type "quantile"
 standsurv.fn.quantile <- function(object, newdata, i, weighted, tr.fun, quantiles, interval){
-  quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
-    as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
+  quantile.root.fn <- function(t, q, object, newdata, i, weighted){
+    as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, 
+                                    weighted, tr.fun=tr("none"))[1,2]) - q
   }
   predsum <- tibble()
   for(q in quantiles){
     root <- uniroot(quantile.root.fn, interval = interval,
-                    q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
-    predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
+                    q=q, object=object, newdata=newdata, i=i, weighted=weighted)$root
+    predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := tr.fun(root)))
   }
   predsum
 }
@@ -603,14 +604,14 @@ acsurv.int.fn <- function(t1, object, newdata, rmap, ratetable, scale.ratetable,
 standsurv.fn.acquantile <- function(t, object, newdata, i,  rmap, ratetable, scale.ratetable,
                                     weighted, tr.fun, quantiles, interval){
   newdata$id <- 1:dim(newdata)[1]
-  quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
+  quantile.root.fn <- function(t, q, object, newdata, i, weighted){
       acsurv.int.fn(t, object, newdata, rmap, ratetable, scale.ratetable, weighted) - q
   }
   predsum <- tibble()
   for(q in quantiles){
     root <- uniroot(quantile.root.fn, interval = interval,
-                    q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
-    predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
+                    q=q, object=object, newdata=newdata, i=i, weighted=weighted)$root
+    predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := tr.fun(root)))
   }
   predsum
 }
@@ -725,12 +726,20 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
                                   predsum, trans, cl, weighted, expsurv,
                                   rmap, ratetable, scale.ratetable, quantiles, interval,
                                   n.gauss.quad){
-  if(type2 %in% c("quantile","acquantile")) stop("deltamethod not yet implemented with quantile")
-  g <- function(coef, t, trans) {
-    object$res[,"est"] <- object$res.t[,"est"] <- coef
-    standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
-                 weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
-                 quantiles, interval, n.gauss.quad)[,2,drop=T]
+  if(!(type2 %in% c("quantile","acquantile"))){
+    g <- function(coef, t, trans) {
+      object$res[,"est"] <- object$res.t[,"est"] <- coef
+      standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
+                   weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
+                   quantiles, interval, n.gauss.quad)[,2,drop=T]
+    }
+  } else {
+    g <- function(coef, quantiles, trans) {
+      object$res[,"est"] <- object$res.t[,"est"] <- coef
+      standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
+                   weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
+                   quantiles=quantiles, interval, n.gauss.quad)[,2,drop=T]
+    }
   }
   est <- standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans="none", 
                       weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
@@ -739,11 +748,19 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
   var.none <- NULL
   if(se==TRUE){
     # Calculate for each value of t the untransformed standardized measure
-    var.none <- sapply(t, function(ti){
-      gd <- grad(g, coef(object), method="simple" ,t=ti, 
-                           trans="none")
-      gd %*% vcov(object) %*% gd
-    })
+    if(!(type2 %in% c("quantile","acquantile"))){
+      var.none <- sapply(t, function(ti){
+        gd <- grad(g, coef(object), method="simple" ,t=ti, 
+                   trans="none")
+        gd %*% vcov(object) %*% gd
+      })
+    } else {
+      var.none <- sapply(quantiles, function(q){
+        gd <- grad(g, coef(object), method="simple" ,quantiles=q, 
+                   trans="none")
+        gd %*% vcov(object) %*% gd
+      })
+    }
     stand.pred.se <- as_tibble(sqrt(var.none)) %>% rename("at{i}_se" := "value")
     predsum <- predsum %>% bind_cols(stand.pred.se)   
   }  
@@ -752,11 +769,19 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
     if(trans=="none" & !is.null(var.none)){
       var.trans <- var.none ## use already calculated variances
     } else {
-      var.trans <- sapply(t, function(ti){
-        gd <- grad(g, coef(object), method="simple" ,t=ti, 
-                             trans=trans)
-        gd %*% vcov(object) %*% gd
-      })
+      if(!(type2 %in% c("quantile","acquantile"))){
+        var.trans <- sapply(t, function(ti){
+          gd <- grad(g, coef(object), method="simple" ,t=ti, 
+                     trans=trans)
+          gd %*% vcov(object) %*% gd
+        })
+      } else {
+        var.trans <- sapply(quantiles, function(q){
+          gd <- grad(g, coef(object), method="simple" ,quantiles=q, 
+                     trans=trans)
+          gd %*% vcov(object) %*% gd
+        })
+      }
     }
     tr.fun <- tr(trans)
     inv.tr.fun <- inv.tr(trans)
@@ -982,6 +1007,7 @@ plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ..
     obj <- attributes(x)$standpred_at
     obj <- obj %>% mutate(Population = "Study")
     y <- attributes(x)$type
+    if(y=="quantile") stop("plot method not configured for type='quantile'")
     group <- "at"
     if(expected){
       if(is.null(attributes(x)$expected)) 
