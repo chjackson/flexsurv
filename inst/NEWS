@@ -6,6 +6,8 @@ Version 2.3 (2023-??-??)
 * Column name of predict() output changed from "time" to "eval_time"
   for consistency with tidymodels update.
 
+* Default value for t chosen in hr_flexsurvreg.
+
 
 Version 2.2.2 (2023-01-31)
 -------------------------
