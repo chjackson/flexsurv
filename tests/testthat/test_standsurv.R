@@ -58,6 +58,21 @@ test_that('quantile predictions', {
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est, 
                tolerance = .Machine$double.eps^0.25) # use same tolerance as uniroot
   
+  # Test marginal predictions of quantiles correspond to inverse marginal survival
+  set.seed(136)
+  bc$age <- rnorm(dim(bc)[1], mean = 65 - bc$recyrs, sd = 5)
+  fitw2 <- flexsurvreg(Surv(recyrs, censrec) ~ group + age, 
+                      data=bc, dist="weibull")
+  ss <- standsurv(fitw2, type="quantile",
+                  at=list(list(group="Good")),
+                  quantiles = seq(0.1, 0.9, by=0.1))
+  ss
+  # Feed back in the quantiles and calculate marginal survival probabilities
+  ss2 <- standsurv(fitw2, type="survival",
+                   at=list(list(group="Good")),
+                   t=ss$at1)
+  expect_equal(1-seq(0.1, 0.9, by=0.1), ss2$at1, 
+               tolerance = .Machine$double.eps^0.25) # use same tolerance as uniroot
 })
 
 test_that('rmst predictions', {
@@ -198,5 +213,18 @@ test_that('all-cause predictions from RS model', {
   expect_equal(pred1, pred2)
   
   # all-cause survival quantile
+  # just use one row of data
+  pred1 <- summary(fitw, type = "quantile", quantiles = seq(0.1, 0.9, 0.1), 
+                              newdata = bc[1,], ci=F, tidy=T)
+  pred2 <- standsurv(fitw2, quantiles = seq(0.1, 0.9, 0.1), 
+                                newdata=bc[1,], type="quantile",
+                                rmap=list(sex = sex,
+                                          year = diag,
+                                          age = agedays
+                                ),
+                                ratetable = new.ratetable,
+                                scale.ratetable = 365.25)
+  expect_equal(pred1$est, pred2$at1, tolerance = .Machine$double.eps^0.25) # use same tolerance as uniroot)
+  
 })
 
