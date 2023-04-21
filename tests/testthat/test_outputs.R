@@ -135,6 +135,11 @@ test_that("hazard ratio",{
     hr2 <- hr_flexsurvreg(fl3, newdata=as.data.frame(list(age=60, sex=c("1","2"))), 
                           t=t, ci=TRUE, B=10)
     expect_is(hr2$lcl, "numeric")
+
+    ## default t 
+    hr2 <- hr_flexsurvreg(fl3, newdata=as.data.frame(list(age=60, sex=c("1","2"))), 
+                          ci=FALSE)
+    expect_equal(nrow(hr2), length(unique(lung$time)))
     
     ## a non-proportional hazards model
     fl4 <- flexsurvspline(Surv(time, event = status) ~ sex + age, anc=list(gamma1=~sex), 
