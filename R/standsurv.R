@@ -627,6 +627,7 @@ inv.tr <- function(trans){
   )
 }
 
+#' @importFrom dplyr pull
 boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, cl, 
                            rawsim, predsum, expsurv, rmap, ratetable, scale.ratetable, 
                            quantiles, interval, n.gauss.quad){
@@ -678,7 +679,7 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
       newobject$res[newobject$dlist$pars,"est"] <- NA  ## setting to NA to be safe
       newobject$res.t[,-1] <- newobject$res[,-1] <- NA ## setting to NA to be safe
       ## standardisation (averaging across patients) is done within acrmst itself 
-      stand.pred[b,] <- standsurv.fn.acrmst(t, newobject, newdat=dat, i, rmap, ratetable, scale.ratetable, weighted, 
+      stand.pred[b,] <- standsurv.fn.acrmst(t, newobject, newdata=dat, i, rmap, ratetable, scale.ratetable, weighted, 
                                             tr.fun=tr("none"), n.gauss.quad)
     }
   }
@@ -719,14 +720,14 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
                                   rmap, ratetable, scale.ratetable, quantiles, interval,
                                   n.gauss.quad){
   if(!(type2 %in% c("quantile","acquantile"))){
-    g <- function(coef, t, trans) {
+    g1 <- function(coef, t, trans) {
       object$res[,"est"] <- object$res.t[,"est"] <- coef
       standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
                    weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
                    quantiles, interval, n.gauss.quad)[,2,drop=T]
     }
   } else {
-    g <- function(coef, quantiles, trans) {
+    g2 <- function(coef, quantiles, trans) {
       object$res[,"est"] <- object$res.t[,"est"] <- coef
       standsurv.fn(object, type=type2, newdata=newdata, t=t, i=i, trans, 
                    weighted=weighted, expsurv=expsurv, rmap, ratetable, scale.ratetable, 
@@ -742,13 +743,13 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
     # Calculate for each value of t the untransformed standardized measure
     if(!(type2 %in% c("quantile","acquantile"))){
       var.none <- sapply(t, function(ti){
-        gd <- grad(g, coef(object), method="simple" ,t=ti, 
+        gd <- grad(g1, coef(object), method="simple" ,t=ti, 
                    trans="none")
         gd %*% vcov(object) %*% gd
       })
     } else {
       var.none <- sapply(quantiles, function(q){
-        gd <- grad(g, coef(object), method="simple" ,quantiles=q, 
+        gd <- grad(g2, coef(object), method="simple" ,quantiles=q, 
                    trans="none")
         gd %*% vcov(object) %*% gd
       })
@@ -763,13 +764,13 @@ deltamethod.standsurv <- function(object, newdata, type2, t, i, se, ci,
     } else {
       if(!(type2 %in% c("quantile","acquantile"))){
         var.trans <- sapply(t, function(ti){
-          gd <- grad(g, coef(object), method="simple" ,t=ti, 
+          gd <- grad(g1, coef(object), method="simple" ,t=ti, 
                      trans=trans)
           gd %*% vcov(object) %*% gd
         })
       } else {
         var.trans <- sapply(quantiles, function(q){
-          gd <- grad(g, coef(object), method="simple" ,quantiles=q, 
+          gd <- grad(g2, coef(object), method="simple" ,quantiles=q, 
                      trans=trans)
           gd %*% vcov(object) %*% gd
         })
@@ -796,18 +797,32 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
   inv.tr.fun <- inv.tr(trans.contrast)
   contrast.fn <- switch(contrast, "difference"= `-`, "ratio"= `/` )
   
-  g <- function(coef, t, tr.fun, contrast.fn) {
-    object$res[,"est"] <- object$res.t[,"est"] <- coef
-    tr.fun(contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
-                                    trans="none", weighted=weighted, expsurv=expsurv,
-                                    rmap, ratetable, scale.ratetable, quantiles, interval,
-                                    n.gauss.quad)[,2,drop=T], 
-                       standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
-                                    trans="none", weighted=weighted, expsurv=expsurv,
-                                    rmap, ratetable, scale.ratetable, quantiles, interval,
-                                    n.gauss.quad)[,2,drop=T]))
+  if(!(type2 %in% c("quantile","acquantile"))){
+    g1 <- function(coef, t, tr.fun, contrast.fn) {
+      object$res[,"est"] <- object$res.t[,"est"] <- coef
+      tr.fun(contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
+                                      trans="none", weighted=weighted, expsurv=expsurv,
+                                      rmap, ratetable, scale.ratetable, quantiles, interval,
+                                      n.gauss.quad)[,2,drop=T], 
+                         standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
+                                      trans="none", weighted=weighted, expsurv=expsurv,
+                                      rmap, ratetable, scale.ratetable, quantiles, interval,
+                                      n.gauss.quad)[,2,drop=T]))
+    }
+  } else {
+    g2 <- function(coef, quantiles, tr.fun, contrast.fn) {
+      object$res[,"est"] <- object$res.t[,"est"] <- coef
+      tr.fun(contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
+                                      trans="none", weighted=weighted, expsurv=expsurv,
+                                      rmap, ratetable, scale.ratetable, quantiles=quantiles, 
+                                      interval, n.gauss.quad)[,2,drop=T], 
+                         standsurv.fn(object, type=type2, newdata=dat.ref, t=t, i=i, 
+                                      trans="none", weighted=weighted, expsurv=expsurv,
+                                      rmap, ratetable, scale.ratetable, quantiles=quantiles, 
+                                      interval, n.gauss.quad)[,2,drop=T]))
+    }
   }
-
+  
   est <- contrast.fn(standsurv.fn(object, type=type2, newdata=dat, t=t, i=i, 
                                   trans="none", weighted=weighted, expsurv=expsurv,
                                   rmap, ratetable, scale.ratetable, quantiles, interval,
@@ -823,11 +838,19 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
   var.none <- NULL
   if(se==TRUE){
     # Calculate for each value of t the untransformed standardized measure
-    var.none <- sapply(t, function(ti){
-      gd <- grad(g, coef(object), method="simple" ,t=ti, 
-                           tr.fun=function(x) x, contrast.fn=contrast.fn)
-      gd %*% vcov(object) %*% gd
-    })
+    if(!(type2 %in% c("quantile","acquantile"))){
+      var.none <- sapply(t, function(ti){
+        gd <- grad(g1, coef(object), method="simple" ,t=ti, 
+                   tr.fun=function(x) x, contrast.fn=contrast.fn)
+        gd %*% vcov(object) %*% gd
+      })
+    } else {
+      var.none <- sapply(quantiles, function(q){
+        gd <- grad(g2, coef(object), method="simple" ,quantiles=q, 
+                   tr.fun=function(x) x, contrast.fn=contrast.fn)
+        gd %*% vcov(object) %*% gd
+      })
+    }
     stand.pred.se <- as_tibble(sqrt(var.none)) %>% rename("contrast{i}_{atreference}_se" := "value") 
     predsum <- predsum %>% bind_cols(stand.pred.se)   
   }  
@@ -836,11 +859,19 @@ deltamethod.contrast.standsurv <- function(object, dat, dat.ref,
     if(trans.contrast=="none" & !is.null(var.none)){
       var.trans <- var.none ## use already calculated variances
     } else {
-      var.trans <- sapply(t, function(ti){
-        gd <- grad(g, coef(object), method="simple" ,t=ti, 
-                             tr.fun=tr.fun, contrast.fn=contrast.fn)
-        gd %*% vcov(object) %*% gd
-      })
+      if(!(type2 %in% c("quantile","acquantile"))){
+        var.trans <- sapply(t, function(ti){
+          gd <- grad(g1, coef(object), method="simple" ,t=ti, 
+                     tr.fun=tr.fun, contrast.fn=contrast.fn)
+          gd %*% vcov(object) %*% gd
+        })
+      } else {
+        var.trans <- sapply(quantiles, function(q){
+          gd <- grad(g2, coef(object), method="simple" ,quantiles=q, 
+                     tr.fun=tr.fun, contrast.fn=contrast.fn)
+          gd %*% vcov(object) %*% gd
+        })
+      }
     }
     stand.pred.lcl <- as_tibble(inv.tr.fun(tr.fun(est)+qnorm((1-cl)/2, lower.tail=T)*sqrt(var.trans))) %>%
       rename("contrast{i}_{atreference}_lci" := "value")
