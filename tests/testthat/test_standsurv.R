@@ -43,25 +43,42 @@ test_that('hazard predictions', {
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est)
 })
 
+test_that('quantile predictions', {
+  fitw <- flexsurvreg(Surv(recyrs, censrec) ~ group, 
+                      data=bc, dist="weibull")
+  
+  # Multiple quantile predictions (q=0.1 and 0.5)
+  ss <- standsurv(fitw, type="quantile",
+                              at=list(list(group="Good"), 
+                                      list(group="Medium"), 
+                                      list(group="Poor")),
+                  quantiles = seq(0.1,0.9, by=0.1))
+  s <- summary(fitw, tidy = TRUE, type = 'quantile', quantiles = seq(0.1,0.9, by=0.1), 
+               ci = FALSE)
+  expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est, 
+               tolerance = .Machine$double.eps^0.25) # use same tolerance as uniroot
+  
+})
+
 test_that('rmst predictions', {
   fitw <- flexsurvreg(Surv(recyrs, censrec) ~ group, 
                       data=bc, dist="weibull")
   
   # Single time predictions
   ss <- standsurv(fitw, type="rmst",
-                              at=list(list(group="Good"), 
-                                      list(group="Medium"), 
-                                      list(group="Poor")),
-                              t = 4)
+                  at=list(list(group="Good"), 
+                          list(group="Medium"), 
+                          list(group="Poor")),
+                  t = 4)
   s <- summary(fitw, tidy = TRUE, type = 'rmst', t = 4, ci = FALSE)
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est)
   
   # Multiple time predictions
   ss <- standsurv(fitw, type="rmst",
-                              at=list(list(group="Good"), 
-                                      list(group="Medium"), 
-                                      list(group="Poor")),
-                              t = c(4,5))
+                  at=list(list(group="Good"), 
+                          list(group="Medium"), 
+                          list(group="Poor")),
+                  t = c(4,5))
   s <- summary(fitw, tidy = TRUE, type = 'rmst', t = c(4,5), ci = FALSE)
   expect_equal(c(ss$at1, ss$at2, ss$at3) ,s$est)
 })
@@ -148,9 +165,13 @@ test_that('model with no covariates', {
   expect_equal(as.numeric(standsurv(fitw, t = 4, newdata = bc)[1,2]), 
                as.numeric(predict(fitw, type = "survival", times = 4, 
                                   newdata = bc)[1,2]))
-  
+})
+
+test_that('all-cause predictions from RS model', {
   # Single time prediction - checking all-cause survival from an RS model
   # with predict.flexsurvreg, where background rates are zero
+  fitw <- flexsurvreg(Surv(recyrs, censrec) ~ 1, 
+                      data=bc, dist="weibull")
   set.seed(136)
   bc$age <- rnorm(dim(bc)[1], mean = 65 - bc$recyrs, sd = 5)
   bc$agedays <- floor(bc$age * 365.25)
@@ -175,5 +196,7 @@ test_that('model with no covariates', {
             ratetable = new.ratetable,
             scale.ratetable = 365.25)[1,2])
   expect_equal(pred1, pred2)
+  
+  # all-cause survival quantile
 })
 

@@ -458,15 +458,6 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
   } else if(type == "quantile"){
     predsum <- standsurv.fn.quantile(object, newdata, i, weighted, tr.fun, 
                                      quantiles, interval)
-    # quantile.root.fn <- function(t, q, object, newdata, i, weighted, tr.fun){
-    #   as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, weighted, tr.fun)[1,2]) - q
-    # }
-    # predsum <- tibble()
-    # for(q in quantiles){
-    #   root <- uniroot(quantile.root.fn, interval = interval,
-    #           q=q, object=object, newdata=newdata, i=i, weighted=weighted, tr.fun=tr.fun)$root
-    #   predsum <- predsum %>% bind_rows(tibble(probability = q) %>% mutate("at{i}" := root))
-    # }
   } else if(type=="acsurvival"){
     predsum <- standsurv.fn.acsurvival(t, object, newdata, i, weighted, tr.fun, expsurv)
   } else if(type=="achazard"){
@@ -513,7 +504,7 @@ standsurv.fn.hazard <- function(t, object, newdata, i, weighted, tr.fun){
 standsurv.fn.quantile <- function(object, newdata, i, weighted, tr.fun, quantiles, interval){
   quantile.root.fn <- function(t, q, object, newdata, i, weighted){
     as.numeric(standsurv.fn.generic(t, object, type = "survival", newdata, i, 
-                                    weighted, tr.fun=tr("none"))[1,2]) - q
+                                    weighted, tr.fun=tr("none"))[1,2]) - (1-q)
   }
   predsum <- tibble()
   for(q in quantiles){
@@ -606,7 +597,7 @@ standsurv.fn.acquantile <- function(t, object, newdata, i,  rmap, ratetable, sca
                                     weighted, tr.fun, quantiles, interval){
   newdata$id <- 1:dim(newdata)[1]
   quantile.root.fn <- function(t, q, object, newdata, i, weighted){
-      acsurv.int.fn(t, object, newdata, rmap, ratetable, scale.ratetable, weighted) - q
+      acsurv.int.fn(t, object, newdata, rmap, ratetable, scale.ratetable, weighted) - (1-q)
   }
   predsum <- tibble()
   for(q in quantiles){
