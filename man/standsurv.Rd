@@ -23,7 +23,9 @@ standsurv(
   rmap,
   ratetable,
   scale.ratetable = 365.25,
-  n.gauss.quad = 100
+  n.gauss.quad = 100,
+  quantiles = 0.5,
+  interval = c(1e-08, 500)
 )
 }
 \arguments{
@@ -66,7 +68,10 @@ relative survival framework this returns the marginal all-cause hazard
 if a relative survival model has been fitted in flexsurv).
 
 \code{"excesshazard"} for marginal excess hazards (can only be specified
-if a relative survival model has been fitted in flexsurv).}
+if a relative survival model has been fitted in flexsurv).
+
+\code{"quantile"} for quantiles of the marginal all-cause survival 
+distribution. The \code{quantiles} option also needs to be provided.}
 
 \item{t}{Times to calculate marginal values at.}
 
@@ -98,8 +103,8 @@ is NULL (i.e. no contrasts are calculated).}
 
 \item{trans.contrast}{Transformation to apply when calculating standard errors
 for contrasts via the delta method to obtain confidence intervals. The default
-transformation is "none" for differences in survival, hazard or RMST, 
-and "log" for ratios of survival, hazard or RMST.}
+transformation is "none" for differences in survival, hazard, quantiles, or RMST, 
+and "log" for ratios of survival, hazard, quantiles or RMST.}
 
 \item{seed}{The random seed to use (for bootstrapping confidence intervals)}
 
@@ -120,6 +125,12 @@ default as often the ratetable will be in units/day (see example).}
 \item{n.gauss.quad}{Number of Gaussian quadrature points used for integrating 
 the all-cause survival function when calculating RMST in a relative survival 
 framework (default = 100)}
+
+\item{quantiles}{If \code{type="quantile"}, this specifies the quantiles of 
+the survival time distribution to return estimates for.}
+
+\item{interval}{Interval of survival times for quantile root finding. 
+Default is c(1e-08, 500).}
 }
 \value{
 A \code{tibble} containing one row for each 
@@ -133,8 +144,9 @@ In addition tidy long-format data.frames are returned in the attributes
 \code{ggplot} for plotting purposes (see \code{\link{plot.standsurv}}).
 }
 \description{
-Returns a tidy data.frame of marginal survival probabilities or the hazards 
-of the marginal survival at user-defined time points and covariate patterns.
+Returns a tidy data.frame of marginal survival probabilities, or hazards, 
+restricted mean survival, or quantiles of the marginal survival function
+at user-defined time points and covariate patterns.
 Standardization is performed over any undefined covariates in the model. 
 The user provides the data to standardize over. Contrasts can be calculated 
 resulting in estimates of the average treatment effect or the average 
@@ -144,8 +156,8 @@ treatment effect in the treated if a treated subset of the data are supplied.
 The syntax of \code{standsurv} follows closely that of Stata's 
 \code{standsurv} command written by Paul Lambert and Michael Crowther. The 
 function calculates standardized (marginal) measures including standardized
-survival functions, standardized restricted mean survival times and the 
-hazard of standardized survival. The standardized survival is defined as
+survival functions, standardized restricted mean survival times, quantiles
+and the hazard of standardized survival. The standardized survival is defined as
 \deqn{S_s(t|X=x) = E(S(t|X=x,Z)) = \frac{1}{N} \sum_{i=1}^N S(t|X=x,Z=z_i)}{S(t|X=x) = E[S(t|X=x,Z)] = 1/N * sum(S(t|X=x,Z=z_i))}
 The hazard of the standardized survival is a weighted average of 
 individual hazard functions at time t, weighted by the survival

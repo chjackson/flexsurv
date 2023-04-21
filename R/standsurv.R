@@ -1,7 +1,8 @@
 #' Marginal survival and hazards of fitted flexsurvreg models
 #'
-#' Returns a tidy data.frame of marginal survival probabilities or the hazards 
-#' of the marginal survival at user-defined time points and covariate patterns.
+#' Returns a tidy data.frame of marginal survival probabilities, or hazards, 
+#' restricted mean survival, or quantiles of the marginal survival function
+#' at user-defined time points and covariate patterns.
 #' Standardization is performed over any undefined covariates in the model. 
 #' The user provides the data to standardize over. Contrasts can be calculated 
 #' resulting in estimates of the average treatment effect or the average 
@@ -10,8 +11,8 @@
 #' The syntax of \code{standsurv} follows closely that of Stata's 
 #' \code{standsurv} command written by Paul Lambert and Michael Crowther. The 
 #' function calculates standardized (marginal) measures including standardized
-#' survival functions, standardized restricted mean survival times and the 
-#' hazard of standardized survival. The standardized survival is defined as
+#' survival functions, standardized restricted mean survival times, quantiles
+#' and the hazard of standardized survival. The standardized survival is defined as
 #' \deqn{S_s(t|X=x) = E(S(t|X=x,Z)) = \frac{1}{N} \sum_{i=1}^N S(t|X=x,Z=z_i)}{S(t|X=x) = E[S(t|X=x,Z)] = 1/N * sum(S(t|X=x,Z=z_i))}
 #' The hazard of the standardized survival is a weighted average of 
 #' individual hazard functions at time t, weighted by the survival
