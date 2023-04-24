@@ -34,7 +34,7 @@ hr_flexsurvreg <- function(x, newdata=NULL, t=NULL, start=0, ci=TRUE, B=1000, cl
   est1 <- do.call(fn, args1)
   est0 <- do.call(fn, args0)
   
-  tstart <- summfn_to_tstart(x, type="hr", t, quantiles, start)
+  tstart <- summfn_to_tstart(x=x, type="hr", t=t)
   t <- tstart$t; start <- tstart$start
   
   res <- data.frame(t = t) 
