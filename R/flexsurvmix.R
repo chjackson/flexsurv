@@ -698,6 +698,8 @@ flexsurvmix <- function(formula, data, event, dists,
   }
 
   ## Add standard errors to results data frame, given covariance matrix.
+  ## A previous version attempted to calculate a SE for the reference category
+  ## probability as follows, but didn't account for the logit transformation.
   ## var ( 1 - p1 - p2 - .. ) = var(p1) + var(p2) - cov(p1,p2) - ...
   res$fixed <- c(NA, rep(FALSE, npars))
   res$fixed[1 + fixedpars] <- TRUE
@@ -706,7 +708,7 @@ flexsurvmix <- function(formula, data, event, dists,
   if (!fixed){
       if (length(optp) > 0){
         covp <- cov[optp, optp, drop=FALSE]
-        res$se[1] <- if (K==1) NA else sqrt(sum(diag(covp)) - sum(covp[lower.tri(covp)]))
+        res$se[1] <- NA
       }
       res$se[1 + optpars] <- sqrt(diag(cov))
   } 
