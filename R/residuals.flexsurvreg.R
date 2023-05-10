@@ -69,13 +69,16 @@ residuals.flexsurvreg <- function(object, type = "response", ...)
 ##'   
 ##' @export
 coxsnell_flexsurvreg <- function(x){
-    mf <- model.frame(x, orig=TRUE)
-    t <- mf[,1][,"time"]
-    covnames <- attr(model.frame(x), "covnames")
-    nd <- mf[,covnames,drop=FALSE]
-    res <- summary(x, type="cumhaz", t=t, newdata=nd, cross=FALSE, 
-                   ci=FALSE, se=FALSE, tidy=TRUE)
-    res$status <- mf[,1][,"status"]
-    res <- res[c("time","status", setdiff(names(res), c("time","status","est")), "est")]
-    res    
+  mf <- model.frame(x, orig=TRUE)
+  startstop <- "start" %in% colnames(mf[,1])
+  tind <- if (startstop) "stop" else "time"
+  t <- mf[,1][,tind]
+  start <- if (startstop) mf[,1][,"start"] else 0  
+  covnames <- attr(model.frame(x), "covnames")
+  nd <- mf[,covnames,drop=FALSE]
+  res <- summary(x, type="cumhaz", t=t, start=start, newdata=nd, cross=FALSE, 
+                 ci=FALSE, se=FALSE, tidy=TRUE)
+  res$status <- mf[,1][,"status"]
+  res <- res[c("time","status", setdiff(names(res), c("time","status","est")), "est")]
+  res    
 }
