@@ -914,20 +914,20 @@ tidy.standsurv <- function(x, ...){
   class(standpred) <- class(standpred)[class(standpred)!="standsurv"]
 
   standpred_at <- standpred %>% 
-    select(c(by, matches("at[0-9]+$"))) %>%
+    select(c(all_of(by), matches("at[0-9]+$"))) %>%
     pivot_longer(cols=matches("at[0-9]+$"),
                  names_to = "at",
                  values_to = type,
                  names_prefix = "at")
   if(ci){
     standpred_at_lci <- standpred %>% 
-      select(c(by, matches("at[0-9]+_lci"))) %>%
+      select(c(all_of(by), matches("at[0-9]+_lci"))) %>%
       pivot_longer(cols=matches("at[0-9]+_lci"),
                    names_to = "at",
                    names_pattern = "at(.+)_lci",
                    values_to = paste0(type,"_lci"))
     standpred_at_uci <- standpred %>% 
-      select(c(by, matches("at[0-9]+_uci"))) %>%
+      select(c(all_of(by), matches("at[0-9]+_uci"))) %>%
       pivot_longer(cols=matches("at[0-9]+_uci"),
                    names_to = "at",
                    names_pattern = "at(.+)_uci",
@@ -945,20 +945,20 @@ tidy.standsurv <- function(x, ...){
     ## Contrast numbers
     cnums <- (1:length(at))[-atreference]
     standpred_contrast <- standpred %>% 
-      select(c(by, matches("contrast[0-9]+_[0-9]+$"))) %>%
+      select(c(all_of(by), matches("contrast[0-9]+_[0-9]+$"))) %>%
       pivot_longer(cols=matches("contrast[0-9]+_[0-9]+$"),
                    names_to = "contrast",
                    values_to = contrast,
                    names_prefix = "contrast")
     if(ci){
       standpred_contrast_lci <- standpred %>% 
-        select(c(by, matches("contrast[0-9]+_[0-9]+_lci"))) %>%
+        select(c(all_of(by), matches("contrast[0-9]+_[0-9]+_lci"))) %>%
         pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_lci"),
                      names_to = "contrast",
                      names_pattern = "contrast(.+)_lci",
                      values_to = paste0(contrast,"_lci"))
       standpred_contrast_uci <- standpred %>% 
-        select(c(by, matches("contrast[0-9]+_[0-9]+_uci"))) %>%
+        select(c(all_of(by), matches("contrast[0-9]+_[0-9]+_uci"))) %>%
         pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_uci"),
                      names_to = "contrast",
                      names_pattern = "contrast(.+)_uci",
