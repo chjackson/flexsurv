@@ -64,7 +64,7 @@ tidy.flexsurvreg <- function(x, conf.int = FALSE, conf.level = 0.95,
   terms <- rownames(vals)
   ses <- vals[, "se"]
   stats <- coefs / ses; stats[names(stats) %in% dist_pars] <- NA
-  pvals <- pnorm(abs(stats), lower.tail = FALSE)
+  pvals <- 2 * pnorm(abs(stats), lower.tail = FALSE)
 
   coef_pars <- terms[which(!terms %in% dist_pars)]
 
