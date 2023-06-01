@@ -58,7 +58,8 @@ simulation from the normal asymptotic distribution of the estimates, which
 is computationally-expensive.}
 
 \item{tvar}{Name of the categorical variable in the model formula that
-represents the transition number. The values of this variable should
+represents the transition number.  This should have been defined as a factor,
+with factor levels that 
 correspond to elements of \code{trans}, conventionally a sequence of
 integers starting from 1.  Not required if \code{x} is a list of
 transition-specific models.}

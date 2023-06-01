@@ -15,6 +15,8 @@ form.msm.newdata <- function(x, newdata=NULL, tvar="trans", trans){
             stop("\"tvar\" not supplied and variable \"", tvar, "\" not in model")
         else stop("\"variable \"", tvar, "\" not in model")
     }
+    if (!x$covdata$isfac[[tvar]])
+      stop("`tvar` should have been fitted as a factor covariate in the model")
     if(is.null(newdata)){
         newdata <- data.frame(trans=factor(tr, levels=x$covdata$xlev[[tvar]]))
         names(newdata) <- tvar
@@ -76,7 +78,8 @@ form.msm.newdata <- function(x, newdata=NULL, tvar="trans", trans){
 ##' simulation from the normal asymptotic distribution of the estimates, which
 ##' is computationally-expensive.
 ##' @param tvar Name of the categorical variable in the model formula that
-##' represents the transition number. The values of this variable should
+##' represents the transition number.  This should have been defined as a factor,
+##' with factor levels that 
 ##' correspond to elements of \code{trans}, conventionally a sequence of
 ##' integers starting from 1.  Not required if \code{x} is a list of
 ##' transition-specific models.
