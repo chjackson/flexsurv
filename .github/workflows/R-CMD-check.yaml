@@ -37,7 +37,7 @@ jobs:
       - run: tlmgr --version
 
       - name: Install additional LaTeX packages
-        run: |
+        run:
 	  tinytex::parse_install( text = "! LaTeX Error: File ae.sty' not found.")
 	  tinytex::parse_install( text = "! LaTeX Error: File footmisc.sty' not found.")
 	  tinytex::parse_install( text = "! LaTeX Error: File ctable.sty' not found.")
