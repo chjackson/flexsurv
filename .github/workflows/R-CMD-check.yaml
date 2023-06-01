@@ -39,6 +39,8 @@ jobs:
 
       - name: Install additional LaTeX packages
         run:
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran("rcmdcheck")
           tinytex::tlmgr_install(pkgs = "grfext")
         shell: Rscript {0}
 
