@@ -34,7 +34,7 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
 
       - uses: r-lib/actions/setup-tinytex@v2
-      - run: |
+        run: |
       	  tlmgr --version
 	  tinytex::parse_install( text = "! LaTeX Error: File ae.sty' not found.")
 	  tinytex::parse_install( text = "! LaTeX Error: File footmisc.sty' not found.")
