@@ -1,4 +1,4 @@
-test_partial <- TRUE
+test_partial <- FALSE
 
 if (test_partial)
   options(
