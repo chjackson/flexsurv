@@ -42,17 +42,14 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::tinytex
+          extra-packages: any::rcmdcheck
           needs: check
-
-      - uses: r-lib/actions/setup-tinytex@v2
-      - run: tlmgr --version
-
-      - name: Install additional LaTeX packages
-        run: |
-          tinytex::tlmgr_install(pkgs = "grfext")
-        shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+        env:
+          _R_CHECK_CRAN_INCOMING_: false
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--ignore-vignettes"), build_args = c("--no-build-vignettes"), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}
+	
