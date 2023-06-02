@@ -23,4 +23,4 @@ devtools::install_github('chjackson/flexsurv-dev')
 
 ## Help wanted
 
-... to get the Github Actions script for R CMD check working, ideally one which supports LaTeX vignettes!
+... to get a standard Github Actions script for R CMD check working, ideally one which supports LaTeX vignettes!
