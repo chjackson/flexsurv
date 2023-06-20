@@ -190,7 +190,7 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
     Haz$trans <- rep(seq_along(tr), each=length(t))
     names(Haz)[names(Haz)=="est"] <- "Haz"
     res <- list(Haz=Haz, trans=trans)
-    foundse <- if (is.flexsurvlist(object)) all(!is.na(sapply(object, function(x)x$cov[[1]]))) else !is.na(object$cov[1])
+    foundse <- if (is.flexsurvlist(object)) !anyNA(sapply(object, function(x)x$cov[[1]])) else !is.na(object$cov[1])
     if (variance && foundse){
         boot <- array(dim=c(B, length(t), ntr))
         for (i in seq_along(tr))
@@ -699,11 +699,11 @@ print.fs.msm.est <- function(x, digits=NULL, ...)
 }
 
 absorbing <- function(trans){
-    which(apply(trans, 1, function(x)all(is.na(x))))
+    which(apply(trans, 1, function(x) all(is.na(x))))
 }
 
 transient <- function(trans){
-    which(apply(trans, 1, function(x)any(!is.na(x))))
+    which(apply(trans, 1, function(x) !all(is.na(x))))
 }
 
 ## Handle predictable time-dependent covariates in simulating from
@@ -913,7 +913,7 @@ simfs_bytrans <- function(simfs){
     ## TODO check for simfs having proper attributes 
     trans <- attr(simfs, "trans")
     ## all possible starting states 
-    start <- which(apply(trans, 1, function(x)any(!is.na(x))))
+    start <- which(apply(trans, 1, function(x) !all(is.na(x))))
     suball <- NULL
     for (i in seq_along(start)){
         subi <- NULL

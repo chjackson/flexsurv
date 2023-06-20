@@ -487,13 +487,13 @@ flexsurvmix <- function(formula, data, event, dists,
   if (isTRUE(fixedpars)) fixedpars <- seq_len(npars)
   if (is.logical(fixedpars) && (fixedpars==FALSE)) fixedpars <- NULL
   if (is.character(fixedpars)){
-    if (any(!fixedpars %in% res$terms)) {
+    if (!all(fixedpars %in% res$terms)) {
       bad_fixedpars <- fixedpars[! fixedpars %in% res$terms[-1]]
       stop(paste(bad_fixedpars,collapse=","), " not in model terms")
     }
     fixedpars <- match(fixedpars, as.character(res$terms[-1]))
   }
-  if (is.numeric(fixedpars) && any(!fixedpars %in% 1:npars)) 
+  if (is.numeric(fixedpars) && !all(fixedpars %in% 1:npars)) 
     stop(sprintf("`fixedpars` should all be in 1,...,%s",npars))
   optpars <- setdiff(seq_len(npars), fixedpars)
   fixed <- (length(optpars) == 0)
@@ -502,7 +502,7 @@ flexsurvmix <- function(formula, data, event, dists,
     optim.control$fnscale <- 10000
 
   method <- match.arg(method, c("direct","em"))
-  if (!any(is.na(event))) method <- "em" # likelihoods factorise, use EM code with one iteration
+  if (!anyNA(event)) method <- "em" # likelihoods factorise, use EM code with one iteration
   if (method=="direct"){
     if (length(optpars) > 0){
       if (is.null(optim.control$ndeps))
@@ -654,7 +654,7 @@ flexsurvmix <- function(formula, data, event, dists,
       theta <- thetanew
       covtheta <- covthetanew
       logliknew <- sum(ll)
-      if (!any(is.na(event))) 
+      if (!anyNA(event)) 
         converged <- TRUE
       else if (iter > 0)
         converged <-  (abs(logliknew / loglik - 1) <= em.control$reltol)
@@ -678,7 +678,7 @@ flexsurvmix <- function(formula, data, event, dists,
     loglik <- -as.vector(ll)
     logliki <- -attr(ll, "indiv")
     
-    if (!any(is.na(event))){
+    if (!anyNA(event)) {
       hess <- - Matrix::bdiag(hess_full_p, Matrix::bdiag(hess_full_t))
       cov <- .hess_to_cov(-hess, hess.control$tol.solve, hess.control$tol.evalues)
     } else {

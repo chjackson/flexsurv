@@ -102,7 +102,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         logdens <- call_distfn_quiet(dfns$d, dargs)
         
         ## Left censoring times (upper bound for event time) 
-        if (any(!event)){
+        if (!all(event)){
             pmaxargs <- fnargs.nevent
             pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
             pmax <- call_distfn_quiet(dfns$p, pmaxargs)
@@ -136,7 +136,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         }
         ## Express as vector of individual likelihood contributions
         loglik[event] <- (logdens*event.weights) + offseti
-        if (any(!event))
+        if (!all(event))
             loglik[!event] <- (log(pmax - pmin)*no.event.weights)
 
         loglik <- loglik - log(pobs)*weights
@@ -230,7 +230,7 @@ check.formula <- function(formula, dlist, data = NULL){
 
 check.fixedpars <- function(fixedpars, npars) {
     if (!is.null(fixedpars) && !is.logical(fixedpars) &&
-        (!is.numeric(fixedpars) || any(!(fixedpars %in% 1:npars)))){
+        (!is.numeric(fixedpars) || !all(fixedpars %in% 1:npars))) {
         dots <- if(npars>2) "...," else ""
         stop("fixedpars must be TRUE/FALSE or a vector of indices in 1,",dots,npars)
     }
@@ -863,7 +863,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
 
     if (missing(inits) && is.null(dlist$inits))
         stop("\"inits\" not supplied, and no function to estimate them found in the custom distribution list")
-    if (missing(inits) || any(is.na(inits))){
+    if (missing(inits) || anyNA(inits)) {
         yy <- ifelse(Y[,"status"]==3 & is.finite(Y[,"time2"]), (Y[,"time1"] + Y[,"time2"])/2, Y[,"time1"])
         wt <- yy*weights*length(yy)/sum(weights)
         dlist$inits <- expand.inits.args(dlist$inits)
@@ -872,7 +872,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                                  counting=(attr(model.extract(m, "response"), "type")=="counting")
                                  ))
         auto.inits <- dlist$inits(t=wt,mf=m,mml=mml,aux=inits.aux)
-        if (!missing(inits) && any(is.na(inits))) inits[is.na(inits)] <- auto.inits[is.na(inits)]
+        if (!missing(inits) && anyNA(inits)) inits[is.na(inits)] <- auto.inits[is.na(inits)]
         else inits <- auto.inits
     }
     if (!is.numeric(inits)) stop ("initial values must be a numeric vector")
@@ -939,7 +939,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                              hessian=hessian))
         opt <- do.call("optim", optim.args)
         est <- opt$par
-        if (hessian && all(!is.na(opt$hessian)) && all(!is.nan(opt$hessian)) && all(is.finite(opt$hessian)) &&
+        if (hessian && !anyNA(opt$hessian) && !any(is.nan(opt$hessian)) && all(is.finite(opt$hessian)) &&
             all(eigen(opt$hessian)$values > 0))
         {
             cov <- .hess_to_cov(opt$hessian, hess.control$tol.solve, hess.control$tol.evalues)

@@ -275,7 +275,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
   if(!is.list(at)){
     stop("'at' must be at list")
   }
-  if(any(!sapply(at, is.list))){
+  if (!all(sapply(at, is.list))) {
     stop("All elements of 'at' must be lists")
   }
   
@@ -379,7 +379,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
     }
     
   }
-  if(any(is.na(standpred))) warning("Missing values present in newdata")
+  if (anyNA(standpred)) warning("Missing values present in newdata")
   
   if(!is.null(contrast)){
     if(boot == TRUE){
