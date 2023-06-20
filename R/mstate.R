@@ -1275,7 +1275,10 @@ check_trans <- function(trans, flist){
     if (nrow(trans) != ncol(trans)) stop("`trans should be a square matrix")
     ntrans <- length(na.omit(as.vector(trans)))
     if (ntrans != length(flist))
-        stop(sprintf("`trans` has %s numeric entries, but `flist` is of length %s. These should match and equal the number of transitions"))
+        stop(sprintf(
+            "`trans` has %s numeric entries, but `flist` is of length %s. These should match and equal the number of transitions",
+            ntrans, length(flist)
+        ))
 }
 
 
