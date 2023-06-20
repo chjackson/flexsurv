@@ -53,7 +53,7 @@ after each transition time, by adding the current time to the value
 supplied in \code{newdata}.  This assumes the covariate is measured in the
 same unit as time. \code{tcovs} is supplied as a character vector.}
 
-\item{tidy}{If \code{TRUE} then the simulated data are returned as a tidy data frame with one row per simulated transition.  See \code{\link{simfs_bytrans}} for a function to rearrange the data into this format if it was simulated in non-tidy format.}
+\item{tidy}{If \code{TRUE} then the simulated data are returned as a tidy data frame with one row per simulated transition.  See \code{\link{simfs_bytrans}} for a function to rearrange the data into this format if it was simulated in non-tidy format.  Currently this includes only event times, and excludes any times of censoring that are reported when \code{tidy=FALSE}.}
 
 \item{debug}{Print intermediate outputs: for development use.}
 }
