@@ -146,7 +146,7 @@ rmst_generic <- function(pdist, t, start=0, matargs=NULL, scalarargs=NULL, ...)
           )
       }
       else args_mat[[i]] <- matrix(args_mat[[i]], nrow=maxlen, ncol=length(args_mat[[i]]), byrow=TRUE)
-      na_inds <- na_inds | apply(args_mat[[i]], 1, function(x)any(is.na(x)))
+      na_inds <- na_inds | apply(args_mat[[i]], 1, anyNA)
   }
   ret <- numeric(maxlen)
   ret[na_inds] <- NA
@@ -258,7 +258,7 @@ qgeneric <- function(pdist, p, matargs=NULL, scalarargs=NULL, ...)
             )
         }
         else args.mat[[i]] <- matrix(args.mat[[i]], nrow=maxlen, ncol=length(args.mat[[i]]), byrow=TRUE)
-        na_inds <- na_inds | apply(args.mat[[i]], 1, function(x)any(is.na(x)))
+        na_inds <- na_inds | apply(args.mat[[i]], 1, anyNA)
     }
     p <- rep(p, length.out=maxlen)
     ret[p < 0 | p > 1] <- NaN
