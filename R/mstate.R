@@ -970,7 +970,7 @@ simfs_bytrans <- function(simfs){
 ##'
 ##' @examples
 ##'
-##' ## How to use bootci.msm
+##' ## How to use bootci.fmsm
 ##' 
 ##' ## Write a function with one argument called x giving a fitted model,
 ##' ## and returning some results of the model.  The results may be in any form.   
@@ -984,7 +984,7 @@ simfs_bytrans <- function(simfs){
 ##'  list(resp, rest)
 ##' }
 ##'
-##' ## Use bootci.msm to obtain the confidence interval
+##' ## Use bootci.fmsm to obtain the confidence interval
 ##' ## The matrix columns are in the order of the unlisted results of the original
 ##' ## summfn.  You will have to rearrange them into the format that you want.
 ##' ## If summfn has any extra arguments, in this case \code{t}, make sure they are
@@ -1101,7 +1101,7 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
 ##' 
 ##' @param cl Width of symmetric confidence intervals, relative to 1.
 ##'
-##' @param cores Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing. 
+##' @param cores Number of processor cores used when calculating confidence limits by repeated simulation.  The default uses single-core processing. 
 ##' 
 ##' @return The transition probability matrix.  If \code{ci=TRUE}, there are
 ##' attributes \code{"lower"} and \code{"upper"} giving matrices of the
