@@ -64,7 +64,7 @@ accuracy.}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
 
-\item{cores}{Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing.}
+\item{cores}{Number of processor cores used when calculating confidence limits by repeated simulation.  The default uses single-core processing.}
 }
 \value{
 The transition probability matrix.  If \code{ci=TRUE}, there are

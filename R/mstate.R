@@ -954,7 +954,7 @@ simfs_bytrans <- function(simfs){
 ##'
 ##' @param B Number of parameter draws to use
 ##'
-##' @param fn Function to bootstrap the results of.  It must have an argument named `code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below. 
+##' @param fn Function to bootstrap the results of.  It must have an argument named \code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below. 
 ##'
 ##' @param attrs Any attributes of the value returned from \code{fn} which we want confidence intervals for.  These will be unlisted, if possible, and appended to the result vector. 
 ##'
