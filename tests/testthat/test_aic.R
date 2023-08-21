@@ -1,0 +1,17 @@
+test_that("Information criteria",{
+  p <- 3
+  n <- nrow(ovarian)
+  fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma")
+  expect_equal(nobs(fitg), n)
+  AIC(fitg)
+  expect_equal(BIC(fitg), AIC(fitg, k=log(n)))
+  nevent <- sum(ovarian$fustat)
+  expect_equal(BIC(fitg, cens=FALSE), AIC(fitg, k=log(nevent)))
+  expect_equal(BIC(fitg), BIC.flexsurvreg(fitg))
+  expect_equal(BIC(fitg,cens=FALSE), BIC.flexsurvreg(fitg,cens=FALSE))
+  expect_equal(AICc(fitg), AIC(fitg, k=(2*n) / (n - p - 1)))
+  expect_equal(AICc(fitg,cens=FALSE), AIC(fitg, k=(2*nevent) / (nevent - p - 1)))
+  expect_equal(AICC(fitg), AICc(fitg))
+  expect_equal(AICc.flexsurvreg(fitg), AICc(fitg))
+  expect_equal(AICC.flexsurvreg(fitg), AICc(fitg))
+})

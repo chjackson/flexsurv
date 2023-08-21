@@ -984,12 +984,13 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                   ncovs=ncovs, ncoveffs=ncoveffs,
                   mx=mx, basepars=1:nbpars,
                   covpars=if (ncoveffs>0) (nbpars+1):npars else NULL,
-                  AIC=-2*ret$loglik + 2*ret$npars,
+                  AIC = -2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
                   concat.formula=f2, all.formulae=forms, dfns=dfns),
              ret,
              list(covdata = covdata)) # temporary position so cyclomort doesn't break
+    ret$BIC <- BIC.flexsurvreg(ret, cens=TRUE)
     if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
         && (dfns$deriv) ) {
         if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
@@ -998,6 +999,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     class(ret) <- "flexsurvreg"
     ret
 }
+
 
 ##' @export
 print.flexsurvreg <- function(x, ...)
@@ -1164,10 +1166,17 @@ coef.flexsurvreg <- function(object, ...){
 ##' 
 ##' Number of observations contributing to a fitted flexible survival model
 ##' 
-##' This matches the behaviour of the \code{nobs} method for \code{\link[survival]{survreg}} objects, including both censored and uncensored observations.
+##' By default, this matches the behaviour of the \code{nobs} method for \code{\link[survival]{survreg}} objects, including both censored and uncensored observations.
+##' 
+##' If a weighted \code{flexsurvreg} analysis was done, then this function returns the sum of the weights.
 ##'
 ##' @param object Output from \code{\link{flexsurvreg}} or
 ##' \code{\link{flexsurvspline}}, representing a fitted survival model object.
+##'
+##' @param cens Include censored observations in the number.  \code{TRUE} by default.
+##' If \code{FALSE} then the number of observed events is returned.  See
+##'   \code{\link{BIC.flexsurvreg}} for a discussion of the issues
+##'   with defining the sample size for censored data. 
 ##' 
 ##' @param ... Further arguments passed to or from other methods.  Currently
 ##' unused.
@@ -1183,6 +1192,129 @@ coef.flexsurvreg <- function(object, ...){
 ##' @keywords models
 ##' 
 ##' @export
-nobs.flexsurvreg <- function(object, ...){
-    object$N
+nobs.flexsurvreg <- function(object, cens=TRUE, ...){
+  if (cens) ind <- seq(length.out=nrow(object$data$Y)) else ind <- which(object$data$Y[,"status"] == 1)
+  sum(object$data$m[ind,"(weights)"])
 }
+
+
+##' Bayesian Information Criterion (BIC) for comparison of flexsurvreg models
+##' 
+##' Bayesian Information Criterion (BIC) for comparison of flexsurvreg models
+##' 
+##' @param object Fitted model returned by \code{\link{flexsurvreg}}
+##'   (or \code{\link{flexsurvspline}}).
+##' 
+##' @param cens Include censored observations in the sample size term
+##'   (\code{n}) used in the calculation of BIC.
+##'
+##' @return The BIC of the fitted model.  This is minus twice the log likelihood plus \code{p*log(n)}, where
+##'   \code{p} is the number of parameters and \code{n} is the sample
+##'   size of the data.  If \code{weights} was supplied to
+##'   \code{flexsurv}, the sample size is defined as the sum of the
+##'   weights.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @details There is no "official" definition of what the sample size
+##'   should be for the use of BIC in censored survival analysis.  BIC
+##'   is based on an approximation to Bayesian model comparison using
+##'   Bayes factors and an implicit vague prior.  Informally, the
+##'   sample size describes the number of "units" giving rise to a
+##'   distinct piece of information (Kass and Raftery 1995).  However
+##'   censored observations provide less information than observed
+##'   events, in principle.  The default used here is the number of
+##'   individuals, for consistency with more familiar kinds of
+##'   statistical modelling.  However if censoring is heavy, then the
+##'   number of events may be a better represent the amount of
+##'   information.  Following these principles, the best approximation
+##'   would be expected to be somewere in between.
+##'
+##' AIC and BIC are intended to measure different things.  Briefly,
+##' AIC measures predictive ability, whereas BIC is expected to choose
+##' the true model from a set of models where one of them is the
+##' truth.  Therefore BIC chooses simpler models for all but the
+##' tiniest sample sizes (\eqn{log(n)>2}, \eqn{n>7}).  AIC might be preferred in the
+##' typical situation where
+##' "all models are wrong but some are useful". AIC also gives similar
+##' results to cross-validation (Stone 1977).
+##'
+##' @references Kass, R. E., & Raftery, A. E. (1995). Bayes
+##'   factors. Journal of the American Statistical Association,
+##'   90(430), 773-795.
+##'
+##' @references Stone, M. (1977). An asymptotic equivalence of choice
+##'   of model by cross‐validation and Akaike's criterion. Journal of
+##'   the Royal Statistical Society: Series B (Methodological), 39(1),
+##'   44-47.
+##'
+##' @seealso \code{\link{BIC}}, \code{\link{AIC}}, \code{\link{AICC.flexsurvreg}}, \code{\link{nobs.flexsurvreg}}
+##'
+##' @export
+BIC.flexsurvreg <- function(object, cens = TRUE, ...){
+  n <- nobs.flexsurvreg(object, cens=cens)
+  -2*object$loglik + object$npars * log(n)  
+}
+
+
+##' Second-order Akaike information criterion 
+##'
+##' Second-order or "corrected" Akaike information criterion, often
+##' known as AICc (see, e.g. Burnham and Anderson 2002).  This is
+##' defined as -2 log-likelihood + \code{(2*p*n)/(n - p -1)}, whereas
+##' the standard AIC is defined as -2 log-likelihood + \code{2*p},
+##' where \code{p} is the number of parameters and \code{n} is the
+##' sample size.  The correction is intended to adjust AIC for
+##' small-sample bias, hence it only makes a difference to the result
+##' for small \code{n}.
+##' 
+##' This can be spelt either as \code{AICC} or \code{AICc}.
+##'
+##' @param object Fitted model returned by \code{\link{flexsurvreg}}
+##'   (or \code{\link{flexsurvspline}}).
+##'
+##' @param cens Include censored observations in the sample size term
+##'   (\code{n}) used in this calculation. See
+##'   \code{\link{BIC.flexsurvreg}} for a discussion of the issues
+##'   with defining the sample size.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @references Burnham, K. P., Anderson, D. R. (2002) Model Selection and Multimodel Inference: a practical information-theoretic approach. Second edition. Springer: New York.
+##'
+##' @return The second-order AIC of the fitted model.
+##'
+##' @seealso \code{\link{BIC}}, \code{\link{AIC}}, \code{\link{BIC.flexsurvreg}}, \code{\link{nobs.flexsurvreg}}
+##' 
+##' @export
+AICc.flexsurvreg <- function(object, cens=TRUE, ...){
+  n <- nobs.flexsurvreg(object, cens=cens)
+  p <- object$npars
+## equivalently: object$AIC + ((2 * p) * (p + 1) / (n - p - 1))
+  -2*object$loglik + (2*p*n) / (n - p - 1) 
+}
+
+
+##' @rdname AICc.flexsurvreg
+##' @export
+AICC.flexsurvreg <- AICc.flexsurvreg
+
+##' Second-order Akaike information criterion 
+##' 
+##' Generic function for the second-order Akaike information criterion.
+##' The only current implementation of this in \pkg{flexsurv} is
+##' in \code{\link{AICc.flexsurvreg}}, see there for more details.
+##'
+##' This can be spelt either as \code{AICC} or \code{AICc}.
+##'
+##' @param object Fitted model object.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @export
+AICc <- function (object, ...)
+UseMethod("AICc")
+
+##' @rdname AICc
+##' @export
+AICC <- AICc
