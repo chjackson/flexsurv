@@ -863,6 +863,17 @@ inv.transform.res <- function(x, dlists) {
   c(probs, pcov, unlist(est))
 }
 
+##' Model frame from a flexsurvmix object
+##'
+##' Returns a list of data frames, with each component containing the
+##' data that were used for the model fit for that mixture component.
+##'
+##' @param formula Fitted model object from \code{\link{flexsurvmix}}.
+##'
+##' @param ... Further arguments (currently unused).
+##'
+##' @return A list of data frames
+##' 
 ##' @export
 model.frame.flexsurvmix <- function(formula, ...)
 {

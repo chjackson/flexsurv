@@ -1068,6 +1068,14 @@ form.model.matrix <- function(object, newdata, na.action=na.pass, forms=NULL){
 }
 
 
+##' Variance-covariance matrix from  a flexsurvreg model
+##'
+##' @inheritParams logLik.flexsurvreg
+##'
+##' @return Variance-covariance matrix of the estimated parameters, on
+##'   the scale that they were estimated on (for positive parameters
+##'   this is the log scale).
+##' 
 ##' @export
 vcov.flexsurvreg <- function (object, ...)
 {
@@ -1124,6 +1132,18 @@ model.matrix.flexsurvreg <- function(object, par=NULL, ...)
     if (is.null(par)) compress.model.matrices(x$data$mml) else x$data$mml[[par]]
 }
 
+##' Log likelihood from a flexsurvreg model
+##'
+##' @param object A fitted model object of class
+##'   \code{\link{flexsurvreg}}, e.g. as returned by
+##'   \code{flexsurvreg} or \code{flexsurvspline}.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @return Log-likelihood (numeric) with additional attributes \code{df} (degrees of freedom, or number
+##' of parameters that were estimated), and number of observations \code{nobs} (including observed
+##' events and censored observations).
+##' 
 ##' @export
 logLik.flexsurvreg <- function(object, ...){
     val <- object$loglik

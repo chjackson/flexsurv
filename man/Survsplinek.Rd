@@ -66,7 +66,7 @@
 \alias{rmst_survspline5}
 \alias{rmst_survspline6}
 \alias{rmst_survspline7}
-\title{Royston/Parmar spline survival distribution functions}
+\title{Royston/Parmar spline survival distribution functions with one argument per parameter}
 \usage{
 mean_survspline0(
   gamma0,

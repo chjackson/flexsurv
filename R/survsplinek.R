@@ -1,4 +1,4 @@
-##' Royston/Parmar spline survival distribution functions 
+##' Royston/Parmar spline survival distribution functions with one argument per parameter
 ##' 
 ##' Probability density, distribution, quantile, random generation, hazard, 
 ##' cumulative hazard, mean and restricted mean functions for the Royston/Parmar

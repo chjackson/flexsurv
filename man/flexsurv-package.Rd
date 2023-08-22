@@ -80,6 +80,7 @@ gamma distribution.  Statistics in Medicine 26:4252-4374
 Useful links:
 \itemize{
   \item \url{https://github.com/chjackson/flexsurv-dev}
+  \item \url{http://chjackson.github.io/flexsurv-dev/}
   \item Report bugs at \url{https://github.com/chjackson/flexsurv-dev/issues}
 }
 

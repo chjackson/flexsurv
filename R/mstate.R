@@ -1347,6 +1347,18 @@ print.fmsm <- function(x, ...){
     }
 }
 
+##' Akaike's information criterion from a flexible parametric multistate model
+##'
+##' Defined as the sum of the AICs of the transition-specific models.
+##'
+##' @param object Object returned by \code{\link{fmsm}} representing a multistate model.
+##'
+##' @param k Penalty applied to number of parameters (defaults to the standard 2).
+##'
+##' @param ... Further arguments (currently unused).
+##'
+##' @return The sum of the AICs of the transition-specific models.
+##' 
 ##' @export
 AIC.fmsm <- function(object,...,k=2){
     nmods <- length(object)

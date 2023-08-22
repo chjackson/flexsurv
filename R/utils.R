@@ -73,13 +73,13 @@ rbase <- function(dname, n, ...){
 }
 
 
-##' Generic function to find restricted mean survival of a distribution
+##' Generic function to find restricted mean survival time for some distribution
 ##'
 ##' Generic function to find the restricted mean of a distribution, given the
-##' equivalent probability distribution function using numeric integration.
+##' equivalent probability distribution function, using numeric integration.
 ##'
 ##' This function is used by default for custom distributions for which an
-##' rmst function is not provided.
+##' \code{rmst} function is not provided.
 ##'
 ##' This assumes a suitably smooth, continuous distribution.
 ##'
