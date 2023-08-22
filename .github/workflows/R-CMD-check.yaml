@@ -46,10 +46,3 @@ jobs:
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
-        with:
-	  args: 'c("--no-manual", "--as-cran", "--ignore-vignettes")'
-	  build-args: 'c("--no-build-vignettes")'
-    	  error-on: '"error"'
-          check-dir: '"check"'   		
-        env:
-          _R_CHECK_CRAN_INCOMING_: false
