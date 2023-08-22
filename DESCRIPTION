@@ -62,9 +62,9 @@ Suggests:
     testthat,
     TH.data,
     broom
-URL: https://github.com/chjackson/flexsurv-dev,
-    http://chjackson.github.io/flexsurv-dev/
-BugReports: https://github.com/chjackson/flexsurv-dev/issues
+URL: https://github.com/chjackson/flexsurv,
+    http://chjackson.github.io/flexsurv/
+BugReports: https://github.com/chjackson/flexsurv/issues
 VignetteBuilder: knitr
 LazyData: yes
 LinkingTo: Rcpp
