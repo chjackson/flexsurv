@@ -42,7 +42,3 @@ devtools::install_github('chjackson/flexsurv-dev')
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R-CMD-check](https://github.com/chjackson/flexsurv-dev/workflows/R-CMD-check/badge.svg)](https://github.com/chjackson/flexsurv-dev/actions)
 <!-- badges: end -->
-
-## Help wanted
-
-... to get a standard Github Actions script for R CMD check working, ideally one which supports LaTeX vignettes!
