@@ -48,8 +48,9 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+	  args: 'c("--no-manual", "--as-cran", "--ignore-vignettes")'
+	  build-args: 'c("--no-build-vignettes")'
+    	  error-on: '"error"'
+          check-dir: '"check"'   		
         env:
           _R_CHECK_CRAN_INCOMING_: false
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran", "--ignore-vignettes"), build_args = c("--no-build-vignettes"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
-	
