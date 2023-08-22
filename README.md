@@ -17,11 +17,11 @@ The [flexsurv](http://cran.r-project.org/package=flexsurv) R package for paramet
 
 ## Learn more 
 
-[User guide (PDF)](articles/flexsurv.pdf).
+[User guide (PDF)](https://chjackson.github.io/flexsurv/articles/flexsurv.pdf).
 
-[Guide to multi-state modelling in flexsurv](articles/multistate.pdf).
+[Guide to multi-state modelling in flexsurv](https://chjackson.github.io/flexsurv/articles/multistate.pdf).
 
-[Full reference manual](reference/index.html) for all the package's functions.
+[Full reference manual](https://chjackson.github.io/flexsurv/reference/index.html) for all the package's functions.
 
 [Paper in Journal of Statistical Software (Jackson 2016)](https://www.jstatsoft.org/article/view/v070i08).  Mostly the same as the user guide, but not kept up to date.
 
