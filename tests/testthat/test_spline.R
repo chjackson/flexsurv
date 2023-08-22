@@ -50,6 +50,7 @@ test_that("Basic flexsurvspline, Weibull, no covs",{
 })
 
 test_that("Basic flexsurvspline, one knot, best fitting in paper",{
+     skip_if(covr::in_covr()) # optimisation for scale="odds" doesn't converge under covr for some reason
      spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1, scale="odds")
      expect_equal(spl$loglik, -788.981901798638, tol=1e-05) 
      expect_equal(spl$loglik  +   sum(log(bc$recyrs[bc$censrec==1])), -615.49431514184, tol=1e-05)
@@ -107,23 +108,16 @@ test_that("Spline proportional hazards models reduce to Weibull",{
     expect_equal(fit$loglik, wei.base$loglik[1])
 })
 
-if (is.element("eha", installed.packages()[,1])) {
-   test_that("Spline proportional odds models reduce to log-logistic",{
-           library(eha)
-           custom.llogis <- list(name="llogis",
-                                 pars=c("shape","scale"),
-                                 location="scale",
-                                 transforms=c(log, log),
-                                 inv.transforms=c(exp, exp),
-                                 inits=function(t){ c(1, median(t)) })
-           fitll <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist=custom.llogis)
-           fitsp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, scale="odds")
-           expect_equal(fitsp$loglik, fitll$loglik)
-           expect_equal(1/fitll$res["scale",1]^fitll$res["shape",1], exp(fitsp$res["gamma0",1]), tol=1e-02)
-           expect_equal(fitsp$res["gamma1",1], fitll$res["shape",1], tol=1e-02)
-           detach("package:eha")
-   })
-}
+test_that("Spline proportional odds models reduce to log-logistic",{
+  skip_if(covr::in_covr()) # optimisation for fitsp doesn't converge under covr for some reason
+  fitll <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist="llogis")
+  fitsp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, scale="odds",
+                          control=list(reltol=1e-16), fixedpars=FALSE)
+  print(fitsp)
+  expect_equal(fitsp$loglik, fitll$loglik)
+  expect_equal(1/fitll$res["scale",1]^fitll$res["shape",1], exp(fitsp$res["gamma0",1]), tol=1e-02)
+  expect_equal(fitsp$res["gamma1",1], fitll$res["shape",1], tol=1e-02)
+})
 
 test_that("Spline normal models reduce to log-normal",{
     fitln <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist="lnorm")
@@ -182,6 +176,7 @@ test_that("Spline models with relative survival",{
 })
 
 test_that("flexsurvspline results match stpm in Stata",{
+    skip_if(covr::in_covr()) # optimisation for scale="odds" doesn't converge under covr for some reason
     ## Numbers copied from Stata output for equivalent stpm commands
     ## see ~/flexsurv/stpm/do1.do
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=0)
@@ -199,11 +194,12 @@ test_that("flexsurvspline results match stpm in Stata",{
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -675.73591 , tol=1e-04)
 
     ## stpm needs all or no ancillary pars to depend on covs
-    ## TODO stpm2: our Stata 13.0 is too old for this, need 13.1
+    ## not tested under stpm2
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group + gamma1(group) + gamma2(group) + gamma3(group), data=bc, k=2, scale="hazard")
     expect_equal(spl$loglik  +  sum(log(bc$recyrs[bc$censrec==1])), -607.47942, tol=1e-04)
     ## coefficients are the same to about 2sf
 })
+
 
 test_that("Expected survival",{
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1)

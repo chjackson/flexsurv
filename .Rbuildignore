@@ -41,3 +41,4 @@ vignettes/Sweave.sty
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+codecov.yml

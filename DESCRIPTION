@@ -61,7 +61,8 @@ Suggests:
     msm,
     testthat,
     TH.data,
-    broom
+    broom,
+    covr
 URL: https://github.com/chjackson/flexsurv,
     http://chjackson.github.io/flexsurv/
 BugReports: https://github.com/chjackson/flexsurv/issues
