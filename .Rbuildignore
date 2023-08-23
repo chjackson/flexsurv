@@ -29,6 +29,7 @@ tests/test_extra.R
 ^codecov\.yml$
 \.gcda
 \.gcno
+\.gcov
 ^doc$
 ^Meta$
 docs
@@ -42,6 +43,3 @@ vignettes/Sweave.sty
 ^docs$
 ^pkgdown$
 codecov.yml
-*.gcda
-*.gcno
-*.gcov
