@@ -144,7 +144,7 @@ fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ factor(rx),
 
 test_that("Model fit with covariates",{
     expect_equal(fitg$loglik, -97.3641506645869, tolerance=1e-06)
-    if (interactive()) {
+    if (covr::in_covr() || interactive()) {
         plot(fitg, ci=TRUE)
         plot(fitg, X=rbind(c(0), c(1)), ci=TRUE, col="red")
         lines(fitg, X=rbind(c(1.1), c(1.2)), ci=TRUE, col="blue")
@@ -190,7 +190,7 @@ test_that("Model fit with covariates and simulated data",{
     dead <- as.numeric(sim<=30)
     simt <- ifelse(sim<=30, sim, 30)
     fit <- flexsurvreg(Surv(simt, dead) ~ x, dist="genf", control=list(maxit=10000))
-    if (interactive()) {
+    if (covr::in_covr() || interactive()) {
         fit # estimate should be -0.2
         summary(fit)
         plot(fit)

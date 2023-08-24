@@ -25,7 +25,7 @@ test_that("flexsurvspline summary method",{
     expect_equal(summ$est[2],  0.04446356223043756, tol=1e-05)
 })
 
-if (interactive()){
+if (covr::in_covr() || interactive()){
     test_that("flexsurvspline plot method",{
       expect_no_error({
         plot(spl, col=c("red","blue","green"))

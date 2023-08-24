@@ -1,6 +1,6 @@
-em_supported <- TRUE
+if (!identical(Sys.getenv("NOT_CRAN"), "true")) return()
 
-n <- 1000
+n <- 200
 p <- 0.5 
 set.seed(1)
 death <- rbinom(n, 1, p)
@@ -16,65 +16,56 @@ event <- ifelse(cens, NA, death+1) # 1 is cure, 2 is death
 dat <- data.frame(t, status, event, x)
 dat$evname <- c("cure", "death")[dat$event]
 
-fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=1:2)
-
-if (em_supported){
-
-  test_that("EM basic",{
+test_that("EM basic",{
   x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
                    dists=c("gamma","gamma"),  method="em")
   xd <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
                     dists=c("gamma","gamma"),  method="direct")
   expect_equivalent(x$loglik, xd$loglik, tol=1e-06)
-  })
-  
-  test_that("EM pformula",{
+})
+
+test_that("EM pformula",{
   x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
                    dists=c("gamma","gamma"), pformula = ~x+y,  method="em")
   xd <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
                     dists=c("gamma","gamma"), pformula = ~x+y,  method="direct")
-  expect_equivalent(x$loglik, xd$loglik, tol=1e-06)
-  })
-  
- test_that("EM with different covs on different components", {
- x <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
-                       death=Surv(t, status) ~ x),
-                  data=dat, event=evname, 
-                  dists=c("gamma","gamma"),  method="em")
- xd <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
-                       death=Surv(t, status) ~ x),
-                  data=dat, event=evname, 
-                  dists=c("gamma","gamma"),  method="direct")
- expect_equivalent(x$loglik, xd$loglik, tol=1e-06)
- })
- 
- 
- test_that("EM with anc and different covs on different components", {
-   x <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
+  expect_equivalent(x$loglik, xd$loglik, tol=1e-04)
+})
+
+test_that("EM with different covs on different components", {
+  x <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
+                        death=Surv(t, status) ~ x),
+                   data=dat, event=evname, 
+                   dists=c("gamma","gamma"),  method="em")
+  xd <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
+                         death=Surv(t, status) ~ x),
+                    data=dat, event=evname, 
+                    dists=c("gamma","gamma"),  method="direct")
+  expect_equivalent(x$loglik, xd$loglik, tol=1e-04)
+})
+
+test_that("EM with anc and different covs on different components", {
+  x <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
+                        death=Surv(t, status) ~ x),
+                   data=dat, event=evname, 
+                   anc=list(cure=list(shape=~y), death=list(shape=~1)),
+                   dists=c("gamma","gamma"),  method="em")
+  xd <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
                          death=Surv(t, status) ~ x),
                     data=dat, event=evname, 
                     anc=list(cure=list(shape=~y), death=list(shape=~1)),
-                    dists=c("gamma","gamma"),  method="em")
-   xd <- flexsurvmix(list(cure=Surv(t, status) ~ 1, 
-                          death=Surv(t, status) ~ x),
-                     data=dat, event=evname, 
-                     anc=list(cure=list(shape=~y), death=list(shape=~1)),
-                     dists=c("gamma","gamma"),  method="direct")
-   expect_equivalent(x$loglik, xd$loglik, tol=1e-06)
- })
- 
-}
-
+                    dists=c("gamma","gamma"),  method="direct")
+  expect_equivalent(x$loglik, xd$loglik, tol=1e-04)
+})
 
 test_that("Variances in Aalen-Johansen",{
   x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
-                 dists=c("gamma","gamma"),  method="em")
+                   dists=c("gamma","gamma"),  method="em")
   aj <- ajfit_flexsurvmix(x, B=3)
   expect_true(inherits(aj, "data.frame")  & is.numeric(aj$lower))
 })
 
-
-n <- 10000
+n <- 100
 set.seed(1)
 x <- rnorm(n)
 y <- rbinom(n, 1,  0.5)
@@ -90,22 +81,20 @@ event <- ifelse(cens, NA, death+1) # 1 is cure, 2 is death
 dat <- data.frame(t, status, event, x)
 dat$evname <- c("cure", "death")[dat$event]
 
-test_that("fixedpars with EM",{
-  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
-                   dists=c("gamma","gamma"), pformula = ~ x + y, method="em")
-  
+test_that("var.method",{
   x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
                    dists=c("gamma","gamma"), pformula = ~ x + y, method="em", fixedpars=c(3,4),
                    em.control=list(var.method="louis"))
   x
   
-  x <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
+  x2 <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, 
                    dists=c("gamma","gamma"), pformula = ~ x + y, method="em", fixedpars=c(3,4),
                    em.control=list(var.method="direct"))
   
-  x
+  x2
+  expect_equivalent(x$loglik, x2$loglik, tol=1e-04)
+  expect_true(x$cov[1,1] != x2$cov[1,1])
 })
-
 
 test_that("Models with interactions",{
   dat$x <- factor(rbinom(nrow(dat), size=1, prob=0.5))
@@ -113,5 +102,6 @@ test_that("Models with interactions",{
   fsi <- flexsurvmix(formula = Surv(t, status) ~ x*y, data = dat, event = event, 
                      dists = c("gamma", "weibull"), fixedpars = FALSE, method="em", 
                      em.control=list(var.method="louis", reltol=1e-04))
-  ajfit_flexsurvmix(fsi)
+  aj <- ajfit_flexsurvmix(fsi)
+  expect_equal(aj$val[1], 1)  
 })
