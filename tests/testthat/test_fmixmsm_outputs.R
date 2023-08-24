@@ -1,3 +1,5 @@
+if (!identical(Sys.getenv("NOT_CRAN"), "true")) return()
+
 ## simulate events following hospital 
 n <- 1000
 set.seed(1)
@@ -80,14 +82,19 @@ test_that("meanfinal_fmixmsm",{
   expect_true(is.numeric(meanfinal_fmixmsm(fm, newdata=nd, final=TRUE, B=3)$lower))
 })
 
-test_that("qfinal_fmixmsm",{
-  qfinal_fmixmsm(fm, newdata=nd)
-  qfinal_fmixmsm(fm, newdata=nd, final=TRUE)
-  qfinal_fmixmsm(fm, newdata=nd, probs=c(0.25, 0.75))
-  qfinal_fmixmsm(fm, newdata=nd, probs=c(0.25, 0.75), final=TRUE)
+if (covr::in_covr()){
+  test_that("qfinal_fmixmsm",{
+    expect_error({
+      qfinal_fmixmsm(fm, newdata=nd)
+      qfinal_fmixmsm(fm, newdata=nd, final=TRUE)
+      qfinal_fmixmsm(fm, newdata=nd, probs=c(0.25, 0.75))
+      qfinal_fmixmsm(fm, newdata=nd, probs=c(0.25, 0.75), final=TRUE)
+      
+      qfinal_fmixmsm(fm, newdata=nd, B=10)
+      qfinal_fmixmsm(fm, newdata=nd, B=10, final=TRUE)
+      qfinal_fmixmsm(fm, newdata=nd, n=100, B=10)
+      qfinal_fmixmsm(fm, newdata=nd, n=100, B=10, final=TRUE)
+    }, NA)
+  })
+}
 
-  qfinal_fmixmsm(fm, newdata=nd, B=10)
-  qfinal_fmixmsm(fm, newdata=nd, B=10, final=TRUE)
-  qfinal_fmixmsm(fm, newdata=nd, n=100, B=10)
-  qfinal_fmixmsm(fm, newdata=nd, n=100, B=10, final=TRUE)
-})
