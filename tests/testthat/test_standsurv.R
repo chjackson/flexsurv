@@ -229,6 +229,8 @@ test_that('all-cause predictions from RS model', {
 })
 
 test_that("standsurv deltamethod and bootstrap SEs",{
+  fitw <- flexsurvreg(Surv(recyrs, censrec) ~ group, 
+                      data=bc, dist="weibull")
   ss <- standsurv(fitw, at=list(list(group="Good"), list(group="Medium"), list(group="Poor")),
                   t = 4, se=TRUE, boot=FALSE)
   expect_true(is.numeric(ss$at1_se))
@@ -269,15 +271,6 @@ if (interactive() || covr::in_covr()){
     }, NA)
   })
 }
-
-## TODO
-## seed arg
-## call type=relsurvival if not bhazard
-# exclude rmap,ratetable for type survival 
-# achazard
-# acrmst , one time point 
-# achazard
-# acrmst 
 
 test_that("examples from help(standsurv) run",{
   skip_on_cran()
