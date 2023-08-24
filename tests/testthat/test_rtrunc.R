@@ -42,3 +42,39 @@ test_that("summary.flexsurvtrunc works", {
   expect_equal(summse$se, 0.004329825)
 })
 
+
+test_that("survrtrunc works", {
+  ## simulate some event time data
+  set.seed(1)
+  X <- rweibull(100, 2, 10)
+  T <- rweibull(100, 2, 10)
+
+  ## truncate above
+  tmax <- 20
+  obs <- X + T < tmax
+  rtrunc <- tmax - X
+  dat <- data.frame(X, T, rtrunc)[obs,]
+  
+  sf <-    survrtrunc(T, rtrunc, data=dat, tmax=tmax)
+  sfnaive <- survfit(Surv(T) ~ 1, data=dat)
+  ## Kaplan-Meier estimate ignoring truncation is biased
+  expect_true(all(sf$surv[10:20] > sfnaive$surv[10:20]))
+
+  if (interactive() || covr::in_covr()){
+    plot(sf, conf.int=TRUE)
+    lines(sfnaive, conf.int=TRUE, lty=2, col="red")
+    plot(sfnaive, conf.int=TRUE)
+    lines(sf, conf.int=TRUE, lty=2, col="red")
+  }
+
+  ## truncate above the maximum observed time
+  tmax <- max(X + T) + 10
+  obs <- X + T < tmax
+  rtrunc <- tmax - X
+  dat <- data.frame(X, T, rtrunc)[obs,]
+  sf <-    survrtrunc(T, rtrunc, data=dat, tmax=tmax)
+  ## estimates identical to the standard Kaplan-Meier
+  sfnaive <- survfit(Surv(T) ~ 1, data=dat)
+
+  expect_equal(sf$surv[1:10], sfnaive$surv[1:10])
+})

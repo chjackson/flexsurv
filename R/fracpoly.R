@@ -1,5 +1,6 @@
 ### simplified version of gamlss::bfp with no shift or scale
 
+#nocov start
 bfp <- function (x, powers = c(1, 2)) 
 {
     nobs <- length(x)
@@ -45,3 +46,4 @@ dbfp <- function (x, powers = c(1, 2))
     }
     X
 }
+#nocov end
