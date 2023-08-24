@@ -9,6 +9,9 @@ survreg_wrap <- function(args){
   do.call(survreg, args)
 }
 
+## covr doesn't detect when these are used, as they are manipulated dynamically
+
+# nocov start
 sr.weib.inits <- function(t,aux){
     if (aux$counting){
         lt <- log(t[t>0])
@@ -77,6 +80,7 @@ sr.llog.inits <- function(t,aux){
         sr2fsllog(sr)
     }
 }
+# nocov end
 
 ## Convert parameters of survreg models to flexsurvreg
 ## parameterisation, for use as initial values
