@@ -228,3 +228,125 @@ test_that('all-cause predictions from RS model', {
   
 })
 
+test_that("standsurv deltamethod and bootstrap SEs",{
+  ss <- standsurv(fitw, at=list(list(group="Good"), list(group="Medium"), list(group="Poor")),
+                  t = 4, se=TRUE, boot=FALSE)
+  expect_true(is.numeric(ss$at1_se))
+  ssb <- standsurv(fitw, at=list(list(group="Good"), list(group="Medium"), list(group="Poor")),
+                  t = 4, se=TRUE, boot=TRUE, B=5)
+  expect_true(ssb$at1_se != ss$at1_se)
+})
+
+if (interactive() || covr::in_covr()){
+  test_that("standsurv plot",{
+    expect_error({
+                 
+    ## Use bc dataset, with an age variable appended
+    ## mean age is higher in those with smaller observed survival times 
+    newbc <- bc
+    newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE), 
+                       sd = 5)
+
+    ## Fit a Weibull flexsurv model with group and age as covariates
+    weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc,
+                            dist="weibull")
+    ## Calculate standardized survival and the difference in standardized survival
+    ## for the three levels of group across a grid of survival times
+    standsurv_weib_age <- standsurv(weib_age,
+                                    at = list(list(group="Good"),
+                                              list(group="Medium"),
+                                              list(group="Poor")),
+                                    t=seq(0,7, length=100),
+                                    contrast = "difference", ci=TRUE,
+                                    boot = TRUE, B=10, seed=123)
+    plot(standsurv_weib_age)
+    plot(standsurv_weib_age) + ggplot2::theme_bw() + ggplot2::ylab("Survival") +
+      ggplot2::xlab("Time (years)") + 
+      ggplot2::guides(color=ggplot2::guide_legend(title="Prognosis"),
+                      fill=ggplot2::guide_legend(title="Prognosis"))
+    plot(standsurv_weib_age, contrast=TRUE, ci=TRUE) + 
+      ggplot2::ylab("Difference in survival") 
+    }, NA)
+  })
+}
+
+## TODO
+## seed arg
+## call type=relsurvival if not bhazard
+# exclude rmap,ratetable for type survival 
+# achazard
+# acrmst , one time point 
+# achazard
+# acrmst 
+
+test_that("examples from help(standsurv) run",{
+  skip_on_cran()
+  expect_error({
+    ## mean age is higher in those with smaller observed survival times 
+    newbc <- bc
+    set.seed(1)
+    newbc$age <- rnorm(dim(bc)[1], mean = 65-scale(newbc$recyrs, scale=FALSE),
+                       sd = 5)
+
+    ## Fit a Weibull flexsurv model with group and age as covariates
+    weib_age <- flexsurvreg(Surv(recyrs, censrec) ~ group+age, data=newbc, 
+                            dist="weibull")
+
+    ## Calculate standardized survival and the difference in standardized survival
+    ## for the three levels of group across a grid of survival times                        
+    standsurv_weib_age <- standsurv(weib_age, 
+                                    at = list(list(group="Good"), 
+                                              list(group="Medium"), 
+                                              list(group="Poor")), 
+                                    t=seq(0,7, length.out=100),
+                                    contrast = "difference", ci=FALSE)
+    standsurv_weib_age
+
+    ## Calculate hazard of standardized survival and the marginal hazard ratio
+    ## for the three levels of group across a grid of survival times
+    ## 10 bootstraps for confidence intervals (this should be larger)
+
+    haz_standsurv_weib_age <- standsurv(weib_age, 
+                                        at = list(list(group="Good"), 
+                                                  list(group="Medium"), 
+                                                  list(group="Poor")), 
+                                        t=seq(0,7, length.out=100),
+                                        type="hazard",
+                                        contrast = "ratio", boot = TRUE,
+                                        B=10, ci=TRUE)
+    haz_standsurv_weib_age
+
+    if (interactive()){
+      plot(haz_standsurv_weib_age, ci=TRUE)
+      ## Hazard ratio plot shows a decreasing marginal HR 
+      ## Whereas the conditional HR is constant (model is a PH model)
+      plot(haz_standsurv_weib_age, contrast=TRUE, ci=TRUE)
+    }
+    ## Calculate standardized survival from a Weibull model together with expected
+    ## survival matching to US lifetables
+
+    ## age at diagnosis in days. This is required to match to US ratetable, whose
+    ## timescale is measured in days
+    newbc$agedays <- floor(newbc$age * 365.25)  
+    ## Create some random diagnosis dates centred on 01/01/2010 with SD=1 year
+    ## These will be used to match to expected rates in the lifetable
+    newbc$diag <- as.Date(floor(rnorm(dim(newbc)[1], 
+                                      mean = as.Date("01/01/2010", "%d/%m/%Y"), sd=365)), 
+                          origin="1970-01-01")
+    ## Create sex (assume all are female)
+    newbc$sex <- factor("female")
+    standsurv_weib_expected <- standsurv(weib_age, 
+                                         at = list(list(group="Good"), 
+                                                   list(group="Medium"), 
+                                                   list(group="Poor")), 
+                                         t=seq(0,7, length.out=100),
+                                         rmap=list(sex = sex,
+                                                   year = diag,
+                                                   age = agedays),
+                                         ratetable = survival::survexp.us,
+                                         scale.ratetable = 365.25,
+                                         newdata = newbc)
+    ## Plot marginal survival with expected survival superimposed                                            
+    plot(standsurv_weib_expected, expected=TRUE)
+  }, NA)
+})
