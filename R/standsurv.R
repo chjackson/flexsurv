@@ -1057,16 +1057,17 @@ plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ..
   }
   linetype <- c("Study" = "solid", "Expected" = "dashed")
   p <- ggplot() + 
-    geom_line(aes_(x= ~time, y=as.name(y), color=as.name(group), 
-                   linetype= ~Population), data=obj) + 
+    geom_line(aes(x=.data[["time"]], y=.data[[y]], color=.data[[group]],
+                   linetype= .data[["Population"]]), data=obj) + 
     xlab("Time") +
     scale_linetype_manual(values = linetype, guide="none") 
     
   if(ci){
     if(any(grepl("_lci",names(obj)))){
-      p <- p + geom_ribbon(aes_(x= ~ time, ymin=as.name(paste0(y,"_lci")),
-                                ymax=as.name(paste0(y,"_uci")),
-                              fill= as.name(group)), data = obj, alpha=0.2) 
+      p <- p + geom_ribbon(aes(x= .data[["time"]],
+                               ymin=.data[[paste0(y,"_lci")]],
+                               ymax=.data[[paste0(y,"_uci")]],
+                              fill= .data[[group]]), data = obj, alpha=0.2)
     } else warning("Confidence intervals have not been calculated in standsurv. None will be plotted")
   }
   p
