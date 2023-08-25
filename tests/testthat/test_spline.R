@@ -113,7 +113,6 @@ test_that("Spline proportional odds models reduce to log-logistic",{
   fitll <- flexsurvreg(formula = Surv(recyrs, censrec) ~ 1, data = bc, dist="llogis")
   fitsp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, scale="odds",
                           control=list(reltol=1e-16), fixedpars=FALSE)
-  print(fitsp)
   expect_equal(fitsp$loglik, fitll$loglik)
   expect_equal(1/fitll$res["scale",1]^fitll$res["shape",1], exp(fitsp$res["gamma0",1]), tol=1e-02)
   expect_equal(fitsp$res["gamma1",1], fitll$res["shape",1], tol=1e-02)

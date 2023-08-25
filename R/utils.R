@@ -358,3 +358,14 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
   }
   numDeriv::hessian(f, x, method = "Richardson", method.args = list(r = r, ...))
 }
+
+check_numeric <- function(...){
+  args <- list(...)
+  nm <- names(args)
+  for (i in seq_along(args)){
+    nm <- names(args)[i]
+    nmstr <- if (is.null(nm) || nm=="") "" else sprintf(" for `%s`", nm)
+    if (!is.numeric(args[[i]]))
+        stop(sprintf("Non-numeric value supplied%s", nmstr))
+  }
+}

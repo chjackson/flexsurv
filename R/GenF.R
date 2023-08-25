@@ -162,12 +162,14 @@ NULL
 ##' @export
 ##' @rdname GenF
 dgenf <- function(x, mu=0, sigma=1, Q, P, log=FALSE) {
+    check_numeric(x=x, mu=mu, sigma=sigma, Q=Q, P=P)
     dgenf_work(x, mu, sigma, Q, P, log)
 }
 ##' @export
 ##' @rdname GenF
 pgenf <- function(q, mu=0, sigma=1, Q, P, lower.tail = TRUE, log.p = FALSE)
 {
+    check_numeric(q=q, mu=mu, sigma=sigma, Q=Q, P=P)
     pgenf_work(q, mu, sigma, Q, P, lower.tail, log.p)
 }
 

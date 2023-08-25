@@ -9,6 +9,10 @@ test_that("dgompertz",{
     expect_equal(dgompertz(x, shape=0, rate=0.2), dexp(x, rate=0.2))
     d <- numeric(6); for (i in 1:6) d[i] <- dgompertz(x[i], shape=-0.0001, rate=i/5)
     expect_equal(d, dgompertz(x, shape=-0.0001, rate=1:6/5))
+    expect_warning(dgompertz(x, shape=-0.0001, rate=-1), "Negative rate")
+    expect_error(dgompertz(x, shape=numeric(), rate=numeric()), "zero length vector")
+    expect_error(dgompertz(numeric, shape=1), "Non-numeric")
+    expect_error(dgompertz(1, shape="wibble"), "Non-numeric")
 })
 
 test_that("pgompertz",{
@@ -20,6 +24,7 @@ test_that("pgompertz",{
     p <- numeric(6); for (i in 1:6) p[i] <- pgompertz(x[i], shape=-0.0001, rate=i/5)
     expect_equal(p, pgompertz(x, shape=-0.0001, rate=1:6/5))
     expect_equal(p, 1 - exp(-Hgompertz(x, shape=-0.0001, rate=1:6/5)))
+    expect_warning(pgompertz(x, shape=-0.0001, rate=-1), "Negative rate")
 })
 
 test_that("qgompertz",{

@@ -9,6 +9,7 @@ test_that("Generalized F",
                  c(0, 0.353553390593274, 0.140288989252053, 0.067923038519582, 0.038247711235678), tolerance=tol)
     expect_error(Hgenf(c(-1,1,2,3,4), mu=0, sigma=1, P=1), "argument \"Q\" is missing")
     expect_error(Hgenf(c(-1,1,2,3,4), mu=0, sigma=1, Q=1), "argument \"P\" is missing")
+    expect_error(dgenf(1, mu=numeric(), sigma=numeric(), Q=numeric(), P=numeric()), "zero length")
 })
 
 test_that("Generalized F reduces to generalized gamma: d",{

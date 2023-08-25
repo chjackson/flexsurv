@@ -175,12 +175,14 @@ NULL
 ##' @export
 ##' @rdname GenGamma
 dgengamma <- function(x, mu=0, sigma=1, Q, log=FALSE) {
+    check_numeric(x=x, mu=mu, sigma=sigma, Q=Q)
     dgengamma_work(x, mu, sigma, Q, log)
 }
 
 ##' @export
 ##' @rdname GenGamma
 pgengamma <- function(q, mu=0, sigma=1, Q, lower.tail = TRUE, log.p = FALSE) {
+    check_numeric(q=q, mu=mu, sigma=sigma, Q=Q)
     pgengamma_work(q, mu, sigma, Q, lower.tail, log.p)
 }
 

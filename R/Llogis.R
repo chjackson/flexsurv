@@ -61,12 +61,14 @@ NULL
 ##' @rdname Llogis
 dllogis <- function(x, shape=1, scale=1, log = FALSE)
 {
+    check_numeric(x=x, shape=shape, scale=scale)
     dllogis_work(x, shape, scale, log)
 }
 
 ##' @export
 ##' @rdname Llogis
 pllogis <- function(q, shape=1, scale=1, lower.tail = TRUE, log.p = FALSE) {
+    check_numeric(q=q, shape=shape, scale=scale)
     pllogis_work(q, shape, scale, lower.tail, log.p)
 }
 
