@@ -3,10 +3,19 @@
 Version 2.3 (2023-??-??)
 -------------------------
 
+* `pmatrix.simfs` can now accept a vector of times `t` and has a
+  `tidy` output option.
+
+* BIC and AICc functions added.
+
 * Column name of predict() output changed from "time" to "eval_time"
   for consistency with tidymodels update.
 
-* Default value for t chosen in hr_flexsurvreg.
+* Default value for t chosen in `hr_flexsurvreg`.
+
+* `coxsnell.flexsurvreg` handles delayed entry.
+
+* quantiles of standardised survival in `standsurv`.
 
 
 Version 2.2.2 (2023-01-31)
