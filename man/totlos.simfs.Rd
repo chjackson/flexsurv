@@ -29,11 +29,14 @@ represents the time since the last transition.  In other words the response
 should be of the form \code{Surv(time,status)}. See the package vignette
 for further explanation.
 
-\code{x} can also be a list of models, with one component for each
-permitted transition, as illustrated in \code{\link{msfit.flexsurvreg}}.}
+\code{x} can also be a list of \code{\link{flexsurvreg}} models,
+with one component for each permitted transition, as illustrated
+in \code{\link{msfit.flexsurvreg}}.  This can be constructed by
+\code{\link{fmsm}}.}
 
 \item{trans}{Matrix indicating allowed transitions.  See
-\code{\link{msfit.flexsurvreg}}.}
+\code{\link{msfit.flexsurvreg}}.  This is not required if \code{x} 
+is a list constructed by \code{\link{fmsm}}.}
 
 \item{t}{Maximum time to predict to.}
 
@@ -67,12 +70,13 @@ transition probabilities.  Users should adjust this to obtain the required
 precision.}
 
 \item{B}{Number of simulations from the normal asymptotic distribution used
-to calculate variances.  Decrease for greater speed at the expense of
+to calculate confidence limits.  Decrease for greater speed at the expense of
 accuracy.}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
 
-\item{cores}{Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing.}
+\item{cores}{Number of processor cores used when calculating confidence 
+limits by repeated simulation.  The default uses single-core processing.}
 }
 \value{
 The expected total time spent in each state (or group of states
