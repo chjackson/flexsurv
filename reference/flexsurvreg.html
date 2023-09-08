@@ -127,17 +127,20 @@ distributions are available, and users may supply their own.</p>
   the distribution.  This is a named list of formulae, with the name of each
   component giving the parameter to be modelled.  The model above can also
   be defined as:</p>
-<p><code>Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex + treat)</code></p></dd>
+<p><code>Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex +
+  treat)</code></p></dd>
 
 
 <dt>data</dt>
 <dd><p>A data frame in which to find variables supplied in
-<code>formula</code>.  If not given, the variables should be in the working
-environment.</p></dd>
+<code>formula</code>.  If not given, the variables should be in the
+working environment.</p></dd>
 
 
 <dt>weights</dt>
-<dd><p>Optional variable giving case weights.</p></dd>
+<dd><p>Optional numeric variable giving weights for each
+individual in the data.  The fitted model is then defined by
+maximising the weighted sum of the individual-specific log-likelihoods.</p></dd>
 
 
 <dt>bhazard</dt>

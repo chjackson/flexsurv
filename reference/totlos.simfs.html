@@ -93,13 +93,16 @@ data.  Additionally this should be semi-Markov, so that the time variable
 represents the time since the last transition.  In other words the response
 should be of the form <code>Surv(time,status)</code>. See the package vignette
 for further explanation.</p>
-<p><code>x</code> can also be a list of models, with one component for each
-permitted transition, as illustrated in <code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.</p></dd>
+<p><code>x</code> can also be a list of <code><a href="flexsurvreg.html">flexsurvreg</a></code> models,
+with one component for each permitted transition, as illustrated
+in <code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.  This can be constructed by
+<code><a href="fmsm.html">fmsm</a></code>.</p></dd>
 
 
 <dt>trans</dt>
 <dd><p>Matrix indicating allowed transitions.  See
-<code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.</p></dd>
+<code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.  This is not required if <code>x</code> 
+is a list constructed by <code><a href="fmsm.html">fmsm</a></code>.</p></dd>
 
 
 <dt>t</dt>
@@ -151,7 +154,7 @@ precision.</p></dd>
 
 <dt>B</dt>
 <dd><p>Number of simulations from the normal asymptotic distribution used
-to calculate variances.  Decrease for greater speed at the expense of
+to calculate confidence limits.  Decrease for greater speed at the expense of
 accuracy.</p></dd>
 
 
@@ -160,7 +163,8 @@ accuracy.</p></dd>
 
 
 <dt>cores</dt>
-<dd><p>Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing.</p></dd>
+<dd><p>Number of processor cores used when calculating confidence 
+limits by repeated simulation.  The default uses single-core processing.</p></dd>
 
 </dl></div>
     <div class="section level2">

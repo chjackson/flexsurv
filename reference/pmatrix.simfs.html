@@ -78,7 +78,8 @@ entry giving the probability that an individual is in state \(s\) at time
 <span>  M <span class="op">=</span> <span class="fl">1e+05</span>,</span>
 <span>  B <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  cl <span class="op">=</span> <span class="fl">0.95</span>,</span>
-<span>  cores <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tidy <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -91,18 +92,21 @@ data.  Additionally this should be semi-Markov, so that the time variable
 represents the time since the last transition.  In other words the response
 should be of the form <code>Surv(time,status)</code>. See the package vignette
 for further explanation.</p>
-<p><code>x</code> can also be a list of models, with one component for each
-permitted transition, as illustrated in <code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.</p></dd>
+<p><code>x</code> can also be a list of <code><a href="flexsurvreg.html">flexsurvreg</a></code> models,
+with one component for each permitted transition, as illustrated
+in <code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.  This can be constructed by
+<code><a href="fmsm.html">fmsm</a></code>.</p></dd>
 
 
 <dt>trans</dt>
 <dd><p>Matrix indicating allowed transitions.  See
-<code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.</p></dd>
+<code><a href="msfit.flexsurvreg.html">msfit.flexsurvreg</a></code>.  This is not required if <code>x</code> 
+is a list constructed by <code><a href="fmsm.html">fmsm</a></code>.</p></dd>
 
 
 <dt>t</dt>
-<dd><p>Time to predict state occupancy probabilities for.  This must be a
-single number, unlike <code><a href="pmatrix.fs.html">pmatrix.fs</a></code>.</p></dd>
+<dd><p>Time to predict state occupancy probabilities for.  This can 
+be a single number or a vector of different numbers.</p></dd>
 
 
 <dt>newdata</dt>
@@ -148,7 +152,14 @@ accuracy.</p></dd>
 
 
 <dt>cores</dt>
-<dd><p>Number of processor cores used when calculating confidence limits by repeated simulation.  The default uses single-core processing.</p></dd>
+<dd><p>Number of processor cores used when calculating confidence 
+limits by repeated simulation.  The default uses single-core processing.</p></dd>
+
+
+<dt>tidy</dt>
+<dd><p>If <code>TRUE</code> then the results are returned as a tidy data frame with 
+columns for the estimate and confidence limits, and rows per state transition and 
+time interval.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -198,15 +209,15 @@ model to be Markov.  No error or warning is given if running
 <span class="r-in"><span><span class="co"># BOS (state 2)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pmatrix.simfs</span><span class="op">(</span><span class="va">bexp</span>, t<span class="op">=</span><span class="fl">5</span>, trans<span class="op">=</span><span class="va">tmat</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         [,1]    [,2]    [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.29456 0.26769 0.43775</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.00000 0.26781 0.73219</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.00000 0.00000 1.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         1       2       3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.29456 0.26769 0.43775</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.00000 0.26781 0.73219</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.00000 0.00000 1.00000</span>
 <span class="r-in"><span><span class="fu">pmatrix.simfs</span><span class="op">(</span><span class="va">bexp</span>, t<span class="op">=</span><span class="fl">10</span>, trans<span class="op">=</span><span class="va">tmat</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         [,1]    [,2]    [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.08806 0.15162 0.76032</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.00000 0.07005 0.92995</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.00000 0.00000 1.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         1       2       3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.08806 0.15162 0.76032</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.00000 0.07005 0.92995</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.00000 0.00000 1.00000</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># these results should converge to those in help(pmatrix.fs), as M</span></span></span>
 <span class="r-in"><span><span class="co"># increases here and ODE solving precision increases there, since with</span></span></span>
