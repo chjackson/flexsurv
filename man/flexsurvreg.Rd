@@ -79,13 +79,16 @@ flexsurvreg(
   component giving the parameter to be modelled.  The model above can also
   be defined as:
 
-  \code{Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex + treat)}}
+  \code{Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex +
+  treat)}}
 
 \item{data}{A data frame in which to find variables supplied in
-\code{formula}.  If not given, the variables should be in the working
-environment.}
+\code{formula}.  If not given, the variables should be in the
+working environment.}
 
-\item{weights}{Optional variable giving case weights.}
+\item{weights}{Optional numeric variable giving weights for each
+individual in the data.  The fitted model is then defined by
+maximising the weighted sum of the individual-specific log-likelihoods.}
 
 \item{bhazard}{Optional variable giving expected hazards for relative
   survival models.  The model is described by Nelson et al. (2007).
