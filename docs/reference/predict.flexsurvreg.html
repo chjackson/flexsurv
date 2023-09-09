@@ -34,7 +34,7 @@ specified in newdata."><!-- mathjax --><script src="https://cdnjs.cloudflare.com
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/chjackson/flexsurv-dev/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/chjackson/flexsurv/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -47,7 +47,7 @@ specified in newdata."><!-- mathjax --><script src="https://cdnjs.cloudflare.com
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Predictions from flexible survival models</h1>
-      <small class="dont-index">Source: <a href="https://github.com/chjackson/flexsurv-dev/blob/HEAD/R/predict.flexsurvreg.R" class="external-link"><code>R/predict.flexsurvreg.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chjackson/flexsurv/blob/HEAD/R/predict.flexsurvreg.R" class="external-link"><code>R/predict.flexsurvreg.R</code></a></small>
       <div class="d-none name"><code>predict.flexsurvreg.Rd</code></div>
     </div>
 
@@ -187,7 +187,7 @@ conventional format.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">fitg</span> <span class="op">&lt;-</span> <span class="fu"><a href="flexsurvreg.html">flexsurvreg</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="fu">Surv</span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist <span class="op">=</span> <span class="st">"gengamma"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitg</span> <span class="op">&lt;-</span> <span class="fu"><a href="flexsurvreg.html">flexsurvreg</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist <span class="op">=</span> <span class="st">"gengamma"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Simplest prediction: mean or median, for covariates defined by original dataset</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitg</span><span class="op">)</span></span></span>
@@ -240,11 +240,6 @@ conventional format.</p>
 <span class="r-in"><span><span class="co">## Predict multiple quantiles and unnest</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: tidyr</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘tidyr’</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The following object is masked from ‘package:testthat’:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     matches</span>
 <span class="r-in"><span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitg</span>, type <span class="op">=</span> <span class="st">"survival"</span>, times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">600</span>, <span class="fl">800</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">pr</span>, <span class="va">.pred</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 52 × 2</span></span>

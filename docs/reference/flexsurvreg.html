@@ -34,7 +34,7 @@ distributions are available, and users may supply their own."><!-- mathjax --><s
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/chjackson/flexsurv-dev/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/chjackson/flexsurv/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -47,7 +47,7 @@ distributions are available, and users may supply their own."><!-- mathjax --><s
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Flexible parametric regression for time-to-event data</h1>
-      <small class="dont-index">Source: <a href="https://github.com/chjackson/flexsurv-dev/blob/HEAD/R/flexsurvreg.R" class="external-link"><code>R/flexsurvreg.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chjackson/flexsurv/blob/HEAD/R/flexsurvreg.R" class="external-link"><code>R/flexsurvreg.R</code></a></small>
       <div class="d-none name"><code>flexsurvreg.Rd</code></div>
     </div>
 
@@ -127,17 +127,20 @@ distributions are available, and users may supply their own.</p>
   the distribution.  This is a named list of formulae, with the name of each
   component giving the parameter to be modelled.  The model above can also
   be defined as:</p>
-<p><code>Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex + treat)</code></p></dd>
+<p><code>Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex +
+  treat)</code></p></dd>
 
 
 <dt>data</dt>
 <dd><p>A data frame in which to find variables supplied in
-<code>formula</code>.  If not given, the variables should be in the working
-environment.</p></dd>
+<code>formula</code>.  If not given, the variables should be in the
+working environment.</p></dd>
 
 
 <dt>weights</dt>
-<dd><p>Optional variable giving case weights.</p></dd>
+<dd><p>Optional numeric variable giving weights for each
+individual in the data.  The fitted model is then defined by
+maximising the weighted sum of the individual-specific log-likelihoods.</p></dd>
 
 
 <dt>bhazard</dt>

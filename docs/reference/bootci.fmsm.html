@@ -32,7 +32,7 @@
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
       <ul class="navbar-nav"><li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/chjackson/flexsurv-dev/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/chjackson/flexsurv/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -45,7 +45,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Bootstrap confidence intervals for flexsurv output functions</h1>
-      <small class="dont-index">Source: <a href="https://github.com/chjackson/flexsurv-dev/blob/HEAD/R/mstate.R" class="external-link"><code>R/mstate.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/chjackson/flexsurv/blob/HEAD/R/mstate.R" class="external-link"><code>R/mstate.R</code></a></small>
       <div class="d-none name"><code>bootci.fmsm.Rd</code></div>
     </div>
 
@@ -134,18 +134,18 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">bootci.fmsm</span><span class="op">(</span><span class="va">bexp</span>, B<span class="op">=</span><span class="fl">3</span>, fn<span class="op">=</span><span class="va">summfn</span>, t<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             [,1] [,2] [,3]      [,4]       [,5] [,6]      [,7]      [,8] [,9]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  0.07458019    0    0 0.1435696 0.06178918    0 0.6812540 0.8800329    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 0.10802913    0    0 0.2107169 0.11996705    0 0.7818502 0.9382108    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  0.06756653    0    0 0.1146223 0.04313799    0 0.7506128 0.9260849    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 0.09684103    0    0 0.1525462 0.07391515    0 0.8178112 0.9568620    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          [,10] [,11] [,12]    [,13]    [,14] [,15]    [,16]    [,17] [,18]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  3.564909     0     0 2.188378 3.368635     0 3.488593 5.851878    10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 4.006816     0     0 2.504591 4.148122     0 4.246713 6.631365    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  3.460022     0     0 1.950338 3.042689     0 4.047277 6.445361    10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 3.867774     0     0 2.132529 3.554639     0 4.586996 6.957311    10</span>
 <span class="r-in"><span><span class="fu">bootci.fmsm</span><span class="op">(</span><span class="va">bexp</span>, B<span class="op">=</span><span class="fl">3</span>, fn<span class="op">=</span><span class="va">summfn</span>, t<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            [,1] [,2] [,3]      [,4]      [,5] [,6]      [,7]      [,8] [,9]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  0.2766532    0    0 0.2634454 0.2831541    0 0.3899619 0.6748043    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 0.3459581    0    0 0.3098349 0.3251957    0 0.4249347 0.7168459    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  0.2535540    0    0 0.2334204 0.2554720    0 0.4050949 0.6845176    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 0.3614848    0    0 0.3059963 0.3154824    0 0.4404497 0.7445280    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          [,10] [,11] [,12]     [,13]    [,14] [,15]     [,16]    [,17] [,18]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  2.814592     0     0 0.9832806 2.840439     0 0.9351938 1.996410     5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 3.080430     0     0 1.2108520 3.003590     0 0.9942813 2.159561     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.5%  2.719086     0     0 0.9020369 2.727915     0 0.9605398 2.033683     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 97.5% 3.137423     0     0 1.2200616 2.966317     0 1.0608527 2.272085     5</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
