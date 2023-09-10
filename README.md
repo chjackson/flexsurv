@@ -40,6 +40,8 @@ devtools::install_github('chjackson/flexsurv-dev')
 
 <!-- badges: start -->
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![CRAN status](https://www.r-pkg.org/badges/version/flexsurv)](https://CRAN.R-project.org/package=flexsurv)
+[![](https://cranlogs.r-pkg.org/badges/flexsurv)](https://cran.rstudio.com/web/packages/flexsurv/index.html)
 [![R-CMD-check](https://github.com/chjackson/flexsurv-dev/workflows/R-CMD-check/badge.svg)](https://github.com/chjackson/flexsurv-dev/actions)
 [![Codecov test coverage](https://codecov.io/gh/chjackson/flexsurv/branch/master/graph/badge.svg)](https://app.codecov.io/gh/chjackson/flexsurv?branch=master)
 <!-- badges: end -->
