@@ -419,7 +419,7 @@ test_that("Relative survival", {
 
     ## Compare with stata stgenreg, using Weibull PH model
     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
-    
+      
     expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tolerance=1e-05)
     expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tolerance=1e-05)
     expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tolerance=1e-04)

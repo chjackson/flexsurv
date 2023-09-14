@@ -17,6 +17,8 @@ Version 2.3 (2023-??-??)
 
 * quantiles of standardised survival in `standsurv`.
 
+* Analytic gradient calculation for Weibull proportional hazards models
+
 
 Version 2.2.2 (2023-01-31)
 -------------------------
