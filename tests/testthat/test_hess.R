@@ -3,9 +3,9 @@ if (!require("numDeriv")) return()
 
 library(numDeriv)
 library(testthat)
-pars <- log(c(shape=1.2,scale=1.1))
 
 test_that("Weibull AFT Hessian",{
+  pars <- log(c(shape=1.2,scale=1.1))
   lds <- function(pars){dweibull(2,exp(pars[1]),exp(pars[2]),log=TRUE)}
   expect_equivalent(grad(lds, pars),
                     flexsurv:::DLdweibull(2, exp(pars[1]), exp(pars[2])))
@@ -20,6 +20,7 @@ test_that("Weibull AFT Hessian",{
 })
 
 test_that("Weibull PH Hessian",{
+  pars <- log(c(shape=1.2,scale=1.1))
   lds <- function(pars){dweibullPH(2,exp(pars[1]),exp(pars[2]),log=TRUE)}
   expect_equivalent(grad(lds, pars),
                     flexsurv:::DLdweibullPH(2, exp(pars[1]), exp(pars[2])))
@@ -69,11 +70,11 @@ hess_error <- function(object){
         stop("flexsurv.test.analytic.derivatives option not set")
     object$hess.test$error
 }
-err <- 1e-03
 
 options(flexsurv.test.analytic.derivatives=TRUE)
 
 test_that("flexsurvreg fit hessian",{
+  err <- 1e-03
   fl <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="exp")
   expect_lt(hess_error(fl), err)
   fl <- flexsurvreg(formula = Surv(recyrs, censrec) ~ group, data=bc, dist="exp")
@@ -147,10 +148,13 @@ test_that("flexsurvreg fit hessian",{
 
 
 test_that("flexsurvspline fit hessian",{
+  err <- 1e-03
   fl <- flexsurvspline(formula = Surv(recyrs, censrec) ~ group,
-                     k = 1, data=bc, scale = "hazard")
+                       k = 1, data=bc, scale = "hazard")
   expect_lt(hess_error(fl), err)
   fl <- flexsurvspline(formula = Surv(recyrs, censrec) ~ group,
-                     k = 1, data=bc, scale="odds")
+                       k = 1, data=bc, scale="odds")
   expect_lt(hess_error(fl), err)
 })
+
+options(flexsurv.test.analytic.derivatives=FALSE)
