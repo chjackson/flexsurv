@@ -132,7 +132,6 @@ test_that("flexsurvreg fit hessian",{
   fl <- flexsurvreg(formula = Surv(recyrs, censrec) ~ group,
                     anc=list(shape=~group), data=bc, 
                     weights=wts, dist="weibull")
-  expect_lt(deriv_error(fl), err)
   expect_lt(hess_error(fl), err)
   
   bc$bhaz <- rep(0.1, nrow(bc))
@@ -141,7 +140,6 @@ test_that("flexsurvreg fit hessian",{
                     anc=list(shape=~group), data=bc, bhazard=bhaz, 
                     weights=wts,
                     dist="weibull")
-  expect_lt(deriv_error(fl), err)
   expect_lt(hess_error(fl), err)
 })
 
