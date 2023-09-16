@@ -34,6 +34,9 @@ the event conditionally on that event occurring first."><!-- mathjax --><script 
     <a class="dropdown-item" href="../articles/standsurv.html">Calculating standardized survival measures in flexsurv</a>
   </div>
 </li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -278,12 +281,19 @@ is passed as the <code>control</code> argument to <code>survreg</code>.</p></dd>
 
 
 <dt>hess.control</dt>
-<dd><p>List of options to control inversion of the Hessian to
-  obtain a covariance matrix. Available options are <code>tol.solve</code>, the
-  tolerance used for <code><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></code> when inverting the Hessian (default
-  <code>.Machine$double.eps</code>), and <code>tol.evalues</code>, the accepted
-  tolerance for negative eigenvalues in the covariance matrix (default
-  <code>1e-05</code>).</p>
+<dd><p>List of options to control covariance matrix computation. 
+   Available options are:</p>
+<p><code>numeric</code>.  If <code>TRUE</code> then numerical methods are used
+  to compute the Hessian for models where an analytic Hessian is
+  available.  These models include the Weibull (both versions),
+  exponential, Gompertz and spline models with hazard or odds
+  scale.  The default is to use the analytic Hessian for these
+  models.  For all other models, numerical methods are always used
+  to compute the Hessian, whether or not this option is set.</p>
+<p><code>tol.solve</code>. The tolerance used for <code><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></code>
+  when inverting the Hessian (default <code>.Machine$double.eps</code>)</p>
+<p><code>tol.evalues</code> The accepted tolerance for negative
+  eigenvalues in the covariance matrix (default <code>1e-05</code>).</p>
 <p>The Hessian is positive definite, thus invertible, at the maximum
   likelihood.  If the Hessian computed after optimisation convergence can't
   be inverted, this is either because the converged result is not the

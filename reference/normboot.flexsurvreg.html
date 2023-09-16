@@ -34,6 +34,9 @@ functions of parameters."><!-- mathjax --><script src="https://cdnjs.cloudflare.
     <a class="dropdown-item" href="../articles/standsurv.html">Calculating standardized survival measures in flexsurv</a>
   </div>
 </li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -160,16 +163,16 @@ press).</p>
 <span class="r-in"><span>    <span class="va">fite</span> <span class="op">&lt;-</span> <span class="fu"><a href="flexsurvreg.html">flexsurvreg</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"exp"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="fu">normboot.flexsurvreg</span><span class="op">(</span><span class="va">fite</span>, B<span class="op">=</span><span class="fl">10</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>age<span class="op">=</span><span class="fl">50</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               rate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.0001332482</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.0002711888</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.0003699895</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.0002547905</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.0005460259</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.0002298601</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.0004888441</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.0001546735</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.0005137610</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.0004137849</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.0001333406</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.0002711950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.0003700718</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.0002548242</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.0005457485</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.0002299253</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.0004888764</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.0001547695</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.0005135426</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.0004136617</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"X")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   age</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  50</span>
@@ -178,55 +181,55 @@ press).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  50</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"rawsim")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            rate        age</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -18.29513 0.18743674</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -14.33198 0.12238564</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -14.75052 0.13696975</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -14.90004 0.13249944</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -10.99492 0.06964144</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -15.71200 0.14667914</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -13.66226 0.12077592</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -17.76009 0.17971798</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -11.44585 0.07744196</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -12.31726 0.09054198</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -18.29776 0.18750322</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -14.33221 0.12239078</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -14.75103 0.13698433</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -14.90062 0.13251367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -10.99314 0.06959569</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -15.71307 0.14670627</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -13.66212 0.12077431</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -17.76240 0.17977660</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -11.44435 0.07740335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -12.31628 0.09051640</span>
 <span class="r-in"><span>    <span class="fu">normboot.flexsurvreg</span><span class="op">(</span><span class="va">fite</span>, B<span class="op">=</span><span class="fl">10</span>, X<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">50</span>,nrow<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               rate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.0003828207</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.0007732248</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.0002974008</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.0004209704</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.0003696917</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.0003892503</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.0002301911</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.0004544350</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.0002247175</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.0002689401</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.0003826964</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.0007727804</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.0002973256</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.0004210293</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.0003696239</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.0003892618</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.0002302111</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.0004541271</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.0002247796</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.0002689798</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"X")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   50</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"rawsim")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            rate        age</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -12.31354 0.08891198</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -10.19637 0.06062867</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -12.99434 0.09747821</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -14.20225 0.12858608</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -12.97970 0.10153711</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -13.83430 0.11966033</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -14.85052 0.12947831</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -10.52342 0.05653925</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -15.71246 0.14623594</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -14.88949 0.13336929</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -12.31256 0.08888573</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -10.19412 0.06057214</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -12.99376 0.09746149</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -14.20243 0.12859241</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -12.97912 0.10152183</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -13.83425 0.11965986</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -14.85106 0.12949092</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -10.52134 0.05648414</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -15.71354 0.14626291</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -14.89006 0.13338376</span>
 <span class="r-in"><span>    <span class="fu">normboot.flexsurvreg</span><span class="op">(</span><span class="va">fite</span>, B<span class="op">=</span><span class="fl">10</span>, newdata<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>age<span class="op">=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>  <span class="co">## closer to...</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               rate</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 9.166549e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 7.990797e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 3.310913e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 5.787134e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 2.842888e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 6.955214e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 6.405365e-07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 6.179835e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 2.165180e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 2.561075e-07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 9.179604e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 8.001138e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 3.313562e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 5.777548e-08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 2.844863e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 6.954191e-07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 6.404087e-07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 6.187050e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 2.166374e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 2.559143e-07</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"X")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   age</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   0</span>
@@ -235,20 +238,20 @@ press).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"rawsim")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            rate        age</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -11.59995 0.07566757</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -11.73722 0.09622816</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -12.61829 0.09540845</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -16.66504 0.16565622</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -12.77069 0.10286849</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -14.17860 0.12219460</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -14.26096 0.12455072</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -11.99422 0.08909916</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -13.04301 0.09912332</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -15.17767 0.13989285</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] -11.59853 0.07562969</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] -11.73593 0.09619946</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] -12.61749 0.09538749</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] -16.66670 0.16569939</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] -12.77000 0.10285181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] -14.17875 0.12219826</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] -14.26116 0.12455604</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] -11.99305 0.08907006</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] -13.04246 0.09910768</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] -15.17842 0.13991248</span>
 <span class="r-in"><span>    <span class="va">fite</span><span class="op">$</span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               est         L95%         U95%           se</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rate 8.883706e-07 1.444100e-08 5.465012e-05 1.867116e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age  1.185227e-01 5.216657e-02 1.848788e-01 3.385579e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rate 8.883706e-07 1.440514e-08 5.478617e-05 1.868243e-06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age  1.185227e-01 5.210364e-02 1.849418e-01 3.388790e-02</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
