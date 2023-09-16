@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   pdf: pdf.html
   standsurv: standsurv.html
-last_built: 2023-09-16T18:41Z
+last_built: 2023-09-16T19:12Z
 urls:
   reference: http://chjackson.github.io/flexsurv-dev/reference
   article: http://chjackson.github.io/flexsurv-dev/articles
