@@ -4,7 +4,7 @@
 \alias{pfinal_fmsm}
 \title{Probabilities of final states in a flexible parametric competing risks model}
 \usage{
-pfinal_fmsm(x, newdata = NULL, fromstate, maxt = 1e+05, B = 0, cores = NULL)
+pfinal_fmsm(x, newdata = NULL, fromstate, maxt = 100000, B = 0, cores = NULL)
 }
 \arguments{
 \item{x}{Object returned by \code{\link{fmsm}}, representing a multi-state

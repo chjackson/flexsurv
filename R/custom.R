@@ -106,9 +106,10 @@ form.dp <- function(dlist, dfns, integ.opts){
         else r <- NULL
         ## random sampling function is currently only used for multi-state models
     }
+
     ## Check for existence of derivative functions
     ## conventionally called DLd, DLs
-    ## if dfns$deriv set to FALSE on entry, derivatives not available
+    ## dfns$deriv can be set to FALSE by user to ignore any derivatives that exist, but this feature is undocumented/unused.
     if (is.function(dfns$DLd)) DLd <- dfns$DLd
     else if (is.null(dfns$deriv) && exists(paste0("DLd",name)))
         DLd <- get(paste0("DLd",name))
@@ -117,9 +118,24 @@ form.dp <- function(dlist, dfns, integ.opts){
     else if (is.null(dfns$deriv) && exists(paste0("DLS",name)))
         DLS <- get(paste0("DLS",name))
     else DLS <- NULL
+
+    ## Likewise, check for second derivative functions
+    if (is.function(dfns$D2Ld)) D2Ld <- dfns$D2Ld
+    else if (is.null(dfns$hessian) && exists(paste0("D2Ld",name)))
+        D2Ld <- get(paste0("D2Ld",name))
+    else D2Ld <- NULL
+    if (is.function(dfns$D2LS)) D2LS <- dfns$D2LS
+    else if (is.null(dfns$hessian) && exists(paste0("D2LS",name)))
+        D2LS <- get(paste0("D2LS",name))
+    else D2LS <- NULL
     
-    list(p=p, d=d, h=h, H=H, r=r, DLd=DLd, DLS=DLS, rmst=rmst, mean= meanf,
-         q=q, deriv = !is.null(DLd) && !is.null(DLS))
+    list(p=p, d=d, h=h, H=H, r=r,
+         DLd=DLd, DLS=DLS, D2Ld=D2Ld, D2LS=D2LS,
+         rmst=rmst, mean= meanf,
+         q=q,
+         deriv = !is.null(DLd) && !is.null(DLS),
+         hessian = !is.null(D2Ld) && !is.null(D2LS)
+         )
 }
 
 

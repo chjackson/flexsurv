@@ -13,7 +13,7 @@ pmatrix.simfs(
   ci = FALSE,
   tvar = "trans",
   tcovs = NULL,
-  M = 1e+05,
+  M = 100000,
   B = 1000,
   cl = 0.95,
   cores = NULL,

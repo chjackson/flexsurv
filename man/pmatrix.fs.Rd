@@ -13,7 +13,7 @@ pmatrix.fs(
   condstates = NULL,
   ci = FALSE,
   tvar = "trans",
-  sing.inf = 1e+10,
+  sing.inf = 10000000000,
   B = 1000,
   cl = 0.95,
   tidy = FALSE,

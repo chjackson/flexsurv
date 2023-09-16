@@ -25,7 +25,7 @@ standsurv(
   scale.ratetable = 365.25,
   n.gauss.quad = 100,
   quantiles = 0.5,
-  interval = c(1e-08, 500)
+  interval = c(0.00000001, 500)
 )
 }
 \arguments{

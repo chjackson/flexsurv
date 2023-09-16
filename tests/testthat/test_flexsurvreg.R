@@ -510,3 +510,14 @@ test_that("summary type `link`",{
     expect_equal(summary(fitg, type="link")[["factor(rx)=2"]]$est, 
                  exp(fitg$res.t["scale","est"] + fitg$res.t["factor(rx)2","est"]))
 })
+
+test_that("With and without analytic Hessian", { 
+  fla <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="weibull")
+  fln <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="weibull",
+                     hess.control = list(numeric=TRUE))
+  expect_true(all(fla$cov != fln$cov)) # analytic derivatives available
+  fla <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma")
+  fln <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma",
+                     hess.control = list(numeric=TRUE))
+  expect_equivalent(fla$cov, fln$cov) # analytic derivatives not available
+})

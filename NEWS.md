@@ -1,7 +1,4 @@
--*- text -*-
-
-Version 2.3 (2023-??-??)
--------------------------
+# Version 2.3 (2023-??-??)
 
 * Analytic Hessian calculation for models where this is possible, that
   is, Weibull, Gompertz, exponential, and spline models in hazard and
@@ -16,40 +13,37 @@ Version 2.3 (2023-??-??)
 * `pmatrix.simfs` can now accept a vector of times `t` and has a
   `tidy` output option.
 
-* BIC and AICc functions added.
+* `BIC` and `AICc` functions added.
 
-* Column name of predict() output changed from "time" to "eval_time",
+* Column name of `predict()` output changed from `"time"` to `"eval_time"`,
   for consistency with tidymodels update.
 
-* Default value for t now chosen in `hr_flexsurvreg`.
+* Default value for `t` now chosen in `hr_flexsurvreg`.
 
 * `coxsnell.flexsurvreg` now handles delayed entry.
 
 * Quantiles of standardised survival now available in `standsurv`.
 
 
-Version 2.2.2 (2023-01-31)
--------------------------
+# Version 2.2.2 (2023-01-31)
 
 * Allow unicode characters in vignette, to satisfy R CMD check on
   r-devel.
 
 
-Version 2.2.1 (2022-12-22)
--------------------------
+# Version 2.2.1 (2022-12-22)
 
 * New `simulate.flexsurvreg` method to simulate data from a fitted
   flexsurvreg or flexsurvspline model.  Thanks to Mark Clements for
   help with this.
 
-* Fix of bug for summary() method with type = "quantile" or "median"
-  and left-truncation in the prediction (start > 0). 
+* Fix of bug for `summary()` method with type = `"quantile"` or `"median"`
+  and left-truncation in the prediction (`start` > 0). 
 
 * Correction to the examples and interpretation of Cox-Snell residuals.
 
 
-Version 2.2 (2022-06-16)
--------------------------
+# Version 2.2 (2022-06-16)
 
 * New function `standsurv` for survival and hazards
   standardised over an observed distribution for covariates. 
@@ -80,16 +74,15 @@ Version 2.2 (2022-06-16)
 * New functions for Cox-Snell residuals: `coxsnell_flexsurvreg` or
   residuals(..., type="coxsnell").
 
-* rmst_generic, mean_survspline, rmst_survspline and related functions
-  (e.g. mean_survspline1) handle alternative parameter values in a
+* `rmst_generic`, `mean_survspline`, `rmst_survspline` and related functions
+  (e.g. `mean_survspline1`) handle alternative parameter values in a
   vectorised way.
 
 * Allow output functions to work on models that have been stripped of
-  data with x$data <- NULL, if possible
+  data with `x$data <- NULL`, if possible.
 
 
-Version 2.1 (2021-09-13)
--------------------------
+# Version 2.1 (2021-09-13)
 
 * Fix of a bug that affected models with baseline hazard offsets and
   exponential, Weibull, Gompertz and hazard/odds-based spline models,
@@ -106,17 +99,16 @@ Version 2.1 (2021-09-13)
 
 * Fix for tidy method with one-parameter exponential models.
 
-* Fixes for h/Hgamma and h/Hlnorm with log = TRUE.
+* Fixes for `h/Hgamma` and `h/Hlnorm` with `log = TRUE`.
 
-* Minor numerical improvements to h/H functions for some distributions.
+* Minor numerical improvements to `h/H` functions for some distributions.
 
 * Bug fix for `simfs_bytrans` when some transitions don't happen.
 
 * `NaNs produced` warnings should occur less often during fitting.
 
 
-Version 2.0 (2021-02-22)
---------------------
+# Version 2.0 (2021-02-22)
 
 * A new class of multi-state models based on mixtures (Larson and
   Dinse 1985).  A new vignette on multi-state modelling describes this
@@ -126,74 +118,73 @@ Version 2.0 (2021-02-22)
 * Different parametric families are now supported for different
   transitions in multi-state models.
 
-* New function "fmsm" allows a list of flexsurvreg objects to be
+* New function `fmsm` allows a list of flexsurvreg objects to be
   associated with a particular transition structure matrix, to create
   a multi-state model. 
 
-* New functions simfinal_fmsm to summarise times and probabilities of
+* New function `simfinal_fmsm` to summarise times and probabilities of
   final absorbing events in multi-state models, using simulation.
 
 * More features for right-truncated data.  Individual-level
   right-truncation times supported with new "rtrunc" argument to
   flexsurvreg and flexsurvspline.  A comparable non-parametric
   estimator for right-truncated data is provided in a new function,
-  "survrtrunc".  Alternative parametric estimators, which make use
+  `survrtrunc`.  Alternative parametric estimators, which make use
   of the time of an initiating event, are provided in a new function,
-  "flexsurvrtrunc".
+  `flexsurvrtrunc`.
 
 * A new vignette describes properties of the different built-in
    parametric distributions in more detail. 
 
-* qgeneric is now vectorised, thanks to the vuniroot function imported
-  from the rstpm2 package by Mark Clements.  This massively boosts the
-  speed of rsurvspline, hence speeding up simulations from
+* `qgeneric` is now vectorised, thanks to the `vuniroot` function imported
+  from the `rstpm2` package by Mark Clements.  This massively boosts the
+  speed of `rsurvspline`, hence speeding up simulations from
   spline-based multi-state models.
 
-* pmatrix.fs can now calculate transition probabilities conditionally
+* `pmatrix.fs` can now calculate transition probabilities conditionally
   on the the transition being to one of a subset of the states.
 
-* "tidy" argument to pmatrix.fs for tidy data frame output. 
+* "tidy" argument to `pmatrix.fs` for tidy data frame output. 
 
-* "tidy" argument to sim.fmsm for returning simulations in tidy data
+* "tidy" argument to `sim.fmsm` for returning simulations in tidy data
   frame format with one row per transition, and associated function
-  simfs_bytrans.
+  `simfs_bytrans`.
 
-* Bootstrapping function bootci.fmsm made available for users to get
+* Bootstrapping function `bootci.fmsm` made available for users to get
   confidence intervals / distributions for their own flexsurv model
   output functions.
 
 * Parallel processing capability for bootstrap confidence intervals.
 
 * Distribution and mean functions for the Royston-Parmar model named
-  like dsurvspline2, psurvspline4 and so on, with one argument per
+  like `dsurvspline2`, `psurvspline4` and so on, with one argument per
   parameter, rather than all parameters collected in a single
   argument, going up to 7 knots / 9 parameters.
 
-* Return value from pars.fmsm is now a list rather than a matrix, even
+* Return value from `pars.fmsm` is now a list rather than a matrix, even
   if the model family is the same for each transition.
 
-* summary.flexsurvreg given a new argument "na.action" to control
+* `summary.flexsurvreg` given a new argument "na.action" to control
   whether missing values in "newdata" are dropped.  Defaults to
-  producing summaries of NA when there are missing values, while
+  producing summaries of `NA` when there are missing values, while
   previously missing values were dropped.
 
 * S3 methods have been added for the generics defined in the broom
   package.  These functions create tidy data frames containing the
-  results of fitted models.  The new functions are tidy.flexsurvreg,
-  glance.flexsurvreg, and augment.flexsurvreg.
+  results of fitted models.  The new functions are `tidy.flexsurvreg`,
+  `glance.flexsurvreg`, and `augment.flexsurvreg`.
 
 * S3 methods have been added for the predict and residuals
-  generics. predict.flexsurvreg has full support for all model
-  outcomes supported by summary.flexsurvreg.  residuals.flexsurvreg
+  generics. `predict.flexsurvreg` has full support for all model
+  outcomes supported by `summary.flexsurvreg`.  `residuals.flexsurvreg`
   currently only supports a naive difference between observed survival and
   predicted mean, neglecting censoring.
 
 * Case weights accounted for in nonparametric survival and cumulative
-   hazard estimates in plot.flexsurvreg.  Thanks to https://github.com/andbe. 
+   hazard estimates in `plot.flexsurvreg`.  Thanks to https://github.com/andbe. 
 
 
-Version 1.1.1 (2019-03-18)
--------------
+# Version 1.1.1 (2019-03-18)
 
 * New type="quantiles" and type="link" for summary.flexsurvreg.
   Thanks to Leonardo Marques for the contribution.
@@ -214,8 +205,7 @@ Version 1.1.1 (2019-03-18)
 * Various other minor code and doc fixes, see github commit history.
 
 
-Version 1.1 (2017-03-27)
--------------
+# Version 1.1 (2017-03-27)
 
 * Substantial speed improvements in fitting most of the built-in
   models, from implementing their PDFs and CDFs in C++.  Thanks to
@@ -233,8 +223,7 @@ Version 1.1 (2017-03-27)
 * Various minor bug fixes, see github commits.
 
 
-Version 1.0.2 (2016-09-26)
--------------
+# Version 1.0.2 (2016-09-26)
 
 * Bug fix: "start" was being ignored by plot.flexsurvreg. Thanks to
   Ruth Keogh.
@@ -250,22 +239,19 @@ Version 1.0.2 (2016-09-26)
 * Vectorised parameters supported in qgeneric.
 
 
-Version 1.0.1 (2016-05-31)
--------------
+# Version 1.0.1 (2016-05-31)
 
 * Bug fix: covariates were labelled wrongly in summary.flexsurvreg
   tidy output.  Thanks to Owain Saunders.
 
 
-Version 1.0.0 (2016-05-10)
--------------
+# Version 1.0.0 (2016-05-10)
 
 * Version number bumped to 1.0.0 to accompany the publication of the
   vignette in Journal of Statistical Software.
 
 
-Version 0.7.1 (2016-03-24)
--------------
+# Version 0.7.1 (2016-03-24)
 
 * Slightly more efficient likelihood calculations, and removed
   spurious warning from likelihood with interval censoring.
@@ -273,8 +259,7 @@ Version 0.7.1 (2016-03-24)
 * Tests modified to work with the latest (and current) testthat.
 
 
-Version 0.7 (2015-11-13)
------------
+# Version 0.7 (2015-11-13)
 
 * flexsurvspline now allows the log cumulative hazard (or its
   alternatives) to be modelled as a spline function of time instead of
@@ -312,8 +297,7 @@ Version 0.7 (2015-11-13)
 * Fix of bugs with subsetting in flexsurvspline (github issue #6).
 
 
-Version 0.6 (2015-04-13)
------------
+# Version 0.6 (2015-04-13)
 
 * CRAN release.  Also includes the changes from Version 0.5.1.
 
@@ -327,8 +311,7 @@ Version 0.6 (2015-04-13)
   Thanks to Milan Bouchet-Valat.
 
 
-Version 0.5.1 (2015-02-24)
--------------
+# Version 0.5.1 (2015-02-24)
 
 * github-only release.
 
@@ -349,8 +332,7 @@ Version 0.5.1 (2015-02-24)
   affected some fits of the Gompertz distribution.
 
 
-Version 0.5 (2014-09-22)
------------
+# Version 0.5 (2014-09-22)
 
 * Major new release, so version number bumped from 0.3 to 0.5.
 
@@ -467,8 +449,7 @@ Distribution functions:
 
 
 
-Version 0.3.1 (2014-02-14)
---------------------------
+# Version 0.3.1 (2014-02-14)
 
 * R-forge only release.
 
@@ -481,14 +462,12 @@ Version 0.3.1 (2014-02-14)
   Sandberg for the report.
 
 
-Version 0.3 (2014-01-19)
-------------------------
+# Version 0.3 (2014-01-19)
 
 * CRAN release. Includes changes from 0.2.1 to 0.2.3.
 
 
-Version 0.2.3 (2013-10-09)
--------------------------
+# Version 0.2.3 (2013-10-09)
 
 * R-forge only release.
 
@@ -509,16 +488,14 @@ Version 0.2.3 (2013-10-09)
   accidentally removed in 0.1.5.
 
 
-Version 0.2.2 (2013-07-26)
--------------------------
+# Version 0.2.2 (2013-07-26)
 
 * R-forge only release.
 
 * Case weights supported in flexsurvreg and flexsurvspline.
 
 
-Version 0.2.1 (2013-07-03)
--------------------------
+# Version 0.2.1 (2013-07-03)
 
 * R-forge only release.
 
@@ -534,8 +511,7 @@ Version 0.2.1 (2013-07-03)
   Zheng.
 
 
-Version 0.2 (2013-05-13)
--------------------------
+# Version 0.2 (2013-05-13)
 
 * New summary() method for fitted flexsurvreg and flexsurvspline model
   objects gives fitted survival, cumulative hazard or hazard curves,
@@ -564,8 +540,7 @@ Version 0.2 (2013-05-13)
   Thanks to Paul Pynsent.
 
 
-Version 0.1.5 (2012-08-29)
--------------------------
+# Version 0.1.5 (2012-08-29)
 
 * Data are now stored in fitted flexsurvreg and flexsurvspline model
   objects, avoiding environment search errors and allowing package
@@ -577,8 +552,7 @@ Version 0.1.5 (2012-08-29)
   cases, with no warning, instead of NaN.  Thanks to Michael Sweeting.
 
 
-Version 0.1.4 (2012-03-22)
---------------------------
+# Version 0.1.4 (2012-03-22)
 
 * maxt argument in plot.flexsurvreg.
 
@@ -592,8 +566,7 @@ Version 0.1.4 (2012-03-22)
 * qgengamma corrected for parameter Q<0.  Thanks to Benn Ackley.
 
 
-Version 0.1.3 (2012-01-17)
---------------------------
+# Version 0.1.3 (2012-01-17)
 
 * No longer complains about invalid initial values when there are zero
   survival times.
@@ -604,8 +577,7 @@ Version 0.1.3 (2012-01-17)
   vectorised parameter values.
 
 
-Version 0.1.2 (2011-11-08)
---------------------------
+# Version 0.1.2 (2011-11-08)
 
 * Initial CRAN release.
 
@@ -613,13 +585,12 @@ Version 0.1.2 (2011-11-08)
   models.
 
 
-Version 0.1.1 (2011-04-19)
---------------------------
+# Version 0.1.1 (2011-04-19)
 
 * Fix of drop=FALSE bug in flexsurvspline.inits which caused
   flexsurvspline to fail with single covariates.
 
 
-Version 0.1 (2011-03-14)
-------------------------
+# Version 0.1 (2011-03-14)
+
 Initial release

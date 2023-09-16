@@ -49,17 +49,13 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
     pars   <- inits
     npars  <- length(pars)
     nbpars <- length(dlist$pars)
-    insert.locations <- setdiff(seq_len(npars),
-                                fixedpars)
+    insert.locations <- setdiff(seq_len(npars), fixedpars)
     
     ## which are the subjects with events
     event <- Y[,"status"] == 1
     event.times <- Y[event, "time1"]
     left.censor <- Y[!event, "time2"]
     right.censor <- Y[!event, "time1"]
-
-    event.weights <- weights[event]
-    no.event.weights <- weights[!event]
     
     par.transform <- buildTransformer(inits, nbpars, dlist)
 
@@ -130,18 +126,18 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
             pargs$q <- event.times
             pminb   <- call_distfn_quiet(dfns$p, pargs)
             loghaz  <- logdens - log(1 - pminb)
-            offseti <- log(1 + bhazard[event] / exp(loghaz)*weights[event])
+            offseti <- log(1 + bhazard[event] / exp(loghaz))
         } else {
             offseti <- default.offset
         }
         ## Express as vector of individual likelihood contributions
-        loglik[event] <- (logdens*event.weights) + offseti
+        loglik[event] <- (logdens + offseti)
         if (!all(event))
-            loglik[!event] <- (log(pmax - pmin)*no.event.weights)
+            loglik[!event] <- (log(pmax - pmin))
 
-        loglik <- loglik - log(pobs)*weights
+        loglik <- loglik - log(pobs)
         
-        ret <- -sum(loglik)
+        ret <- -sum(loglik*weights)
         attr(ret, "indiv") <- loglik
         ret
     }
@@ -604,12 +600,22 @@ compress.model.matrices <- function(mml){
 ##' @param hessian Calculate the covariances and confidence intervals for the
 ##'   parameters. Defaults to \code{TRUE}.
 ##'
-##' @param hess.control List of options to control inversion of the Hessian to
-##'   obtain a covariance matrix. Available options are \code{tol.solve}, the
-##'   tolerance used for \code{\link{solve}} when inverting the Hessian (default
-##'   \code{.Machine$double.eps}), and \code{tol.evalues}, the accepted
-##'   tolerance for negative eigenvalues in the covariance matrix (default
-##'   \code{1e-05}).
+##' @param hess.control List of options to control covariance matrix computation. 
+##'    Available options are:
+##'
+##'   \code{numeric}.  If \code{TRUE} then numerical methods are used
+##'   to compute the Hessian for models where an analytic Hessian is
+##'   available.  These models include the Weibull (both versions),
+##'   exponential, Gompertz and spline models with hazard or odds
+##'   scale.  The default is to use the analytic Hessian for these
+##'   models.  For all other models, numerical methods are always used
+##'   to compute the Hessian, whether or not this option is set.
+##'
+##'   \code{tol.solve}. The tolerance used for \code{\link{solve}}
+##'   when inverting the Hessian (default \code{.Machine$double.eps})
+##'
+##'   \code{tol.evalues} The accepted tolerance for negative
+##'   eigenvalues in the covariance matrix (default \code{1e-05}).
 ##'
 ##'   The Hessian is positive definite, thus invertible, at the maximum
 ##'   likelihood.  If the Hessian computed after optimisation convergence can't
@@ -925,6 +931,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
             optim.args$method <- "BFGS"
         }
         gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
+        has_analytic_hessian <- dfns$hessian && !isTRUE(hess.control$numeric)
         optim.args <- c(optim.args,
                         list(par=optpars,
                              fn=logLikFactory(Y=Y, X=X,
@@ -940,11 +947,15 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                              bhazard=bhazard, rtrunc=rtrunc, dlist=dlist,
                              inits=inits, dfns=dfns, aux=aux,
                              mx=mx, fixedpars=fixedpars,
-                             hessian=hessian))
+                             hessian = hessian && !has_analytic_hessian))
         opt <- do.call("optim", optim.args)
         est <- opt$par
-        if (hessian && !anyNA(opt$hessian) && !any(is.nan(opt$hessian)) && all(is.finite(opt$hessian)) &&
-            all(eigen(opt$hessian)$values > 0))
+        if (has_analytic_hessian)
+          opt$hessian <- D2minusloglik.flexsurv(est, Y=Y, X=X, weights=weights, bhazard=bhazard,
+                                                rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns,
+                                                aux=aux, mx=mx, fixedpars=fixedpars)
+        
+        if (hessian && all(is.finite(opt$hessian)) && all(eigen(opt$hessian)$values > 0))
         {
             cov <- .hess_to_cov(opt$hessian, hess.control$tol.solve, hess.control$tol.evalues)
             se <- sqrt(diag(cov))
@@ -995,15 +1006,22 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
              ret,
              list(covdata = covdata)) # temporary position so cyclomort doesn't break
     ret$BIC <- BIC.flexsurvreg(ret, cens=TRUE)
-    if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
-        && (dfns$deriv) ) {
-        if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
-        ret$deriv.test <- deriv.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
-    }
+    ret <- c(ret, check_deriv(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars))
     class(ret) <- "flexsurvreg"
     ret
 }
 
+check_deriv <- function(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars){
+  if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))){
+    if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
+    if (dfns$deriv)
+      deriv.test <- deriv.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+    if (dfns$hessian)
+      hess.test <- hess.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+    res <- list(deriv.test=deriv.test, hess.test=hess.test)
+  } else res <- NULL
+  res
+}
 
 ##' @export
 print.flexsurvreg <- function(x, ...)

@@ -247,12 +247,22 @@ is passed as the \code{control} argument to \code{\link{survreg}}.}
 \item{hessian}{Calculate the covariances and confidence intervals for the
 parameters. Defaults to \code{TRUE}.}
 
-\item{hess.control}{List of options to control inversion of the Hessian to
-  obtain a covariance matrix. Available options are \code{tol.solve}, the
-  tolerance used for \code{\link{solve}} when inverting the Hessian (default
-  \code{.Machine$double.eps}), and \code{tol.evalues}, the accepted
-  tolerance for negative eigenvalues in the covariance matrix (default
-  \code{1e-05}).
+\item{hess.control}{List of options to control covariance matrix computation. 
+   Available options are:
+
+  \code{numeric}.  If \code{TRUE} then numerical methods are used
+  to compute the Hessian for models where an analytic Hessian is
+  available.  These models include the Weibull (both versions),
+  exponential, Gompertz and spline models with hazard or odds
+  scale.  The default is to use the analytic Hessian for these
+  models.  For all other models, numerical methods are always used
+  to compute the Hessian, whether or not this option is set.
+
+  \code{tol.solve}. The tolerance used for \code{\link{solve}}
+  when inverting the Hessian (default \code{.Machine$double.eps})
+
+  \code{tol.evalues} The accepted tolerance for negative
+  eigenvalues in the covariance matrix (default \code{1e-05}).
 
   The Hessian is positive definite, thus invertible, at the maximum
   likelihood.  If the Hessian computed after optimisation convergence can't

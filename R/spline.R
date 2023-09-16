@@ -765,9 +765,13 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
     rmstfn <- unroll.function(rmst_survspline, gamma=0:(nk-1))
     Ddfn <- if (scale=="normal") NULL else unroll.function(DLdsurvspline, gamma=0:(nk-1))
     DSfn <- if (scale=="normal") NULL else unroll.function(DLSsurvspline, gamma=0:(nk-1))
+    D2dfn <- if (scale=="normal") NULL else unroll.function(D2Ldsurvspline, gamma=0:(nk-1))
+    D2Sfn <- if (scale=="normal") NULL else unroll.function(D2LSsurvspline, gamma=0:(nk-1))
     args <- c(list(formula=formula, data=data, dist=custom.fss,
                    dfns=list(d=dfn,p=pfn,r=rfn,h=hfn,H=Hfn,rmst=rmstfn,mean=meanfn, q=qfn,
-                             DLd=Ddfn,DLS=DSfn,deriv=!(scale=="normal")), aux=aux), list(...))
+                             DLd=Ddfn,DLS=DSfn,deriv=!(scale=="normal"),
+                             D2Ld=D2dfn,D2LS=D2Sfn,hessian=!(scale=="normal")
+                             ), aux=aux), list(...))
 
     ## Try an alternative initial value routine if the default one gives zero likelihood
     fpold <- args$fixedpars

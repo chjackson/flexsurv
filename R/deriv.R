@@ -35,18 +35,19 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dli
         ddcall[[i]] <- ddcall[[i]][dead]
         dsccall[[i]] <- dsccall[[i]][!dead]
     }
-    dd <- dderiv(dfns$DLd, ddcall, X[dead,,drop=FALSE], mx, dlist)
-    dscens <- dderiv(dfns$DLS, dsccall, X[!dead,,drop=FALSE], mx, dlist)
-    if (sum(dead) > 0) dd <- dd * weights[dead]
-    if (sum(!dead) > 0) dscens <- dscens * weights[!dead]
-    dstrunc <- dderiv(dfns$DLS, dstcall, X, mx, dlist) * weights
-    res <- - ( colSums(dd) + colSums(dscens) - colSums(dstrunc) )
-    
+    nobs <- nrow(Y)
+    dloglik <- matrix(nrow=nobs, ncol=npars)
+    dloglik[dead,] <- dderiv(dfns$DLd, ddcall, X[dead,,drop=FALSE], mx, dlist)
+    dloglik[!dead,] <- dderiv(dfns$DLS, dsccall, X[!dead,,drop=FALSE], mx, dlist)
+    dstrunc <- dderiv(dfns$DLS, dstcall, X, mx, dlist)
+    dloglik <- dloglik - dstrunc
+
     ## Derivatives with baseline hazard.
     ## adjust dd, dscens and dstrunc.  cens and trunc terms don't depend on pars 
     ## Add deriv of log(1 + (1/h) * bh/w)  just for uncensored event 
     ## 1 / (1 + (1/h)*bh/w) * -h^{-2}bh/w * dh 
     ## and h = f * S^-1, so dh = df*s^-1   +   f * -s^-2 * ds)
+
     if (any(bhazard > 0)) { 
         dcall <- ddcall
         dcall$x <- ddcall$t; dcall$t <- NULL
@@ -54,15 +55,14 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dli
         pcall <- dcall
         pcall$q <- pcall$x; pcall$x <- NULL
         surv <- 1 - do.call(dfns$p, pcall)
-        loghaz  <- log(dens) - log(surv)
         haz <- dens / surv
-        offseti <- 1 / (1 + bhazard[dead] / (haz*weights[dead]))
+        offseti <- 1 / (1 + bhazard[dead] / haz)
         ## Note d/dx log(x) = 1/x ddx
         dscense <- dderiv(dfns$DLS, ddcall, X[dead,,drop=FALSE], mx, dlist)
-        doff <- offseti * -haz^{-2}*bhazard[dead]/weights[dead] * (dd*dens/surv  -  dens/surv^2 * dscense*surv)
-        res <- res - colSums(doff)
+        doff <- - offseti*bhazard[dead] * (dloglik[dead,]  -  dscense)/ haz
+        dloglik[dead,] <- dloglik[dead,] + doff
     }
-
+    res <- - colSums(dloglik*weights)
     ## currently wastefully calculates derivs for fixed pars then discards them
     res[setdiff(1:npars, fixedpars)]
 }
@@ -197,15 +197,17 @@ DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"
     db <- dbasis(knots, tsfn(t,timescale))
     eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
     ds <- rowSums(db * gamma)
+    npars <- ncol(gamma)
+    parnames <- paste0("gamma", seq_len(npars)-1)
+    colnames(ret) <- parnames
     for (i in 1:ncol(gamma)){
         if (scale=="hazard")
             ret[ind,i] <- db[,i] / ds + b[,i] * (1 - exp(eta))
         else if (scale=="odds"){
-            eeta <- 1 - 2*exp(eta)/(1 + exp(eta))
-            ret[ind,i] <- db[,i] / ds + b[,i] * eeta
+          eeta <- 1 - 2*exp(eta)/(1 + exp(eta))
+          ret[ind,i] <- db[,i] / ds + b[,i] * eeta
         }
     }
-    ## TODO name them as gamma0, gammak  where k is n internal knots - 1 
     ret
 }
 
