@@ -1,5 +1,4 @@
-flexsurv
-========
+# flexsurv <img src="man/figures/flexsurv_hex.png" width="120" height="120" align="right" />
 
 The [flexsurv](http://cran.r-project.org/package=flexsurv) R package for parametric survival and multi-state modelling.
 
