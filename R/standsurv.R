@@ -1042,7 +1042,7 @@ plot.standsurv <- function(x, contrast = FALSE, ci = FALSE, expected = FALSE, ..
       if(y %in% c("survival", "acsurvival"))
         y2 <- "expsurv"
       obj2 <- attributes(x)$expected[,c("time",y2)] %>%
-        rename({{y}} := y2) %>% 
+        rename({{y}} := all_of(y2)) %>% 
         mutate({{group}} := "Expected", Population = "Expected")
       obj <- obj %>% bind_rows(obj2)
     }
