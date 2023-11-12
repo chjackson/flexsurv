@@ -40,15 +40,26 @@
 ##' 
 ##' This may in principle be supplied as a matrix, in the same way as for
 ##' \code{gamma}, but in most applications the knots will be fixed.
+##'
 ##' @param scale \code{"hazard"}, \code{"odds"}, or \code{"normal"}, as
 ##' described in \code{\link{flexsurvspline}}.  With the default of no knots in
 ##' addition to the boundaries, this model reduces to the Weibull, log-logistic
 ##' and log-normal respectively.  The scale must be common to all times.
+##'
 ##' @param timescale \code{"log"} or \code{"identity"} as described in
 ##' \code{\link{flexsurvspline}}.
+##' 
+##' @param spline \code{"rp"} to use the spline basis described in
+##'   Royston and Parmar.  \code{"splines2ns"} to use the alternative
+##'   natural spline basis from the \code{splines2} package (Wang and
+##'   Yan 2021), which may be better behaved due to the basis being
+##'   orthogonal.
+##' 
 ##' @param offset An extra constant to add to the linear predictor
 ##' \eqn{\eta}{eta}.
+##' 
 ##' @param log,log.p Return log density or probability.
+##' 
 ##' @param lower.tail logical; if TRUE (default), probabilities are \eqn{P(X
 ##' \le x)}{P(X <= x)}, otherwise, \eqn{P(X > x)}{P(X > x)}.
 ##' @return \code{dsurvspline} gives the density, \code{psurvspline} gives the
@@ -63,13 +74,21 @@
 ##' \code{qsurvspline} on a sample of uniform random numbers.  Due to the
 ##' numerical root-finding involved in \code{qsurvspline}, it is slow compared
 ##' to typical random number generation functions.
+##'
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##'
 ##' @seealso \code{\link{flexsurvspline}}.
+##'
 ##' @references Royston, P. and Parmar, M. (2002).  Flexible parametric
 ##' proportional-hazards and proportional-odds models for censored survival
 ##' data, with application to prognostic modelling and estimation of treatment
 ##' effects. Statistics in Medicine 21(1):2175-2197.
+##'
+##' Wang W, Yan J (2021). Shape-Restricted Regression Splines with R
+##' Package splines2. Journal of Data Science, 19(3), 498-517.
+##'
 ##' @keywords distribution
+##'
 ##' @examples
 ##' 
 ##' ## reduces to the weibull
@@ -90,9 +109,10 @@ NULL
 ## could be generalized to any function with vector of arguments 
 ## TODO more special value handling
 
-dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE){
+dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE, spline="rp"){
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
     if(!is.matrix(knots)) knots <- matrix(knots, nrow=1)
+    else if (spline=="splines2ns") stop("matrix knots not supported with spline=\"splines2ns\"")
     lg <- nrow(gamma)
     nret <- max(length(q), lg)
     q <- rep(q, length.out=nret)
@@ -142,11 +162,12 @@ ldlink <- function(scale){
 
 ##' @rdname Survspline
 ##' @export
-dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, log=FALSE){
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset)
+dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, log=FALSE){
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
-        eta <- rowSums(basis(knots, tsfn(q, timescale)) * gamma) + as.numeric(X %*% beta) + offset # log cumulative hazard/odds
+        if (length(knots)==0) browser()
+        eta <- rowSums(basis(knots, tsfn(q, timescale), spline=spline) * gamma) + as.numeric(X %*% beta) + offset # log cumulative hazard/odds
         eeta <- exp(ldlink(scale)(eta))
         ret[ind][eeta==0] <- 0
         ret[ind][is.nan(eeta)] <- NaN
@@ -156,7 +177,7 @@ dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
         knots <- knots[ind2,,drop=FALSE] 
         eeta <- eeta[ind2]
         ind[ind] <- ind[ind] & ind2
-        dsum <- rowSums(dbasis(knots, tsfn(q, timescale)) * gamma)  # ds/dx
+        dsum <- rowSums(dbasis(knots, tsfn(q, timescale), spline=spline) * gamma)  # ds/dx
         ret[ind] <- dtsfn(q,timescale) * dsum * eeta
         ## derivative of log cum haz cannot be negative by definition, but
         ## optimisation doesn't constrain gamma to respect this, so set
@@ -191,16 +212,25 @@ Slink <- function(scale){
 
 ##' @rdname Survspline
 ##' @export
-psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE){
-    d <- dbase.survspline(q=q, gamma=gamma, knots=knots, scale=scale, offset=offset)
+psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, lower.tail=TRUE, log.p=FALSE){
+    d <- dbase.survspline(q=q, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
-        eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
-        surv <- Slink(scale)(eta)
-        ret[ind] <- as.numeric(1 - surv)
-
         ret[ind][q==0] <- 0
         ret[ind][q==Inf] <- 1
+        finite <- q>0 & q<Inf
+        ind <- ind[finite]
+        q <- q[finite]
+        offset <- offset[finite]
+        gamma <- gamma[finite,,drop=FALSE]
+        knots <- knots[finite,,drop=FALSE]
+    }
+    if (any(ind)){
+        if (length(knots)==0) browser()
+        eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) +
+          as.numeric(X %*% beta) + offset
+        surv <- Slink(scale)(eta)
+        ret[ind] <- as.numeric(1 - surv)
     }
     if (!lower.tail) ret <- 1 - ret
     if (log.p) ret <- log(ret)
@@ -209,17 +239,18 @@ psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 
 ##' @rdname Survspline
 ##' @export
-qsurvspline <- function(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, lower.tail=TRUE, log.p=FALSE){
+qsurvspline <- function(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, lower.tail=TRUE, log.p=FALSE){
     if (log.p) p <- exp(p)
     if (!lower.tail) p <- 1 - p
-    qgeneric(psurvspline, p=p, matargs=c("gamma","knots"), scalarargs=c("scale","timescale"), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, offset=offset)
+    qgeneric(psurvspline, p=p, matargs=c("gamma","knots"), scalarargs=c("scale","timescale","spline"),
+             gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, spline=spline, offset=offset)
 }
 
 ##' @rdname Survspline
 ##' @export
-rsurvspline <- function(n, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
+rsurvspline <- function(n, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
     if (length(n) > 1) n <- length(n)
-    ret <- qsurvspline(p=runif(n), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, offset=offset)
+    ret <- qsurvspline(p=runif(n), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, spline=spline, offset=offset)
     ret
 }
   
@@ -236,12 +267,13 @@ Hlink <- function(scale){
 
 ##' @rdname Survspline
 ##' @export
-Hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
+Hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
     match.arg(scale, c("hazard","odds","normal"))
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
-        eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
+        if (length(knots)==0) browser()
+        eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) + as.numeric(X %*% beta) + offset
         ret[ind] <- as.numeric(Hlink(scale)(eta))
     }
     ret
@@ -259,15 +291,16 @@ hlink <- function(scale){
 
 ##' @rdname Survspline
 ##' @export
-hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
+hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
 ## value for x=0?  currently zero, should it be limit as x reduces to 0? 
     match.arg(scale, c("hazard","odds","normal"))
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
-        eta <- rowSums(basis(knots, tsfn(q,timescale)) * gamma) + as.numeric(X %*% beta) + offset
+        if (length(knots)==0) browser()
+        eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) + as.numeric(X %*% beta) + offset
         eeta <- hlink(scale)(eta)
-        ret[ind] <- dtsfn(q, timescale) * rowSums(dbasis(knots, tsfn(q, timescale)) * gamma) * eeta
+        ret[ind] <- dtsfn(q, timescale) * rowSums(dbasis(knots, tsfn(q, timescale), spline=spline) * gamma) * eeta
         ret[ind][ret[ind]<=0] <- 0 # these correspond to invalid decreasing cumulative hazard functions
     }
     as.numeric(ret)
@@ -275,30 +308,30 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 
 ##' @rdname Survspline
 ##' @export
-rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0, start=0){
+rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, start=0){
     rmst_generic(psurvspline, t, start=start,
-                 matargs = c("gamma", "knots"), scalarargs = c("scale", "timescale"), 
+                 matargs = c("gamma", "knots"), scalarargs = c("scale", "timescale", "spline"), 
                  gamma=gamma, knots=knots,
                  beta=beta, X=X,
-                 scale=scale, timescale=timescale, offset=offset)
+                 scale=scale, timescale=timescale, spline=spline, offset=offset)
 }
 
 ##' @rdname Survspline
 ##' @export
-mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", offset=0){
+mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
     nt <- if (is.matrix(gamma)) nrow(gamma) else 1
     rmst_generic(psurvspline, rep(Inf,nt), start=0,
                  matargs = c("gamma", "knots"), 
-                 scalarargs = c("scale", "timescale"), 
+                 scalarargs = c("scale", "timescale", "spline"), 
                  gamma=gamma, knots=knots,
-                 beta=beta, X=X, scale=scale, timescale=timescale, offset=offset)
+                 beta=beta, X=X, scale=scale, timescale=timescale, spline=spline, offset=offset)
 }
 
 ##' Natural cubic spline basis
 ##' 
-##' Compute a basis for a natural cubic spline, using the parameterisation
-##' described by Royston and Parmar (2002).  Used for flexible parametric
-##' survival models.
+##' Compute a basis for a natural cubic spline, by default using the
+##' parameterisation described by Royston and Parmar (2002).  Used for
+##' flexible parametric survival models.
 ##' 
 ##' The exact formula for the basis is given in \code{\link{flexsurvspline}}.
 ##' 
@@ -308,6 +341,8 @@ mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 ##' boundary knots at the beginning and end.
 ##' 
 ##' @param x Vector of ordinates to compute the basis for.
+##'
+##' @inheritParams Survspline
 ##' 
 ##' @return A matrix with one row for each ordinate and one column for each
 ##' knot.
@@ -318,15 +353,62 @@ mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 ##' \code{fss} and \code{dfss} are the same, but with the order of the
 ##' arguments swapped around for consistency with similar functions in other R
 ##' packages.
+##'
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##'
 ##' @seealso \code{\link{flexsurvspline}}.
+##'
 ##' @references Royston, P. and Parmar, M. (2002).  Flexible parametric
 ##' proportional-hazards and proportional-odds models for censored survival
 ##' data, with application to prognostic modelling and estimation of treatment
 ##' effects. Statistics in Medicine 21(1):2175-2197.
+##'
+##' Wang W, Yan J (2021). Shape-Restricted Regression Splines with R
+##' Package splines2. Journal of Data Science, 19(3), 498-517.
+##'
 ##' @keywords models
 ##' @export
-basis <- function(knots, x) {
+basis <- function(knots, x, spline="rp") {
+  if (spline=="rp")
+    basis_original(knots, x)
+  else if (spline=="splines2ns")
+    basis_splines2ns(knots, x)
+}
+
+basis_splines2ns <- function(knots, x){
+  if (!isTRUE(requireNamespace("splines2", quietly = TRUE)))
+    stop("spline=\"splines2ns\" needs the splines2 package to be installed")
+  if (is.matrix(knots) && nrow(knots) > 0) 
+    ## matrix knots not supported in dbase.survspline
+    ## so if this happens, it must have been replicated from a vector
+    knots <- knots[1,]
+  nk <- length(knots)
+  if (nk > 0){
+    iknots <- knots[-c(1,nk)]
+    bknots <- knots[c(1,nk)]
+    bas <- splines2::naturalSpline(x, knots = iknots, Boundary.knots=bknots,
+                                   intercept = FALSE)
+    cbind(1, bas)
+  }
+  else numeric(nk)
+}
+
+dbasis_splines2ns <- function(knots, x){
+  if (!isTRUE(requireNamespace("splines2", quietly = TRUE)))
+    stop("spline=\"splines2ns\" needs the splines2 package to be installed")
+  if (is.matrix(knots) && nrow(knots) > 0) 
+    knots <- knots[1,]
+  nk <- length(knots)
+  if (nk > 0){
+    iknots <- knots[-c(1,nk)]
+    bknots <- knots[c(1,nk)]
+    bas <- splines2::naturalSpline(x, knots = iknots, Boundary.knots=bknots,
+                                   intercept = FALSE, derivs=1)
+    cbind(0, bas)
+  } else numeric(nk)
+}
+
+basis_original <- function(knots, x){
     if (is.matrix(knots)) {
         basis_matrix(knots, x)
     } else {
@@ -335,8 +417,15 @@ basis <- function(knots, x) {
 }
 
 ##' @export
-dbasis <- function(knots, x) {
-    if (is.matrix(knots)) {
+dbasis <- function(knots, x, spline="rp") {
+  if (spline=="rp")
+    dbasis_original(knots, x)
+  else if (spline=="splines2ns")
+    dbasis_splines2ns(knots, x)
+}
+
+dbasis_original <- function(knots, x){
+      if (is.matrix(knots)) {
         dbasis_matrix(knots, x)
     } else {
         dbasis_vector(knots, x)
@@ -394,7 +483,7 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
     else if (aux$scale=="normal")
         logH <- qnorm(1 - surv)
     x <- tsfn(Y[inc,"time"], aux$timescale)
-    b <- if (!is.null(aux$knots)) basis(aux$knots, x) else cbind(1, x)
+    b <- if (!is.null(aux$knots)) basis(aux$knots, x, spline=aux$spline) else cbind(1, x)
     
     ## Regress empirical logH on covariates and spline basis to obtain
     ## initial values.
@@ -405,7 +494,7 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
     kr <- diff(range(x))
     kx[1] <- x[1] - 0.01*kr
     kx[length(kx)] <- x[length(kx)] + 0.01*kr
-    db <- if (!is.null(aux$knots)) dbasis(aux$knots, kx) else cbind(0, kx)
+    db <- if (!is.null(aux$knots)) dbasis(aux$knots, kx, spline=aux$spline) else cbind(0, kx)
     dXq <- cbind(db, matrix(0, nrow=nrow(db), ncol=ncol(X)))
     nints <- length(mml)-1
     for (i in seq_len(nints)){
@@ -607,6 +696,13 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' \code{"identity"}, it is modelled as a spline function of time, however
 ##' this model would not satisfy the desirable property that the cumulative hazard
 ##' (or alternative) should approach 0 at time zero. 
+##'
+##' @param spline \code{"rp"} to use the spline basis described in
+##'   Royston and Parmar.
+##'
+##'   \code{"splines2ns"} to use the alternative natural spline basis
+##'   from the \code{splines2} package (Wang and Yan 2021), which may
+##'   be better behaved due to the basis being orthogonal.
 ##' 
 ##' @param ...  Any other arguments to be passed to or through
 ##' \code{\link{flexsurvreg}}, for example, \code{anc}, \code{inits},
@@ -644,22 +740,30 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' maximised log-likelihood.  This will differ from Stata, where the sum of
 ##' the log uncensored survival times is added to the log-likelihood in
 ##' survival models, to remove dependency on the time scale.}
+##'
 ##' @author Christopher Jackson <chris.jackson@@mrc-bsu.cam.ac.uk>
+##'
 ##' @seealso \code{\link{flexsurvreg}} for flexible survival modelling using
 ##' general parametric distributions.
 ##' 
 ##' \code{\link{plot.flexsurvreg}} and \code{\link{lines.flexsurvreg}} to plot
 ##' fitted survival, hazards and cumulative hazards from models fitted by
 ##' \code{\link{flexsurvspline}} and \code{\link{flexsurvreg}}.
+##'
 ##' @references Royston, P. and Parmar, M. (2002).  Flexible parametric
 ##' proportional-hazards and proportional-odds models for censored survival
 ##' data, with application to prognostic modelling and estimation of treatment
 ##' effects. Statistics in Medicine 21(1):2175-2197.
 ##' 
+##' Wang W, Yan J (2021). Shape-Restricted Regression Splines with R
+##' Package splines2. Journal of Data Science, 19(3), 498-517.
+##'
 ##' Jackson, C. (2016). flexsurv: A Platform for Parametric Survival Modeling
 ##' in R. Journal of Statistical Software, 70(8), 1-33.
 ##' doi:10.18637/jss.v070.i08
+##'
 ##' @keywords models survival
+##'
 ##' @examples
 ##' 
 ##' ## Best-fitting model to breast cancer data from Royston and Parmar (2002)
@@ -684,7 +788,7 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' 
 ##' @export
 flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
-                           k=0, knots=NULL, bknots=NULL, scale="hazard", timescale="log", ...){
+                           k=0, knots=NULL, bknots=NULL, scale="hazard", timescale="log", spline="rp", ...){
     ## Get response matrix from the formula.  Only need this to obtain
     ## default knots.  Largely copied from flexsurvreg - ideally
     ## should be in separate function, but can't make scoping work.
@@ -754,7 +858,7 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
         transforms = rep(c(identity), nk), inv.transforms=rep(c(identity), nk),
         inits = flexsurv.splineinits
         )
-    aux <- list(knots=knots, scale=scale, timescale=timescale)
+    aux <- list(knots=knots, scale=scale, timescale=timescale, spline=spline)
     dfn <- unroll.function(dsurvspline, gamma=0:(nk-1))
     pfn <- unroll.function(psurvspline, gamma=0:(nk-1))
     rfn <- unroll.function(rsurvspline, gamma=0:(nk-1))
@@ -788,7 +892,7 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
     args$fixedpars <- fpold
 
     ret <- do.call("flexsurvreg", args) # faff to make ... args work within functions
-    ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale, timescale=timescale))
+    ret <- c(ret, list(k=length(knots) - 2, knots=knots, scale=scale, timescale=timescale, spline=spline))
     ret$call <- call
     class(ret) <- "flexsurvreg"
     ret

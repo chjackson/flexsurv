@@ -190,11 +190,11 @@ DLSgompertz <- function(t, shape, rate){
     res
 }
 
-DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log"){
-    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE)
+DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp"){
+    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
-    b <- basis(knots, tsfn(t,timescale))
-    db <- dbasis(knots, tsfn(t,timescale))
+    b <- basis(knots, tsfn(t,timescale), spline=spline)
+    db <- dbasis(knots, tsfn(t,timescale), spline=spline)
     eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
     ds <- rowSums(db * gamma)
     npars <- ncol(gamma)
@@ -211,18 +211,20 @@ DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"
     ret
 }
 
-DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log"){
-    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE)
+DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp"){
+    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
-    b <- basis(knots, tsfn(t,timescale))
-    eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
-    for (i in 1:ncol(gamma)){
+    b <- basis(knots, tsfn(t,timescale), spline=spline)
+    if (any(ind)){
+      eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
+      for (i in 1:ncol(gamma)){
         if (scale=="hazard")
-            ret[ind,i] <- ifelse(t==0, 0, - b[,i] * exp(eta))
+          ret[ind,i] <- ifelse(t==0, 0, - b[,i] * exp(eta))
         else if (scale=="odds"){
-            eeta <- exp(eta)/(1 + exp(eta))
-            ret[ind,i] <- ifelse(t==0, 0, - b[,i] * eeta)
+          eeta <- exp(eta)/(1 + exp(eta))
+          ret[ind,i] <- ifelse(t==0, 0, - b[,i] * eeta)
         }
+      }
     }
     ret
 }

@@ -4,7 +4,7 @@
 \alias{.hess_to_cov}
 \title{helper function to safely convert a Hessian matrix to covariance matrix}
 \usage{
-.hess_to_cov(hessian, tol.solve = 0.000000001, tol.evalues = 0.00001, ...)
+.hess_to_cov(hessian, tol.solve = 1e-09, tol.evalues = 1e-05, ...)
 }
 \arguments{
 \item{hessian}{hessian matrix to convert to covariance matrix (must be evaluated at MLE)}

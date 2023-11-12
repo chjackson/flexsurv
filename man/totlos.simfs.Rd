@@ -15,7 +15,7 @@ totlos.simfs(
   tvar = "trans",
   tcovs = NULL,
   group = NULL,
-  M = 100000,
+  M = 1e+05,
   B = 1000,
   cl = 0.95,
   cores = NULL

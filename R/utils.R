@@ -101,7 +101,7 @@ rbase <- function(dname, n, ...){
 ##' vectorised, these will become matrices.  This is used for the arguments
 ##' \code{gamma} and \code{knots} in \code{\link{psurvspline}}.
 ##'
-##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.
+##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used, for example, for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.
 ##'
 ##' @param ...  The remaining arguments define parameters of the distribution
 ##' \code{pdist}.  These MUST be named explicitly.

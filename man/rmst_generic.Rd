@@ -25,7 +25,7 @@ represent vector parameters of the distribution.  Empty by default.  When
 vectorised, these will become matrices.  This is used for the arguments
 \code{gamma} and \code{knots} in \code{\link{psurvspline}}.}
 
-\item{scalarargs}{Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.}
+\item{scalarargs}{Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used, for example, for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.}
 
 \item{...}{The remaining arguments define parameters of the distribution
 \code{pdist}.  These MUST be named explicitly.}

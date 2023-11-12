@@ -16,6 +16,7 @@ flexsurvspline(
   bknots = NULL,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   ...
 )
 }
@@ -106,6 +107,13 @@ distribution function \code{\link{qnorm}}.}
 \code{"identity"}, it is modelled as a spline function of time, however
 this model would not satisfy the desirable property that the cumulative hazard
 (or alternative) should approach 0 at time zero.}
+
+\item{spline}{\code{"rp"} to use the spline basis described in
+  Royston and Parmar.
+
+  \code{"splines2ns"} to use the alternative natural spline basis
+  from the \code{splines2} package (Wang and Yan 2021), which may
+  be better behaved due to the basis being orthogonal.}
 
 \item{...}{Any other arguments to be passed to or through
 \code{\link{flexsurvreg}}, for example, \code{anc}, \code{inits},
@@ -241,6 +249,9 @@ Royston, P. and Parmar, M. (2002).  Flexible parametric
 proportional-hazards and proportional-odds models for censored survival
 data, with application to prognostic modelling and estimation of treatment
 effects. Statistics in Medicine 21(1):2175-2197.
+
+Wang W, Yan J (2021). Shape-Restricted Regression Splines with R
+Package splines2. Journal of Data Science, 19(3), 498-517.
 
 Jackson, C. (2016). flexsurv: A Platform for Parametric Survival Modeling
 in R. Journal of Statistical Software, 70(8), 1-33.

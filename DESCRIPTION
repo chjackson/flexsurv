@@ -51,6 +51,7 @@ Imports:
     ggplot2
 Encoding: UTF-8
 Suggests:
+    splines2,
     flexsurvcure,
     survminer,
     lubridate,

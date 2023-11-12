@@ -248,3 +248,13 @@ test_that("subset",{
     subflex <- flexsurvspline(Surv(time = time, event = status) ~ sex + cut(age, 4), data = survival::lung, 
                               subset = survival::lung$age > 60) # empty factor level in subset, should be dropped since 0.7
 })
+
+test_that("splines2 orthogonal basis",{
+  spl_rp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, spline="rp")
+  spl_ns <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, spline="splines2ns") # fits better 
+  expect_equal(spl_ns$loglik, spl_rp$loglik, tol=1)
+  spl_rp <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=2, spline="rp")
+  spl_ns <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=2, spline="splines2ns") # fits better 
+  expect_equal(spl_rp$res["groupMedium","est"], spl_ns$res["groupMedium","est"], tol=1e-03)
+  expect_equal(spl_rp$res["groupPoor","est"], spl_ns$res["groupPoor","est"], tol=1e-03)
+})

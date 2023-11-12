@@ -107,16 +107,16 @@ D2LSgompertz <- function(t, shape, rate){
   res
 }
 
-D2Ldsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log"){
-    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE)
+D2Ldsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp"){
+    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
-    b <- basis(knots, tsfn(t,timescale))
-    db <- dbasis(knots, tsfn(t,timescale))
+    b <- basis(knots, tsfn(t,timescale), spline=spline)
+    db <- dbasis(knots, tsfn(t,timescale), spline=spline)
     eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
     ds <- rowSums(db * gamma)
     if (scale=="odds") {
       eeta <- 2*exp(eta)/(1 + exp(eta))^2
-      db <- dbasis(knots, tsfn(t,timescale))
+      db <- dbasis(knots, tsfn(t,timescale), spline=spline)
     }
     npars <- ncol(gamma)
     parnames <- paste0("gamma",seq_len(npars)-1)
@@ -133,24 +133,26 @@ D2Ldsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard
     res
 }
 
-D2LSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log"){
-    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE)
+D2LSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp"){
+    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
-    b <- basis(knots, tsfn(t,timescale))
-    eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
-    if (scale=="odds") {
-      eeta <- exp(eta)/(1 + exp(eta))^2
-    }
+    b <- basis(knots, tsfn(t,timescale), spline=spline)
     npars <- ncol(gamma)
     parnames <- paste0("gamma",seq_len(npars)-1)
     res <- array(dim=c(length(t), npars, npars),
                  dimnames = list(NULL, parnames, parnames))
-    for (i in 1:npars){
-      for (j in 1:npars){
-        if (scale=="hazard") 
-          res[ind,i,j] <- ifelse(t==0, 0, - b[,i]*b[,j]*exp(eta))
-        else if (scale=="odds") 
-          res[ind,i,j] <- ifelse(t==0, 0, - b[,i]*b[,j] * eeta)
+    if (length(t) > 0){
+      eta <- rowSums(b * gamma) + as.numeric(X %*% beta)
+      if (scale=="odds") {
+        eeta <- exp(eta)/(1 + exp(eta))^2
+      }
+      for (i in 1:npars){
+        for (j in 1:npars){
+          if (scale=="hazard") 
+            res[ind,i,j] <- ifelse(t==0, 0, - b[,i]*b[,j]*exp(eta))
+          else if (scale=="odds") 
+            res[ind,i,j] <- ifelse(t==0, 0, - b[,i]*b[,j] * eeta)
+        }
       }
     }
     res

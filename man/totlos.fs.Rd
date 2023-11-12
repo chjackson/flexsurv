@@ -12,7 +12,7 @@ totlos.fs(
   newdata = NULL,
   ci = FALSE,
   tvar = "trans",
-  sing.inf = 10000000000,
+  sing.inf = 1e+10,
   B = 1000,
   cl = 0.95,
   ...

@@ -10,7 +10,7 @@ simfinal_fmsm(
   newdata = NULL,
   probs = c(0.025, 0.5, 0.975),
   t = 1000,
-  M = 100000,
+  M = 1e+05,
   B = 0,
   cores = NULL
 )
