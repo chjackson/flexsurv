@@ -477,8 +477,12 @@ test_that("No events in the data",{
     set.seed(1)
     tmin <- rexp(100, 1) 
     tmax <- tmin + 0.1
+    bhazard <- rep(0.0001, 100)
     mod <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="exponential")
     expect_equal(mod$loglik, -337.9815, tolerance=1e-03)
+    modb <- flexsurvreg(Surv(tmin,tmax,type='interval2')~1,
+                       bhazard=bhazard,dist="exponential")
+    expect_equal(mod$loglik, modb$loglik, tolerance=1e-03)
 })
 
 test_that("No censoring in the data",{

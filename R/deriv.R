@@ -68,7 +68,7 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dli
 }
 
 dderiv <- function(ddfn, ddcall, X, mx, dlist){
-    if (length(ddcall$t) == 0) matrix(0) else { 
+    if (length(ddcall$t) == 0) array(dim=c(0,length(dlist$pars))) else { 
         res.base <- do.call(ddfn, ddcall)
         res.beta <- Dcov(res.base, X, mx, dlist)
         cbind(res.base, res.beta)

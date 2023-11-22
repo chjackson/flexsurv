@@ -51,7 +51,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
     nbpars <- length(dlist$pars)
     insert.locations <- setdiff(seq_len(npars), fixedpars)
     
-    ## which are the subjects with events
+    ## which are the subjects with known event times
     event <- Y[,"status"] == 1
     event.times <- Y[event, "time1"]
     left.censor <- Y[!event, "time2"]
