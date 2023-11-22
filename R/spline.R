@@ -49,11 +49,11 @@
 ##' @param timescale \code{"log"} or \code{"identity"} as described in
 ##' \code{\link{flexsurvspline}}.
 ##' 
-##' @param spline \code{"rp"} to use the spline basis described in
-##'   Royston and Parmar.  \code{"splines2ns"} to use the alternative
-##'   natural spline basis from the \code{splines2} package (Wang and
-##'   Yan 2021), which may be better behaved due to the basis being
-##'   orthogonal.
+##' @param spline \code{"rp"} to use the natural cubic spline basis
+##'   described in Royston and Parmar.  \code{"splines2ns"} to use the
+##'   alternative natural cubic spline basis from the \code{splines2}
+##'   package (Wang and Yan 2021), which may be better behaved due to
+##'   the basis being orthogonal.
 ##' 
 ##' @param offset An extra constant to add to the linear predictor
 ##' \eqn{\eta}{eta}.
@@ -697,12 +697,12 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' this model would not satisfy the desirable property that the cumulative hazard
 ##' (or alternative) should approach 0 at time zero. 
 ##'
-##' @param spline \code{"rp"} to use the spline basis described in
-##'   Royston and Parmar.
+##' @param spline \code{"rp"} to use the natural cubic spline basis
+##'   described in Royston and Parmar.
 ##'
-##'   \code{"splines2ns"} to use the alternative natural spline basis
-##'   from the \code{splines2} package (Wang and Yan 2021), which may
-##'   be better behaved due to the basis being orthogonal.
+##'   \code{"splines2ns"} to use the alternative natural cubic spline
+##'   basis from the \code{splines2} package (Wang and Yan 2021),
+##'   which may be better behaved due to the basis being orthogonal.
 ##' 
 ##' @param ...  Any other arguments to be passed to or through
 ##' \code{\link{flexsurvreg}}, for example, \code{anc}, \code{inits},
