@@ -54,15 +54,14 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
     ## which are the subjects with known event times
     event <- Y[,"status"] == 1
     event.times <- Y[event, "time1"]
-    left.censor <- Y[!event, "time2"]
-    right.censor <- Y[!event, "time1"]
+    lcens.times <- Y[!event, "time2"]
+    rcens.times <- Y[!event, "time1"]
     
     par.transform <- buildTransformer(inits, nbpars, dlist)
 
     aux.pars <- buildAuxParms(aux, dlist)
 
-    default.offset <- rep.int(0, length(event.times))
-    do.hazard <- any(bhazard > 0)
+    do.bhazard <- any(bhazard > 0)
 
     loglik <- rep.int(0, nrow(Y))
     ## the ... here is to work around optim
@@ -100,12 +99,12 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         ## Left censoring times (upper bound for event time) 
         if (!all(event)){
             pmaxargs <- fnargs.nevent
-            pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
+            pmaxargs$q <- lcens.times # Inf if right-censored, giving pmax=1
             pmax <- call_distfn_quiet(dfns$p, pmaxargs)
             pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
         ## Right censoring times (lower bound for event time) 
             pargs <- fnargs.nevent
-            pargs$q <- right.censor
+            pargs$q <- rcens.times
             pmin <- call_distfn_quiet(dfns$p, pargs)
         } 
         
@@ -120,20 +119,32 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         pupper[rtrunc==Inf] <- 1 # in case the user's function doesn't already do this
         pobs <- pupper - plower # prob of being observed = 1 - 0 if no truncation 
 
-        if (do.hazard){
-            # Hazard adjustment for relative survival models: required for estimation
+        if (do.bhazard){
+            # Adjust for background hazard in relative survival models
             pargs   <- fnargs.event
             pargs$q <- event.times
             pminb   <- call_distfn_quiet(dfns$p, pargs)
-            loghaz  <- logdens - log(1 - pminb)
-            offseti <- log(1 + bhazard[event] / exp(loghaz))
+            logsurv_excess <- log(1 - pminb)
+            loghaz_excess  <- logdens - logsurv_excess
+            haz_excess <- exp(loghaz_excess)
+            logdens_offset <- log(1 + bhazard[event] / haz_excess) # = log(haz_allcause / haz_excess)
+            if (!all(event)) {               # background survival S* and left or interval censoring 
+              b_condsurv <- bhazard[!event]  # this is S*(end) / S*(start)
+              b_condsurv[lcens.times==Inf] <- 0  # when end=Inf, i.e. right censoring
+            }
+            if (any(is.finite(rtrunc)))
+              stop("models with both right truncation and background hazards not supported")
         } else {
-            offseti <- default.offset
+            logdens_offset <- 0
         }
         ## Express as vector of individual likelihood contributions
-        loglik[event] <- (logdens + offseti)
-        if (!all(event))
-            loglik[!event] <- (log(pmax - pmin))
+        loglik[event] <- (logdens + logdens_offset)
+        if (!all(event)){
+           if (do.bhazard)
+             loglik[!event] <- log((pmax - 1)*b_condsurv  +  1 - pmin)
+           else
+             loglik[!event] <- log(pmax - pmin)
+        }
 
         loglik <- loglik - log(pobs)
         
@@ -441,9 +452,22 @@ compress.model.matrices <- function(mml){
 ##' @param bhazard Optional variable giving expected hazards for relative
 ##'   survival models.  The model is described by Nelson et al. (2007).
 ##'
-##'    \code{bhazard} should contain a vector of values for each person in
-##'   the data, but only the values for the individuals whose event is observed are
-##'   used. \code{bhazard} refers to the hazard at the observed event time.
+##'   \code{bhazard} should contain a vector of values for each person in
+##'   the data.
+##'
+##'  \itemize{
+##'  \item  For people with observed events, \code{bhazard} refers to the
+##'   hazard at the observed event time.
+##'
+##'  \item  For people whose event time is
+##'   left-censored or interval-censored, \code{bhazard} should contain the
+##'   probability of surviving until the end of the corresponding interval,
+##'   conditionally on being alive at the start.
+##'
+##'   \item For people whose event time
+##'   is right-censored, the value of \code{bhazard} is ignored and does not
+##'   need to be specified.
+##' }
 ##'
 ##'   If \code{bhazard} is supplied, then the parameter estimates returned by
 ##'   \code{flexsurvreg} and the outputs returned by \code{summary.flexsurvreg}
@@ -665,7 +689,7 @@ compress.model.matrices <- function(mml){
 ##'   for use in \code{\link{flexsurvreg}}, construct a list with the following
 ##'   elements:
 ##'
-##'   \describe{ \item{"name"}{A string naming the distribution.  If this
+##'   \describe{ \item{\code{"name"}}{A string naming the distribution.  If this
 ##'   is called \code{"dist"}, for example, then there must be visible in the
 ##'   working environment, at least, either
 ##'
@@ -713,21 +737,21 @@ compress.model.matrices <- function(mml){
 ##' function must return a matrix with rows corresponding to times, and columns
 ##' corresponding to the parameters of the distribution.  The derivatives are
 ##' used, if available, to speed up the model fitting with \code{\link{optim}}.
-##' } \item{"pars"}{Vector of strings naming the parameters of the
+##' } \item{\code{"pars"}}{Vector of strings naming the parameters of the
 ##' distribution. These must be the same names as the arguments of the density
 ##' and probability functions.  }
-##' \item{"location"}{Name of the main parameter governing the mean of
+##' \item{\code{"location"}}{Name of the main parameter governing the mean of
 ##' the distribution.  This is the default parameter on which covariates are
 ##' placed in the \code{formula} supplied to \code{flexsurvreg}. }
-##' \item{"transforms"}{List of R
+##' \item{\code{"transforms"}}{List of R
 ##' functions which transform the range of values taken by each parameter onto
 ##' the real line.  For example, \code{c(log, log)} for a distribution with two
 ##' positive parameters. }
-##' \item{"inv.transforms"}{List of R functions defining the
+##' \item{\code{"inv.transforms"}}{List of R functions defining the
 ##' corresponding inverse transformations.  Note these must be lists, even for
 ##' single parameter distributions they should be supplied as, e.g.
 ##' \code{c(exp)} or \code{list(exp)}. }
-##' \item{"inits"}{A function of the
+##' \item{\code{"inits"}}{A function of the
 ##' observed survival times \code{t} (including right-censoring times, and
 ##' using the halfway point for interval-censored times) which returns a vector
 ##' of reasonable initial values for maximum likelihood estimation of each
@@ -930,8 +954,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         if (is.null(optim.args$method)){
             optim.args$method <- "BFGS"
         }
-        gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
-        has_analytic_hessian <- dfns$hessian && !isTRUE(hess.control$numeric)
+        gr <- if (dfns$deriv && deriv_supported(Y)) Dminusloglik.flexsurv else NULL
+        has_analytic_hessian <- dfns$hessian && !isTRUE(hess.control$numeric) && deriv_supported(Y)
         optim.args <- c(optim.args,
                         list(par=optpars,
                              fn=logLikFactory(Y=Y, X=X,
@@ -1012,7 +1036,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
 }
 
 check_deriv <- function(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars){
-  if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))){
+  if (isTRUE(getOption("flexsurv.test.analytic.derivatives")) && deriv_supported(Y)){
     if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
     if (dfns$deriv)
       deriv.test <- deriv.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
@@ -1360,3 +1384,9 @@ UseMethod("AICc")
 ##' @rdname AICc
 ##' @export
 AICC <- AICc
+
+deriv_supported <- function(Y){
+  event <- Y[,"status"] == 1
+  left_cens <- is.finite(Y[!event, "time2"])
+  !any(left_cens)
+}

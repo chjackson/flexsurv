@@ -361,9 +361,8 @@ test_that("Interval censoring",{
     simt[status==0] <- 0.6
     tmin <- simt
     tmax <- ifelse(status==1, simt, Inf)
-    tmax.sr <- ifelse(status==1, simt, NA) # need -Inf instead of Inf, don't understand why. bug?
-## Currently flexsurvreg fails with Inf, just as survreg fails, with Weibull. Consistent with survreg for the moment
-    
+    tmax.sr <- ifelse(status==1, simt, NA) 
+
     sr1 <- survreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
     sr2 <- survreg(Surv(tmin, status) ~ 1, dist="weibull")
     expect_equal(sr1$loglik[2], sr2$loglik[2])
@@ -379,14 +378,33 @@ test_that("Interval censoring",{
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
     expect_true(fs1$loglik != fs2$loglik)
 
-    ### FIXME n events wrong for interval2. 
-    
     ## using type="interval"
     status[status==0] <- 3
     fs3 <- flexsurvreg(Surv(tmin, tmax, status, type="interval") ~ 1, dist="weibull")
     expect_equal(fs1$loglik, fs3$loglik)
 
+    ## interval censoring close around the event
+    set.seed(1)
+    tev <- rweibull(100, 1.1, 1.5)
+    tmin <- tev - 0.001
+    tmax <- tev + 0.001
+    fs1 <- flexsurvreg(Surv(tev) ~ 1, dist="weibull")
+    fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    expect_equal(fs2$res["shape","est"], fs1$res["shape","est"], tol=1e-03)
+
+    ## relative survival with left and interval censoring
+    ## at left cens times, bhazard contains the background cond prob of surviving interval
+    bh <- rep(0.01, length(tmax))
+    back_csurv <- rep(exp(-0.002*0.01), length(tmax))
+    fs1 <- flexsurvreg(Surv(tev) ~ 1, dist="weibull", bhazard=bh)
+    fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, 
+                       dist="weibull", bhazard=back_csurv)
     
+    fs1 <- flexsurvreg(Surv(tev) ~ 1, 
+                       dist="weibull", bhazard=bh)
+    fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, 
+                       dist="weibull", bhazard=back_csurv, inits=c(1.24, 1.4))
+    expect_equal(fs2$res["shape","est"], fs1$res["shape","est"], tol=1e-03)
 })
 
 test_that("inits",{
@@ -454,7 +472,7 @@ test_that("Relative survival", {
   
     expect_equal(mdl_0$loglik, mdl_1$loglik - sum(bhaz * lung$time/365))
 })
-
+    
 test_that("warning with strata", { 
     ## need double backslash to escape $
     expect_warning(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ strata(ovarian$resid.ds), dist="gengamma", inits=c(6,1,-1,0)),
@@ -481,8 +499,8 @@ test_that("No events in the data",{
     mod <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="exponential")
     expect_equal(mod$loglik, -337.9815, tolerance=1e-03)
     modb <- flexsurvreg(Surv(tmin,tmax,type='interval2')~1,
-                       bhazard=bhazard,dist="exponential")
-    expect_equal(mod$loglik, modb$loglik, tolerance=1e-03)
+                       bhazard=exp(-bhazard*(tmax-tmin)),dist="exponential")
+    expect_equal(mod$res["rate","est"], modb$res["rate","est"], tolerance=1e-02)
 })
 
 test_that("No censoring in the data",{

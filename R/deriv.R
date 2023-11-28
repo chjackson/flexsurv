@@ -28,8 +28,8 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dli
                 dstcall[[names(pars)[i]]] <-
                     dlist$inv.transforms[[i]](pars[[i]])
     for (i in seq_along(aux)){
-        ddcall[[names(aux)[i]]] <- dsccall[[names(aux)[i]]] <-
-            dstcall[[names(aux)[i]]] <- aux[[i]]
+      ddcall[[names(aux)[i]]] <- dsccall[[names(aux)[i]]] <-
+        dstcall[[names(aux)[i]]] <- aux[[i]]
     }
     for (i in dlist$pars) {
         ddcall[[i]] <- ddcall[[i]][dead]

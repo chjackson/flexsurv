@@ -43,3 +43,4 @@ vignettes/Sweave.sty
 ^docs$
 ^pkgdown$
 codecov.yml
+data-raw
