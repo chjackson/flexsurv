@@ -108,12 +108,12 @@ distribution function \code{\link{qnorm}}.}
 this model would not satisfy the desirable property that the cumulative hazard
 (or alternative) should approach 0 at time zero.}
 
-\item{spline}{\code{"rp"} to use the spline basis described in
-  Royston and Parmar.
+\item{spline}{\code{"rp"} to use the natural cubic spline basis
+  described in Royston and Parmar.
 
-  \code{"splines2ns"} to use the alternative natural spline basis
-  from the \code{splines2} package (Wang and Yan 2021), which may
-  be better behaved due to the basis being orthogonal.}
+  \code{"splines2ns"} to use the alternative natural cubic spline
+  basis from the \code{splines2} package (Wang and Yan 2021),
+  which may be better behaved due to the basis being orthogonal.}
 
 \item{...}{Any other arguments to be passed to or through
 \code{\link{flexsurvreg}}, for example, \code{anc}, \code{inits},

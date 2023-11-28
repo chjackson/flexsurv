@@ -15,11 +15,11 @@ boundary knots at the beginning and end.}
 
 \item{x}{Vector of ordinates to compute the basis for.}
 
-\item{spline}{\code{"rp"} to use the spline basis described in
-Royston and Parmar.  \code{"splines2ns"} to use the alternative
-natural spline basis from the \code{splines2} package (Wang and
-Yan 2021), which may be better behaved due to the basis being
-orthogonal.}
+\item{spline}{\code{"rp"} to use the natural cubic spline basis
+described in Royston and Parmar.  \code{"splines2ns"} to use the
+alternative natural cubic spline basis from the \code{splines2}
+package (Wang and Yan 2021), which may be better behaved due to
+the basis being orthogonal.}
 }
 \value{
 A matrix with one row for each ordinate and one column for each

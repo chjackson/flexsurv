@@ -995,11 +995,11 @@ and log-normal respectively.  The scale must be common to all times.}
 \item{timescale}{\code{"log"} or \code{"identity"} as described in
 \code{\link{flexsurvspline}}.}
 
-\item{spline}{\code{"rp"} to use the spline basis described in
-Royston and Parmar.  \code{"splines2ns"} to use the alternative
-natural spline basis from the \code{splines2} package (Wang and
-Yan 2021), which may be better behaved due to the basis being
-orthogonal.}
+\item{spline}{\code{"rp"} to use the natural cubic spline basis
+described in Royston and Parmar.  \code{"splines2ns"} to use the
+alternative natural cubic spline basis from the \code{splines2}
+package (Wang and Yan 2021), which may be better behaved due to
+the basis being orthogonal.}
 
 \item{start}{Optional left-truncation time or times.  The returned
 restricted mean survival will be conditioned on survival up to
