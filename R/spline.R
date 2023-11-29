@@ -26,9 +26,9 @@
 ##' restricted mean survival will be conditioned on survival up to
 ##' this time.
 ##'
-##' @param beta Vector of covariate effects (deprecated).
+##' @param beta Vector of covariate effects.  Not supported and ignored since version 2.3, and this argument will be removed in 2.4.
 ##'
-##' @param X Matrix of covariate values (deprecated).
+##' @param X Matrix of covariate values. Not supported and ignored since version 2.3, and this argument will be removed in 2.4.
 ##'
 ##' @param knots Locations of knots on the axis of log time, supplied in
 ##' increasing order.  Unlike in \code{\link{flexsurvspline}}, these include
@@ -56,7 +56,7 @@
 ##'   the basis being orthogonal.
 ##' 
 ##' @param offset An extra constant to add to the linear predictor
-##' \eqn{\eta}{eta}.
+##' \eqn{\eta}{eta}.  Not supported and ignored since version 2.3, and this argument will be removed in 2.4. 
 ##' 
 ##' @param log,log.p Return log density or probability.
 ##' 
@@ -109,14 +109,13 @@ NULL
 ## could be generalized to any function with vector of arguments 
 ## TODO more special value handling
 
-dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE, spline="rp"){
+dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE, spline="rp"){
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
     if(!is.matrix(knots)) knots <- matrix(knots, nrow=1)
     else if (spline=="splines2ns") stop("matrix knots not supported with spline=\"splines2ns\"")
     lg <- nrow(gamma)
     nret <- max(length(q), lg)
     q <- rep(q, length.out=nret)
-    offset <- rep(offset, length.out=nret)
 
     gamma <- matrix(rep(as.numeric(t(gamma)), length.out = ncol(gamma) * nret),
                     ncol = ncol(gamma), byrow = TRUE)
@@ -136,10 +135,9 @@ dbase.survspline <- function(q, gamma, knots, scale, offset=0, deriv=FALSE, spli
     }
     ind <- !is.na(q) & q > 0
     q <- q[ind]
-    offset <- offset[ind]
     gamma <- gamma[ind,,drop=FALSE]
     knots <- knots[ind,,drop=FALSE]
-    list(ret=ret, gamma=gamma, q=q, scale=scale, ind=ind, knots=knots, offset=offset)
+    list(ret=ret, gamma=gamma, q=q, scale=scale, ind=ind, knots=knots)
 }
 
 dlink <- function(scale){
@@ -163,11 +161,12 @@ ldlink <- function(scale){
 ##' @rdname Survspline
 ##' @export
 dsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, log=FALSE){
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
+    betax_warn(beta, X, offset)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         if (length(knots)==0) browser()
-        eta <- rowSums(basis(knots, tsfn(q, timescale), spline=spline) * gamma) + as.numeric(X %*% beta) + offset # log cumulative hazard/odds
+        eta <- rowSums(basis(knots, tsfn(q, timescale), spline=spline) * gamma) # log cumulative hazard/odds
         eeta <- exp(ldlink(scale)(eta))
         ret[ind][eeta==0] <- 0
         ret[ind][is.nan(eeta)] <- NaN
@@ -213,7 +212,8 @@ Slink <- function(scale){
 ##' @rdname Survspline
 ##' @export
 psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, lower.tail=TRUE, log.p=FALSE){
-    d <- dbase.survspline(q=q, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
+    betax_warn(beta, X, offset)
+    d <- dbase.survspline(q=q, gamma=gamma, knots=knots, scale=scale, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         ret[ind][q==0] <- 0
@@ -221,14 +221,13 @@ psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
         finite <- q>0 & q<Inf
         ind <- ind[finite]
         q <- q[finite]
-        offset <- offset[finite]
         gamma <- gamma[finite,,drop=FALSE]
         knots <- knots[finite,,drop=FALSE]
     }
     if (any(ind)){
         if (length(knots)==0) browser()
         eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) +
-          as.numeric(X %*% beta) + offset
+          as.numeric(X %*% beta)
         surv <- Slink(scale)(eta)
         ret[ind] <- as.numeric(1 - surv)
     }
@@ -240,17 +239,19 @@ psurvspline <- function(q, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 ##' @rdname Survspline
 ##' @export
 qsurvspline <- function(p, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, lower.tail=TRUE, log.p=FALSE){
+    betax_warn(beta, X, offset)
     if (log.p) p <- exp(p)
     if (!lower.tail) p <- 1 - p
     qgeneric(psurvspline, p=p, matargs=c("gamma","knots"), scalarargs=c("scale","timescale","spline"),
-             gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, spline=spline, offset=offset)
+             gamma=gamma, knots=knots, scale=scale, timescale=timescale, spline=spline)
 }
 
 ##' @rdname Survspline
 ##' @export
 rsurvspline <- function(n, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
+    betax_warn(beta, X, offset)
     if (length(n) > 1) n <- length(n)
-    ret <- qsurvspline(p=runif(n), gamma=gamma, beta=beta, X=X, knots=knots, scale=scale, timescale=timescale, spline=spline, offset=offset)
+    ret <- qsurvspline(p=runif(n), gamma=gamma, knots=knots, scale=scale, timescale=timescale, spline=spline)
     ret
 }
   
@@ -269,11 +270,11 @@ Hlink <- function(scale){
 ##' @export
 Hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
     match.arg(scale, c("hazard","odds","normal"))
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         if (length(knots)==0) browser()
-        eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) + as.numeric(X %*% beta) + offset
+        eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) + as.numeric(X %*% beta)
         ret[ind] <- as.numeric(Hlink(scale)(eta))
     }
     ret
@@ -293,12 +294,13 @@ hlink <- function(scale){
 ##' @export
 hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
 ## value for x=0?  currently zero, should it be limit as x reduces to 0? 
+    betax_warn(beta, X, offset)
     match.arg(scale, c("hazard","odds","normal"))
-    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, offset=offset, spline=spline)
+    d <- dbase.survspline(q=x, gamma=gamma, knots=knots, scale=scale, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]])
     if (any(ind)){
         if (length(knots)==0) browser()
-        eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) + as.numeric(X %*% beta) + offset
+        eta <- rowSums(basis(knots, tsfn(q,timescale), spline=spline) * gamma) + as.numeric(X %*% beta)
         eeta <- hlink(scale)(eta)
         ret[ind] <- dtsfn(q, timescale) * rowSums(dbasis(knots, tsfn(q, timescale), spline=spline) * gamma) * eeta
         ret[ind][ret[ind]<=0] <- 0 # these correspond to invalid decreasing cumulative hazard functions
@@ -309,22 +311,23 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 ##' @rdname Survspline
 ##' @export
 rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, start=0){
+    betax_warn(beta, X, offset)
     rmst_generic(psurvspline, t, start=start,
                  matargs = c("gamma", "knots"), scalarargs = c("scale", "timescale", "spline"), 
                  gamma=gamma, knots=knots,
-                 beta=beta, X=X,
-                 scale=scale, timescale=timescale, spline=spline, offset=offset)
+                 scale=scale, timescale=timescale, spline=spline)
 }
 
 ##' @rdname Survspline
 ##' @export
 mean_survspline = function(gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0){
+    betax_warn(beta, X, offset)
     nt <- if (is.matrix(gamma)) nrow(gamma) else 1
     rmst_generic(psurvspline, rep(Inf,nt), start=0,
                  matargs = c("gamma", "knots"), 
                  scalarargs = c("scale", "timescale", "spline"), 
                  gamma=gamma, knots=knots,
-                 beta=beta, X=X, scale=scale, timescale=timescale, spline=spline, offset=offset)
+                 scale=scale, timescale=timescale, spline=spline)
 }
 
 ##' Natural cubic spline basis
@@ -896,4 +899,9 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
     ret$call <- call
     class(ret) <- "flexsurvreg"
     ret
+}
+
+betax_warn <- function(X, beta, offset){
+  if (!isTRUE(all.equal(X,0)) || !isTRUE(all.equal(beta,0)) || !isTRUE(all.equal(offset,0)))
+    warning("`X`, `beta` and `offset` arguments not supported since v2.3.  Instead the first element of `gamma` should be modified to include any covariate effects or offsets.")
 }

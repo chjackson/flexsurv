@@ -203,11 +203,9 @@ test_that("flexsurvspline results match stpm in Stata",{
 test_that("Expected survival",{
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1)
     gamma <- coef(spl)[1:3]
-    beta <- coef(spl)[4:5]
-    surv <- function(x,...)psurvspline(q=x, gamma=gamma, beta=beta, knots=spl$knots, scale=spl$scale, lower.tail=FALSE, ...)
-    expect_equal(integrate(surv, 0, 5, X=c(0,0))$value, 4.341222955052117, tol=1e-04)# For group="good"
-    expect_equal(integrate(surv, 0, 5, X=c(1,0))$value, 3.664826479659649, tol=1e-04) # For group="medium"
-    expect_equal(integrate(surv, 0, 5, X=c(0,1))$value, 2.713301623208948, tol=1e-04) # For group="poor"
+    surv <- function(x,...)psurvspline(q=x, gamma=gamma, knots=spl$knots,
+                                       scale=spl$scale, lower.tail=FALSE, ...)
+    expect_equal(integrate(surv, 0, 5)$value, 4.341222955052117, tol=1e-04) # For group="good"
 })
 
 test_that("gamma in d/psurvspline can be matrix or vector",{
