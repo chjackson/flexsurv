@@ -343,21 +343,24 @@ check.flexsurv.response <- function(Y){
     if (!inherits(Y, "Surv"))
         stop("Response must be a survival object")
 ### convert Y from Surv object to numeric matrix
+    type <- attr(Y, "type")
 ### though "time" only used for initial values, printed time at risk, empirical hazard
-    if (attr(Y, "type") == "counting")
+    if (type == "counting")
         Y <- cbind(Y, time=Y[,"stop"] - Y[,"start"], time1=Y[,"stop"], time2=Inf)
-    else if (attr(Y, "type") == "interval"){
+    else if (type == "interval"){ # Surv() converts interval2 to interval
         Y[,"time2"][Y[,"status"]==0] <- Inf   # upper bound with right censoring 
+        Y[,"time2"][Y[,"status"]==1] <- Y[,"time1"][Y[,"status"]==1]  # event time
         Y[,"time2"][Y[,"status"]==2] <- Y[,"time1"][Y[,"status"]==2]
         Y[,"time1"][Y[,"status"]==2] <- 0  # 
         Y <- cbind(Y, start=0, stop=Y[,"time1"], time=Y[,"time1"])
     }
-    else if (attr(Y, "type") == "right")
+    else if (type == "right")
         Y <- cbind(Y, start=0, stop=Y[,"time"], time1=Y[,"time"], time2=Inf)
     else stop("Survival object type \"", attr(Y, "type"), "\"", " not supported")
     if (any(Y[,"time1"]<0)){
         stop("Negative survival times in the data")
     }
+    attr(Y, "type") <- type
     Y
 }
 

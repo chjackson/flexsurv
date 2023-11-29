@@ -367,10 +367,12 @@ test_that("Interval censoring",{
     sr2 <- survreg(Surv(tmin, status) ~ 1, dist="weibull")
     expect_equal(sr1$loglik[2], sr2$loglik[2])
     
-    fs1 <- flexsurvreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
+    fs1_inf <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    fs1_na <- flexsurvreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
-    expect_equal(fs1$loglik, fs2$loglik)
-    expect_equal(fs1$loglik, sr1$loglik[2])
+    expect_equal(fs1_inf$loglik, fs2$loglik)
+    expect_equal(fs1_na$loglik, fs2$loglik)
+    expect_equal(fs1_inf$loglik, sr1$loglik[2])
 
     ## put an upper bound on censored times
     tmax <- ifelse(status==1, simt, 0.7)
@@ -382,7 +384,14 @@ test_that("Interval censoring",{
     status[status==0] <- 3
     fs3 <- flexsurvreg(Surv(tmin, tmax, status, type="interval") ~ 1, dist="weibull")
     expect_equal(fs1$loglik, fs3$loglik)
-
+    
+    ## interval censoring with zero width interval
+    set.seed(1)
+    tmin <- tmax <- rweibull(100, 1.1, 1.5)
+    fs1 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    fs2 <- flexsurvreg(Surv(tmin) ~ 1, dist="weibull")
+    expect_equal(fs1$loglik, fs2$loglik)
+    
     ## interval censoring close around the event
     set.seed(1)
     tev <- rweibull(100, 1.1, 1.5)
@@ -391,7 +400,7 @@ test_that("Interval censoring",{
     fs1 <- flexsurvreg(Surv(tev) ~ 1, dist="weibull")
     fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
     expect_equal(fs2$res["shape","est"], fs1$res["shape","est"], tol=1e-03)
-
+    
     ## relative survival with left and interval censoring
     ## at left cens times, bhazard contains the background cond prob of surviving interval
     bh <- rep(0.01, length(tmax))
