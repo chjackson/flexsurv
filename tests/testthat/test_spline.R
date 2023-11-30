@@ -256,3 +256,15 @@ test_that("splines2 orthogonal basis",{
   expect_equal(spl_rp$res["groupMedium","est"], spl_ns$res["groupMedium","est"], tol=1e-03)
   expect_equal(spl_rp$res["groupPoor","est"], spl_ns$res["groupPoor","est"], tol=1e-03)
 })
+
+test_that("interval censored data",{
+  bc$recyrs1 <- bc$recyrs + 0.001
+  bci <- bc[bc$censrec==1,]
+  ## knots chosen from interval midpoints
+  spl1 <- flexsurvspline(Surv(recyrs, recyrs1, type="interval2") ~ 1, data=bci, k=1)
+  spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bci, knots=spl1$knots[2],
+                        bknots=spl1$knots[c(1,3)])
+  expect_equal(spl1$res["gamma0","est"], spl$res["gamma0","est"], tol=1e-02)
+  spl0 <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bci, k=1)
+  expect_equal(spl0$res["gamma0","est"], spl$res["gamma0","est"], tol=1e-02)
+})
