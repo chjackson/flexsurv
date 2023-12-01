@@ -123,9 +123,9 @@ which case the parameters are common to all times.  Alternatively a matrix
 may be supplied, with rows corresponding to different times, and columns
 corresponding to \code{knots}.}
 
-\item{beta}{Vector of covariate effects (deprecated).}
+\item{beta}{Vector of covariate effects.  Not supported and ignored since version 2.3, and this argument will be removed in 2.4.}
 
-\item{X}{Matrix of covariate values (deprecated).}
+\item{X}{Matrix of covariate values. Not supported and ignored since version 2.3, and this argument will be removed in 2.4.}
 
 \item{knots}{Locations of knots on the axis of log time, supplied in
 increasing order.  Unlike in \code{\link{flexsurvspline}}, these include
@@ -153,7 +153,7 @@ package (Wang and Yan 2021), which may be better behaved due to
 the basis being orthogonal.}
 
 \item{offset}{An extra constant to add to the linear predictor
-\eqn{\eta}{eta}.}
+\eqn{\eta}{eta}.  Not supported and ignored since version 2.3, and this argument will be removed in 2.4.}
 
 \item{log, log.p}{Return log density or probability.}
 

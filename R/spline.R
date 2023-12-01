@@ -806,11 +806,12 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
     m <- eval(temp, parent.frame())
     Y <- check.flexsurv.response(model.extract(m, "response"))
     
-    dtimes <- Y[,"stop"][Y[,"status"]==1]
-
+    deaths <- Y[,"status"]==1
+    dtimes <- Y[deaths,"stop"]
     intcens <- Y[,"status"]==3
-    midpoints <- (Y[intcens,"time2"] + Y[intcens,"time1"])/2
-    if (any(intcens)) dtimes <- sort(c(dtimes, midpoints))
+    midpoints <- (Y[,"time2"] + Y[,"time1"])/2
+    ktimes <- ifelse(deaths, Y[,"stop"], ifelse(intcens, midpoints, NA))
+    kinds <- deaths | intcens 
 
     if (is.null(knots)) {
         is.wholenumber <-
@@ -818,7 +819,9 @@ flexsurvspline <- function(formula, data, weights, bhazard, rtrunc, subset,
         if (is.null(k)) stop("either \"knots\" or \"k\" must be specified")
         if (!is.numeric(k)) stop("k must be numeric")
         if (!is.wholenumber(k) || (k<0)) stop("number of knots \"k\" must be a non-negative integer")
-        knots <- quantile(tsfn(dtimes,timescale), seq(0, 1, length.out=k+2)[-c(1,k+2)])
+        knots <- quantile_weighted(tsfn(ktimes[kinds],timescale),
+                                   probs = seq(0, 1, length.out=k+2)[-c(1,k+2)],
+                                   weights = model.extract(m, "weights")[kinds])
     }
     else {
         if (!is.numeric(knots)) stop("\"knots\" must be a numeric vector")
@@ -905,3 +908,38 @@ betax_warn <- function(X, beta, offset){
   if (!isTRUE(all.equal(X,0)) || !isTRUE(all.equal(beta,0)) || !isTRUE(all.equal(offset,0)))
     warning("`X`, `beta` and `offset` arguments not supported since v2.3.  Instead the first element of `gamma` should be modified to include any covariate effects or offsets.")
 }
+
+##' Weighted quantile function
+##'
+##' Works by multiplying the [0,1] weights by a large number
+##' `max_rep*length(x)`, then rounding to an integer.  Each element of x is
+##' duplicated to the length defined by these integers.  Then
+##' quantiles of x are obtained using the standard `quantile`
+##' function.
+##'
+##' @inheritParams quantile
+##'
+##' @param weights Vector of non-negative numbers of same length as
+##'   `x`, in proportion to the weights of `x`.  Elements can be greater
+##'   than 1, since this is normalised to sum to 1 internally.
+##'
+##' @param `max_rep` is the average number of times that an element of
+##'   `x` will be replicated.  Increasing this will give more accuracy
+##'   at the cost of bigger memory requirements for longer `x`.  The
+##'   default of 100 is chosen to be rough, given the intended purpose
+##'   of this function for choosing default knots for a spline to span
+##'   `x`.
+##'
+##' @noRd
+quantile_weighted <- function(x, probs, weights=NULL, max_rep=100, ...){
+  x_expand <- x 
+  if (!is.null(weights)){
+    weights_int <- round(length(x) * max_rep * (weights/sum(weights)))
+    x_expand <- rep(x, weights_int)
+  }
+  quantile(x_expand, probs)
+}
+
+### FIXME expanding should result in longer x
+### so choose in proportion to the length of x somehow
+### sum(weights_int) should be > length(x) 

@@ -268,3 +268,13 @@ test_that("interval censored data",{
   spl0 <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bci, k=1)
   expect_equal(spl0$res["gamma0","est"], spl$res["gamma0","est"], tol=1e-02)
 })
+
+test_that("spline with weights",{
+  set.seed(1)
+  bc$w <- bc$recyrs # weight later obs
+  splw <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, weights=w, k=1)
+  spl <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=1)
+  expect_true(!isTRUE(identical(splw$knots, spl$knots)))
+  ## knots chosen to account for weights, so should be higher in weighted model
+  expect_lt(mean(spl$knots), mean(splw$knots))
+})
