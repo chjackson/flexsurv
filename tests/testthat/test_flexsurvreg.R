@@ -404,15 +404,15 @@ test_that("Interval censoring",{
     ## relative survival with left and interval censoring
     ## at left cens times, bhazard contains the background cond prob of surviving interval
     bh <- rep(0.01, length(tmax))
-    back_csurv <- rep(exp(-0.002*0.01), length(tmax))
+    back_cdeath <- 1 - rep(exp(-0.002*0.01), length(tmax))
     fs1 <- flexsurvreg(Surv(tev) ~ 1, dist="weibull", bhazard=bh)
     fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, 
-                       dist="weibull", bhazard=back_csurv)
+                       dist="weibull", bhazard=back_cdeath)
     
     fs1 <- flexsurvreg(Surv(tev) ~ 1, 
                        dist="weibull", bhazard=bh)
     fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, 
-                       dist="weibull", bhazard=back_csurv, inits=c(1.24, 1.4))
+                       dist="weibull", bhazard=back_cdeath, inits=c(1.24, 1.4))
     expect_equal(fs2$res["shape","est"], fs1$res["shape","est"], tol=1e-03)
 })
 
@@ -508,7 +508,7 @@ test_that("No events in the data",{
     mod <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="exponential")
     expect_equal(mod$loglik, -337.9815, tolerance=1e-03)
     modb <- flexsurvreg(Surv(tmin,tmax,type='interval2')~1,
-                       bhazard=exp(-bhazard*(tmax-tmin)),dist="exponential")
+                       bhazard = 1 - exp(-bhazard*(tmax-tmin)), dist="exponential")
     expect_equal(mod$res["rate","est"], modb$res["rate","est"], tolerance=1e-02)
 })
 

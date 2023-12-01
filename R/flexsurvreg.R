@@ -129,7 +129,7 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
             haz_excess <- exp(loghaz_excess)
             logdens_offset <- log(1 + bhazard[event] / haz_excess) # = log(haz_allcause / haz_excess)
             if (!all(event)) {               # background survival S* and left or interval censoring 
-              b_condsurv <- bhazard[!event]  # this is S*(end) / S*(start)
+              b_condsurv <- 1 - bhazard[!event]  # this is S*(end) / S*(start)
               b_condsurv[lcens.times==Inf] <- 0  # when end=Inf, i.e. right censoring
             }
             if (any(is.finite(rtrunc)))
@@ -464,7 +464,7 @@ compress.model.matrices <- function(mml){
 ##'
 ##'  \item  For people whose event time is
 ##'   left-censored or interval-censored, \code{bhazard} should contain the
-##'   probability of surviving until the end of the corresponding interval,
+##'   probability of dying by the end of the corresponding interval,
 ##'   conditionally on being alive at the start.
 ##'
 ##'   \item For people whose event time
@@ -856,10 +856,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     ## a) calling model.frame() directly doesn't work.  it only looks in
     ## "data" or the environment of "formula" for extra variables like
     ## "weights". needs to also look in environment of flexsurvreg.
-    ## m <- model.frame(formula=, data=data, weights=weights, subset=subset, na.action=na.action)
-    ## b) putting block below in a function doesn't work when calling
-    ## flexsurvreg within a function
-    ## m <- make.model.frame(call, formula, data, weights, subset, na.action, ancnames)
+    ## should handle calling flexsurvreg within a function 
 
     ## Make model frame
     indx <- match(c("formula", "data", "weights", "bhazard", "rtrunc", "subset", "na.action"), names(call), nomatch = 0)

@@ -102,7 +102,7 @@ maximising the weighted sum of the individual-specific log-likelihoods.}
 
  \item  For people whose event time is
   left-censored or interval-censored, \code{bhazard} should contain the
-  probability of surviving until the end of the corresponding interval,
+  probability of dying by the end of the corresponding interval,
   conditionally on being alive at the start.
 
   \item For people whose event time
