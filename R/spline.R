@@ -939,7 +939,3 @@ quantile_weighted <- function(x, probs, weights=NULL, max_rep=100, ...){
   }
   quantile(x_expand, probs)
 }
-
-### FIXME expanding should result in longer x
-### so choose in proportion to the length of x somehow
-### sum(weights_int) should be > length(x) 
