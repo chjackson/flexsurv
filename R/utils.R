@@ -73,13 +73,13 @@ rbase <- function(dname, n, ...){
 }
 
 
-##' Generic function to find restricted mean survival of a distribution
+##' Generic function to find restricted mean survival time for some distribution
 ##'
 ##' Generic function to find the restricted mean of a distribution, given the
-##' equivalent probability distribution function using numeric integration.
+##' equivalent probability distribution function, using numeric integration.
 ##'
 ##' This function is used by default for custom distributions for which an
-##' rmst function is not provided.
+##' \code{rmst} function is not provided.
 ##'
 ##' This assumes a suitably smooth, continuous distribution.
 ##'
@@ -101,7 +101,7 @@ rbase <- function(dname, n, ...){
 ##' vectorised, these will become matrices.  This is used for the arguments
 ##' \code{gamma} and \code{knots} in \code{\link{psurvspline}}.
 ##'
-##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.
+##' @param scalarargs Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used, for example, for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.
 ##'
 ##' @param ...  The remaining arguments define parameters of the distribution
 ##' \code{pdist}.  These MUST be named explicitly.
@@ -357,4 +357,15 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("ind"))
     r <- default.r
   }
   numDeriv::hessian(f, x, method = "Richardson", method.args = list(r = r, ...))
+}
+
+check_numeric <- function(...){
+  args <- list(...)
+  nm <- names(args)
+  for (i in seq_along(args)){
+    nm <- names(args)[i]
+    nmstr <- if (is.null(nm) || nm=="") "" else sprintf(" for `%s`", nm)
+    if (!is.numeric(args[[i]]))
+        stop(sprintf("Non-numeric value supplied%s", nmstr))
+  }
 }

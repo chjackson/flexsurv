@@ -66,14 +66,15 @@
 \alias{rmst_survspline5}
 \alias{rmst_survspline6}
 \alias{rmst_survspline7}
-\title{Royston/Parmar spline survival distribution functions}
+\title{Royston/Parmar spline survival distribution functions with one argument per parameter}
 \usage{
 mean_survspline0(
   gamma0,
   gamma1,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 mean_survspline1(
@@ -82,7 +83,8 @@ mean_survspline1(
   gamma2,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 mean_survspline2(
@@ -92,7 +94,8 @@ mean_survspline2(
   gamma3,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 mean_survspline3(
@@ -103,7 +106,8 @@ mean_survspline3(
   gamma4,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 mean_survspline4(
@@ -115,7 +119,8 @@ mean_survspline4(
   gamma5,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 mean_survspline5(
@@ -128,7 +133,8 @@ mean_survspline5(
   gamma6,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 mean_survspline6(
@@ -142,7 +148,8 @@ mean_survspline6(
   gamma7,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 mean_survspline7(
@@ -157,7 +164,8 @@ mean_survspline7(
   gamma8,
   knots = c(-10, 10),
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 rmst_survspline0(
@@ -167,6 +175,7 @@ rmst_survspline0(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -178,6 +187,7 @@ rmst_survspline1(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -190,6 +200,7 @@ rmst_survspline2(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -203,6 +214,7 @@ rmst_survspline3(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -217,6 +229,7 @@ rmst_survspline4(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -232,6 +245,7 @@ rmst_survspline5(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -248,6 +262,7 @@ rmst_survspline6(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -265,6 +280,7 @@ rmst_survspline7(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   start = 0
 )
 
@@ -275,6 +291,7 @@ dsurvspline0(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -286,6 +303,7 @@ dsurvspline1(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -298,6 +316,7 @@ dsurvspline2(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -311,6 +330,7 @@ dsurvspline3(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -325,6 +345,7 @@ dsurvspline4(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -340,6 +361,7 @@ dsurvspline5(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -356,6 +378,7 @@ dsurvspline6(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -373,6 +396,7 @@ dsurvspline7(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   log = FALSE
 )
 
@@ -383,6 +407,7 @@ psurvspline0(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -395,6 +420,7 @@ psurvspline1(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -408,6 +434,7 @@ psurvspline2(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -422,6 +449,7 @@ psurvspline3(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -437,6 +465,7 @@ psurvspline4(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -453,6 +482,7 @@ psurvspline5(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -470,6 +500,7 @@ psurvspline6(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -488,6 +519,7 @@ psurvspline7(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -499,6 +531,7 @@ qsurvspline0(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -511,6 +544,7 @@ qsurvspline1(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -524,6 +558,7 @@ qsurvspline2(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -538,6 +573,7 @@ qsurvspline3(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -553,6 +589,7 @@ qsurvspline4(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -569,6 +606,7 @@ qsurvspline5(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -586,6 +624,7 @@ qsurvspline6(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
@@ -604,11 +643,20 @@ qsurvspline7(
   knots,
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   lower.tail = TRUE,
   log.p = FALSE
 )
 
-rsurvspline0(n, gamma0, gamma1, knots, scale = "hazard", timescale = "log")
+rsurvspline0(
+  n,
+  gamma0,
+  gamma1,
+  knots,
+  scale = "hazard",
+  timescale = "log",
+  spline = "rp"
+)
 
 rsurvspline1(
   n,
@@ -617,7 +665,8 @@ rsurvspline1(
   gamma2,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 rsurvspline2(
@@ -628,7 +677,8 @@ rsurvspline2(
   gamma3,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 rsurvspline3(
@@ -640,7 +690,8 @@ rsurvspline3(
   gamma4,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 rsurvspline4(
@@ -653,7 +704,8 @@ rsurvspline4(
   gamma5,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 rsurvspline5(
@@ -667,7 +719,8 @@ rsurvspline5(
   gamma6,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 rsurvspline6(
@@ -682,7 +735,8 @@ rsurvspline6(
   gamma7,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 rsurvspline7(
@@ -698,10 +752,19 @@ rsurvspline7(
   gamma8,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
-hsurvspline0(x, gamma0, gamma1, knots, scale = "hazard", timescale = "log")
+hsurvspline0(
+  x,
+  gamma0,
+  gamma1,
+  knots,
+  scale = "hazard",
+  timescale = "log",
+  spline = "rp"
+)
 
 hsurvspline1(
   x,
@@ -710,7 +773,8 @@ hsurvspline1(
   gamma2,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 hsurvspline2(
@@ -721,7 +785,8 @@ hsurvspline2(
   gamma3,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 hsurvspline3(
@@ -733,7 +798,8 @@ hsurvspline3(
   gamma4,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 hsurvspline4(
@@ -746,7 +812,8 @@ hsurvspline4(
   gamma5,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 hsurvspline5(
@@ -760,7 +827,8 @@ hsurvspline5(
   gamma6,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 hsurvspline6(
@@ -775,7 +843,8 @@ hsurvspline6(
   gamma7,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 hsurvspline7(
@@ -791,10 +860,19 @@ hsurvspline7(
   gamma8,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
-Hsurvspline0(x, gamma0, gamma1, knots, scale = "hazard", timescale = "log")
+Hsurvspline0(
+  x,
+  gamma0,
+  gamma1,
+  knots,
+  scale = "hazard",
+  timescale = "log",
+  spline = "rp"
+)
 
 Hsurvspline1(
   x,
@@ -803,7 +881,8 @@ Hsurvspline1(
   gamma2,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 Hsurvspline2(
@@ -814,7 +893,8 @@ Hsurvspline2(
   gamma3,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 Hsurvspline3(
@@ -826,7 +906,8 @@ Hsurvspline3(
   gamma4,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 Hsurvspline4(
@@ -839,7 +920,8 @@ Hsurvspline4(
   gamma5,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 Hsurvspline5(
@@ -853,7 +935,8 @@ Hsurvspline5(
   gamma6,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 Hsurvspline6(
@@ -868,7 +951,8 @@ Hsurvspline6(
   gamma7,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 
 Hsurvspline7(
@@ -884,7 +968,8 @@ Hsurvspline7(
   gamma8,
   knots,
   scale = "hazard",
-  timescale = "log"
+  timescale = "log",
+  spline = "rp"
 )
 }
 \arguments{
@@ -909,6 +994,12 @@ and log-normal respectively.  The scale must be common to all times.}
 
 \item{timescale}{\code{"log"} or \code{"identity"} as described in
 \code{\link{flexsurvspline}}.}
+
+\item{spline}{\code{"rp"} to use the natural cubic spline basis
+described in Royston and Parmar.  \code{"splines2ns"} to use the
+alternative natural cubic spline basis from the \code{splines2}
+package (Wang and Yan 2021), which may be better behaved due to
+the basis being orthogonal.}
 
 \item{start}{Optional left-truncation time or times.  The returned
 restricted mean survival will be conditioned on survival up to

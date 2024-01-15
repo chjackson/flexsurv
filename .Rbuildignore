@@ -18,6 +18,7 @@ vignettes/.+\.bbl
 vignettes/.+\.blg
 vignettes/flexsurv-.+\.pdf
 vignettes/.+.odg
+vignettes/pdf.Rmd
 inst/doc/flexsurv.Rnw
 inst/doc/flexsurv-examples.Rnw
 tests/extra
@@ -28,6 +29,7 @@ tests/test_extra.R
 ^codecov\.yml$
 \.gcda
 \.gcno
+\.gcov
 ^doc$
 ^Meta$
 docs
@@ -37,3 +39,8 @@ vignettes/_region_.tex
 vignettes/Sweave.sty
 ^revdep$
 ^man-roxygen$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+codecov.yml
+data-raw

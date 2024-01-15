@@ -3,10 +3,29 @@
 Version 2.3 (2023-??-??)
 -------------------------
 
-* Column name of predict() output changed from "time" to "eval_time"
+* Analytic Hessian calculation for models where this is possible, that
+  is, Weibull, Gompertz, exponential, and spline models in hazard and
+  odds scales.
+
+* Analytic gradient calculation for Weibull proportional hazards models.
+
+* Weighted likelihood for relative survival models now implemented
+  consistently with other models, as a weighted sum of individual
+  log-likelihoods.
+
+* `pmatrix.simfs` can now accept a vector of times `t` and has a
+  `tidy` output option.
+
+* BIC and AICc functions added.
+
+* Column name of predict() output changed from "time" to "eval_time",
   for consistency with tidymodels update.
 
-* Default value for t chosen in hr_flexsurvreg.
+* Default value for t now chosen in `hr_flexsurvreg`.
+
+* `coxsnell.flexsurvreg` now handles delayed entry.
+
+* Quantiles of standardised survival now available in `standsurv`.
 
 
 Version 2.2.2 (2023-01-31)

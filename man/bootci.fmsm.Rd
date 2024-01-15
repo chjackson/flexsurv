@@ -21,7 +21,7 @@ bootci.fmsm(
 
 \item{B}{Number of parameter draws to use}
 
-\item{fn}{Function to bootstrap the results of.  It must have an argument named `code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below.}
+\item{fn}{Function to bootstrap the results of.  It must have an argument named \code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below.}
 
 \item{cl}{Width of symmetric confidence interval, by default 0.95}
 
@@ -41,7 +41,7 @@ Calculate a confidence interval for a model output by repeatedly replacing the p
 }
 \examples{
 
-## How to use bootci.msm
+## How to use bootci.fmsm
 
 ## Write a function with one argument called x giving a fitted model,
 ## and returning some results of the model.  The results may be in any form.   
@@ -55,7 +55,7 @@ summfn <- function(x, t){
  list(resp, rest)
 }
 
-## Use bootci.msm to obtain the confidence interval
+## Use bootci.fmsm to obtain the confidence interval
 ## The matrix columns are in the order of the unlisted results of the original
 ## summfn.  You will have to rearrange them into the format that you want.
 ## If summfn has any extra arguments, in this case \code{t}, make sure they are

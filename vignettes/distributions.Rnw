@@ -62,7 +62,7 @@ distributions in \code{flexsurvreg}.
 \end{itemize}
 
   In a \emph{proportional hazards} model, the ``more interpretable'' effect
-  measure presented is is the hazard ratio (HR) for one unit of the
+  measure presented is the hazard ratio (HR) for one unit of the
   covariate.   
 
   In an \emph{accelerated failure time model}, the time acceleration

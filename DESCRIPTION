@@ -2,7 +2,7 @@ Package: flexsurv
 Type: Package
 Title: Flexible Parametric Survival and Multi-State Models
 Version: 2.3
-Date: 2023-05-26
+Date: 2023-08-22
 Authors@R: c(person("Christopher", "Jackson",
          email="chris.jackson@mrc-bsu.cam.ac.uk",
          role=c("aut", "cre")),
@@ -51,6 +51,7 @@ Imports:
     ggplot2
 Encoding: UTF-8
 Suggests:
+    splines2,
     flexsurvcure,
     survminer,
     lubridate,
@@ -61,9 +62,11 @@ Suggests:
     msm,
     testthat,
     TH.data,
-    broom
-URL: https://github.com/chjackson/flexsurv-dev
-BugReports: https://github.com/chjackson/flexsurv-dev/issues
+    broom,
+    covr
+URL: https://github.com/chjackson/flexsurv,
+    http://chjackson.github.io/flexsurv/
+BugReports: https://github.com/chjackson/flexsurv/issues
 VignetteBuilder: knitr
 LazyData: yes
 LinkingTo: Rcpp

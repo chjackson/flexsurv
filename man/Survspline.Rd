@@ -20,6 +20,7 @@ dsurvspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0,
   log = FALSE
 )
@@ -32,6 +33,7 @@ psurvspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0,
   lower.tail = TRUE,
   log.p = FALSE
@@ -45,6 +47,7 @@ qsurvspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0,
   lower.tail = TRUE,
   log.p = FALSE
@@ -58,6 +61,7 @@ rsurvspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0
 )
 
@@ -69,6 +73,7 @@ Hsurvspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0
 )
 
@@ -80,6 +85,7 @@ hsurvspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0
 )
 
@@ -91,6 +97,7 @@ rmst_survspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0,
   start = 0
 )
@@ -102,6 +109,7 @@ mean_survspline(
   knots = c(-10, 10),
   scale = "hazard",
   timescale = "log",
+  spline = "rp",
   offset = 0
 )
 }
@@ -115,9 +123,9 @@ which case the parameters are common to all times.  Alternatively a matrix
 may be supplied, with rows corresponding to different times, and columns
 corresponding to \code{knots}.}
 
-\item{beta}{Vector of covariate effects (deprecated).}
+\item{beta}{Vector of covariate effects.  Not supported and ignored since version 2.3, and this argument will be removed in 2.4.}
 
-\item{X}{Matrix of covariate values (deprecated).}
+\item{X}{Matrix of covariate values. Not supported and ignored since version 2.3, and this argument will be removed in 2.4.}
 
 \item{knots}{Locations of knots on the axis of log time, supplied in
 increasing order.  Unlike in \code{\link{flexsurvspline}}, these include
@@ -138,8 +146,14 @@ and log-normal respectively.  The scale must be common to all times.}
 \item{timescale}{\code{"log"} or \code{"identity"} as described in
 \code{\link{flexsurvspline}}.}
 
+\item{spline}{\code{"rp"} to use the natural cubic spline basis
+described in Royston and Parmar.  \code{"splines2ns"} to use the
+alternative natural cubic spline basis from the \code{splines2}
+package (Wang and Yan 2021), which may be better behaved due to
+the basis being orthogonal.}
+
 \item{offset}{An extra constant to add to the linear predictor
-\eqn{\eta}{eta}.}
+\eqn{\eta}{eta}.  Not supported and ignored since version 2.3, and this argument will be removed in 2.4.}
 
 \item{log, log.p}{Return log density or probability.}
 
@@ -194,6 +208,9 @@ Royston, P. and Parmar, M. (2002).  Flexible parametric
 proportional-hazards and proportional-odds models for censored survival
 data, with application to prognostic modelling and estimation of treatment
 effects. Statistics in Medicine 21(1):2175-2197.
+
+Wang W, Yan J (2021). Shape-Restricted Regression Splines with R
+Package splines2. Journal of Data Science, 19(3), 498-517.
 }
 \seealso{
 \code{\link{flexsurvspline}}.

@@ -46,7 +46,7 @@ test_that("pmatrix.fs",{
     expect_equal(pmat$"5"[1,2], 0.259065437633427, tolerance=1e-04)
 })
 
-test_that("totlos.fs",{
+test_that("totlos.fs for flexsurvreg objects",{
     tl <- totlos.fs(bexp.markov, t=c(5), trans=tmat)
     expect_equal(as.numeric(tl), c(2.89231556324412, 0, 0, 1.06822543404334, 2.77639174263866, 0, 1.03945900271255, 2.22360825736133, 5), tolerance=1e-06)
     tl <- totlos.fs(bexp.markov.cov, t=c(5), trans=tmat, newdata=list(x=1))
@@ -58,15 +58,32 @@ test_that("totlos.fs",{
     attr(tl, "P")
 })
 
-test_that("pmatrix.simfs",{
-    expect_error({
-        pmatrix.simfs(bexp, t=5, trans=tmat, M=100)
-        pmatrix.simfs(bwei, t=5, trans=tmat, M=100)
-        pmatrix.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
-    }, NA)
+test_that("pmatrix.simfs for flexsurvreg objects",{
+  expect_error({
+    pmatrix.simfs(bwei, t=5, trans=tmat, M=100)
+    pmatrix.simfs(bexp.cov, t=5, trans=tmat, newdata=list(x=1), M=100)
+  }, NA)
+  dimnames(tmat) <- rep(list(paste("State",1:3)),2)
+  set.seed(1)
+  p5 <- pmatrix.simfs(bexp, t=5, trans=tmat, M=1000)
+  p10 <- pmatrix.simfs(bexp, t=10, trans=tmat, M=1000)
+  pboth <- pmatrix.simfs(bexp, t=c(0, 5,10), trans=tmat)
+  expect_equivalent(p5, pboth[,,"5"], tol=0.1)
+  (p5 <- pmatrix.simfs(bexp, t=5, trans=tmat, ci=TRUE, M=100, B=3))
+  expect_gt(p5[1,1], attr(p5,"lower")[1,1])
+  set.seed(1)
+  (pboth <- pmatrix.simfs(bexp, t=c(0, 5,10), trans=tmat, ci=TRUE, M=1000, B=3))
+  expect_gt(pboth[1,1,"5"], attr(pboth,"lower")[1,1,"5"])
+  set.seed(1)
+  (pt <- pmatrix.simfs(bexp, t=c(0, 5,10), trans=tmat, ci=TRUE, M=1000, B=3, tidy=TRUE))
+  expect_equal(pboth[1,2,"5"], pt[pt$from=="State 1" & pt$to=="State 2" & pt$t==5, "p"])
+  expect_equal(attr(pboth,"lower")[1,2,"5"], 
+               pt[pt$from=="State 1" & pt$to=="State 2" & pt$t==5, "lower"])
+  expect_equal(attr(pboth,"upper")[1,2,"5"], 
+               pt[pt$from=="State 1" & pt$to=="State 2" & pt$t==5, "upper"])
 })
 
-test_that("totlos.simfs",{
+test_that("totlos.simfs for flexsurvreg objects",{
     expect_error({
         totlos.simfs(bexp, t=5, trans=tmat, M=100)
         totlos.simfs(bwei, t=5, trans=tmat, M=100)
@@ -90,17 +107,22 @@ for (i in 1:3) {
     bexpc.list[[i]] <- flexsurvreg(Surv(years, status) ~ x, subset=(trans==i), data=bosms3, dist="exp")
 }
 
-test_that("list format in output functions", {
+test_that("multistate output functions for list of models objects", {
     set.seed(1)
     totlos.simfs(bwei.list, t=5, trans=tmat, M=10)
     totlos.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0))
 
     pmatrix.simfs(bwei.list, t=5, trans=tmat, M=100)
-    pmatrix.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0))
 
+    set.seed(1)
+    pnt <- pmatrix.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0))
+    set.seed(1)
+    pt <- pmatrix.simfs(bweic.list, t=c(5), trans=tmat, M=100, newdata=list(x=0),
+                        tidy=TRUE)
+    expect_equal(pnt[1,2], pt$p[pt$from=="1" & pt$to=="2" & pt$t==5])
+    
     pmatrix.fs(bweim.list, t=5, trans=tmat)
     pmatrix.fs(bweim.list, t=c(5,10), trans=tmat)
-
    
     pmat1 <- pmatrix.fs(bweic.list, t=c(5,10), trans=tmat, newdata=list(x=-1))
     pmat3 <- pmatrix.fs(bweic.list, t=c(5,10), trans=tmat, newdata=list(x=c(-1,-1,-1)))

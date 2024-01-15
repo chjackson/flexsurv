@@ -39,7 +39,8 @@ test_that("Analytic derivatives match numeric",{
     fitw <- flexsurvreg(formula = Surv(rep(200,nrow(ov2)), ov2$futime, ov2$fustat) ~ factor(ov2$rx), dist="weibull")
     expect_lt(deriv_error(fitw), err)
 
-    fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz", inits=c(0.001, 0.0005), fixedpars=TRUE)
+    fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz", 
+                        inits=c(0.001, 0.0005), fixedpars=TRUE)
     expect_lt(deriv_error(fitg), err)
     fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz")
     expect_lt(deriv_error(fitg), err)

@@ -44,3 +44,33 @@ test_that("simfinal_fmsm",{
   simfinal_fmsm(weic, newdata=nd)
   simfinal_fmsm(weic, newdata=nd, M=1000, B=10)
 })
+
+bosms3$hix <- factor(bosms3$x > 0, labels = c("lo","hi"))
+
+test_that("ajfit_fmsm", {
+  expect_equal(ajfit_fmsm(weim, maxt=5)$val[1], 1)
+  expect_error(ajfit_fmsm(weic, maxt=5, newdata=list(x=1)), 
+               "Nonparametric estimation not supported with non-factor")
+  
+  weicf <- fmsm(
+    "Well-BOS"=flexsurvreg(Surv(years, status) ~ hix, subset=(trans==1),
+                           data = bosms3, dist = "weibull"),
+    "Well-Death"=flexsurvreg(Surv(years, status) ~ hix, subset=(trans==2),
+                             data = bosms3, dist = "weibull"), 
+    trans=tmat
+  )
+  expect_equal(ajfit_fmsm(weicf, maxt=5)$val[1], 1)
+  expect_equal(ajfit_fmsm(weicf, maxt=5, newdata=data.frame(hix="lo"))$val[1], 1)
+  
+  weicfd <- fmsm(
+    "Well-BOS"=flexsurvreg(Surv(years, status) ~ hix, subset=(trans==1),
+                           data = bosms3, dist = "weibull"),
+    "Well-Death"=flexsurvreg(Surv(years, status) ~ 1, subset=(trans==2),
+                             data = bosms3, dist = "weibull"), 
+    trans=tmat
+  )
+  
+  expect_error(ajfit_fmsm(weicfd, maxt=5), 
+               "Not currently supported with different covariates on different transitions")
+
+})

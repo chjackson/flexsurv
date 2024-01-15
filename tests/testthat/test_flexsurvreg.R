@@ -144,7 +144,7 @@ fitg <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ factor(rx),
 
 test_that("Model fit with covariates",{
     expect_equal(fitg$loglik, -97.3641506645869, tolerance=1e-06)
-    if (interactive()) {
+    if (covr::in_covr() || interactive()) {
         plot(fitg, ci=TRUE)
         plot(fitg, X=rbind(c(0), c(1)), ci=TRUE, col="red")
         lines(fitg, X=rbind(c(1.1), c(1.2)), ci=TRUE, col="blue")
@@ -190,7 +190,7 @@ test_that("Model fit with covariates and simulated data",{
     dead <- as.numeric(sim<=30)
     simt <- ifelse(sim<=30, sim, 30)
     fit <- flexsurvreg(Surv(simt, dead) ~ x, dist="genf", control=list(maxit=10000))
-    if (interactive()) {
+    if (covr::in_covr() || interactive()) {
         fit # estimate should be -0.2
         summary(fit)
         plot(fit)
@@ -361,17 +361,18 @@ test_that("Interval censoring",{
     simt[status==0] <- 0.6
     tmin <- simt
     tmax <- ifelse(status==1, simt, Inf)
-    tmax.sr <- ifelse(status==1, simt, NA) # need -Inf instead of Inf, don't understand why. bug?
-## Currently flexsurvreg fails with Inf, just as survreg fails, with Weibull. Consistent with survreg for the moment
-    
+    tmax.sr <- ifelse(status==1, simt, NA) 
+
     sr1 <- survreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
     sr2 <- survreg(Surv(tmin, status) ~ 1, dist="weibull")
     expect_equal(sr1$loglik[2], sr2$loglik[2])
     
-    fs1 <- flexsurvreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
+    fs1_inf <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    fs1_na <- flexsurvreg(Surv(tmin, tmax.sr, type="interval2") ~ 1, dist="weibull")
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
-    expect_equal(fs1$loglik, fs2$loglik)
-    expect_equal(fs1$loglik, sr1$loglik[2])
+    expect_equal(fs1_inf$loglik, fs2$loglik)
+    expect_equal(fs1_na$loglik, fs2$loglik)
+    expect_equal(fs1_inf$loglik, sr1$loglik[2])
 
     ## put an upper bound on censored times
     tmax <- ifelse(status==1, simt, 0.7)
@@ -379,14 +380,40 @@ test_that("Interval censoring",{
     fs2 <- flexsurvreg(Surv(simt, status) ~ 1, dist="weibull")
     expect_true(fs1$loglik != fs2$loglik)
 
-    ### FIXME n events wrong for interval2. 
-    
     ## using type="interval"
     status[status==0] <- 3
     fs3 <- flexsurvreg(Surv(tmin, tmax, status, type="interval") ~ 1, dist="weibull")
     expect_equal(fs1$loglik, fs3$loglik)
-
     
+    ## interval censoring with zero width interval
+    set.seed(1)
+    tmin <- tmax <- rweibull(100, 1.1, 1.5)
+    fs1 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    fs2 <- flexsurvreg(Surv(tmin) ~ 1, dist="weibull")
+    expect_equal(fs1$loglik, fs2$loglik)
+    
+    ## interval censoring close around the event
+    set.seed(1)
+    tev <- rweibull(100, 1.1, 1.5)
+    tmin <- tev - 0.001
+    tmax <- tev + 0.001
+    fs1 <- flexsurvreg(Surv(tev) ~ 1, dist="weibull")
+    fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="weibull")
+    expect_equal(fs2$res["shape","est"], fs1$res["shape","est"], tol=1e-03)
+    
+    ## relative survival with left and interval censoring
+    ## at left cens times, bhazard contains the background cond prob of surviving interval
+    bh <- rep(0.01, length(tmax))
+    back_cdeath <- 1 - rep(exp(-0.002*0.01), length(tmax))
+    fs1 <- flexsurvreg(Surv(tev) ~ 1, dist="weibull", bhazard=bh)
+    fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, 
+                       dist="weibull", bhazard=back_cdeath)
+    
+    fs1 <- flexsurvreg(Surv(tev) ~ 1, 
+                       dist="weibull", bhazard=bh)
+    fs2 <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, 
+                       dist="weibull", bhazard=back_cdeath, inits=c(1.24, 1.4))
+    expect_equal(fs2$res["shape","est"], fs1$res["shape","est"], tol=1e-03)
 })
 
 test_that("inits",{
@@ -419,7 +446,7 @@ test_that("Relative survival", {
 
     ## Compare with stata stgenreg, using Weibull PH model
     fs6b <- flexsurvreg(Surv(recyrs, censrec) ~ group, data=bc, dist="weibullPH", bhazard=bh)
-    
+      
     expect_equal(log(fs6b$res[1,"est"]), 0.3268327417773233, tolerance=1e-05)
     expect_equal(log(fs6b$res[2,"est"]), -3.5308925743338038, tolerance=1e-05)
     expect_equal(fs6b$res["groupMedium","est"], 0.9343799681269026, tolerance=1e-04)
@@ -454,7 +481,7 @@ test_that("Relative survival", {
   
     expect_equal(mdl_0$loglik, mdl_1$loglik - sum(bhaz * lung$time/365))
 })
-
+    
 test_that("warning with strata", { 
     ## need double backslash to escape $
     expect_warning(flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ strata(ovarian$resid.ds), dist="gengamma", inits=c(6,1,-1,0)),
@@ -477,8 +504,12 @@ test_that("No events in the data",{
     set.seed(1)
     tmin <- rexp(100, 1) 
     tmax <- tmin + 0.1
+    bhazard <- rep(0.0001, 100)
     mod <- flexsurvreg(Surv(tmin, tmax, type="interval2") ~ 1, dist="exponential")
     expect_equal(mod$loglik, -337.9815, tolerance=1e-03)
+    modb <- flexsurvreg(Surv(tmin,tmax,type='interval2')~1,
+                       bhazard = 1 - exp(-bhazard*(tmax-tmin)), dist="exponential")
+    expect_equal(mod$res["rate","est"], modb$res["rate","est"], tolerance=1e-02)
 })
 
 test_that("No censoring in the data",{
@@ -509,4 +540,15 @@ test_that("summary type `link`",{
                  fitg$res["scale","est"])
     expect_equal(summary(fitg, type="link")[["factor(rx)=2"]]$est, 
                  exp(fitg$res.t["scale","est"] + fitg$res.t["factor(rx)2","est"]))
+})
+
+test_that("With and without analytic Hessian", { 
+  fla <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="weibull")
+  fln <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="weibull",
+                     hess.control = list(numeric=TRUE))
+  expect_true(all(fla$cov != fln$cov)) # analytic derivatives available
+  fla <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma")
+  fln <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gengamma",
+                     hess.control = list(numeric=TRUE))
+  expect_equivalent(fla$cov, fln$cov) # analytic derivatives not available
 })

@@ -4,11 +4,16 @@
 \alias{nobs.flexsurvreg}
 \title{Number of observations contributing to a fitted flexible survival model}
 \usage{
-\method{nobs}{flexsurvreg}(object, ...)
+\method{nobs}{flexsurvreg}(object, cens = TRUE, ...)
 }
 \arguments{
 \item{object}{Output from \code{\link{flexsurvreg}} or
 \code{\link{flexsurvspline}}, representing a fitted survival model object.}
+
+\item{cens}{Include censored observations in the number.  \code{TRUE} by default.
+If \code{FALSE} then the number of observed events is returned.  See
+  \code{\link{BIC.flexsurvreg}} for a discussion of the issues
+  with defining the sample size for censored data.}
 
 \item{...}{Further arguments passed to or from other methods.  Currently
 unused.}
@@ -22,7 +27,9 @@ model object \code{mod}.  See \code{\link{flexsurvreg}},
 Number of observations contributing to a fitted flexible survival model
 }
 \details{
-This matches the behaviour of the \code{nobs} method for \code{\link[survival]{survreg}} objects, including both censored and uncensored observations.
+By default, this matches the behaviour of the \code{nobs} method for \code{\link[survival]{survreg}} objects, including both censored and uncensored observations.
+
+If a weighted \code{flexsurvreg} analysis was done, then this function returns the sum of the weights.
 }
 \seealso{
 \code{\link{flexsurvreg}}, \code{\link{flexsurvspline}}.

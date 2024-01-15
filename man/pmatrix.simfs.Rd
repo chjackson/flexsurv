@@ -16,7 +16,8 @@ pmatrix.simfs(
   M = 1e+05,
   B = 1000,
   cl = 0.95,
-  cores = NULL
+  cores = NULL,
+  tidy = FALSE
 )
 }
 \arguments{
@@ -27,14 +28,17 @@ represents the time since the last transition.  In other words the response
 should be of the form \code{Surv(time,status)}. See the package vignette
 for further explanation.
 
-\code{x} can also be a list of models, with one component for each
-permitted transition, as illustrated in \code{\link{msfit.flexsurvreg}}.}
+\code{x} can also be a list of \code{\link{flexsurvreg}} models,
+with one component for each permitted transition, as illustrated
+in \code{\link{msfit.flexsurvreg}}.  This can be constructed by
+\code{\link{fmsm}}.}
 
 \item{trans}{Matrix indicating allowed transitions.  See
-\code{\link{msfit.flexsurvreg}}.}
+\code{\link{msfit.flexsurvreg}}.  This is not required if \code{x} 
+is a list constructed by \code{\link{fmsm}}.}
 
-\item{t}{Time to predict state occupancy probabilities for.  This must be a
-single number, unlike \code{\link{pmatrix.fs}}.}
+\item{t}{Time to predict state occupancy probabilities for.  This can 
+be a single number or a vector of different numbers.}
 
 \item{newdata}{A data frame specifying the values of covariates in the
 fitted model, other than the transition number.  See
@@ -64,7 +68,12 @@ accuracy.}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
 
-\item{cores}{Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing.}
+\item{cores}{Number of processor cores used when calculating confidence 
+limits by repeated simulation.  The default uses single-core processing.}
+
+\item{tidy}{If \code{TRUE} then the results are returned as a tidy data frame with 
+columns for the estimate and confidence limits, and rows per state transition and 
+time interval.}
 }
 \value{
 The transition probability matrix.  If \code{ci=TRUE}, there are

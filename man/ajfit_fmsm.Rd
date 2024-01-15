@@ -32,5 +32,6 @@ estimates from a flexible parametric multi-state model, and returns them
 together in a tidy data frame.  Only models with no covariates, or only
 factor covariates, are supported.  If there are factor covariates, then the
 nonparametric estimates are computed for subgroups defined by combinations
-of the covariates.
+of the covariates.  Another restriction of this function is that all
+transitions must have the same covariates on them.
 }

@@ -22,3 +22,6 @@ R/#*
 /temp/
 /revdep/
 inst/doc
+*.gcda
+*.gcno
+*.gcov

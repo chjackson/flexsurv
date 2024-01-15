@@ -72,3 +72,11 @@ test_that("rmst_generic",{
     expect_equal(rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138),
                  rmst_generic(plnorm, t=500, start=250, meanlog=7.4225, sdlog = 1.1138))
 })
+
+#implemented in C++
+test_that("exph",{
+  exph_r <- function(y)(y + sqrt(y^2 + 1))
+  dexph_r <- function(y)(1 + y / sqrt(y^2 + 1))
+  expect_equal(exph(1.1), exph_r(1.1))
+  expect_equal(dexph(1.1), dexph_r(1.1))
+})

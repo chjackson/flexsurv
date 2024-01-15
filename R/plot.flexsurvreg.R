@@ -96,8 +96,8 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                              add=FALSE,...)
 {
     ## don't calculate or plot CIs by default if all covs are categorical -> multiple curves
-  if (!add && is.null(x[["data"]]))
-    stop("Goodness-of-fit plots are not available if the data have been removed from the model object")
+    if (!add && is.null(x[["data"]]))
+        stop("Goodness-of-fit plots are not available if the data have been removed from the model object")
     if (is.null(ci))
         ci <- ((x$ncovs == 0) || (!all(x$covdata$isfac)))
     if (!ci) B <- 0
@@ -112,7 +112,10 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
         mf <- model.frame(x)
         Xraw <- mf[,attr(mf, "covnames.orig"), drop=FALSE]
         mm <- as.data.frame(model.matrix(x))
-        form <- "Surv(dat$Y[,\"start\"],dat$Y[,\"stop\"],dat$Y[,\"status\"]) ~ "
+        if (isTRUE(attr(dat$Y, "type")=="interval")){ # guard against NULL from older versions
+            form <- "Surv(dat$Y[,\"time1\"],dat$Y[,\"time2\"],type=\"interval2\") ~ "
+        } else 
+            form <- "Surv(dat$Y[,\"start\"],dat$Y[,\"stop\"],dat$Y[,\"status\"]) ~ "
         form <- paste(form, if (x$ncovs > 0 && all(x$covdata$isfac)) paste("mm[,",1:x$ncoveffs,"]", collapse=" + ") else 1)
         form <- as.formula(form)
         ## If any continuous covariates, it is hard to define subgroups
@@ -139,7 +142,7 @@ plot.flexsurvreg <- function(x, newdata=NULL, X=NULL, type="survival", fn=NULL, 
                 group <- if(x$ncovs>0) do.call("interaction", mm) else factor(rep(0,nrow(dat$Y)))
                 Xgroup <- factor(do.call("interaction", as.data.frame(X)), levels=levels(group))
                 haz <- list()
-              for (i in 1:nrow(X)) {
+                for (i in 1:nrow(X)) {
                     mha <- muhaz.args
                     if (is.null(mha$max.time)) mha$max.time <- with(as.data.frame(dat$Y[group==Xgroup[i],,drop=FALSE]), max(time[status==1]))
                     haz[[i]] <- do.call("muhaz", c(list(times=dat$Y[,"time"], delta=dat$Y[,"status"], subset=(group==Xgroup[i])), mha))

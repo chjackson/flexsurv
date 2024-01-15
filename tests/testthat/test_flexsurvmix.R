@@ -18,7 +18,11 @@ test_that("flexsurvmix basic",{
   fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=TRUE)
   expect_equivalent(fs$loglik, -1550.65934372248)
   
-  expect_no_error({
+  fs2 <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=event, dists=c("gamma","gamma"), fixedpars=1:2,
+                     em.control = list(var.method="louis"))
+  fs2$cov
+
+    expect_no_error({
     ## event as character
     fs <- flexsurvmix(Surv(t, status) ~ 1, data=dat, event=evname, dists=c("gamma","gamma"), fixedpars=TRUE)
     ## event as factor

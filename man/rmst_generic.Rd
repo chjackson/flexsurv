@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{rmst_generic}
 \alias{rmst_generic}
-\title{Generic function to find restricted mean survival of a distribution}
+\title{Generic function to find restricted mean survival time for some distribution}
 \usage{
 rmst_generic(pdist, t, start = 0, matargs = NULL, scalarargs = NULL, ...)
 }
@@ -25,7 +25,7 @@ represent vector parameters of the distribution.  Empty by default.  When
 vectorised, these will become matrices.  This is used for the arguments
 \code{gamma} and \code{knots} in \code{\link{psurvspline}}.}
 
-\item{scalarargs}{Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.}
+\item{scalarargs}{Character vector naming scalar arguments of the distribution function that cannot be vectorised.  This is used, for example, for the arguments \code{scale} and \code{timescale} in \code{\link{psurvspline}}.}
 
 \item{...}{The remaining arguments define parameters of the distribution
 \code{pdist}.  These MUST be named explicitly.}
@@ -36,11 +36,11 @@ Vector of restricted mean survival times of the distribution at
 }
 \description{
 Generic function to find the restricted mean of a distribution, given the
-equivalent probability distribution function using numeric integration.
+equivalent probability distribution function, using numeric integration.
 }
 \details{
 This function is used by default for custom distributions for which an
-rmst function is not provided.
+\code{rmst} function is not provided.
 
 This assumes a suitably smooth, continuous distribution.
 }

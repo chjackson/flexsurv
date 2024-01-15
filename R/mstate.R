@@ -954,7 +954,7 @@ simfs_bytrans <- function(simfs){
 ##'
 ##' @param B Number of parameter draws to use
 ##'
-##' @param fn Function to bootstrap the results of.  It must have an argument named `code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below. 
+##' @param fn Function to bootstrap the results of.  It must have an argument named \code{x} giving a fitted flexsurv model object.  This may return a value with any format, e.g. list, matrix or vector, as long as it can be converted to a numeric vector with \code{unlist}.   See the example below. 
 ##'
 ##' @param attrs Any attributes of the value returned from \code{fn} which we want confidence intervals for.  These will be unlisted, if possible, and appended to the result vector. 
 ##'
@@ -1071,15 +1071,22 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
 ##' should be of the form \code{Surv(time,status)}. See the package vignette
 ##' for further explanation.
 ##' 
-##' \code{x} can also be a list of models, with one component for each
-##' permitted transition, as illustrated in \code{\link{msfit.flexsurvreg}}.
+##' \code{x} can also be a list of \code{\link{flexsurvreg}} models,
+##' with one component for each permitted transition, as illustrated
+##' in \code{\link{msfit.flexsurvreg}}.  This can be constructed by
+##' \code{\link{fmsm}}.
+##' 
 ##' @param trans Matrix indicating allowed transitions.  See
-##' \code{\link{msfit.flexsurvreg}}.
-##' @param t Time to predict state occupancy probabilities for.  This must be a
-##' single number, unlike \code{\link{pmatrix.fs}}.
+##' \code{\link{msfit.flexsurvreg}}.  This is not required if \code{x} 
+##' is a list constructed by \code{\link{fmsm}}. 
+##' 
+##' @param t Time to predict state occupancy probabilities for.  This can 
+##' be a single number or a vector of different numbers.
+##' 
 ##' @param newdata A data frame specifying the values of covariates in the
 ##' fitted model, other than the transition number.  See
 ##' \code{\link{msfit.flexsurvreg}}.
+##' 
 ##' @param ci Return a confidence interval calculated by simulating from the
 ##' asymptotic normal distribution of the maximum likelihood estimates.  This
 ##' is turned off by default, since two levels of simulation are required.  If
@@ -1087,10 +1094,13 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
 ##' reach the desired precision.  The simulation over \code{M} is generally
 ##' vectorised, therefore increasing \code{B} is usually more expensive than
 ##' increasing \code{M}.
+##' 
 ##' @param tvar Variable in the data representing the transition type. Not
 ##' required if \code{x} is a list of models.
+##' 
 ##' @param tcovs Predictable time-dependent covariates such as age, see
 ##' \code{\link{sim.fmsm}}.
+##' 
 ##' @param M Number of individuals to simulate in order to approximate the
 ##' transition probabilities.  Users should adjust this to obtain the required
 ##' precision.
@@ -1101,7 +1111,12 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
 ##' 
 ##' @param cl Width of symmetric confidence intervals, relative to 1.
 ##'
-##' @param cores Number of processor cores used when calculating confidence limits by repeated simulation.  The default uses single-core processing. 
+##' @param cores Number of processor cores used when calculating confidence 
+##' limits by repeated simulation.  The default uses single-core processing. 
+##' 
+##' @param tidy If \code{TRUE} then the results are returned as a tidy data frame with 
+##' columns for the estimate and confidence limits, and rows per state transition and 
+##' time interval.
 ##' 
 ##' @return The transition probability matrix.  If \code{ci=TRUE}, there are
 ##' attributes \code{"lower"} and \code{"upper"} giving matrices of the
@@ -1131,27 +1146,83 @@ bootci.fmsm <- function(x, B, fn, cl=0.95, attrs=NULL, cores=NULL, sample=FALSE,
 ##' # Markov model.
 ##' @export
 pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
-                          tvar="trans", tcovs=NULL, M=100000, B=1000, cl=0.95, cores=NULL)
+                          tvar="trans", tcovs=NULL, M=100000, B=1000, cl=0.95, cores=NULL,
+                          tidy=FALSE)
 {
     n <- nrow(trans)
-    res <- matrix(0, nrow=n, ncol=n)
-    if (length(t)>1) stop("\"t\" must be a single number")
+    T <- length(t)
+    check_nonnegative_numeric(t)
+    res <- array(0, dim=c(n,n,T))
+    statenames <- rownames(trans)
+    if (is.null(statenames)) statenames <- 1:n
+    dimnames(res) <- list(statenames, statenames, t)
     for (i in seq_len(n)){
-        sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
+        sim <- sim.fmsm(x=x, trans=trans, t=max(t), newdata=newdata,
                       start=i, M=M, tvar=tvar, tcovs=tcovs, debug=FALSE)
-        last.st <- sim$st[,ncol(sim$st)]
-        res[i,] <- prop.table(table(factor(last.st, levels=seq_len(n))))
+        for (j in seq_len(T)){
+          st <- find_state_at(sim,t[j])
+          res[i,,j] <- prop.table(table(factor(st, levels=seq_len(n))))
+        }
     }
+    if (T==1) res <- res[,,1] 
+    ### if t is a scalar, drop dimension, for backward compatibility
+    if (tidy){
+      rest <- data.frame(from = rep(rep(statenames, n), T), 
+                         to = rep(rep(statenames, each=n), T), 
+                         t = rep(t, each=n*n), 
+                         p = as.vector(res))
+    } else rest <- res
     if (ci){
-        resci <- bootci.fmsm(x, B, fn=pmatrix.simfs, ci=FALSE, cl=cl, cores=cores, trans=trans, t=t, newdata=newdata, tvar=tvar, tcovs=tcovs, M=M)
-        resl <- matrix(resci[1,], nrow=n)
-        resu <- matrix(resci[2,], nrow=n)
-        attr(res, "lower") <- resl
-        attr(res, "upper") <- resu
-        class(res) <- "fs.msm.est"
-    }  
-    res
+      resci <- bootci.fmsm(x, B, fn=pmatrix.simfs, ci=FALSE, cl=cl, 
+                           cores=cores, trans=trans, t=t, 
+                           newdata=newdata, tvar=tvar, tcovs=tcovs, M=M, tidy=FALSE)
+      resl <- array(resci[1,], dim=c(n,n,T))
+      resu <- array(resci[2,], dim=c(n,n,T))
+      dimnames(resl) <- dimnames(resu) <- dimnames(res)
+      if (T==1) resl <- resl[,,1]
+      if (T==1) resu <- resu[,,1]
+      if (tidy) {
+        rest$lower <- as.vector(resl)
+        rest$upper <- as.vector(resu)
+      } else {
+        attr(rest, "lower") <- resl
+        attr(rest, "upper") <- resu
+        class(rest) <- "fs.msm.est"
+      }
+    }
+    rest
 }
+
+## sim should be a object returned by sim.fmsm in non-tidy format
+## 
+## t should be a scalar (a single number)
+## 
+## Returns the state at time t for each individual
+find_state_at <- function(sim, t){
+  check_numeric_scalar(t) 
+  tind <- rowSums(sim$t <= t)
+  sim$st[cbind(seq_len(nrow(sim$st)), tind)]
+}
+
+check_numeric <- function(x){
+  if (!is.numeric(x)) stop(sprintf("%s must be numeric",deparse(substitute(x))))
+}
+
+check_nonnegative_numeric <- function(x)
+{
+  check_numeric(x)
+  if (!all(x>=0)) stop(sprintf("%s must all be non-negative",deparse(substitute(x))))
+}
+
+check_numeric_scalar <- function(x)
+{
+  check_numeric(x)
+  if (length(x) > 1) stop(sprintf("%s must have length 1",deparse(substitute(x))))
+}
+
+## TODO test the multi time thing 
+
+
 
 
 
@@ -1178,47 +1249,17 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
 ##' \code{\link{totlos.fs}}.  Note neither of these functions give errors or
 ##' warnings if used with the wrong type of model, but the results will be
 ##' invalid.
+##'
+##' @inheritParams pmatrix.simfs
 ##' 
-##' @param x A model fitted with \code{\link{flexsurvreg}}.  See
-##' \code{\link{msfit.flexsurvreg}} for the required form of the model and the
-##' data.  Additionally this should be semi-Markov, so that the time variable
-##' represents the time since the last transition.  In other words the response
-##' should be of the form \code{Surv(time,status)}. See the package vignette
-##' for further explanation.
-##' 
-##' \code{x} can also be a list of models, with one component for each
-##' permitted transition, as illustrated in \code{\link{msfit.flexsurvreg}}.
-##' @param trans Matrix indicating allowed transitions.  See
-##' \code{\link{msfit.flexsurvreg}}.
 ##' @param t Maximum time to predict to.
+##' 
 ##' @param start Starting state.
-##' @param newdata A data frame specifying the values of covariates in the
-##' fitted model, other than the transition number.  See
-##' \code{\link{msfit.flexsurvreg}}.
-##' @param ci Return a confidence interval calculated by simulating from the
-##' asymptotic normal distribution of the maximum likelihood estimates.  This
-##' is turned off by default, since two levels of simulation are required.  If
-##' turned on, users should adjust \code{B} and/or \code{M} until the results
-##' reach the desired precision.  The simulation over \code{M} is generally
-##' vectorised, therefore increasing \code{B} is usually more expensive than
-##' increasing \code{M}.
-##' @param tvar Variable in the data representing the transition type. Not
-##' required if \code{x} is a list of models.
-##' @param tcovs Predictable time-dependent covariates such as age, see
-##' \code{\link{sim.fmsm}}.
+##' 
 ##' @param group Optional grouping for the states.  For example, if there are
 ##' four states, and \code{group=c(1,1,2,2)}, then \code{\link{totlos.simfs}}
 ##' returns the expected total time in states 1 and 2 combined, and states 3
 ##' and 4 combined.
-##' @param M Number of individuals to simulate in order to approximate the
-##' transition probabilities.  Users should adjust this to obtain the required
-##' precision.
-##' @param B Number of simulations from the normal asymptotic distribution used
-##' to calculate variances.  Decrease for greater speed at the expense of
-##' accuracy.
-##' @param cl Width of symmetric confidence intervals, relative to 1.
-##'
-##' @param cores Number of processor cores used when calculating confidence limits bu repeated simulation.  The default uses single-core processing. 
 ##'
 ##' @return The expected total time spent in each state (or group of states
 ##' given by \code{group}) up to time \code{t}, and corresponding confidence
@@ -1347,6 +1388,18 @@ print.fmsm <- function(x, ...){
     }
 }
 
+##' Akaike's information criterion from a flexible parametric multistate model
+##'
+##' Defined as the sum of the AICs of the transition-specific models.
+##'
+##' @param object Object returned by \code{\link{fmsm}} representing a multistate model.
+##'
+##' @param k Penalty applied to number of parameters (defaults to the standard 2).
+##'
+##' @param ... Further arguments (currently unused).
+##'
+##' @return The sum of the AICs of the transition-specific models.
+##' 
 ##' @export
 AIC.fmsm <- function(object,...,k=2){
     nmods <- length(object)

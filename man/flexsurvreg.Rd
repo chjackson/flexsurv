@@ -79,20 +79,36 @@ flexsurvreg(
   component giving the parameter to be modelled.  The model above can also
   be defined as:
 
-  \code{Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex + treat)}}
+  \code{Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex +
+  treat)}}
 
 \item{data}{A data frame in which to find variables supplied in
-\code{formula}.  If not given, the variables should be in the working
-environment.}
+\code{formula}.  If not given, the variables should be in the
+working environment.}
 
-\item{weights}{Optional variable giving case weights.}
+\item{weights}{Optional numeric variable giving weights for each
+individual in the data.  The fitted model is then defined by
+maximising the weighted sum of the individual-specific log-likelihoods.}
 
 \item{bhazard}{Optional variable giving expected hazards for relative
   survival models.  The model is described by Nelson et al. (2007).
 
-   \code{bhazard} should contain a vector of values for each person in
-  the data, but only the values for the individuals whose event is observed are
-  used. \code{bhazard} refers to the hazard at the observed event time.
+  \code{bhazard} should contain a vector of values for each person in
+  the data.
+
+ \itemize{
+ \item  For people with observed events, \code{bhazard} refers to the
+  hazard at the observed event time.
+
+ \item  For people whose event time is
+  left-censored or interval-censored, \code{bhazard} should contain the
+  probability of dying by the end of the corresponding interval,
+  conditionally on being alive at the start.
+
+  \item For people whose event time
+  is right-censored, the value of \code{bhazard} is ignored and does not
+  need to be specified.
+}
 
   If \code{bhazard} is supplied, then the parameter estimates returned by
   \code{flexsurvreg} and the outputs returned by \code{summary.flexsurvreg}
@@ -244,12 +260,22 @@ is passed as the \code{control} argument to \code{\link{survreg}}.}
 \item{hessian}{Calculate the covariances and confidence intervals for the
 parameters. Defaults to \code{TRUE}.}
 
-\item{hess.control}{List of options to control inversion of the Hessian to
-  obtain a covariance matrix. Available options are \code{tol.solve}, the
-  tolerance used for \code{\link{solve}} when inverting the Hessian (default
-  \code{.Machine$double.eps}), and \code{tol.evalues}, the accepted
-  tolerance for negative eigenvalues in the covariance matrix (default
-  \code{1e-05}).
+\item{hess.control}{List of options to control covariance matrix computation. 
+   Available options are:
+
+  \code{numeric}.  If \code{TRUE} then numerical methods are used
+  to compute the Hessian for models where an analytic Hessian is
+  available.  These models include the Weibull (both versions),
+  exponential, Gompertz and spline models with hazard or odds
+  scale.  The default is to use the analytic Hessian for these
+  models.  For all other models, numerical methods are always used
+  to compute the Hessian, whether or not this option is set.
+
+  \code{tol.solve}. The tolerance used for \code{\link{solve}}
+  when inverting the Hessian (default \code{.Machine$double.eps})
+
+  \code{tol.evalues} The accepted tolerance for negative
+  eigenvalues in the covariance matrix (default \code{1e-05}).
 
   The Hessian is positive definite, thus invertible, at the maximum
   likelihood.  If the Hessian computed after optimisation convergence can't
@@ -327,7 +353,7 @@ The usage of \code{\link{flexsurvreg}} is intended to be similar to
   for use in \code{\link{flexsurvreg}}, construct a list with the following
   elements:
 
-  \describe{ \item{"name"}{A string naming the distribution.  If this
+  \describe{ \item{\code{"name"}}{A string naming the distribution.  If this
   is called \code{"dist"}, for example, then there must be visible in the
   working environment, at least, either
 
@@ -375,21 +401,21 @@ arguments must be named as the parameters of the density function. The
 function must return a matrix with rows corresponding to times, and columns
 corresponding to the parameters of the distribution.  The derivatives are
 used, if available, to speed up the model fitting with \code{\link{optim}}.
-} \item{"pars"}{Vector of strings naming the parameters of the
+} \item{\code{"pars"}}{Vector of strings naming the parameters of the
 distribution. These must be the same names as the arguments of the density
 and probability functions.  }
-\item{"location"}{Name of the main parameter governing the mean of
+\item{\code{"location"}}{Name of the main parameter governing the mean of
 the distribution.  This is the default parameter on which covariates are
 placed in the \code{formula} supplied to \code{flexsurvreg}. }
-\item{"transforms"}{List of R
+\item{\code{"transforms"}}{List of R
 functions which transform the range of values taken by each parameter onto
 the real line.  For example, \code{c(log, log)} for a distribution with two
 positive parameters. }
-\item{"inv.transforms"}{List of R functions defining the
+\item{\code{"inv.transforms"}}{List of R functions defining the
 corresponding inverse transformations.  Note these must be lists, even for
 single parameter distributions they should be supplied as, e.g.
 \code{c(exp)} or \code{list(exp)}. }
-\item{"inits"}{A function of the
+\item{\code{"inits"}}{A function of the
 observed survival times \code{t} (including right-censoring times, and
 using the halfway point for interval-censored times) which returns a vector
 of reasonable initial values for maximum likelihood estimation of each

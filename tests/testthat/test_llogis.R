@@ -29,4 +29,10 @@ test_that("llogis",{
     expect_equal(pllogis(qllogis(p=x, lower.tail=FALSE), lower.tail=FALSE), x)
     expect_equal(qlogis(p=x, lower.tail=TRUE), rev(qlogis(p=x, lower.tail=FALSE)))
     
+    expect_warning(dllogis(1.2, shape=1, scale=-1), "Non-positive scale")
+    expect_warning(dllogis(1.2, shape=-1, scale=1), "Non-positive shape")
+    expect_warning(pllogis(1.2, shape=1, scale=-1), "Non-positive scale")
+    expect_warning(pllogis(1.2, shape=-1, scale=1), "Non-positive shape")
+    expect_error(pllogis(1.2, shape=numeric(), scale=numeric()), "zero length vector")
+    expect_error(pllogis(numeric, shape=1, scale=1), "Non-numeric value")
 })

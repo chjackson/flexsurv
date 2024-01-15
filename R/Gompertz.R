@@ -69,12 +69,14 @@ NULL
 ##' @export
 ##' @rdname Gompertz
 dgompertz <- function(x, shape, rate=1, log=FALSE) {
+    check_numeric(x=x, shape=shape, rate=rate)
     dgompertz_work(x, shape, rate, log)
 }
 
 ##' @export
 ##' @rdname Gompertz
 pgompertz <- function(q, shape, rate=1, lower.tail = TRUE, log.p = FALSE) {
+    check_numeric(q=q, shape=shape, rate=rate)
     pgompertz_work(q, shape, rate, lower.tail, log.p)
 }
 

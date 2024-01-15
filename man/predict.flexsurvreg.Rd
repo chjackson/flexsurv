@@ -82,9 +82,10 @@ Default is \code{FALSE}.}
 \item{...}{Not currently used.}
 }
 \value{
-A \code{\link{tibble}} with same number of rows as \code{newdata}
-and in the same order. If multiple predictions are requested, a
-\code{\link{tibble}} containing a single list-column of data frames.
+A \code{\link{tibble}} with same number of rows as
+\code{newdata} and in the same order. If multiple predictions are
+requested, a \code{\link{tibble}} containing a single list-column
+of data frames.
 
 For the list-column of data frames - the dimensions of each data frame
 will be identical. Rows are added for each value of \code{times} or

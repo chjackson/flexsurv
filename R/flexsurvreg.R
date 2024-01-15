@@ -49,24 +49,19 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
     pars   <- inits
     npars  <- length(pars)
     nbpars <- length(dlist$pars)
-    insert.locations <- setdiff(seq_len(npars),
-                                fixedpars)
+    insert.locations <- setdiff(seq_len(npars), fixedpars)
     
-    ## which are the subjects with events
+    ## which are the subjects with known event times
     event <- Y[,"status"] == 1
     event.times <- Y[event, "time1"]
-    left.censor <- Y[!event, "time2"]
-    right.censor <- Y[!event, "time1"]
-
-    event.weights <- weights[event]
-    no.event.weights <- weights[!event]
+    lcens.times <- Y[!event, "time2"]
+    rcens.times <- Y[!event, "time1"]
     
     par.transform <- buildTransformer(inits, nbpars, dlist)
 
     aux.pars <- buildAuxParms(aux, dlist)
 
-    default.offset <- rep.int(0, length(event.times))
-    do.hazard <- any(bhazard > 0)
+    do.bhazard <- any(bhazard > 0)
 
     loglik <- rep.int(0, nrow(Y))
     ## the ... here is to work around optim
@@ -104,12 +99,12 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         ## Left censoring times (upper bound for event time) 
         if (!all(event)){
             pmaxargs <- fnargs.nevent
-            pmaxargs$q <- left.censor # Inf if right-censored, giving pmax=1
+            pmaxargs$q <- lcens.times # Inf if right-censored, giving pmax=1
             pmax <- call_distfn_quiet(dfns$p, pmaxargs)
             pmax[pmaxargs$q==Inf] <- 1  # in case user-defined function doesn't already do this
         ## Right censoring times (lower bound for event time) 
             pargs <- fnargs.nevent
-            pargs$q <- right.censor
+            pargs$q <- rcens.times
             pmin <- call_distfn_quiet(dfns$p, pargs)
         } 
         
@@ -124,24 +119,36 @@ logLikFactory <- function(Y, X=0, weights, bhazard, rtrunc, dlist,
         pupper[rtrunc==Inf] <- 1 # in case the user's function doesn't already do this
         pobs <- pupper - plower # prob of being observed = 1 - 0 if no truncation 
 
-        if (do.hazard){
-            # Hazard adjustment for relative survival models: required for estimation
+        if (do.bhazard){
+            # Adjust for background hazard in relative survival models
             pargs   <- fnargs.event
             pargs$q <- event.times
             pminb   <- call_distfn_quiet(dfns$p, pargs)
-            loghaz  <- logdens - log(1 - pminb)
-            offseti <- log(1 + bhazard[event] / exp(loghaz)*weights[event])
+            logsurv_excess <- log(1 - pminb)
+            loghaz_excess  <- logdens - logsurv_excess
+            haz_excess <- exp(loghaz_excess)
+            logdens_offset <- log(1 + bhazard[event] / haz_excess) # = log(haz_allcause / haz_excess)
+            if (!all(event)) {               # background survival S* and left or interval censoring 
+              b_condsurv <- 1 - bhazard[!event]  # this is S*(end) / S*(start)
+              b_condsurv[lcens.times==Inf] <- 0  # when end=Inf, i.e. right censoring
+            }
+            if (any(is.finite(rtrunc)))
+              stop("models with both right truncation and background hazards not supported")
         } else {
-            offseti <- default.offset
+            logdens_offset <- 0
         }
         ## Express as vector of individual likelihood contributions
-        loglik[event] <- (logdens*event.weights) + offseti
-        if (!all(event))
-            loglik[!event] <- (log(pmax - pmin)*no.event.weights)
+        loglik[event] <- (logdens + logdens_offset)
+        if (!all(event)){
+           if (do.bhazard)
+             loglik[!event] <- log((pmax - 1)*b_condsurv  +  1 - pmin)
+           else
+             loglik[!event] <- log(pmax - pmin)
+        }
 
-        loglik <- loglik - log(pobs)*weights
+        loglik <- loglik - log(pobs)
         
-        ret <- -sum(loglik)
+        ret <- -sum(loglik*weights)
         attr(ret, "indiv") <- loglik
         ret
     }
@@ -336,21 +343,24 @@ check.flexsurv.response <- function(Y){
     if (!inherits(Y, "Surv"))
         stop("Response must be a survival object")
 ### convert Y from Surv object to numeric matrix
+    type <- attr(Y, "type")
 ### though "time" only used for initial values, printed time at risk, empirical hazard
-    if (attr(Y, "type") == "counting")
+    if (type == "counting")
         Y <- cbind(Y, time=Y[,"stop"] - Y[,"start"], time1=Y[,"stop"], time2=Inf)
-    else if (attr(Y, "type") == "interval"){
+    else if (type == "interval"){ # Surv() converts interval2 to interval
         Y[,"time2"][Y[,"status"]==0] <- Inf   # upper bound with right censoring 
+        Y[,"time2"][Y[,"status"]==1] <- Y[,"time1"][Y[,"status"]==1]  # event time
         Y[,"time2"][Y[,"status"]==2] <- Y[,"time1"][Y[,"status"]==2]
         Y[,"time1"][Y[,"status"]==2] <- 0  # 
         Y <- cbind(Y, start=0, stop=Y[,"time1"], time=Y[,"time1"])
     }
-    else if (attr(Y, "type") == "right")
+    else if (type == "right")
         Y <- cbind(Y, start=0, stop=Y[,"time"], time1=Y[,"time"], time2=Inf)
     else stop("Survival object type \"", attr(Y, "type"), "\"", " not supported")
     if (any(Y[,"time1"]<0)){
         stop("Negative survival times in the data")
     }
+    attr(Y, "type") <- type
     Y
 }
 
@@ -432,18 +442,35 @@ compress.model.matrices <- function(mml){
 ##'   component giving the parameter to be modelled.  The model above can also
 ##'   be defined as:
 ##'
-##'   \code{Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex + treat)}
+##'   \code{Surv(time, dead) ~ age + treat, anc = list(shape = ~ sex +
+##'   treat)}
 ##' @param data A data frame in which to find variables supplied in
-##'   \code{formula}.  If not given, the variables should be in the working
-##'   environment.
-##' @param weights Optional variable giving case weights.
+##'   \code{formula}.  If not given, the variables should be in the
+##'   working environment.
+##' 
+##' @param weights Optional numeric variable giving weights for each
+##'   individual in the data.  The fitted model is then defined by
+##'   maximising the weighted sum of the individual-specific log-likelihoods.
 ##'
 ##' @param bhazard Optional variable giving expected hazards for relative
 ##'   survival models.  The model is described by Nelson et al. (2007).
 ##'
-##'    \code{bhazard} should contain a vector of values for each person in
-##'   the data, but only the values for the individuals whose event is observed are
-##'   used. \code{bhazard} refers to the hazard at the observed event time.
+##'   \code{bhazard} should contain a vector of values for each person in
+##'   the data.
+##'
+##'  \itemize{
+##'  \item  For people with observed events, \code{bhazard} refers to the
+##'   hazard at the observed event time.
+##'
+##'  \item  For people whose event time is
+##'   left-censored or interval-censored, \code{bhazard} should contain the
+##'   probability of dying by the end of the corresponding interval,
+##'   conditionally on being alive at the start.
+##'
+##'   \item For people whose event time
+##'   is right-censored, the value of \code{bhazard} is ignored and does not
+##'   need to be specified.
+##' }
 ##'
 ##'   If \code{bhazard} is supplied, then the parameter estimates returned by
 ##'   \code{flexsurvreg} and the outputs returned by \code{summary.flexsurvreg}
@@ -600,12 +627,22 @@ compress.model.matrices <- function(mml){
 ##' @param hessian Calculate the covariances and confidence intervals for the
 ##'   parameters. Defaults to \code{TRUE}.
 ##'
-##' @param hess.control List of options to control inversion of the Hessian to
-##'   obtain a covariance matrix. Available options are \code{tol.solve}, the
-##'   tolerance used for \code{\link{solve}} when inverting the Hessian (default
-##'   \code{.Machine$double.eps}), and \code{tol.evalues}, the accepted
-##'   tolerance for negative eigenvalues in the covariance matrix (default
-##'   \code{1e-05}).
+##' @param hess.control List of options to control covariance matrix computation. 
+##'    Available options are:
+##'
+##'   \code{numeric}.  If \code{TRUE} then numerical methods are used
+##'   to compute the Hessian for models where an analytic Hessian is
+##'   available.  These models include the Weibull (both versions),
+##'   exponential, Gompertz and spline models with hazard or odds
+##'   scale.  The default is to use the analytic Hessian for these
+##'   models.  For all other models, numerical methods are always used
+##'   to compute the Hessian, whether or not this option is set.
+##'
+##'   \code{tol.solve}. The tolerance used for \code{\link{solve}}
+##'   when inverting the Hessian (default \code{.Machine$double.eps})
+##'
+##'   \code{tol.evalues} The accepted tolerance for negative
+##'   eigenvalues in the covariance matrix (default \code{1e-05}).
 ##'
 ##'   The Hessian is positive definite, thus invertible, at the maximum
 ##'   likelihood.  If the Hessian computed after optimisation convergence can't
@@ -655,7 +692,7 @@ compress.model.matrices <- function(mml){
 ##'   for use in \code{\link{flexsurvreg}}, construct a list with the following
 ##'   elements:
 ##'
-##'   \describe{ \item{"name"}{A string naming the distribution.  If this
+##'   \describe{ \item{\code{"name"}}{A string naming the distribution.  If this
 ##'   is called \code{"dist"}, for example, then there must be visible in the
 ##'   working environment, at least, either
 ##'
@@ -703,21 +740,21 @@ compress.model.matrices <- function(mml){
 ##' function must return a matrix with rows corresponding to times, and columns
 ##' corresponding to the parameters of the distribution.  The derivatives are
 ##' used, if available, to speed up the model fitting with \code{\link{optim}}.
-##' } \item{"pars"}{Vector of strings naming the parameters of the
+##' } \item{\code{"pars"}}{Vector of strings naming the parameters of the
 ##' distribution. These must be the same names as the arguments of the density
 ##' and probability functions.  }
-##' \item{"location"}{Name of the main parameter governing the mean of
+##' \item{\code{"location"}}{Name of the main parameter governing the mean of
 ##' the distribution.  This is the default parameter on which covariates are
 ##' placed in the \code{formula} supplied to \code{flexsurvreg}. }
-##' \item{"transforms"}{List of R
+##' \item{\code{"transforms"}}{List of R
 ##' functions which transform the range of values taken by each parameter onto
 ##' the real line.  For example, \code{c(log, log)} for a distribution with two
 ##' positive parameters. }
-##' \item{"inv.transforms"}{List of R functions defining the
+##' \item{\code{"inv.transforms"}}{List of R functions defining the
 ##' corresponding inverse transformations.  Note these must be lists, even for
 ##' single parameter distributions they should be supplied as, e.g.
 ##' \code{c(exp)} or \code{list(exp)}. }
-##' \item{"inits"}{A function of the
+##' \item{\code{"inits"}}{A function of the
 ##' observed survival times \code{t} (including right-censoring times, and
 ##' using the halfway point for interval-censored times) which returns a vector
 ##' of reasonable initial values for maximum likelihood estimation of each
@@ -819,10 +856,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     ## a) calling model.frame() directly doesn't work.  it only looks in
     ## "data" or the environment of "formula" for extra variables like
     ## "weights". needs to also look in environment of flexsurvreg.
-    ## m <- model.frame(formula=, data=data, weights=weights, subset=subset, na.action=na.action)
-    ## b) putting block below in a function doesn't work when calling
-    ## flexsurvreg within a function
-    ## m <- make.model.frame(call, formula, data, weights, subset, na.action, ancnames)
+    ## should handle calling flexsurvreg within a function 
 
     ## Make model frame
     indx <- match(c("formula", "data", "weights", "bhazard", "rtrunc", "subset", "na.action"), names(call), nomatch = 0)
@@ -920,7 +954,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         if (is.null(optim.args$method)){
             optim.args$method <- "BFGS"
         }
-        gr <- if (dfns$deriv) Dminusloglik.flexsurv else NULL
+        gr <- if (dfns$deriv && deriv_supported(Y)) Dminusloglik.flexsurv else NULL
+        has_analytic_hessian <- dfns$hessian && !isTRUE(hess.control$numeric) && deriv_supported(Y)
         optim.args <- c(optim.args,
                         list(par=optpars,
                              fn=logLikFactory(Y=Y, X=X,
@@ -936,11 +971,15 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                              bhazard=bhazard, rtrunc=rtrunc, dlist=dlist,
                              inits=inits, dfns=dfns, aux=aux,
                              mx=mx, fixedpars=fixedpars,
-                             hessian=hessian))
+                             hessian = hessian && !has_analytic_hessian))
         opt <- do.call("optim", optim.args)
         est <- opt$par
-        if (hessian && !anyNA(opt$hessian) && !any(is.nan(opt$hessian)) && all(is.finite(opt$hessian)) &&
-            all(eigen(opt$hessian)$values > 0))
+        if (has_analytic_hessian)
+          opt$hessian <- D2minusloglik.flexsurv(est, Y=Y, X=X, weights=weights, bhazard=bhazard,
+                                                rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns,
+                                                aux=aux, mx=mx, fixedpars=fixedpars)
+        
+        if (hessian && all(is.finite(opt$hessian)) && all(eigen(opt$hessian)$values > 0))
         {
             cov <- .hess_to_cov(opt$hessian, hess.control$tol.solve, hess.control$tol.evalues)
             se <- sqrt(diag(cov))
@@ -984,19 +1023,28 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                   ncovs=ncovs, ncoveffs=ncoveffs,
                   mx=mx, basepars=1:nbpars,
                   covpars=if (ncoveffs>0) (nbpars+1):npars else NULL,
-                  AIC=-2*ret$loglik + 2*ret$npars,
+                  AIC = -2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
                   concat.formula=f2, all.formulae=forms, dfns=dfns),
              ret,
              list(covdata = covdata)) # temporary position so cyclomort doesn't break
-    if (isTRUE(getOption("flexsurv.test.analytic.derivatives"))
-        && (dfns$deriv) ) {
-        if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
-        ret$deriv.test <- deriv.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
-    }
+    ret$BIC <- BIC.flexsurvreg(ret, cens=TRUE)
+    ret <- c(ret, check_deriv(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars))
     class(ret) <- "flexsurvreg"
     ret
+}
+
+check_deriv <- function(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars){
+  if (isTRUE(getOption("flexsurv.test.analytic.derivatives")) && deriv_supported(Y)){
+    if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
+    if (dfns$deriv)
+      deriv.test <- deriv.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+    if (dfns$hessian)
+      hess.test <- hess.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+    res <- list(deriv.test=deriv.test, hess.test=hess.test)
+  } else res <- NULL
+  res
 }
 
 ##' @export
@@ -1066,6 +1114,14 @@ form.model.matrix <- function(object, newdata, na.action=na.pass, forms=NULL){
 }
 
 
+##' Variance-covariance matrix from  a flexsurvreg model
+##'
+##' @inheritParams logLik.flexsurvreg
+##'
+##' @return Variance-covariance matrix of the estimated parameters, on
+##'   the scale that they were estimated on (for positive parameters
+##'   this is the log scale).
+##' 
 ##' @export
 vcov.flexsurvreg <- function (object, ...)
 {
@@ -1122,6 +1178,18 @@ model.matrix.flexsurvreg <- function(object, par=NULL, ...)
     if (is.null(par)) compress.model.matrices(x$data$mml) else x$data$mml[[par]]
 }
 
+##' Log likelihood from a flexsurvreg model
+##'
+##' @param object A fitted model object of class
+##'   \code{\link{flexsurvreg}}, e.g. as returned by
+##'   \code{flexsurvreg} or \code{flexsurvspline}.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @return Log-likelihood (numeric) with additional attributes \code{df} (degrees of freedom, or number
+##' of parameters that were estimated), and number of observations \code{nobs} (including observed
+##' events and censored observations).
+##' 
 ##' @export
 logLik.flexsurvreg <- function(object, ...){
     val <- object$loglik
@@ -1164,10 +1232,17 @@ coef.flexsurvreg <- function(object, ...){
 ##' 
 ##' Number of observations contributing to a fitted flexible survival model
 ##' 
-##' This matches the behaviour of the \code{nobs} method for \code{\link[survival]{survreg}} objects, including both censored and uncensored observations.
+##' By default, this matches the behaviour of the \code{nobs} method for \code{\link[survival]{survreg}} objects, including both censored and uncensored observations.
+##' 
+##' If a weighted \code{flexsurvreg} analysis was done, then this function returns the sum of the weights.
 ##'
 ##' @param object Output from \code{\link{flexsurvreg}} or
 ##' \code{\link{flexsurvspline}}, representing a fitted survival model object.
+##'
+##' @param cens Include censored observations in the number.  \code{TRUE} by default.
+##' If \code{FALSE} then the number of observed events is returned.  See
+##'   \code{\link{BIC.flexsurvreg}} for a discussion of the issues
+##'   with defining the sample size for censored data. 
 ##' 
 ##' @param ... Further arguments passed to or from other methods.  Currently
 ##' unused.
@@ -1183,6 +1258,135 @@ coef.flexsurvreg <- function(object, ...){
 ##' @keywords models
 ##' 
 ##' @export
-nobs.flexsurvreg <- function(object, ...){
-    object$N
+nobs.flexsurvreg <- function(object, cens=TRUE, ...){
+  if (cens) ind <- seq(length.out=nrow(object$data$Y)) else ind <- which(object$data$Y[,"status"] == 1)
+  sum(object$data$m[ind,"(weights)"])
+}
+
+
+##' Bayesian Information Criterion (BIC) for comparison of flexsurvreg models
+##' 
+##' Bayesian Information Criterion (BIC) for comparison of flexsurvreg models
+##' 
+##' @param object Fitted model returned by \code{\link{flexsurvreg}}
+##'   (or \code{\link{flexsurvspline}}).
+##' 
+##' @param cens Include censored observations in the sample size term
+##'   (\code{n}) used in the calculation of BIC.
+##'
+##' @return The BIC of the fitted model.  This is minus twice the log likelihood plus \code{p*log(n)}, where
+##'   \code{p} is the number of parameters and \code{n} is the sample
+##'   size of the data.  If \code{weights} was supplied to
+##'   \code{flexsurv}, the sample size is defined as the sum of the
+##'   weights.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @details There is no "official" definition of what the sample size
+##'   should be for the use of BIC in censored survival analysis.  BIC
+##'   is based on an approximation to Bayesian model comparison using
+##'   Bayes factors and an implicit vague prior.  Informally, the
+##'   sample size describes the number of "units" giving rise to a
+##'   distinct piece of information (Kass and Raftery 1995).  However
+##'   censored observations provide less information than observed
+##'   events, in principle.  The default used here is the number of
+##'   individuals, for consistency with more familiar kinds of
+##'   statistical modelling.  However if censoring is heavy, then the
+##'   number of events may be a better represent the amount of
+##'   information.  Following these principles, the best approximation
+##'   would be expected to be somewere in between.
+##'
+##' AIC and BIC are intended to measure different things.  Briefly,
+##' AIC measures predictive ability, whereas BIC is expected to choose
+##' the true model from a set of models where one of them is the
+##' truth.  Therefore BIC chooses simpler models for all but the
+##' tiniest sample sizes (\eqn{log(n)>2}, \eqn{n>7}).  AIC might be preferred in the
+##' typical situation where
+##' "all models are wrong but some are useful". AIC also gives similar
+##' results to cross-validation (Stone 1977).
+##'
+##' @references Kass, R. E., & Raftery, A. E. (1995). Bayes
+##'   factors. Journal of the American Statistical Association,
+##'   90(430), 773-795.
+##'
+##' @references Stone, M. (1977). An asymptotic equivalence of choice
+##'   of model by cross‐validation and Akaike's criterion. Journal of
+##'   the Royal Statistical Society: Series B (Methodological), 39(1),
+##'   44-47.
+##'
+##' @seealso \code{\link{BIC}}, \code{\link{AIC}}, \code{\link{AICC.flexsurvreg}}, \code{\link{nobs.flexsurvreg}}
+##'
+##' @export
+BIC.flexsurvreg <- function(object, cens = TRUE, ...){
+  n <- nobs.flexsurvreg(object, cens=cens)
+  -2*object$loglik + object$npars * log(n)  
+}
+
+
+##' Second-order Akaike information criterion 
+##'
+##' Second-order or "corrected" Akaike information criterion, often
+##' known as AICc (see, e.g. Burnham and Anderson 2002).  This is
+##' defined as -2 log-likelihood + \code{(2*p*n)/(n - p -1)}, whereas
+##' the standard AIC is defined as -2 log-likelihood + \code{2*p},
+##' where \code{p} is the number of parameters and \code{n} is the
+##' sample size.  The correction is intended to adjust AIC for
+##' small-sample bias, hence it only makes a difference to the result
+##' for small \code{n}.
+##' 
+##' This can be spelt either as \code{AICC} or \code{AICc}.
+##'
+##' @param object Fitted model returned by \code{\link{flexsurvreg}}
+##'   (or \code{\link{flexsurvspline}}).
+##'
+##' @param cens Include censored observations in the sample size term
+##'   (\code{n}) used in this calculation. See
+##'   \code{\link{BIC.flexsurvreg}} for a discussion of the issues
+##'   with defining the sample size.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @references Burnham, K. P., Anderson, D. R. (2002) Model Selection and Multimodel Inference: a practical information-theoretic approach. Second edition. Springer: New York.
+##'
+##' @return The second-order AIC of the fitted model.
+##'
+##' @seealso \code{\link{BIC}}, \code{\link{AIC}}, \code{\link{BIC.flexsurvreg}}, \code{\link{nobs.flexsurvreg}}
+##' 
+##' @export
+AICc.flexsurvreg <- function(object, cens=TRUE, ...){
+  n <- nobs.flexsurvreg(object, cens=cens)
+  p <- object$npars
+## equivalently: object$AIC + ((2 * p) * (p + 1) / (n - p - 1))
+  -2*object$loglik + (2*p*n) / (n - p - 1) 
+}
+
+
+##' @rdname AICc.flexsurvreg
+##' @export
+AICC.flexsurvreg <- AICc.flexsurvreg
+
+##' Second-order Akaike information criterion 
+##' 
+##' Generic function for the second-order Akaike information criterion.
+##' The only current implementation of this in \pkg{flexsurv} is
+##' in \code{\link{AICc.flexsurvreg}}, see there for more details.
+##'
+##' This can be spelt either as \code{AICC} or \code{AICc}.
+##'
+##' @param object Fitted model object.
+##'
+##' @param ... Other arguments (currently unused).
+##'
+##' @export
+AICc <- function (object, ...)
+UseMethod("AICc")
+
+##' @rdname AICc
+##' @export
+AICC <- AICc
+
+deriv_supported <- function(Y){
+  event <- Y[,"status"] == 1
+  left_cens <- is.finite(Y[!event, "time2"])
+  !any(left_cens)
 }

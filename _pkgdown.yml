@@ -1,0 +1,105 @@
+url: http://chjackson.github.io/flexsurv-dev/
+template:
+  bootstrap: 5
+reference:
+- title: Fitting survival models
+- contents:
+  - flexsurvreg
+  - flexsurvspline
+  - flexsurvrtrunc
+  - survrtrunc
+- title: Getting results from survival models
+- contents:
+  - summary.flexsurvreg
+  - standsurv
+  - coef.flexsurvreg
+  - normboot.flexsurvreg
+  - hr_flexsurvreg
+  - vcov.flexsurvreg
+  - simulate.flexsurvreg
+  - plot.flexsurvreg
+  - lines.flexsurvreg
+  - plot.standsurv
+  - summary.flexsurvrtrunc
+  - plot.survrtrunc
+  - lines.survrtrunc
+- title: Multi-state models based on transition-specific hazards
+- contents:
+  - fmsm
+  - pars.fmsm
+  - pmatrix.fs
+  - pmatrix.simfs
+  - totlos.fs
+  - totlos.simfs
+  - sim.fmsm
+  - simfs_bytrans
+  - bootci.fmsm
+  - pfinal_fmsm
+  - simfinal_fmsm
+  - ajfit_fmsm
+  - msfit.flexsurvreg
+- title: Competing risks and multi-state models based on mixtures
+- contents:
+  - flexsurvmix
+  - get_basepars
+  - mean_flexsurvmix
+  - pdf_flexsurvmix
+  - probs_flexsurvmix
+  - p_flexsurvmix
+  - quantile_flexsurvmix
+  - rmst_flexsurvmix
+  - simt_flexsurvmix
+  - fmixmsm
+  - meanfinal_fmixmsm
+  - ppath_fmixmsm
+  - qfinal_fmixmsm
+  - ajfit
+  - ajfit_flexsurvmix
+- title: Model comparison and checking
+- contents:
+  - logLik.flexsurvreg
+  - AICc.flexsurvreg
+  - AICc
+  - BIC.flexsurvreg
+  - AIC.fmsm
+  - nobs.flexsurvreg
+  - residuals.flexsurvreg
+  - coxsnell_flexsurvreg
+- title: Probability distributions
+- contents:
+  - Survspline
+  - Survsplinek
+  - WeibullPH
+  - GenGamma
+  - GenGamma.orig
+  - GenF
+  - GenF.orig
+  - Gompertz
+  - Llogis
+  - hexp
+  - Hexp
+  - mean_exp
+  - rmst_exp
+  - qgeneric
+- title: Tools for using flexsurv with tidyverse
+- contents:
+  - predict.flexsurvreg
+  - tidy.flexsurvreg
+  - tidy.standsurv
+  - augment.flexsurvreg
+  - glance.flexsurvreg
+- title: Datasets
+- contents:
+  - bc
+  - bos
+- title: Miscellaneous / advanced tools
+- contents:
+  - model.frame.flexsurvreg
+  - model.matrix.flexsurvreg
+  - model.frame.flexsurvmix
+  - basis
+  - rmst_generic
+  - unroll.function
+- title: Package overview
+- contents:
+  - flexsurv-package

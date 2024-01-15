@@ -6,7 +6,8 @@
 ##' together in a tidy data frame.  Only models with no covariates, or only
 ##' factor covariates, are supported.  If there are factor covariates, then the
 ##' nonparametric estimates are computed for subgroups defined by combinations
-##' of the covariates.
+##' of the covariates.  Another restriction of this function is that all
+##' transitions must have the same covariates on them.
 ##'
 ##' @param x Object returned by \code{\link{fmsm}} representing a flexible
 ##'   parametric multi-state model.  This must be Markov, rather than
@@ -21,20 +22,30 @@
 ##'   potential subgroups defined by combinations of factor covariates are
 ##'   included.  Continuous covariates are not supported.
 ##'
+##'
+##'
 ##' @return Tidy data frame containing both Aalen-Johansen and parametric
 ##'   estimates of state occupancy over time, and by subgroup if subgroups are
 ##'   included.
 ##'
 ##' @export
 ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
-  ## TODO what if different covariates on different transitions? 
   dat <- x[[1]]$data$m
   covnames <- attr(dat,"covnames")
   faccovs <- sapply(dat[,covnames], is.factor)
   if (!all(faccovs)) 
     stop("Nonparametric estimation not supported with non-factor covariates")
+  covs <- lapply(x, function(x)attr(x$data$m, "covnames"))
+  if (length(covs)>1){
+    for (i in 2:length(covs)){
+      if(!identical(covs[[i]], covs[[1]]))
+        stop("Not currently supported with different covariates on different transitions")
+    }
+  }
   if (is.null(newdata)) 
-    newdata <- do.call(expand.grid, lapply(dat[,covnames],  levels))
+    newdata <- do.call(expand.grid, lapply(dat[,covnames,drop=FALSE],  levels))
+  else if (is.list(newdata)) newdata <- as.data.frame(newdata)
+  else stop("`newdata` should be a data frame")
   
   nmods <- length(x)
   datlist <- vector(nmods, mode="list")
@@ -43,7 +54,7 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
     names(datlist[[j]])[1] <- "(response)"
     datlist[[j]]$trans <- j
   }
-  dat <- do.call("rbind", datlist)
+  dat <- do.call(dplyr::bind_rows, datlist)
   dat$trans <- factor(dat$trans, labels=attr(x,"names"))
   ## remove interval censored
   dat <- dat[dat$`(response)`[,"status"] != 3,]
@@ -60,10 +71,10 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
     cf <- coxph(Surv(time, status) ~ strata(trans), data=datsub)
     ms <-  msfit(cf, trans=attr(x,"trans"))
     pt[[i]] <- probtrans(ms, predt=0, variance=FALSE)[[1]]
-    covvals <- newdata[i,][rep(1,nrow(pt[[i]])),]
+    covvals <- newdata[i,,drop=FALSE][rep(1,nrow(pt[[i]])),,drop=FALSE]
     pt[[i]] <- cbind(pt[[i]], covvals)
   } 
-  pt <- do.call("rbind", pt)
+  pt <- do.call(dplyr::bind_rows, pt)
   nstates <- length(attr(x,"statenames"))
   names(pt)[names(pt) %in% paste0("pstate",1:nstates)] <- attr(x,"statenames")
   pt$model <- "Aalen-Johansen"
@@ -74,11 +85,11 @@ ajfit_fmsm <- function(x, maxt=NULL, newdata=NULL){
     maxt <- max(pt$time)
   times <- seq(0, maxt, length.out=100)
   for (i in 1:ncovvals){  # note newdata doesn't support multiple covs 
-    pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,], start=1, t=times, tidy=TRUE, ci=FALSE)
-    covvals <- newdata[i,][rep(1,nrow(pmat[[i]])),]
+    pmat[[i]] <- pmatrix.fs(x, newdata=newdata[i,,drop=FALSE], start=1, t=times, tidy=TRUE, ci=FALSE)
+    covvals <- newdata[i,,drop=FALSE][rep(1,nrow(pmat[[i]])),,drop=FALSE]
     pmat[[i]] <- cbind(pmat[[i]], covvals)
   } 
-  pmat <- do.call("rbind", pmat)
+  pmat <- do.call(dplyr::bind_rows, pmat)
   pmat <- pmat[pmat$start==1,,drop=FALSE]
   pmat$start <- NULL
   pmat$model <- "Parametric"

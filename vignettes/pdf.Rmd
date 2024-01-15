@@ -1,0 +1,37 @@
+---
+title: "flexsurv PDF vignettes"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{flexsurv PDF vignettes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<!-- Method for getting pkgdown to deal with PDF vignettes -->
+<!-- https://github.com/r-lib/pkgdown/issues/781#issuecomment-792208432 --> 
+
+<!-- using same build tools as Rstudio, which work --> 
+
+```{r, echo = FALSE, results="hide", message=FALSE}
+library(knitr)
+knit('flexsurv.Rnw')
+system('pdflatex flexsurv.tex')
+knit('multistate.Rnw')
+system('pdflatex multistate.tex')
+knit('distributions.Rnw')
+system('pdflatex distributions.tex')
+knit('flexsurv-examples.Rnw')
+system('pdflatex flexsurv-examples.tex')
+system('cp flexsurv.pdf ../docs/articles/')
+system('cp multistate.pdf ../docs/articles/')
+system('cp distributions.pdf ../docs/articles/')
+system('cp flexsurv-examples.pdf ../docs/articles/')
+```
+
+[flexsurv user guide](flexsurv.pdf){target="_blank"}
+
+[Multi-state modelling with flexsurv](multistate.pdf){target="_blank"}
+
+[Distributions reference manual](distributions.pdf){target="_blank"}
+
+[flexsurv supplementary examples](flexsurv-examples.pdf){target="_blank"}

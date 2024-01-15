@@ -173,3 +173,14 @@ test_that("fixed-knot convenience wrappers",{
 
 })
 
+test_that("removing support for beta, X and offset",{
+    gamma <- c(0.1, 0.2)
+    d2 <- dsurvspline(1, gamma=gamma)
+    expect_warning(d2 <- dsurvspline(1, gamma=gamma, beta = 0.1))
+    expect_warning(d2 <- dsurvspline(1, gamma=gamma, X = 0.1))
+    expect_warning(d2 <- dsurvspline(1, gamma=gamma, offset = 0.1))
+    suppressWarnings({
+        d3 <- dsurvspline(1, gamma=gamma, X = 0.1)
+        expect_equal(d2, d3)
+    })
+})
