@@ -52,10 +52,11 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.3" id="version-23-2023--">Version 2.3 (2023-??-??)<a class="anchor" aria-label="anchor" href="#version-23-2023--"></a></h2>
+<h2 class="pkg-version" data-toc-text="2.3" id="version-23-2024--">Version 2.3 (2024-??-??)<a class="anchor" aria-label="anchor" href="#version-23-2024--"></a></h2>
 <ul><li><p>Analytic Hessian calculation for models where this is possible, that is, Weibull, Gompertz, exponential, and spline models in hazard and odds scales.</p></li>
 <li><p>Analytic gradient calculation for Weibull proportional hazards models.</p></li>
 <li><p>Weighted likelihood for relative survival models now implemented consistently with other models, as a weighted sum of individual log-likelihoods.</p></li>
+<li><p>Non-default factor contrasts now handled.</p></li>
 <li><p><code>pmatrix.simfs</code> can now accept a vector of times <code>t</code> and has a <code>tidy</code> output option.</p></li>
 <li><p><code>BIC</code> and <code>AICc</code> functions added.</p></li>
 <li><p>Column name of <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> output changed from <code>"time"</code> to <code>"eval_time"</code>, for consistency with tidymodels update.</p></li>
