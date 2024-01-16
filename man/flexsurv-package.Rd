@@ -3,7 +3,6 @@
 \docType{package}
 \name{flexsurv-package}
 \alias{flexsurv-package}
-\alias{_PACKAGE}
 \alias{flexsurv}
 \title{flexsurv: Flexible parametric survival and multi-state models}
 \description{

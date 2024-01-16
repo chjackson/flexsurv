@@ -668,6 +668,7 @@ print.totlos.fs <- function(x, ...){attr(x, "P") <- NULL; print(unclass(x),...)}
 # TODO make pmatrix generic
 # pmatrix.flexsurvreg <- pmatrix.fs
 
+#' @noRd
 format.ci <- function(x, l, u, digits=NULL, ...)
 {
     if (is.null(digits)) digits <- 4
@@ -686,11 +687,13 @@ format.ci <- function(x, l, u, digits=NULL, ...)
     res
 }
 
+#' @noRd
 print.ci <- function(x, l, u, digits=NULL){
     res <- format.ci(x, l, u, digits)
     print(res, quote=FALSE)
 }
 
+#' @noRd
 print.fs.msm.est <- function(x, digits=NULL, ...)
 {
     if (!is.null(attr(x, "lower")))

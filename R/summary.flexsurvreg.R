@@ -162,7 +162,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
      res <- data.frame(quantile = args$t, est=est)
  else res <- data.frame(time = args$t, est=est)
  if (ci || se){
-     res.ci <- cisumm.flexsurvreg.new(x, args$t, args$start, attr(args, "X"), fn=fn, B=B, cl=cl)
+     res.ci <- cisumm.flexsurvreg(x, args$t, args$start, attr(args, "X"), fn=fn, B=B, cl=cl)
      if (ci) {
          res$lcl <- res.ci[1,]
          res$ucl <-  res.ci[2,]
@@ -316,7 +316,7 @@ summfn_to_tstart <- function(x, type="survival", t=NULL, quantiles=0.5, start=0)
 }
 
 
-cisumm.flexsurvreg.new <- function(x, t, start, X, fn, B=1000, cl=0.95) {
+cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
     if (all(is.na(x$cov)) || (B==0))
         ret <- array(NA, dim=c(2, length(t)))
     else {
@@ -335,7 +335,7 @@ cisumm.flexsurvreg.new <- function(x, t, start, X, fn, B=1000, cl=0.95) {
     ret
 }
 
-
+#' @noRd
 summary.fns <- function(x, type){
     switch(type,   # TODO warn for clashing arguments in dfns
            "survival" = function(t,start,...) {
@@ -533,157 +533,4 @@ normbootfn.flexsurvreg <- function(x, t, start, newdata=NULL, X=NULL, fn, B, raw
         }
     }
     if (nrow(X)==1) ret[1,,,drop=FALSE] else ret
-}
-
-
-
-### REST OF THE FILE IS THE OLD SUMMARY CODE.  LEAVE IN FOR THE MOMENT
-
-summary.flexsurvreg.old <- function(object, newdata=NULL, X=NULL, type="survival", fn=NULL,
-                                t=NULL, quantiles=0.5, start=0, ci=TRUE, se=FALSE,
-                                B=1000, cl=0.95, tidy=FALSE, na.action=na.pass,
-                                ...)
-{
-    x <- object
-    dat <- x$data
-    Xraw <- model.frame(x)[,unique(attr(model.frame(x),"covnames.orig")),drop=FALSE]
-    isfac <- sapply(Xraw, function(x){is.factor(x) || is.character(x)})
-    type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median", "quantile","link"))
-    if (is.null(newdata)){
-        if (is.vector(X)) X <- matrix(X, nrow=1)
-        if (x$ncovs > 0 && is.null(X)) {
-            ## if any continuous covariates, calculate fitted survival for "average" covariate value
-            if (!all(isfac)){
-                nd <- colMeans(model.matrix(x))
-                X <- matrix(nd ,nrow=1, dimnames=list(NULL,names(nd)))
-                attr(X, "newdata") <- as.data.frame(X)
-            }
-            ## else calculate for all different factor groupings
-            else {
-                X <- unique(model.matrix(x))
-                ## build names like "COVA=value1,COVB=value2"
-                nam <- as.matrix(unique(Xraw))
-                for (i in 1:ncol(nam)) nam[,i] <- paste(colnames(nam)[i], nam[,i], sep="=")
-                rownames(X) <- apply(nam, 1, paste, collapse=",")
-                attr(X, "newdata") <- unique(Xraw)
-            }
-        }
-        else if (is.null(X)) X <- as.matrix(0, nrow=1, ncol=max(x$ncoveffs,1))
-        else if (!is.matrix(X) || (is.matrix(X) && ncol(X) != x$ncoveffs)) {
-            plural <- if (x$ncoveffs > 1) "s" else ""
-            stop("expected X to be a matrix with ", x$ncoveffs, " column", plural, " or a vector with ", x$ncoveffs, " element", plural)
-        }
-        else {
-            attr(X, "newdata") <- X
-            colnames(attr(X, "newdata")) <- colnames(model.matrix(x))
-        }
-    } else
-        X <- form.model.matrix(object, as.data.frame(newdata), na.action=na.action)
-
-    if(type == "mean"){
-      if(!is.null(t)) warning("Mean selected, but time specified.  For restricted mean, set type to 'rmst'.")
-      # Type = mean same as RMST w/ time = Inf
-      t <- rep(Inf,length(start))
-    }
-    else if(type == "median"){
-      if(!is.null(t)) warning("Median selected, but time specified.")
-      t <- rep(0.5,length(start))
-    }
-    else if(type == "link"){
-      if(!is.null(t)) warning("`link` selected, but time specified.")
-      t <- rep(0,length(start))
-    }
-    else if(type == "quantile"){
-      t <- quantiles
-      if((any(t<0) | any(t>1))){
-        stop("Quantiles should not be less than 0 or greater than 1")
-      }
-      t <- rep(t,length(start))
-    }
-    else if(type == "rmst"){
-        if (is.null(t))
-            t <- max(dat$Y[,"time1"])
-    }
-    else if (is.null(t))
-        t <- sort(unique(dat$Y[,"stop"]))
-    if (length(start)==1)
-        start <- rep(start, length(t))
-    else if (length(start) != length(t))
-        stop("length of \"start\" is ",length(start),". Should be 1, or length of \"t\" which is ",length(t))
-
-    if (is.null(fn)) {
-        fn <- summary.fns(x, type)
-    }
-    fn <- expand.summfn.args(fn)
-    fncall <- list(t,start)
-    beta <- if (x$ncovs==0) 0 else x$res[x$covpars,"est"]
-    dlist <- x$dlist
-    ret <- vector(nrow(X), mode="list")
-    if(!is.null(newdata)){
-        nd <- attr(X, "newdata")
-        covnames <- apply(as.data.frame(nd), 1, function(x)paste0(names(nd), "=", x, collapse=", "))
-    }
-    else covnames <- rownames(X)
-    names(ret) <- covnames
-    for (i in 1:nrow(X)) {
-        basepars.mat <- add.covs(x, x$res.t[dlist$pars,"est"], beta, X[i,,drop=FALSE], transform=FALSE)
-        basepars <- as.list(as.data.frame(basepars.mat))
-        fncall[dlist$pars] <- basepars
-        if (type=="link")
-            x$aux$location <- x$dlist$location
-        for (j in seq_along(x$aux)){
-            fncall[[names(x$aux)[j]]] <- x$aux[[j]]
-        }
-
-        y <- do.call(fn, fncall)
-        if (ci){
-            res.ci <- cisumm.flexsurvreg(x, t, start, X[i,,drop=FALSE], fn=fn, B=B, cl=cl)
-            ly <- res.ci[,1]
-            uy <-  res.ci[,2]
-        }
-        if (se){
-            res.se <- sesumm.flexsurvreg(x, t, start, X[i,,drop=FALSE], fn=fn, B=B)
-        }
-        if (type %in% c("median","mean"))
-            ret[[i]] <- data.frame(est=y, row.names=NULL)
-        else if (type == "quantile")
-            ret[[i]] <- data.frame(quantile=t, est=y, row.names=NULL)
-        else ret[[i]] <- data.frame(time=t, est=y, row.names=NULL)
-        if (ci) { ret[[i]]$lcl <- ly; ret[[i]]$ucl <- uy}
-        if (se) { ret[[i]]$se <- res.se }
-    }
-    if (x$ncovs>0) attr(ret,"X") <- X
-    if (tidy) {
-        ret <- do.call("rbind", ret)
-        if (x$ncovs>0) {
-            nd <- attr(X, "newdata")
-            covdf <- nd[rep(seq_len(nrow(nd)), each=length(t)), , drop=FALSE]
-            rownames(ret) <- rownames(covdf) <- NULL
-            ret <- cbind(ret, covdf)
-        }
-    }
-    class(ret) <- c("summary.flexsurvreg",class(ret))
-    ret
-}
-
-cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
-    if (all(is.na(x$cov)) || (B==0))
-        ret <- array(NA, dim=c(length(t), 2))
-    else {
-        ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
-        ret <- apply(ret, c(1,3), function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
-        ret <- t(ret[,1,])
-    }
-    ret
-}
-
-sesumm.flexsurvreg <- function(x, t, start, X, fn, B=1000) {
-  if (all(is.na(x$cov)) || (B==0))
-        ret <- numeric(length(t))
-    else {
-        ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
-        ret <- apply(ret, c(1,3), sd, na.rm=TRUE)
-        ret <- ret[1,]
-    }
-    ret
 }

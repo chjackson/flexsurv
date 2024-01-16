@@ -764,6 +764,7 @@ check.formula.flexsurvmix <- function(formula, dlist, data=NULL){
   }
 }
 
+#' @noRd
 logLik.flexsurvmix <- function(object, ...){
   val <- object$loglik
   attributes(val) <- NULL

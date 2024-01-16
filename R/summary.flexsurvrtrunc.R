@@ -79,12 +79,12 @@ summary.flexsurvrtrunc <- function(object, type="survival", fn=NULL,
     fncall[dlist$pars] <- basepars
     y <- do.call(fn, fncall)
     if (ci){
-        res.ci <- cisumm.flexsurvreg(x, t, start, X=NULL, fn=fn, B=B, cl=cl)
+        res.ci <- cisumm.flexsurvreg.old(x, t, start, X=NULL, fn=fn, B=B, cl=cl)
         ly <- res.ci[,1]
         uy <-  res.ci[,2]
     }
     if (se){
-        res.se <- sesumm.flexsurvreg(x, t, start, X=NULL, fn=fn, B=B)
+        res.se <- sesumm.flexsurvreg.old(x, t, start, X=NULL, fn=fn, B=B)
     }
     if (type %in% c("median","mean"))
         ret <- data.frame(est=y, row.names=NULL)
@@ -94,5 +94,27 @@ summary.flexsurvrtrunc <- function(object, type="survival", fn=NULL,
     if (ci) { ret$lcl <- ly; ret$ucl <- uy}
     if (se) { ret$se <- res.se }
     class(ret) <- c("summary.flexsurvrtrunc", class(ret))
+    ret
+}
+
+cisumm.flexsurvreg.old <- function(x, t, start, X, fn, B=1000, cl=0.95) {
+    if (all(is.na(x$cov)) || (B==0))
+        ret <- array(NA, dim=c(length(t), 2))
+    else {
+        ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
+        ret <- apply(ret, c(1,3), function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+        ret <- t(ret[,1,])
+    }
+    ret
+}
+
+sesumm.flexsurvreg.old <- function(x, t, start, X, fn, B=1000) {
+  if (all(is.na(x$cov)) || (B==0))
+        ret <- numeric(length(t))
+    else {
+        ret <- normbootfn.flexsurvreg(x=x, t=t, start=start, X=X, fn=fn, B=B)
+        ret <- apply(ret, c(1,3), sd, na.rm=TRUE)
+        ret <- ret[1,]
+    }
     ret
 }
