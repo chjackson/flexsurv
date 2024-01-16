@@ -866,11 +866,11 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     temp[[1]] <- as.name("model.frame")
 
     f2 <- concat.formulae(formula,forms, data)
-    temp[["formula"]] <- f2
+    temp[["formula"]] <- terms(f2)
     if (missing(data)) temp[["data"]] <- environment(formula)
     m <- eval(temp, parent.frame())
 
-    m <- droplevels(m) # remove unused factor levels after subset applied
+    m <- droplevels_keepcontrasts(m) # remove unused factor levels after subset applied
     attr(m,"covnames") <- attr(f2, "covnames") # for "newdata" in summary
     attr(m,"covnames.orig") <- intersect(colnames(m), attr(f2, "covnames.orig")) # for finding factors in plot method
     Y <- check.flexsurv.response(model.extract(m, "response"))
@@ -1389,4 +1389,23 @@ deriv_supported <- function(Y){
   event <- Y[,"status"] == 1
   left_cens <- is.finite(Y[!event, "time2"])
   !any(left_cens)
+}
+
+
+droplevels_factor_keepcontrasts <- function (x, exclude = if (anyNA(levels(x))) NULL else NA, ...) {
+  ct <- attr(x, "contrasts")
+  x <- factor(x, exclude = exclude)
+  contrasts(x) <- ct
+  x
+}
+
+droplevels_keepcontrasts <- function (x, except = NULL, exclude, ...) 
+{
+    ix <- vapply(x, is.factor, NA)
+    if (!is.null(except)) 
+        ix[except] <- FALSE
+    x[ix] <- if (missing(exclude)) 
+        lapply(x[ix], droplevels_factor_keepcontrasts)
+    else lapply(x[ix], droplevels_factor_keepcontrasts, exclude = exclude)
+    x
 }

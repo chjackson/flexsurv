@@ -1,4 +1,4 @@
-# Version 2.3 (2023-??-??)
+# Version 2.3 (2024-??-??)
 
 * Analytic Hessian calculation for models where this is possible, that
   is, Weibull, Gompertz, exponential, and spline models in hazard and
@@ -9,6 +9,8 @@
 * Weighted likelihood for relative survival models now implemented
   consistently with other models, as a weighted sum of individual
   log-likelihoods.
+
+* Non-default factor contrasts now handled.
 
 * `pmatrix.simfs` can now accept a vector of times `t` and has a
   `tidy` output option.
