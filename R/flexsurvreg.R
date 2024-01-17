@@ -881,6 +881,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         mx[[i]] <- length(unlist(mx)) + seq_len(ncol(mml[[i]][,-1,drop=FALSE]))
     }
     X <- compress.model.matrices(mml)
+    contr.save <- lapply(mml, function(x)attr(x,"contrasts"))
 
     weights <- model.extract(m, "weights")
     if (is.null(weights)) weights <- m$"(weights)" <- rep(1, nrow(X))
@@ -1026,7 +1027,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                   AIC = -2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
-                  concat.formula=f2, all.formulae=forms, dfns=dfns),
+                  concat.formula=f2, all.formulae=forms, all.contrasts=contr.save,
+                  dfns=dfns),
              ret,
              list(covdata = covdata)) # temporary position so cyclomort doesn't break
     ret$BIC <- BIC.flexsurvreg(ret, cens=TRUE)
@@ -1105,7 +1107,7 @@ form.model.matrix <- function(object, newdata, na.action=na.pass, forms=NULL){
     names(mml) <- names(forms)
     forms[[1]] <- delete.response(terms(forms[[1]]))
     for (i in seq_along(forms)){
-        mml[[i]] <- model.matrix(forms[[i]], mf)
+        mml[[i]] <- model.matrix(forms[[i]], mf, contrasts.arg = object$all.contrasts[[i]])
     }
     X <- compress.model.matrices(mml)
 
