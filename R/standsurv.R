@@ -446,6 +446,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
 #' @importFrom dplyr left_join
 #' @importFrom dplyr slice
 #' @importFrom dplyr n
+#' @importFrom dplyr ungroup
 #' @importFrom statmod gauss.quad
 #' @import rlang
 standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, expsurv, rmap, ratetable, 
@@ -475,12 +476,15 @@ standsurv.fn <- function(object, type, newdata, t, i, trans="none", weighted, ex
 # generic standardisation function, for use with types "survival", "relsurv", "excesshazard"
 standsurv.fn.generic <- function(t, object, type, newdata, i, weighted, tr.fun){
   pred <- summary(object, type = type, tidy = T, newdata=newdata, t=t, ci=F)
+  pred$levels.fct <- factor(seq_along(t))
   if(weighted){
     pred$weights <- rep(newdata$`(weights)`, each=length(t))
-    predsum <- pred %>% group_by(time) %>% 
-      summarise("at{i}" := tr.fun(weighted.mean(.data$est, .data$weights)))
+    predsum <- pred %>% group_by(levels.fct, time) %>%
+      summarise("at{i}" := tr.fun(weighted.mean(.data$est, .data$weights))) %>%
+      ungroup() %>% select(-levels.fct)
   } else{
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$est)))
+    predsum <- pred %>% group_by(levels.fct, time) %>% summarise("at{i}" := tr.fun(mean(.data$est))) %>%
+      ungroup() %>% select(-levels.fct)
   }
   predsum
 }
@@ -490,13 +494,16 @@ standsurv.fn.hazard <- function(t, object, newdata, i, weighted, tr.fun){
   pred <- summary(object, type = "hazard", tidy = T, newdata=newdata, t=t, ci=F)
   names(pred)[names(pred)=="est"] <- "h"
   pred <- cbind(pred, S = summary(object, type = "survival", tidy = T, newdata=newdata, t=t, ci=F)[,"est"])
+  pred$levels.fct <- factor(seq_along(t))
   
   if(weighted){
     pred$weights <- rep(newdata$`(weights)`, each=length(t))
-    predsum <- pred %>% group_by(time) %>% 
-      summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights)))
+    predsum <- pred %>% group_by(levels.fct, time) %>% 
+      summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S * .data$weights))) %>%
+      ungroup() %>% select(-levels.fct)
   } else{
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S)))
+    predsum <- pred %>% group_by(levels.fct, time) %>% summarise("at{i}" := tr.fun(weighted.mean(.data$h,.data$S))) %>% 
+      ungroup() %>% select(-levels.fct)
   }
 }
 
@@ -521,12 +528,15 @@ standsurv.fn.acsurvival <- function(t, object, newdata, i, weighted, tr.fun, exp
   rs$id <- rep(1:dim(newdata)[1],each=length(t))
   names(rs)[names(rs)=="est"] <- "rs"
   pred <- rs %>% left_join(expsurv$expsurv, by=c("id","time"))
+  pred$levels.fct <- factor(seq_along(t))
   if(weighted){
     pred$weights <- rep(newdata$`(weights)`, each=length(t))
-    predsum <- pred %>% group_by(time) %>%
-      summarise("at{i}" := tr.fun(weighted.mean(.data$rs*.data$es, .data$weights)))
+    predsum <- pred %>% group_by(levels.fct, time) %>%
+      summarise("at{i}" := tr.fun(weighted.mean(.data$rs*.data$es, .data$weights))) %>%
+      ungroup() %>% select(-levels.fct)
   } else {
-    predsum <- pred %>% group_by(time) %>% summarise("at{i}" := tr.fun(mean(.data$rs*.data$es)))
+    predsum <- pred %>% group_by(levels.fct, time) %>% summarise("at{i}" := tr.fun(mean(.data$rs*.data$es))) %>%
+      ungroup() %>% select(-levels.fct)
   }
   predsum
 }
@@ -541,13 +551,16 @@ standsurv.fn.achazard <- function(t, object, newdata, i, weighted, tr.fun, expsu
   names(excessh)[names(excessh)=="est"] <- "excessh"
   pred <- rs %>% left_join(excessh, by=c("id", "time")) %>%
     left_join(expsurv$expsurv, by=c("id","time"))
+  pred$levels.fct <- factor(seq_along(t))
   if(weighted){
     pred$weights <- rep(newdata$`(weights)`, each=length(t))
-    predsum <- pred %>% group_by(time) %>% 
-      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh*.data$eh, .data$rs*.data$es * .data$weights)))
+    predsum <- pred %>% group_by(levels.fct, time) %>% 
+      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh*.data$eh, .data$rs*.data$es * .data$weights))) %>%
+      ungroup() %>% select(-levels.fct)
   } else {
-    predsum <- pred %>% group_by(time) %>% 
-      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es)))
+    predsum <- pred %>% group_by(levels.fct, time) %>% 
+      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es))) %>%
+      ungroup() %>% select(-levels.fct)
   }
 }
 
@@ -582,11 +595,15 @@ acsurv.int.fn <- function(t1, object, newdata, rmap, ratetable, scale.ratetable,
                                    rmap = rmap, method="individual.s", 
                                    ratetable = ratetable, data=rs
   ))
+  rs$levels.fct <- factor(seq_along(t))
+  
   if(weighted){
-    rssum <- rs %>% group_by(time) %>% 
-      summarise(acsurv = weighted.mean(.data$est*.data$es, .data$weights))
+    rssum <- rs %>% group_by(levels.fct, time) %>% 
+      summarise(acsurv = weighted.mean(.data$est*.data$es, .data$weights)) %>%
+      ungroup() %>% select(-levels.fct)
   } else {
-    rssum <- rs %>% group_by(time) %>% summarise(acsurv = mean(.data$est*.data$es))
+    rssum <- rs %>% group_by(levels.fct, time) %>% summarise(acsurv = mean(.data$est*.data$es)) %>%
+      ungroup() %>% select(-levels.fct)
   }
   rssum$acsurv
 }
