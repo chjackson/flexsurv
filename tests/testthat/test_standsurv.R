@@ -343,3 +343,41 @@ test_that("examples from help(standsurv) run",{
     plot(standsurv_weib_expected, expected=TRUE)
   }, NA)
 })
+
+test_that('t ordering', {
+  test_mod <- flexsurvreg(Surv(recyrs, censrec) ~ 1, data=bc, dist="weibull")
+  
+  # surv
+  tvec <- c(3,1,4,2,3)
+  ss1 <- standsurv(test_mod, t=tvec, type = "surv")
+  ## summary.flexsurvreg output
+  sum1 <- summary(test_mod, t=tvec, type = "surv")
+  expect_equal(ss1$time, tvec)
+  expect_equal(ss1$at1[1], ss1$at1[5])
+  expect_equal(ss1$at1, sum1[[1]]$est)
+  
+  # haz
+  ss2 <- standsurv(test_mod, t=tvec, type = "haz")
+  sum2 <- summary(test_mod, t=tvec, type = "haz")
+  expect_equal(ss2$time, tvec)
+  expect_equal(ss2$at1[1], ss2$at1[5])
+  expect_equal(ss2$at1, sum2[[1]]$est)
+  
+  # rmst
+  ss3 <- standsurv(test_mod, t=tvec, type = "rmst")
+  sum3 <- summary(test_mod, t=tvec, type = "rmst")
+  expect_equal(ss3$time, tvec)
+  expect_equal(ss3$at1[1], ss3$at1[5])
+  expect_equal(ss3$at1, sum3[[1]]$est)
+  
+  # bootstrap CIs
+  ss4 <- standsurv(test_mod, t=tvec, type = "surv", se = TRUE, ci = TRUE, boot = T, B = 5, seed = 1)
+  expect_true(all(ss4$at1 >= ss4$at1_lci))
+  expect_true(all(ss4$at1 <= ss4$at1_uci))
+  
+  # delta method CIs
+  ss5 <- standsurv(test_mod, t=tvec, type = "surv", se = TRUE, ci = TRUE, boot = F)
+  expect_true(all(ss5$at1 >= ss5$at1_lci))
+  expect_true(all(ss5$at1 <= ss5$at1_uci))
+
+})
