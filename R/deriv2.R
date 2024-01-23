@@ -270,20 +270,19 @@ D2minusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dl
         dhazinv <- surv/dens*(d1LS - d1Ld)
         
         if (any(dead)){
-            ## given two matrices with dims (n,p), 
-            ## return array of dim(n,p,p) with outer product of each pair of matrix rows
-            vouter <- function(y,z){
-                rows <- seq_len(nrow(y))
-                res <- mapply(outer, split(y, rows), split(z, rows), SIMPLIFY=FALSE)
-                res <- simplify2array(res, except = NULL)
-                aperm(res, c(3,1,2))
-            }
-            
-            doff <- - offseti*bw*(offseti*vouter(dhazinv, dhazinv)*bw +
-                                      (d2Ld - d2LS)*surv/dens +
-                                      vouter(d1Ld - d1LS, dhazinv))
-            
-            res <- res - apply(doff*weights[dead],2:3,sum)
+          ## given two matrices with dims (n,p), 
+          ## return array of dim(n,p,p) with outer product of each pair of matrix rows
+          vouter <- function(y,z){
+            rows <- seq_len(nrow(y))
+            res <- mapply(outer, split(y, rows), split(z, rows), SIMPLIFY=FALSE)
+            res <- array(unlist(res), dim=c(dim(res[[1]]), length(res))) # res <- simplify2array(res, except = NULL)  # would do this, but needs R >= 4.2.0
+            aperm(res, c(3,1,2))
+          }          
+          doff <- - offseti*bw*(offseti*vouter(dhazinv, dhazinv)*bw +
+                                (d2Ld - d2LS)*surv/dens +
+                                vouter(d1Ld - d1LS, dhazinv))
+          
+          res <- res - apply(doff*weights[dead],2:3,sum)
         }
     }
     ## currently wastefully calculates derivs for fixed pars then discards them
