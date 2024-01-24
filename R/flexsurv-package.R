@@ -83,6 +83,7 @@
 ##' @importFrom mvtnorm rmvnorm
 ##' @importFrom deSolve ode
 ##' @importFrom quadprog solve.QP
+##' @importFrom utils globalVariables
 "_PACKAGE"
 
 .onUnload <- function(libpath) {

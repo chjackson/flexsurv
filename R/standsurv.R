@@ -1130,4 +1130,5 @@ expsurv.fn <- function(t, rmap, ratetable, data, weighted, scale.ratetable){
   return(list(marginal=marginal, expsurv=expsurv))
 }
 
-
+## to remove R CMD check NOTE
+utils::globalVariables(c("levels.fct"))
