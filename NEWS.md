@@ -10,6 +10,11 @@
   consistently with other models, as a weighted sum of individual
   log-likelihoods.
 
+* `standsurv` now returns results in the same order of times `t`
+  as given by the user, for consistency with `summary.flexsurvreg`.
+
+* Quantiles of standardised survival now available in `standsurv`.
+
 * Non-default factor contrasts now handled.
 
 * `pmatrix.simfs` can now accept a vector of times `t` and has a
@@ -23,8 +28,6 @@
 * Default value for `t` now chosen in `hr_flexsurvreg`.
 
 * `coxsnell.flexsurvreg` now handles delayed entry.
-
-* Quantiles of standardised survival now available in `standsurv`.
 
 
 # Version 2.2.2 (2023-01-31)
