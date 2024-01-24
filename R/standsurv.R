@@ -975,13 +975,15 @@ tidy.standsurv <- function(x, ...){
         pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_lci"),
                      names_to = "contrast",
                      names_pattern = "contrast(.+)_lci",
-                     values_to = paste0(contrast,"_lci"))
+                     values_to = paste0(contrast,"_lci")) %>%
+        distinct()
       standpred_contrast_uci <- standpred %>% 
         select(c(all_of(by), matches("contrast[0-9]+_[0-9]+_uci"))) %>%
         pivot_longer(cols=matches("contrast[0-9]+_[0-9]+_uci"),
                      names_to = "contrast",
                      names_pattern = "contrast(.+)_uci",
-                     values_to = paste0(contrast,"_uci"))
+                     values_to = paste0(contrast,"_uci")) %>%
+        distinct()
       standpred_contrast <- standpred_contrast %>% inner_join(standpred_contrast_lci, by=c(by, "contrast")) %>%
         inner_join(standpred_contrast_uci, by=c(by, "contrast"))
     }
