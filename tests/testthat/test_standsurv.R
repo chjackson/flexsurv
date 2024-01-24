@@ -371,6 +371,7 @@ test_that('t ordering', {
   expect_equal(ss3$at1, sum3[[1]]$est)
   
   # bootstrap CIs
+  set.seed(1)
   ss4 <- standsurv(test_mod, t=tvec, type = "surv", se = TRUE, ci = TRUE, boot = T, B = 5, seed = 1)
   expect_true(all(ss4$at1 >= ss4$at1_lci))
   expect_true(all(ss4$at1 <= ss4$at1_uci))

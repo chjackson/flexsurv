@@ -71,8 +71,8 @@
 ##' @importFrom Rcpp sourceCpp
 ##' @useDynLib flexsurv, .registration = TRUE
 ##' @import stats
-##' @importFrom magrittr "%>%"
-##' @importFrom dplyr mutate rename full_join bind_rows
+##' @importFrom magrittr %>%
+##' @importFrom dplyr mutate rename full_join bind_rows distinct
 ##' @importFrom tidyr pivot_longer pivot_wider
 ##' @importFrom tidyselect all_of num_range
 ##' @importFrom rlang .data

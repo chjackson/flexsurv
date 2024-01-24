@@ -942,13 +942,15 @@ tidy.standsurv <- function(x, ...){
       pivot_longer(cols=matches("at[0-9]+_lci"),
                    names_to = "at",
                    names_pattern = "at(.+)_lci",
-                   values_to = paste0(type,"_lci"))
+                   values_to = paste0(type,"_lci")) %>%
+      distinct()
     standpred_at_uci <- standpred %>% 
       select(c(all_of(by), matches("at[0-9]+_uci"))) %>%
       pivot_longer(cols=matches("at[0-9]+_uci"),
                    names_to = "at",
                    names_pattern = "at(.+)_uci",
-                   values_to = paste0(type,"_uci"))
+                   values_to = paste0(type,"_uci")) %>%
+      distinct()
     standpred_at <- standpred_at %>% inner_join(standpred_at_lci, by=c(by,"at")) %>%
       inner_join(standpred_at_uci, by=c(by, "at"))
   }
