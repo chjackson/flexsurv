@@ -254,6 +254,7 @@ anc_from_formula <- function(formula, anc, dlist,
         for (i in ancnames){
             anc[[i]] <- ancpar.formula(formula, i, data)
         }
+        ancpar.formula(formula, dlist$location, data, location=TRUE)
     }
     else {
         if (!is.list(anc) || !all(sapply(anc, function(x)inherits(x, "formula"))))
@@ -263,15 +264,19 @@ anc_from_formula <- function(formula, anc, dlist,
                                                dlist$name, badnames[1]))
         ## reorder components of anc to canonical order
         anc <- anc[dlist$pars[dlist$pars %in% names(anc)]]
+        if (dlist$location %in% names(anc))
+          warning(sprintf("Ignoring location parameter `%s` in ancillary formula", dlist$location))
     }
     anc
 }
 
-ancpar.formula <- function(formula, par, data = NULL){
+ancpar.formula <- function(formula, par, data = NULL, location=FALSE){
     labs <- attr(terms(formula, data = data), "term.labels")
     pattern <- paste0(par,"\\((.+)\\)")
     labs <- grep(pattern,labs,value=TRUE)
     if (length(labs)==0) return(NULL)
+    else if (location) 
+        warning(sprintf("Ignoring location parameter `%s` in ancillary formula", par))
     labs <- gsub(pattern, "\\1", labs)
     f2 <- reformulate(labs)
     environment(f2) <- environment(formula)
