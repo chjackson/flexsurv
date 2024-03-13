@@ -186,9 +186,7 @@ the survival time may be interval-censored on $(t^{min}_i, t^{max}_i)$.
 Also let $s_i$ be corresponding left-truncation (or delayed-entry)
 times, meaning that the $i$th survival time is only observed
 conditionally on the individual having survived up to $s_i$, thus
-$s_i=0$ if there is no left-truncation.  Time-dependent covariates
-(\S\ref{sec:censtrunc}) and some multi-state models
-(\S\ref{sec:multistate}) can be represented through left-truncation.
+$s_i=0$ if there is no left-truncation.  
 
 With at most right-censoring, the likelihood for the parameters $\bm{\theta} =
 \{\bm{\gamma},\bm{\beta}\}$ in Equation \ref{eq:model}, given the
@@ -310,15 +308,22 @@ and upper bounds \code{tmin} and \code{tmax}, then we would write
 \code{Surv(tmin, tmax, type = "interval2")}.  
 \end{sloppypar}
 
-Time-dependent covariates can sometimes be represented in ``counting process''
+Time-dependent covariates are not supported in \pkg{flexsurv}.
+In other packages, they are represented in ``counting process''
 form --- as a series of left-truncated survival times, which may also be right-censored.
-For each
-individual there would be multiple records, each corresponding to an
+For each individual there would be multiple records, each corresponding to an
 interval where the covariate is assumed to be constant.  The response
 would be of the form \code{Surv(start, stop, censrec)}, where
 \code{start} and \code{stop} are the limits of each interval, and
 \code{censrec} indicates whether a death was observed at \code{stop}.
-Care is required however.  Whether this is a valid approach in \pkg{flexsurv}  depends on whether the probability of survival up to the left-truncation time can be represented by a term of the form $S_i(s_i) = exp(-H_i(s_i))$ in the likelihood (equation 2).  The cumulative hazard $H$ over the interval from time 0 to time $s_i$ depends on how the covariates change on this time interval.   If the covariates are constant between time 0 and time $s_i$, or if covariates are modelled with proportional hazards, then this cumulative hazard is $H_i(s_i)$, hence the likelihood used by \pkg{flexsurv} is valid.  It is not valid in general however for other forms of dependence on covariates, e.g. accelerated failure time models.
+However, using this approach would require the probability of survival up to the left-truncation time to be represented by a term of the form $S_i(s_i) = exp(-H_i(s_i))$ in the likelihood (equation 2).   The cumulative hazard $H$ over the interval from time 0 to time $s_i$ depends
+on how the covariates change for an individual on this time interval, and \pkg{flexsurv}
+cannot keep track of different observations for an individual.
+Furthermore, prediction from models with time-dependent covariates
+is a difficult problem, as it requires knowledge of when the covariates
+are expected to change.   Joint models for longitudinal and survival data
+are a more flexible approach for modelling the association of a survival
+time with a time-dependent predictor. 
 
 In versions of \pkg{flexsurv} since April 2020, models with
 individual-specific right-truncation times are also supported.   
