@@ -245,7 +245,7 @@ check.fixedpars <- function(fixedpars, npars) {
 
 anc_from_formula <- function(formula, anc, dlist,
                              msg = "\"anc\" must be a list of formulae",
-                             data = NULL) {
+                             data = NULL, loc_warn=TRUE) {
     parnames <- dlist$pars
     ancnames <- setdiff(parnames, dlist$location)
     if (is.null(anc)){
@@ -264,7 +264,7 @@ anc_from_formula <- function(formula, anc, dlist,
                                                dlist$name, badnames[1]))
         ## reorder components of anc to canonical order
         anc <- anc[dlist$pars[dlist$pars %in% names(anc)]]
-        if (dlist$location %in% names(anc))
+        if (dlist$location %in% names(anc) && loc_warn)
           warning(sprintf("Ignoring location parameter `%s` in ancillary formula", dlist$location))
     }
     anc

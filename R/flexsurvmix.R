@@ -280,7 +280,8 @@ flexsurvmix <- function(formula, data, event, dists,
   for (k in 1:K){
     msg <- sprintf("anc[[%s]] must be a list of formulae", k)
     fk <- if (is.list(formula)) formula[[k]] else formula
-    ancm[[k]] <- anc_from_formula(fk, anc[[k]], dlists[[k]], msg, data)
+    ancm[[k]] <- anc_from_formula(fk, anc[[k]], dlists[[k]], msg, data,
+                                  loc_warn=FALSE)
   }
   locform <- forms <- vector(K, mode="list")
   for (k in 1:K) {

@@ -29,6 +29,9 @@
 
 * `coxsnell.flexsurvreg` now handles delayed entry.
 
+* Warning given if the name of a location parameter is included in the
+  ancillary part of the model specification.
+
 
 # Version 2.2.2 (2023-01-31)
 
