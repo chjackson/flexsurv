@@ -109,11 +109,12 @@ NULL
 ## could be generalized to any function with vector of arguments 
 ## TODO more special value handling
 
-dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE, spline="rp"){
+dbase.survspline <- function(q, gamma, knots, scale, deriv=0, spline="rp"){
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
     if(!is.matrix(knots)) knots <- matrix(knots, nrow=1)
     else if (spline=="splines2ns") stop("matrix knots not supported with spline=\"splines2ns\"")
-    nret <- max(length(q), nrow(gamma), nrow(knots))
+    anylength0 <- (min(length(q), nrow(gamma), nrow(knots)) == 0)
+    nret <- if (anylength0) 0 else max(length(q), nrow(gamma), nrow(knots))
     q <- rep(q, length.out=nret)
 
     gamma <- matrix(rep(as.numeric(t(gamma)), length.out = ncol(gamma) * nret),
@@ -125,10 +126,17 @@ dbase.survspline <- function(q, gamma, knots, scale, deriv=FALSE, spline="rp"){
         stop("length of gamma should equal number of knots")
     }
     scale <- match.arg(scale, c("hazard","odds","normal"))
-    if (deriv){
+    if (deriv==2){
+        npars <- ncol(gamma)
+        parnames <- paste0("gamma",seq_len(npars)-1)
+        ret <- array(0, dim=c(nret, npars, npars),
+                     dimnames = list(NULL, parnames, parnames))
+        ret[is.na(q),,] <- NA
+    }
+    else if (deriv==1){
         ret <- matrix(0, nrow=nret, ncol=ncol(gamma))
         ret[is.na(q),] <- NA
-    } else {
+    } else if (deriv==0) {
         ret <- numeric(nret)
         ret[is.na(q)] <- NA
     }

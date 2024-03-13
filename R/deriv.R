@@ -191,7 +191,7 @@ DLSgompertz <- function(t, shape, rate){
 }
 
 DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp"){
-    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE, spline=spline)
+    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=1, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
     b <- basis(knots, tsfn(t,timescale), spline=spline)
     db <- dbasis(knots, tsfn(t,timescale), spline=spline)
@@ -212,7 +212,7 @@ DLdsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"
 }
 
 DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp"){
-    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=TRUE, spline=spline)
+    d <- dbase.survspline(q=t, gamma=gamma, knots=knots, scale=scale, deriv=1, spline=spline)
     for (i in seq_along(d)) assign(names(d)[i], d[[i]]); t <- q
     b <- basis(knots, tsfn(t,timescale), spline=spline)
     if (any(ind)){
