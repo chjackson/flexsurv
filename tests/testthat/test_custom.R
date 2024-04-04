@@ -93,6 +93,22 @@ test_that("Custom distributions: density only",{
     expect_equal(fitf$loglik, fite$loglik, tolerance=1e-05)
 })
 
+test_that("Custom distributions: summary", {
+    custom.baz <- list(name="baz", pars=c("rate"), location="rate", transforms=c(log), inv.transforms=c(exp), inits=function(t)1/mean(t))
+    dbaz <- function(x, rate=1, log=FALSE){
+        if (log) {log(rate) - x*rate} else rate*exp(-rate*x)
+    }
+    dbaz <- Vectorize(dbaz)
+    fitd <- flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.baz, dfns=list(d=dbaz))
+    expect_no_error(summary(fitd, type='quantile'))
+
+    hfoo <- function(x, rate=1){ rate }
+    Hfoo <- function(x, rate=1){ rate*x }
+    custom.foo <- list(name="foo", pars=c("rate"), location="rate", transforms=c(log), inv.transforms=c(exp), inits=function(t)1/median(t))
+    fith <- flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist=custom.foo, dfns=list(h=hfoo, H=Hfoo))
+    expect_no_error(summary(fith, type='quantile'))
+})
+
 ## Integration breaks for the Gompertz
 
 if (0) {
