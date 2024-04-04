@@ -74,7 +74,7 @@ form.dp <- function(dlist, dfns, integ.opts){
         # giving this another name to avoid scoping issues
         # w/ name p also being an argument to q functions
         pfun <- p
-        q <- function(p, ...) qgeneric(pfun, p)
+        q <- function(p, ...) qgeneric(pfun, p, ...)
       } 
     }
     if (!exists("d", inherits=FALSE)){
