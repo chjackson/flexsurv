@@ -1022,7 +1022,7 @@ cumulative hazard, mean and restricted mean functions for the Royston/Parmar
 spline model, with one argument per parameter.   For the equivalent functions with all parameters collected together in a single argument, see \code{\link{Survspline}}.
 }
 \details{
-These functions go up to 7 spline knots, or 9 parameters.  If you'd like higher-dimension versions, just submit an issue at \url{https://github.com/chjackson/flexsurv-dev/issues}.
+These functions go up to 7 spline knots, or 9 parameters.
 }
 \author{
 Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
