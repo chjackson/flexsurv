@@ -152,7 +152,6 @@ D2LSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard
         }
       }
     }
-    if (any(is.na(ret))) browser()
     ret
 }
 

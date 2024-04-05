@@ -32,6 +32,8 @@
 * Warning given if the name of a location parameter is included in the
   ancillary part of the model specification.
 
+* Fix for computing quantiles for custom distributions (#187).
+
 
 # Version 2.2.2 (2023-01-31)
 

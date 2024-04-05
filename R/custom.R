@@ -178,7 +178,6 @@ integrate.dh <- function(fn, dlist, integ.opts, what="dens"){
             }
             else {
                 int <- try(do.call("integrate", int.args))
-#                 if (inherits(int, "try-error")) browser()
                 ret[i] <- int$value
             }
         }

@@ -70,4 +70,4 @@ BugReports: https://github.com/chjackson/flexsurv/issues
 VignetteBuilder: knitr
 LazyData: yes
 LinkingTo: Rcpp
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.1
