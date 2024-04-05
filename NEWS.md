@@ -1,4 +1,4 @@
-# Version 2.3 (2024-??-??)
+# Version 2.3 (2024-04-05)
 
 * Analytic Hessian calculation for models where this is possible, that
   is, Weibull, Gompertz, exponential, and spline models in hazard and
