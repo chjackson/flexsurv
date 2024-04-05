@@ -4,14 +4,15 @@
 ##' generation for the generalized F distribution, using the less
 ##' flexible original parameterisation described by Prentice (1975).
 ##' 
-##' If \eqn{y \sim F(2s_1, 2s_2)}{y ~ F(2*s1, 2*s2)}, and \eqn{w = }{w =
-##' log(y)}\eqn{ \log(y)}{w = log(y)} then \eqn{x = \exp(w\sigma + \mu)}{x =
+##' If \eqn{y \sim F(2s_1, 2s_2)}{y ~ F(2*s1, 2*s2)}, and \eqn{w = \log(y)}{w =
+##' log(y)} then \eqn{x = \exp(w\sigma + \mu)}{x =
 ##' exp(w*sigma + mu)} has the original generalized F distribution with
 ##' location parameter \eqn{\mu}{mu}, scale parameter \eqn{\sigma>0}{sigma>0}
 ##' and shape parameters \eqn{s_1>0,s_2>0}{s1>0,s2>0}.  The probability density
 ##' function of \eqn{x} is
 ##' 
-##' \deqn{f(x | \mu, \sigma, s_1, s_2) = \frac{(s_1/s_2)^{s_1} e^{s_1 w}}{\sigma x (1 + s_1 e^w/s_2) ^ {(s_1 + s_2)} B(s_1, s_2)}}{f(x | mu, sigma, s_1, s_2) = ((s1/s2)^{s1} e^{s1 w}) / (sigma x (1 + s1 e^w/s2) ^ (s1 + s2) B(s1, s2))}
+##' \deqn{f(x | \mu, \sigma, s_1, s_2) = \frac{(s_1/s_2)^{s_1} e^{s_1 w}}{\sigma x (1 + s_1 e^w/s_2) ^ {(s_1 + s_2)} B(s_1, s_2)}}{
+##' f(x | mu, sigma, s_1, s_2) = ((s1/s2)^{s1} e^{s1 w}) / (sigma x (1 + s1 e^w/s2) ^ (s1 + s2) B(s1, s2))}
 ##'
 ##' where \eqn{w = (\log(x) - \mu)/\sigma}{w = (log(x) - mu)/sigma}, and
 ##' \eqn{B(s_1,s_2) = \Gamma(s_1)\Gamma(s_2)/\Gamma(s_1+s_2)}{B(s1,s2) =
@@ -90,8 +91,7 @@ NULL
 ##' then the probability density function of \eqn{x} is \deqn{ f(x) =
 ##' \frac{\delta (s_1/s_2)^{s_1} e^{s_1 w}}{\sigma x (1 + s_1 e^w/s_2) ^ {(s_1
 ##' + s_2)} B(s_1, s_2)} }{ f(x) = (delta (s1/s2)^{s1} e^{s1 w}) / (sigma t (1
-##' + s1 e^w/s2) ^ {(s1 + s2)} B(s1, s2)) }\deqn{ }{ f(x) = (delta (s1/s2)^{s1}
-##' e^{s1 w}) / (sigma t (1 + s1 e^w/s2) ^ {(s1 + s2)} B(s1, s2)) } The
+##' + s1 e^w/s2) ^ {(s1 + s2)} B(s1, s2)) } The
 ##' original parameterisation is available in this package as
 ##' \code{\link{dgenf.orig}}, for the sake of completion / compatibility.  With
 ##' the above definitions,

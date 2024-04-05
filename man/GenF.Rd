@@ -77,8 +77,7 @@ Define \eqn{\delta = (Q^2 + 2P)^{1/2}}{delta = (Q^2 + 2P)^{1/2}}, and
 then the probability density function of \eqn{x} is \deqn{ f(x) =
 \frac{\delta (s_1/s_2)^{s_1} e^{s_1 w}}{\sigma x (1 + s_1 e^w/s_2) ^ {(s_1
 + s_2)} B(s_1, s_2)} }{ f(x) = (delta (s1/s2)^{s1} e^{s1 w}) / (sigma t (1
-+ s1 e^w/s2) ^ {(s1 + s2)} B(s1, s2)) }\deqn{ }{ f(x) = (delta (s1/s2)^{s1}
-e^{s1 w}) / (sigma t (1 + s1 e^w/s2) ^ {(s1 + s2)} B(s1, s2)) } The
++ s1 e^w/s2) ^ {(s1 + s2)} B(s1, s2)) } The
 original parameterisation is available in this package as
 \code{\link{dgenf.orig}}, for the sake of completion / compatibility.  With
 the above definitions,
