@@ -3,7 +3,7 @@
 cumulative hazard, mean and restricted mean functions for the Royston/Parmar
 spline model. These functions have all parameters of the distribution collected
 together in a single argument gamma. For the equivalent functions with
-one argument per parameter, see Survsplinek."><title>Royston/Parmar spline survival distribution — Survspline • flexsurv</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Royston/Parmar spline survival distribution — Survspline"><meta property="og:description" content="Probability density, distribution, quantile, random generation, hazard, 
+one argument per parameter, see Survsplinek."><title>Royston/Parmar spline survival distribution — Survspline • flexsurv</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Royston/Parmar spline survival distribution — Survspline"><meta property="og:description" content="Probability density, distribution, quantile, random generation, hazard, 
 cumulative hazard, mean and restricted mean functions for the Royston/Parmar
 spline model. These functions have all parameters of the distribution collected
 together in a single argument gamma. For the equivalent functions with
@@ -35,6 +35,9 @@ one argument per parameter, see Survsplinek."><!-- mathjax --><script src="https
     <a class="dropdown-item" href="../articles/pdf.html">flexsurv PDF vignettes</a>
     <a class="dropdown-item" href="../articles/standsurv.html">Calculating standardized survival measures in flexsurv</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -75,6 +78,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  log <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
@@ -87,6 +91,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  lower.tail <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  log.p <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -100,6 +105,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  lower.tail <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  log.p <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -113,6 +119,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -124,6 +131,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -135,6 +143,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -146,6 +155,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  start <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
@@ -157,6 +167,7 @@ one argument per parameter, see <code><a href="Survsplinek.html">Survsplinek</a>
 <span>  knots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  scale <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>  timescale <span class="op">=</span> <span class="st">"log"</span>,</span>
+<span>  spline <span class="op">=</span> <span class="st">"rp"</span>,</span>
 <span>  offset <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -177,11 +188,11 @@ corresponding to <code>knots</code>.</p></dd>
 
 
 <dt>beta</dt>
-<dd><p>Vector of covariate effects (deprecated).</p></dd>
+<dd><p>Vector of covariate effects.  Not supported and ignored since version 2.3, and this argument will be removed in 2.4.</p></dd>
 
 
 <dt>X</dt>
-<dd><p>Matrix of covariate values (deprecated).</p></dd>
+<dd><p>Matrix of covariate values. Not supported and ignored since version 2.3, and this argument will be removed in 2.4.</p></dd>
 
 
 <dt>knots</dt>
@@ -208,9 +219,17 @@ and log-normal respectively.  The scale must be common to all times.</p></dd>
 <code><a href="flexsurvspline.html">flexsurvspline</a></code>.</p></dd>
 
 
+<dt>spline</dt>
+<dd><p><code>"rp"</code> to use the natural cubic spline basis
+described in Royston and Parmar.  <code>"splines2ns"</code> to use the
+alternative natural cubic spline basis from the <code>splines2</code>
+package (Wang and Yan 2021), which may be better behaved due to
+the basis being orthogonal.</p></dd>
+
+
 <dt>offset</dt>
 <dd><p>An extra constant to add to the linear predictor
-\(\eta\).</p></dd>
+\(\eta\).  Not supported and ignored since version 2.3, and this argument will be removed in 2.4.</p></dd>
 
 
 <dt>log, log.p</dt>
@@ -261,6 +280,8 @@ to typical random number generation functions.</p>
 proportional-hazards and proportional-odds models for censored survival
 data, with application to prognostic modelling and estimation of treatment
 effects. Statistics in Medicine 21(1):2175-2197.</p>
+<p>Wang W, Yan J (2021). Shape-Restricted Regression Splines with R
+Package splines2. Journal of Data Science, 19(3), 498-517.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
