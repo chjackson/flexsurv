@@ -230,7 +230,7 @@ DLSsurvspline <- function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard"
 }
 
 #' @noRd
-deriv.test <- function(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars){
+deriv_test <- function(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars){
   an.d <- Dminusloglik.flexsurv(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard,
                                 rtrunc=rtrunc, dlist=dlist, inits=inits,
                                 dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)

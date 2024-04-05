@@ -30,7 +30,7 @@ hr_flexsurvreg <- function(x, newdata=NULL, t=NULL, start=0, ci=TRUE, B=1000, cl
   X <- newdata_to_X(x, newdata, na.action=na.action)
   args1 <- xt_to_fnargs(x, X[2,,drop=FALSE], t, start=start, type="hazard")
   args0 <- xt_to_fnargs(x, X[1,,drop=FALSE], t, start=start, type="hazard")
-  fn <- expand.summfn.args(summary.fns(x, type="hazard"))
+  fn <- expand.summfn.args(summary_fns(x, type="hazard"))
   est1 <- do.call(fn, args1)
   est0 <- do.call(fn, args0)
   

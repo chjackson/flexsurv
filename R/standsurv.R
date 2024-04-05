@@ -654,9 +654,9 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
   X <- form.model.matrix(object, as.data.frame(dat), na.action=na.pass)
   if(!(type2 %in% c("acrmst","quantile","acquantile"))){
     if(!(type2 %in% c("acsurvival", "achazard"))){
-      sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type2), B=B, rawsim=rawsim) # pts, sims, times
+      sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary_fns(object, type2), B=B, rawsim=rawsim) # pts, sims, times
     } else {
-      sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
+      sim.pred <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary_fns(object, type), B=B, rawsim=rawsim) # pts, sims, times
     }
     
     if(weighted){
@@ -667,7 +667,7 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
     if(type2=="hazard"){
       # Weight individual hazards by survival function to get hazard of the standardized survival
       haz <- sim.pred
-      surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
+      surv <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary_fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
       stand.pred <- apply(haz*surv*weights, c(2,3),sum) / apply(surv*weights,c(2,3),sum)
     } else if(type2=="acsurvival"){
       rs <- sim.pred
@@ -676,7 +676,7 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
       stand.pred <- apply(es*rs*weights, c(2,3),sum) / apply(weights,c(2,3),sum)
     } else if(type2=="achazard"){
       excessh <- sim.pred
-      rs <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary.fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
+      rs <- normbootfn.flexsurvreg(object, t=t, start=0, X=X, fn=summary_fns(object, "survival"), B=B, rawsim=rawsim) # pts, sims, times
       es <- array(expsurv$expsurv$es, dim= dim(rs)[c(1,3,2)])
       es <- aperm(es, c(1, 3, 2))
       eh <- array(expsurv$expsurv$eh, dim= dim(rs)[c(1,3,2)])

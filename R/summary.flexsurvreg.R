@@ -148,7 +148,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
  X <- newdata_to_X(x, newdata, X, na.action)
  type <- match.arg(type, c("survival","cumhaz","hazard","rmst","mean","median", "quantile","link"))
  if (is.null(fn)) {
-  fn <- summary.fns(x, type)
+  fn <- summary_fns(x, type)
  }
  fn <- expand.summfn.args(fn)
  if (type=="link")
@@ -336,7 +336,7 @@ cisumm.flexsurvreg <- function(x, t, start, X, fn, B=1000, cl=0.95) {
 }
 
 #' @noRd
-summary.fns <- function(x, type){
+summary_fns <- function(x, type){
     switch(type,   # TODO warn for clashing arguments in dfns
            "survival" = function(t,start,...) {
                ret <- (1 - x$dfns$p(t,...))/(1 - x$dfns$p(start,...))

@@ -1046,7 +1046,7 @@ check_deriv <- function(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, d
   if (isTRUE(getOption("flexsurv.test.analytic.derivatives")) && deriv_supported(Y)){
     if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
     if (dfns$deriv)
-      deriv.test <- deriv.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
+      deriv.test <- deriv_test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
     if (dfns$hessian)
       hess.test <- hess.test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
     res <- list(deriv.test=deriv.test, hess.test=hess.test)

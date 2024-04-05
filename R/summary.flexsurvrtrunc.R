@@ -66,7 +66,7 @@ summary.flexsurvrtrunc <- function(object, type="survival", fn=NULL,
         t <- sort(unique(dat$t))
 
     if (is.null(fn)) {
-        fn <- summary.fns(x, type)
+        fn <- summary_fns(x, type)
     }
 
     fn <- expand.summfn.args(fn)

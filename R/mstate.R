@@ -197,10 +197,10 @@ msfit.flexsurvreg <- function(object, t, newdata=NULL, variance=TRUE, tvar="tran
             boot[,,i] <-
                 if (is.flexsurvlist(object))
                     normbootfn.flexsurvreg(object[[i]], t=t, start=0, newdata=newdata, B=B,
-                                           fn=summary.fns(object[[i]],"cumhaz"))
+                                           fn=summary_fns(object[[i]],"cumhaz"))
                 else
                     normbootfn.flexsurvreg(object, t=t, start=0, X=X[i,,drop=FALSE], B=B,
-                                           fn=summary.fns(object,"cumhaz"))
+                                           fn=summary_fns(object,"cumhaz"))
         ntr2 <- 0.5*ntr*(ntr+1)
         nt <- length(t)
         mat <- matrix(nrow=ntr, ncol=ntr)
@@ -688,7 +688,7 @@ format.ci <- function(x, l, u, digits=NULL, ...)
 }
 
 #' @noRd
-print.ci <- function(x, l, u, digits=NULL){
+print.ci <- function(x, l, u, digits=NULL,...){
     res <- format.ci(x, l, u, digits)
     print(res, quote=FALSE)
 }
