@@ -985,7 +985,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                                                 rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns,
                                                 aux=aux, mx=mx, fixedpars=fixedpars)
         
-        if (hessian && all(is.finite(opt$hessian)) && all(eigen(opt$hessian)$values > 0))
+        if (hessian && all(is.finite(opt$hessian)))
         {
             cov <- .hess_to_cov(opt$hessian, hess.control$tol.solve, hess.control$tol.evalues)
             se <- sqrt(diag(cov))
@@ -996,7 +996,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         }
         else {
             if (hessian) 
-                warning("Optimisation has probably not converged to the maximum likelihood - Hessian is not positive definite. ")
+                warning("Optimisation has probably not converged to the maximum likelihood - Hessian is not finite. ")
             cov <- lcl <- ucl <- se <- NA
         }
         res <- cbind(est=inits, lcl=NA, ucl=NA, se=NA)
