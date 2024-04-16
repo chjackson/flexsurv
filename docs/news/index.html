@@ -55,6 +55,7 @@
 <h2 class="pkg-version" data-toc-text="2.3" id="version-23-2024-04-05">Version 2.3 (2024-04-05)<a class="anchor" aria-label="anchor" href="#version-23-2024-04-05"></a></h2>
 <ul><li><p>Analytic Hessian calculation for models where this is possible, that is, Weibull, Gompertz, exponential, and spline models in hazard and odds scales.</p></li>
 <li><p>Analytic gradient calculation for Weibull proportional hazards models.</p></li>
+<li><p>Vignette now firmly warns against using flexsurv with time-dependent covariates (<a href="https://github.com/chjackson/flexsurv/issues/176" class="external-link">#176</a>).</p></li>
 <li><p>Weighted likelihood for relative survival models now implemented consistently with other models, as a weighted sum of individual log-likelihoods.</p></li>
 <li><p><code>standsurv</code> now returns results in the same order of times <code>t</code> as given by the user, for consistency with <code>summary.flexsurvreg</code>.</p></li>
 <li><p>Quantiles of standardised survival now available in <code>standsurv</code>.</p></li>

@@ -6,6 +6,9 @@
 
 * Analytic gradient calculation for Weibull proportional hazards models.
 
+* Vignette now firmly warns against using flexsurv with time-dependent
+  covariates (#176).
+
 * Weighted likelihood for relative survival models now implemented
   consistently with other models, as a weighted sum of individual
   log-likelihoods.

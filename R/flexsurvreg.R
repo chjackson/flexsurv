@@ -1032,10 +1032,10 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                   AIC = -2*ret$loglik + 2*ret$npars,
                   data = dat, datameans = colMeans(X),
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
-                  concat.formula=f2, all.formulae=forms, all.contrasts=contr.save,
-                  dfns=dfns),
+                  concat.formula=f2, all.formulae=forms, dfns=dfns),
              ret,
-             list(covdata = covdata)) # temporary position so cyclomort doesn't break
+             list(all.contrasts=contr.save,
+                  covdata = covdata)) # temporary position so cyclomort doesn't break
     ret$BIC <- BIC.flexsurvreg(ret, cens=TRUE)
     ret <- c(ret, check_deriv(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars))
     class(ret) <- "flexsurvreg"

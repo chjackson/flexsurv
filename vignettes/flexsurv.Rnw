@@ -316,7 +316,7 @@ interval where the covariate is assumed to be constant.  The response
 would be of the form \code{Surv(start, stop, censrec)}, where
 \code{start} and \code{stop} are the limits of each interval, and
 \code{censrec} indicates whether a death was observed at \code{stop}.
-However, using this approach would require the probability of survival up to the left-truncation time to be represented by a term of the form $S_i(s_i) = exp(-H_i(s_i))$ in the likelihood (equation 2).   The cumulative hazard $H$ over the interval from time 0 to time $s_i$ depends
+However, using this approach would require the probability of survival up to the left-truncation time to be represented by a term of the form $S_i(s_i) = \exp(-H_i(s_i))$ in the likelihood (equation 2).   The cumulative hazard $H$ over the interval from time 0 to time $s_i$ depends
 on how the covariates change for an individual on this time interval, and \pkg{flexsurv}
 cannot keep track of different observations for an individual.
 Furthermore, prediction from models with time-dependent covariates
