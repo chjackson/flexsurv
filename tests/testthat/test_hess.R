@@ -159,3 +159,29 @@ test_that("flexsurvspline fit hessian",{
 })
 
 options(flexsurv.test.analytic.derivatives=FALSE)
+
+
+test_that("nearest positive-definite control",{
+
+  # sub-optimal solution near to optimal solution of:
+  # flexsurvreg(formula=Surv(futime, fustat) ~ 1, dist="gengamma", data=ovarian)
+    perturbed <- c(mu=6.4049977, sigma=1.2217696, Q=-0.6432642)
+    short_optim <- list(maxit=0)
+
+    expect_warning(
+        flexsurvreg(formula=Surv(futime, fustat) ~ 1, data=ovarian,
+                    dist="gengamma", inits=perturbed, control=short_optim,
+                    hess.control=list(tol.evalues=0)),
+        "Hessian not positive definite"
+    )
+    expect_silent(
+        flexsurvreg(formula=Surv(ovarian$futime, ovarian$fustat) ~ 1,
+                    dist="gengamma", inits=perturbed, control=short_optim,
+                    hess.control=list(tol.evalues=1.1E1))
+    )
+    fl_nearPD <- flexsurvreg(formula=Surv(futime, fustat) ~ 1, data=ovarian,
+                             dist="gengamma", inits=perturbed, control=short_optim,
+                             hess.control=list(tol.evalues=1.1E1))
+    expect_gt(min(eigen(vcov(fl_nearPD))$values), 0)
+
+})
