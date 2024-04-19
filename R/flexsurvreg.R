@@ -314,6 +314,7 @@ concat.formulae <- function(formula,forms, data = NULL){
 ## User-supplied initial value functions don't have to include all
 ## four possible arguments: this expands them if they don't
 
+#' @noRd
 expand.inits.args <- function(inits){
     inits2 <- inits
     formals(inits2) <- alist(t=,mf=,mml=,aux=)
@@ -324,6 +325,7 @@ expand.inits.args <- function(inits){
 ## User-supplied summary output functions don't have to include all
 ## two possible arguments: this expands them if they don't
 
+#' @noRd
 expand.summfn.args <- function(summfn){
     summfn2 <- summfn
     args <- c(alist(t=,start=), formals(summfn))
