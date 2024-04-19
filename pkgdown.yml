@@ -1,10 +1,10 @@
 pandoc: 3.1.11
-pkgdown: 2.0.8
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
   pdf: pdf.html
   standsurv: standsurv.html
-last_built: 2024-04-17T16:42Z
+last_built: 2024-04-19T12:44Z
 urls:
   reference: http://chjackson.github.io/flexsurv-dev/reference
   article: http://chjackson.github.io/flexsurv-dev/articles
