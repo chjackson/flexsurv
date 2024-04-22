@@ -1,36 +1,10 @@
 -*- text -*-
 
-Version 2.3 (2024-??-??)
--------------------------
+For changes in Version 2.3 and later, see
 
-* Analytic Hessian calculation for models where this is possible, that
-  is, Weibull, Gompertz, exponential, and spline models in hazard and
-  odds scales.
+https://chjackson.github.io/flexsurv/news
 
-* Analytic gradient calculation for Weibull proportional hazards models.
-
-* Weighted likelihood for relative survival models now implemented
-  consistently with other models, as a weighted sum of individual
-  log-likelihoods.
-
-* `standsurv` now returns results in the same order of times `t`
-  as given by the user, for consistency with `summary.flexsurvreg`.
-
-* Quantiles of standardised survival now available in `standsurv`.
-
-* Non-default factor contrasts now handled.
-
-* `pmatrix.simfs` can now accept a vector of times `t` and has a
-  `tidy` output option.
-
-* BIC and AICc functions added.
-
-* Column name of predict() output changed from "time" to "eval_time",
-  for consistency with tidymodels update.
-
-* Default value for t now chosen in `hr_flexsurvreg`.
-
-* `coxsnell.flexsurvreg` now handles delayed entry.
+which is built from NEWS.md in the source root directory.
 
 
 Version 2.2.2 (2023-01-31)

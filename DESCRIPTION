@@ -2,7 +2,7 @@ Package: flexsurv
 Type: Package
 Title: Flexible Parametric Survival and Multi-State Models
 Version: 2.3
-Date: 2024-04-05
+Date: 2024-04-21
 Authors@R: c(person("Christopher", "Jackson",
          email="chris.jackson@mrc-bsu.cam.ac.uk",
          role=c("aut", "cre")),
