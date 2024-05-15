@@ -219,7 +219,7 @@ check.dlist <- function(dlist){
 
 check.formula <- function(formula, dlist, data = NULL){
     if (!inherits(formula,"formula")) stop("\"formula\" must be a formula object")
-    labs <- attr(terms(formula, data = data), "term.labels")
+    labs <- as.character(attr(terms(formula, data = data), "variables"))[-c(1,2)]
     if (!("strata" %in% dlist$pars)){
         strat <- grep("strata\\((.+)\\)",labs)
         if (length(strat) > 0){
@@ -230,7 +230,13 @@ check.formula <- function(formula, dlist, data = NULL){
     if (!("frailty" %in% dlist$pars)){
         fra <- grep("frailty\\((.+)\\)",labs)
         if (length(fra) > 0){
-            warning("frailty models are not supported and behaviour of frailty() is undefined")
+            stop("frailty models are not supported and behaviour of frailty() is undefined")
+        }
+    }
+    if (!("offset" %in% dlist$pars)){
+        fra <- grep("offset\\((.+)\\)",labs)
+        if (length(fra) > 0){
+            stop("offset() terms are not supported in formulae. To fit a model with a covariate coefficient fixed to 1, use the `inits` and `fixedpars` arguments")
         }
     }
 }

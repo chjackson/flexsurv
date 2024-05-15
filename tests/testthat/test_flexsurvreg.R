@@ -499,6 +499,13 @@ test_that("warning with strata", {
                    "Ignoring \"strata\" function: interpreting \"ovarian\\$resid.ds\" as a covariate on \"mu\"")
 })
 
+test_that("error with frailty() and offset()", { 
+    expect_error(flexsurvreg(formula = Surv(futime, fustat) ~ frailty(resid.ds), data="ovarian", dist="weibull"),
+                   "frailty models are not supported")
+    expect_error(flexsurvreg(formula = Surv(futime, fustat) ~ offset(resid.ds), data="ovarian", dist="weibull"),
+                   "offset\\(\\) terms are not supported")
+})
+
 test_that("Distribution names are case insensitive",{
   fs1 = flexsurvreg(Surv(rectime, censrec)~group,dist="weibull",data=bc)
   fs2 = flexsurvreg(Surv(rectime, censrec)~group,dist="Weibull",data=bc)
