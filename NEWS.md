@@ -1,3 +1,9 @@
+# Version 2.3.1 ? (development version)
+
+* Fix for simulating from semi-Markov models with `tcovs` option,
+  which was not completing for some model configurations.
+
+
 # Version 2.3 (2024-04-21)
 
 * Analytic Hessian calculation for models where this is possible, that

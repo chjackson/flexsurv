@@ -72,7 +72,7 @@ form.msm.newdata <- function(x, newdata=NULL, tvar="trans", trans){
 ##' there are other covariates. The variable names should be the same as those
 ##' in the fitted model formula.  There must be either one value per covariate
 ##' (the typical situation) or \eqn{n} values per covariate, a different one
-##' for each of the \eqn{n} allowed transitions.
+##' for each of the \eqn{n} allowed transitions. 
 ##' @param variance Calculate the variances and covariances of the transition
 ##' cumulative hazards (\code{TRUE} or \code{FALSE}).  This is based on
 ##' simulation from the normal asymptotic distribution of the estimates, which
@@ -270,6 +270,7 @@ pars.fmsm <- function(x, trans, newdata=NULL, tvar="trans")
                 } else if(nrow(newdata) == ntr){
                     X <- form.model.matrix(x[[i]], as.data.frame(newdata[i, ,drop = FALSE]), na.action=na.omit)
                 } else stop(sprintf("`newdata` has %s rows. It must either have one row, or one row for each of the %s allowed transitions",nrow(newdata),ntr))
+##                } else stop(sprintf("`newdata` must only have one row")) # use case for ntr rows is unclear
               }
             beta <- if (x[[i]]$ncovs==0) 0 else x[[i]]$res.t[x[[i]]$covpars,"est"]
             basepar[[i]] <- add.covs(x[[i]], x[[i]]$res.t[x[[i]]$dlist$pars,"est"], beta, X, transform=FALSE)
@@ -780,7 +781,7 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
 ##'
 ##' @param newdata A data frame specifying the values of covariates in the
 ##' fitted model, other than the transition number.  See
-##' \code{\link{msfit.flexsurvreg}}.
+##' \code{\link{msfit.flexsurvreg}}. 
 ##'
 ##' @param start Starting state, or vector of starting states for each of the
 ##' \code{M} individuals.
@@ -798,8 +799,6 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
 ##' same unit as time. \code{tcovs} is supplied as a character vector.
 ##'
 ##' @param tidy If \code{TRUE} then the simulated data are returned as a tidy data frame with one row per simulated transition.  See \code{\link{simfs_bytrans}} for a function to rearrange the data into this format if it was simulated in non-tidy format.  Currently this includes only event times, and excludes any times of censoring that are reported when \code{tidy=FALSE}.
-##' 
-##' @param debug Print intermediate outputs: for development use.
 ##' 
 ##' @return If \code{tidy=TRUE}, a data frame with one row for each simulated transition, giving the individual ID \code{id}, start state \code{start}, end state \code{end}, transition label \code{trans}, time of the transition since the start of the process (\code{time}), and time since the previous transition (\code{delay}).
 ##'
@@ -825,7 +824,7 @@ form.basepars.tcovs <- function(x, transi, # index of allowed transition
 ##' tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 ##' sim.fmsm(bexp, M=10, t=5, trans=tmat)
 ##' @export
-sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans", tcovs=NULL, tidy=FALSE, debug=FALSE){
+sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans", tcovs=NULL, tidy=FALSE){
     if (is.null(trans)) {
         if (!is.null(attr(x, "trans"))) trans <- attr(x, "trans")
         else stop("`trans` not supplied and not found in `x`")
@@ -843,9 +842,6 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
     res.t <- cur.t <- rep(0, M)
     todo <- seq_len(M)
     while (any(todo)){
-        if (debug) { cat("cur.t\n"); cat(cur.t); cat("\n") }
-        if (debug) { cat("cur.st\n"); cat(cur.st); cat("\n") }
-        if (debug) { cat("TODO\n"); cat(todo); cat("\n") }
         cur.st.out <- cur.st[todo]
         cur.t.out <- cur.t[todo]
         done <- numeric()
@@ -859,24 +855,17 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
                 for (j in seq_along(transi)) {         
                     xbase <- if (is.flexsurvlist(x)) x[[transi[j]]] else x
                     if (length(tcovs)>0){
-                        basepars <- form.basepars.tcovs(x, transi[j], newdata, tcovs, cur.t.out)
+                        basepars <- form.basepars.tcovs(x, transi[j], newdata, tcovs, cur.t[todo][cur.st[todo]==i])
                     } else 
                         basepars <- as.list(as.data.frame(basepars.all[[transi[j]]]))
-
                     fncall <- c(list(n=ni), basepars, xbase$aux)
                     if (is.null(xbase$dfns$r)) stop("No random sampling function found for this model")
                     t.trans1[,j] <- do.call(xbase$dfns$r, fncall)
                 }
-                if (debug) { print(t(t.trans1)) }
                 ## simulated next state is the one with minimum simulated time
                 mc <- max.col(-t.trans1)
-                if (debug) { cat("mc\n"); cat(mc); cat("\n") }
-                if (debug) { cat("transi\n"); cat(transi); cat("\n") }
-                if (debug) { cat("trans[i,]\n"); cat(trans[i,]); cat("\n") }
                 next.state <- match(transi[mc], trans[i,])
-                if (debug) { cat("next.state\n"); cat(next.state); cat("\n") }
                 next.time <- t.trans1[cbind(seq_along(next.state), mc)]
-                if (debug) { cat("next.time\n"); cat(next.time); cat("\n") }
                 inds <- which(cur.st[todo]==i)
                 cur.t.out[inds] <- cur.t.out[inds] + next.time
                 ## if final simulated state is greater than target time, censor at target time
@@ -892,7 +881,6 @@ sim.fmsm <- function(x, trans=NULL, t, newdata=NULL, start=1, M=10, tvar="trans"
         res.t <- cbind(res.t, cur.t)
         done <- union(done, which(cur.st %in% absorbing(trans)))
         todo <- setdiff(todo, done)
-        if (debug) { cat("\n") }
     }
     res <- list(st=unname(res.st), t=unname(res.t))
     attr(res, "trans") <- trans
@@ -1161,7 +1149,7 @@ pmatrix.simfs <- function(x, trans, t=1, newdata=NULL, ci=FALSE,
     dimnames(res) <- list(statenames, statenames, t)
     for (i in seq_len(n)){
         sim <- sim.fmsm(x=x, trans=trans, t=max(t), newdata=newdata,
-                      start=i, M=M, tvar=tvar, tcovs=tcovs, debug=FALSE)
+                      start=i, M=M, tvar=tvar, tcovs=tcovs)
         for (j in seq_len(T)){
           st <- find_state_at(sim,t[j])
           res[i,,j] <- prop.table(table(factor(st, levels=seq_len(n))))
@@ -1287,7 +1275,7 @@ totlos.simfs <- function(x, trans, t=1, start=1, newdata=NULL, ci=FALSE,
 {
     if (length(t)>1) stop("\"t\" must be a single number")
     sim <- sim.fmsm(x=x, trans=trans, t=t, newdata=newdata,
-                    start=start, M=M, tvar=tvar, tcovs=tcovs, debug=FALSE)
+                    start=start, M=M, tvar=tvar, tcovs=tcovs)
     dt <- diff(t(cbind(sim$t, t)))
     st <- factor(t(sim$st), levels=1:nrow(trans))
     res <- tapply(dt, st, sum) / M

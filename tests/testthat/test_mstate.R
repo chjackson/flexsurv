@@ -111,9 +111,11 @@ test_that("multistate output functions for list of models objects", {
     set.seed(1)
     totlos.simfs(bwei.list, t=5, trans=tmat, M=10)
     totlos.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0))
-
+    totlos.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0), tcovs="x")
+    
     pmatrix.simfs(bwei.list, t=5, trans=tmat, M=100)
-
+    pmatrix.simfs(bweic.list, t=10, trans=tmat, M=10000, newdata=list(x=0), tcovs="x")
+    
     set.seed(1)
     pnt <- pmatrix.simfs(bweic.list, t=5, trans=tmat, M=100, newdata=list(x=0))
     set.seed(1)
