@@ -502,8 +502,9 @@ predict for 10 time points.</p>
 <span>                                          boot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                          B <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>                                          seed <span class="op">=</span> <span class="fl">2367</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Calculating bootstrap standard errors / confidence intervals</span></span>
-<span></span>
+<span><span class="co">#&gt; Calculating bootstrap standard errors / confidence intervals</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">ss.weibull.sep.deltam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standsurv.html">standsurv</a></span><span class="op">(</span><span class="va">model.weibull.sep</span>,</span>
 <span>                                          type <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>                                                 at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group2 <span class="op">=</span> <span class="st">"Good"</span><span class="op">)</span>,</span>
@@ -511,8 +512,9 @@ predict for 10 time points.</p>
 <span>                                          t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">7</span>,length<span class="op">=</span><span class="fl">10</span><span class="op">)</span>,</span>
 <span>                                          ci <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                                          boot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Calculating standard errors / confidence intervals using delta method</span></span>
-<span></span>
+<span><span class="co">#&gt; Calculating standard errors / confidence intervals using delta method</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.boot</span>, ci <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span>  </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, ymin<span class="op">=</span><span class="va">survival_lci</span>, ymax<span class="op">=</span><span class="va">survival_uci</span>, color<span class="op">=</span><span class="va">at</span>, linetype <span class="op">=</span> <span class="st">"Delta method"</span><span class="op">)</span>, fill<span class="op">=</span><span class="cn">NA</span>,</span>
 <span>              data<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">ss.weibull.sep.deltam</span>,<span class="st">"standpred_at"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -535,7 +537,7 @@ population. As an example, we obtain marginal survival estimates after
 fitting a stratified Weibull model, firstly standardized to the
 age-distribution of our study population and secondly standardized to an
 older population with mean age of 75 and standard deviation 5.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model.weibull.age.sep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flexsurvreg.html">flexsurvreg</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">recyrs</span>, <span class="va">censrec</span><span class="op">)</span><span class="op">~</span><span class="va">group2</span> <span class="op">+</span> <span class="va">age</span>, </span>
 <span>                                 anc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="op">~</span> <span class="va">group2</span> <span class="op">+</span> <span class="va">age</span><span class="op">)</span>, </span>
 <span>                                 data<span class="op">=</span><span class="va">bc</span>, dist<span class="op">=</span><span class="st">"weibullPH"</span><span class="op">)</span></span>
@@ -585,7 +587,7 @@ object with stratification factors age, sex and year. It gives rates of
 mortality per person-day for combinations of the stratification factors.
 A summary of the <code>survexp.us</code> object shows that the
 time-scale is in days.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">survexp.us</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Rate table with 3 dimensions:</span></span>
 <span><span class="co">#&gt;  age ranges from 0 to 39812.25; with 110 categories</span></span>
@@ -624,7 +626,7 @@ model was fitted in years but the ratetable is in days.</p>
 <p>After running <code>standsurv</code> we can plot the expected
 survival (or hazard) by using the argument <code>expected = TRUE</code>
 in the <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> function.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ss.weibull.sep.expected</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standsurv.html">standsurv</a></span><span class="op">(</span><span class="va">model.weibull.sep</span>,</span>
 <span>                                                 type <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>                                                 at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group2 <span class="op">=</span> <span class="st">"Good"</span><span class="op">)</span>,</span>
@@ -638,13 +640,14 @@ in the <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="exter
 <span>                                                 scale.ratetable <span class="op">=</span> <span class="fl">365.25</span>,</span>
 <span>                                                 newdata <span class="op">=</span> <span class="va">bc</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.expected</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.expected</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
 <p><img src="standsurv_files/figure-html/unnamed-chunk-17-1.png" width="768"></p>
 <p>We can see that the marginal expected survival is much higher than
 the marginal (predicted) survival for our breast cancer population. We
 can also obtain the expected hazards:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ss.weibull.sep.expectedh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standsurv.html">standsurv</a></span><span class="op">(</span><span class="va">model.weibull.sep</span>,</span>
 <span>                                                 type <span class="op">=</span> <span class="st">"hazard"</span>,</span>
 <span>                                                 at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group2 <span class="op">=</span> <span class="st">"Good"</span><span class="op">)</span>,</span>
@@ -658,8 +661,9 @@ can also obtain the expected hazards:</p>
 <span>                                                 scale.ratetable <span class="op">=</span> <span class="fl">365.25</span>,</span>
 <span>                                                 newdata <span class="op">=</span> <span class="va">bc</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.expectedh</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.expectedh</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
 <p><img src="standsurv_files/figure-html/unnamed-chunk-18-1.png" width="768"></p>
 <p>The hazard plot shows that our model is predicting an increasing
 hazard over time for the cancer population, which remains significantly
@@ -701,7 +705,7 @@ the data with the expected rates using the matching variables attained
 age, attained year and sex. In the example, we express the expected rate
 as per person-year as this is the timescale used in the flexsurv
 regression model.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## reshape US lifetable to be a tidy data.frame, and convert rates to per person-year as flexsurv regression is in years</span></span>
 <span><span class="va">survexp.us.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">as.data.frame.table</a></span><span class="op">(</span><span class="va">survexp.us</span>, responseName <span class="op">=</span> <span class="st">"exprate"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>exprate <span class="op">=</span> <span class="fl">365.25</span> <span class="op">*</span> <span class="va">exprate</span><span class="op">)</span></span>
@@ -756,7 +760,7 @@ and hazard predictions using <code>type = "survival"</code> and
 relative survival or excess hazards we would use
 <code>type = "relsurvival"</code> and
 <code>type = "excesshazard"</code>, respectively.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## All-cause survival</span></span>
 <span><span class="va">ss.weibull.sep.rs.surv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standsurv.html">standsurv</a></span><span class="op">(</span><span class="va">model.weibull.sep.rs</span>,</span>
 <span>                                                 type <span class="op">=</span> <span class="st">"survival"</span>,</span>
@@ -772,10 +776,11 @@ relative survival or excess hazards we would use
 <span>                                                 newdata <span class="op">=</span> <span class="va">bc</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Marginal all-cause survival will be calculated</span></span>
-<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.surv</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.surv</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
 <p><img src="standsurv_files/figure-html/unnamed-chunk-20-1.png" width="768"></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># All-cause hazard</span></span>
 <span><span class="va">ss.weibull.sep.rs.haz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standsurv.html">standsurv</a></span><span class="op">(</span><span class="va">model.weibull.sep.rs</span>,</span>
@@ -792,15 +797,16 @@ relative survival or excess hazards we would use
 <span>                                                 newdata <span class="op">=</span> <span class="va">bc</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Marginal all-cause hazard will be calculated</span></span>
-<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.haz</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.haz</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
 <p><img src="standsurv_files/figure-html/unnamed-chunk-20-2.png" width="768"></p>
 <p>The marginal excess hazard is now unimodal since the cure model is
 forcing the initially increasing excess hazard to tend to zero in the
 long-term where only ‘cured’ subjects remain. The marginal all-cause
 hazard tends to the expected hazard and follows it thereafter.</p>
 <p>A plot of the excess hazard confirms this.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Excess hazard</span></span>
 <span><span class="va">ss.weibull.sep.rs.excesshaz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standsurv.html">standsurv</a></span><span class="op">(</span><span class="va">model.weibull.sep.rs</span>,</span>
 <span>                                                 type <span class="op">=</span> <span class="st">"excesshazard"</span>,</span>
@@ -815,8 +821,9 @@ hazard tends to the expected hazard and follows it thereafter.</p>
 <span>                                                 scale.ratetable <span class="op">=</span> <span class="fl">365.25</span>,</span>
 <span>                                                 newdata <span class="op">=</span> <span class="va">bc</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.excesshaz</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.excesshaz</span><span class="op">)</span></span></code></pre></div>
 <p><img src="standsurv_files/figure-html/unnamed-chunk-21-1.png" width="768"></p>
 </div>
 </div>
