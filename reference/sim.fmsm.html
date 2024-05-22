@@ -70,8 +70,7 @@ multi-state model fitted using <code><a href="flexsurvreg.html">flexsurvreg</a><
 <span>  M <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  tvar <span class="op">=</span> <span class="st">"trans"</span>,</span>
 <span>  tcovs <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  tidy <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  debug <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  tidy <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -129,10 +128,6 @@ same unit as time. <code>tcovs</code> is supplied as a character vector.</p></dd
 
 <dt>tidy</dt>
 <dd><p>If <code>TRUE</code> then the simulated data are returned as a tidy data frame with one row per simulated transition.  See <code><a href="simfs_bytrans.html">simfs_bytrans</a></code> for a function to rearrange the data into this format if it was simulated in non-tidy format.  Currently this includes only event times, and excludes any times of censoring that are reported when <code>tidy=FALSE</code>.</p></dd>
-
-
-<dt>debug</dt>
-<dd><p>Print intermediate outputs: for development use.</p></dd>
 
 </dl></div>
     <div class="section level2">
