@@ -75,7 +75,7 @@ sr.llog.inits <- function(t,aux){
     } else {
         aux$formula <- aux$forms[[1]]
         aux$forms <- NULL
-        aux$dist <- "lognormal"
+        aux$dist <- "loglogistic"
         sr <- survreg_wrap(aux)
         sr2fsllog(sr)
     }
