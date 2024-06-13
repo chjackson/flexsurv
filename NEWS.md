@@ -3,6 +3,9 @@
 * Fix for simulating from semi-Markov models with `tcovs` option,
   which was not completing for some model configurations.
 
+* Fix for `simulate.flexsurvreg()` with vector `start` argument
+  (#192).
+  
 
 # Version 2.3 (2024-04-21)
 
