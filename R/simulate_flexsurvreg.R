@@ -61,7 +61,9 @@ simulate.flexsurvreg <- function(object, nsim=1, seed=NULL,
     if(!(length(start) %in% c(1, nd)))
       stop(sprintf("`start` of length %s, should be of length 1 or %s = nrow(newdata)"),
            length(start), nd)
-    start <- rep(start, length.out=n)
+    if (length(start)==1)
+        start <- rep(start, length.out=n)
+    else start <- rep(start, each=nsim)
   } else start <- 0
   U <- runif(n, 0, 1)
   newdata <- newdata[rep(1:nd, each=nsim), , drop=FALSE]

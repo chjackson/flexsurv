@@ -20,3 +20,9 @@ test_that("simulate.flexsurvreg",{
   expect_true(all(sim$time > 500))
 })
 
+test_that("simulate.flexsurvreg with left truncation",{
+  fit <- flexsurvreg(formula = Surv(futime, fustat) ~ rx, data = ovarian, dist="weibull")
+  nd <- ovarian
+  sim <- simulate(fit, seed=1003, newdata=nd, nsim = 20, start = nd$futime)
+  expect_true(all(sim[,1:20] > nd$futime))
+})
