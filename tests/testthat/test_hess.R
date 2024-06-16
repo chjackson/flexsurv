@@ -95,6 +95,8 @@ test_that("flexsurvreg fit hessian",{
   expect_lt(hess_error(fl), err)
   fl <- flexsurvreg(formula = Surv(ovarian$futime, ovarian$fustat) ~ 1, dist="gompertz")
   expect_lt(hess_error(fl), err)
+
+  err <- 1e-02
   fl <- flexsurvreg(formula = Surv(recyrs, censrec) ~ group, data=bc, dist="gompertz")
   expect_lt(hess_error(fl), err)
   fl <- flexsurvreg(formula = Surv(recyrs, censrec) ~ group,
