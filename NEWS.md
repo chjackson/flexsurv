@@ -1,4 +1,4 @@
-# Version 2.3.1 ? (development version)
+# Version 2.3.1 (2024-07-14)
 
 * Fix for simulating from semi-Markov models with `tcovs` option,
   which was not completing for some model configurations.
