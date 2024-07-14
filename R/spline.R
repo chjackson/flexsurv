@@ -605,7 +605,7 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' boundary knots \eqn{k_{min},k_{max}}{kmin,kmax}.  The spline function is
 ##' defined as
 ##' 
-##' \deqn{s(x,\bm{\gamma}) = \gamma_0 + \gamma_1 x + \gamma_2 v_1(x) + \ldots +
+##' \deqn{s(x,\boldsymbol{\gamma}) = \gamma_0 + \gamma_1 x + \gamma_2 v_1(x) + \ldots +
 ##' }{s(x,gamma) = gamma0 + gamma1 x + gamma2 v1(x) + ... + gamma_{m+1}
 ##' vm(x)}\deqn{ \gamma_{m+1} v_m(x)}{s(x,gamma) = gamma0 + gamma1 x + gamma2
 ##' v1(x) + ... + gamma_{m+1} vm(x)}
