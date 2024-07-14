@@ -131,7 +131,7 @@ accuracy.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Arguments passed to <code>ode</code> in <span class="pkg">deSolve</span>.</p></dd>
+<dd><p>Arguments passed to <code><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></code> in <span class="pkg">deSolve</span>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -149,7 +149,7 @@ suppressed for printing, but can be extracted with <code>attr(...,"P")</code>.</
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This is computed by solving a second order extension of the Kolmogorov
 forward differential equation numerically, using the methods in the
-<code>deSolve</code> package.  The equation is expressed as a linear
+<span class="pkg">deSolve</span> package.  The equation is expressed as a linear
 system</p>
 <p>$$\frac{dT(t)}{dt} = P(t)$$ $$\frac{dP(t)}{dt} = P(t) Q(t)$$</p>
 <p>and solved for \(T(t)\) and \(P(t)\) simultaneously, where \(T(t)\)

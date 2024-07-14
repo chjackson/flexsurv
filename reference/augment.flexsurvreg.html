@@ -64,11 +64,11 @@
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code>tibble</code> containing the original data that was used to produce the object <code>x</code>.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></code> containing the original data that was used to produce the object <code>x</code>.</p></dd>
 
 
 <dt id="arg-newdata">newdata<a class="anchor" aria-label="anchor" href="#arg-newdata"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code>tibble</code> containing all the original predictors used to create <code>x</code>. Defaults to <code>NULL</code>, indicating that nothing has been passed to <code>newdata</code>. If <code>newdata</code> is specified, the <code>data</code> argument will be ignored.</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> or <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></code> containing all the original predictors used to create <code>x</code>. Defaults to <code>NULL</code>, indicating that nothing has been passed to <code>newdata</code>. If <code>newdata</code> is specified, the <code>data</code> argument will be ignored.</p></dd>
 
 
 <dt id="arg-type-predict">type.predict<a class="anchor" aria-label="anchor" href="#arg-type-predict"></a></dt>
@@ -85,13 +85,13 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>tibble</code> containing <code>data</code> or <code>newdata</code> and possible additional columns:</p><ul><li><p><code>.fitted</code> Fitted values of model</p></li>
+    <p>A <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></code> containing <code>data</code> or <code>newdata</code> and possible additional columns:</p><ul><li><p><code>.fitted</code> Fitted values of model</p></li>
 <li><p><code>.se.fit</code> Standard errors of fitted values</p></li>
 <li><p><code>.resid</code> Residuals (not present if <code>newdata</code> specified)</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>If neither of <code>data</code> or <code>newdata</code> are specified, then <code>model.frame(x)</code> will be used. It is worth noting that <code>model.frame(x)</code> will include a <code>Surv</code> object and not the original time-to-event variables used when fitting the <code>flexsurvreg</code> object. If the original data is desired, specify <code>data</code>.</p>
+    <p>If neither of <code>data</code> or <code>newdata</code> are specified, then <code>model.frame(x)</code> will be used. It is worth noting that <code>model.frame(x)</code> will include a <code><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></code> object and not the original time-to-event variables used when fitting the <code>flexsurvreg</code> object. If the original data is desired, specify <code>data</code>.</p>
     </div>
 
     <div class="section level2">

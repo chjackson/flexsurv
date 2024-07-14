@@ -106,7 +106,7 @@ distributions are available, and users may supply their own.</p>
   <code><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor()</a></code>), then those functions will not work in the formula.  A
   safer way to model covariates on ancillary parameters is through the
   <code>anc</code> argument to <code>flexsurvreg</code>.</p>
-<p><code>survreg</code> users should also note that the function
+<p><code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code> users should also note that the function
   <code><a href="https://rdrr.io/pkg/survival/man/strata.html" class="external-link">strata()</a></code> is ignored, so that any covariates surrounded by
   <code><a href="https://rdrr.io/pkg/survival/man/strata.html" class="external-link">strata()</a></code> are applied to the location parameter.  Likewise the
   function <code>frailty()</code> is not handled.</p></dd>
@@ -193,7 +193,7 @@ argument has been used. Default is <code>options()$na.action</code>.</p></dd>
   would give half the expected survival time.</p>
 <p></p><table class="table table"><tr><td><code>"gengamma"</code></td><td>Generalized gamma (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"gengamma.orig"</code></td><td>Generalized gamma (original)</td><td>scale</td><td>AFT</td></tr><tr><td><code>"genf"</code></td><td>Generalized F (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"genf.orig"</code></td><td>Generalized F (original)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"weibull"</code></td><td>Weibull</td><td>scale</td><td>AFT</td></tr><tr><td><code>"gamma"</code></td><td>Gamma</td><td>rate</td><td>AFT</td></tr><tr><td><code>"exp"</code></td><td>Exponential</td><td>rate</td><td>PH</td></tr><tr><td><code>"llogis"</code></td><td>Log-logistic</td><td>scale</td><td>AFT</td></tr><tr><td><code>"lnorm"</code></td><td>Log-normal</td><td>meanlog</td><td>AFT</td></tr><tr><td><code>"gompertz"</code></td><td>Gompertz</td><td>rate</td><td>PH</td></tr></table><p><code>"exponential"</code> and <code>"lognormal"</code> can be used as aliases for
   <code>"exp"</code> and <code>"lnorm"</code>, for compatibility with
-  <code>survreg</code>.</p>
+  <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code>.</p>
 <p>Alternatively, <code>dist</code> can be a list specifying a custom distribution.
   See section “Custom distributions” below for how to construct this list.</p>
 <p>Very flexible spline-based distributions can also be fitted with
@@ -208,7 +208,7 @@ argument has been used. Default is <code>options()$na.action</code>.</p></dd>
 <p>A package vignette "Distributions reference" lists the survivor functions
   and covariate effect parameterisations used by each built-in distribution.</p>
 <p>For the Weibull, exponential and log-normal distributions,
-  <code>flexsurvreg</code> simply works by calling <code>survreg</code> to
+  <code>flexsurvreg</code> simply works by calling <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code> to
   obtain the maximum likelihood estimates, then calling <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>
   to double-check convergence and obtain the covariance matrix for
   <code>flexsurvreg</code>'s preferred parameterisation.</p>
@@ -288,9 +288,9 @@ estimates, by default 0.95.</p></dd>
 
 
 <dt id="arg-sr-control">sr.control<a class="anchor" aria-label="anchor" href="#arg-sr-control"></a></dt>
-<dd><p>For the models which use <code>survreg</code> to find the
+<dd><p>For the models which use <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code> to find the
 maximum likelihood estimates (Weibull, exponential, log-normal), this list
-is passed as the <code>control</code> argument to <code>survreg</code>.</p></dd>
+is passed as the <code>control</code> argument to <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code>.</p></dd>
 
 
 <dt id="arg-hessian">hessian<a class="anchor" aria-label="anchor" href="#arg-hessian"></a></dt>

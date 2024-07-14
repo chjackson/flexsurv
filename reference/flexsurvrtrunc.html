@@ -102,7 +102,7 @@
   would give half the expected survival time.</p>
 <p></p><table class="table table"><tr><td><code>"gengamma"</code></td><td>Generalized gamma (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"gengamma.orig"</code></td><td>Generalized gamma (original)</td><td>scale</td><td>AFT</td></tr><tr><td><code>"genf"</code></td><td>Generalized F (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"genf.orig"</code></td><td>Generalized F (original)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"weibull"</code></td><td>Weibull</td><td>scale</td><td>AFT</td></tr><tr><td><code>"gamma"</code></td><td>Gamma</td><td>rate</td><td>AFT</td></tr><tr><td><code>"exp"</code></td><td>Exponential</td><td>rate</td><td>PH</td></tr><tr><td><code>"llogis"</code></td><td>Log-logistic</td><td>scale</td><td>AFT</td></tr><tr><td><code>"lnorm"</code></td><td>Log-normal</td><td>meanlog</td><td>AFT</td></tr><tr><td><code>"gompertz"</code></td><td>Gompertz</td><td>rate</td><td>PH</td></tr></table><p><code>"exponential"</code> and <code>"lognormal"</code> can be used as aliases for
   <code>"exp"</code> and <code>"lnorm"</code>, for compatibility with
-  <code>survreg</code>.</p>
+  <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code>.</p>
 <p>Alternatively, <code>dist</code> can be a list specifying a custom distribution.
   See section “Custom distributions” below for how to construct this list.</p>
 <p>Very flexible spline-based distributions can also be fitted with
@@ -117,7 +117,7 @@
 <p>A package vignette "Distributions reference" lists the survivor functions
   and covariate effect parameterisations used by each built-in distribution.</p>
 <p>For the Weibull, exponential and log-normal distributions,
-  <code><a href="flexsurvreg.html">flexsurvreg</a></code> simply works by calling <code>survreg</code> to
+  <code><a href="flexsurvreg.html">flexsurvreg</a></code> simply works by calling <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code> to
   obtain the maximum likelihood estimates, then calling <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim</a></code>
   to double-check convergence and obtain the covariance matrix for
   <code><a href="flexsurvreg.html">flexsurvreg</a></code>'s preferred parameterisation.</p>
