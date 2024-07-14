@@ -35,7 +35,7 @@ See \code{Details} for a more complete explanation.}
 \item{...}{Not currently used.}
 }
 \value{
-A \code{\link{tibble}} containing the columns: \code{term}, \code{estimate}, \code{std.error}, \code{statistic}, \code{p.value}, \code{conf.low}, and \code{conf.high}, by default.
+A \code{\link[tibble]{tibble}} containing the columns: \code{term}, \code{estimate}, \code{std.error}, \code{statistic}, \code{p.value}, \code{conf.low}, and \code{conf.high}, by default.
 
 \code{statistic} and \code{p.value} are only provided for covariate effects (\code{NA} for baseline distribution parameters). These are computed as Wald-type test statistics with p-values from a standard normal distribution.
 }

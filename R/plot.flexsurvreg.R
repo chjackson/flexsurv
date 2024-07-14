@@ -68,7 +68,7 @@
 ##' @param ylim y-axis limits: vector of two elements.
 ##' @param add If \code{TRUE}, add lines to an existing plot, otherwise new
 ##' axes are drawn.
-##' @param ... Other options to be passed to \code{\link{plot.survfit}} or
+##' @param ... Other options to be passed to \code{\link[survival]{plot.survfit}} or
 ##' \code{\link[muhaz]{muhaz}}, for example, to control the smoothness of the
 ##' nonparametric hazard estimates.  The \code{min.time} and \code{max.time}
 ##' options to \code{\link[muhaz]{muhaz}} may sometimes need to be changed from

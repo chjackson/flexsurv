@@ -406,7 +406,7 @@ compress.model.matrices <- function(mml){
 ##' @aliases flexsurvreg flexsurv.dists
 ##' @param formula A formula expression in conventional R linear modelling
 ##'   syntax. The response must be a survival object as returned by the
-##'   \code{\link{Surv}} function, and any covariates are given on the
+##'   \code{\link[survival]{Surv}} function, and any covariates are given on the
 ##'   right-hand side.  For example,
 ##'
 ##'   \code{Surv(time, dead) ~ age + sex}
@@ -444,7 +444,7 @@ compress.model.matrices <- function(mml){
 ##'   safer way to model covariates on ancillary parameters is through the
 ##'   \code{anc} argument to \code{\link{flexsurvreg}}.
 ##'
-##'   \code{\link{survreg}} users should also note that the function
+##'   \code{\link[survival]{survreg}} users should also note that the function
 ##'   \code{strata()} is ignored, so that any covariates surrounded by
 ##'   \code{strata()} are applied to the location parameter.  Likewise the
 ##'   function \code{frailty()} is not handled.
@@ -533,7 +533,7 @@ compress.model.matrices <- function(mml){
 ##'
 ##'   \code{"exponential"} and \code{"lognormal"} can be used as aliases for
 ##'   \code{"exp"} and \code{"lnorm"}, for compatibility with
-##'   \code{\link{survreg}}.
+##'   \code{\link[survival]{survreg}}.
 ##'
 ##'   Alternatively, \code{dist} can be a list specifying a custom distribution.
 ##'   See section ``Custom distributions'' below for how to construct this list.
@@ -553,7 +553,7 @@ compress.model.matrices <- function(mml){
 ##'   and covariate effect parameterisations used by each built-in distribution.
 ##'
 ##'   For the Weibull, exponential and log-normal distributions,
-##'   \code{\link{flexsurvreg}} simply works by calling \code{\link{survreg}} to
+##'   \code{\link{flexsurvreg}} simply works by calling \code{\link[survival]{survreg}} to
 ##'   obtain the maximum likelihood estimates, then calling \code{\link{optim}}
 ##'   to double-check convergence and obtain the covariance matrix for
 ##'   \code{\link{flexsurvreg}}'s preferred parameterisation.
@@ -620,9 +620,9 @@ compress.model.matrices <- function(mml){
 ##'
 ##'   \code{integ.opts = list(rel.tol=1e-12)}
 ##'
-##' @param sr.control For the models which use \code{\link{survreg}} to find the
+##' @param sr.control For the models which use \code{\link[survival]{survreg}} to find the
 ##'   maximum likelihood estimates (Weibull, exponential, log-normal), this list
-##'   is passed as the \code{control} argument to \code{\link{survreg}}.
+##'   is passed as the \code{control} argument to \code{\link[survival]{survreg}}.
 ##'
 ##' @param ... Optional arguments to the general-purpose optimisation routine
 ##'   \code{\link{optim}}.  For example, the BFGS optimisation algorithm is the

@@ -67,7 +67,7 @@ accuracy.}
 
 \item{tidy}{If TRUE then return the results as a tidy data frame}
 
-\item{...}{Arguments passed to \code{\link{ode}} in \pkg{deSolve}.}
+\item{...}{Arguments passed to \code{\link[deSolve]{ode}} in \pkg{deSolve}.}
 }
 \value{
 The transition probability matrix, if \code{t} is of length 1.  If \code{t} is longer, return a list of matrices, or a data frame if \code{tidy} is TRUE. 
@@ -84,7 +84,7 @@ has \eqn{r,s} entry giving the probability that an individual is in state
 }
 \details{
 This is computed by solving the Kolmogorov forward differential equation
-numerically, using the methods in the \code{\link{deSolve}} package.  The
+numerically, using the methods in the \pkg{deSolve} package.  The
 equation is
 
 \deqn{\frac{dP(t)}{dt} = P(t) Q(t)}

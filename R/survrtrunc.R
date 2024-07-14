@@ -148,7 +148,7 @@ check_survrtrunc <- function(t, rtrunc, tmax) {
 ##' 
 ##' @param x Object of class \code{"survrtrunc"} as returned by \code{\link{survrtrunc}}. 
 ##' 
-##' @param ... Other arguments to be passed to \code{\link{plot.survfit}} or \code{\link{lines.survfit}}. 
+##' @param ... Other arguments to be passed to \code{\link[survival]{plot.survfit}} or \code{\link[survival]{lines.survfit}}. 
 ##' 
 ##' @rdname plot_survtrunc
 ##' @export

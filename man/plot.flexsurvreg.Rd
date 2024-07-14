@@ -116,7 +116,7 @@ same as for the fitted curve.}
 \item{add}{If \code{TRUE}, add lines to an existing plot, otherwise new
 axes are drawn.}
 
-\item{...}{Other options to be passed to \code{\link{plot.survfit}} or
+\item{...}{Other options to be passed to \code{\link[survival]{plot.survfit}} or
 \code{\link[muhaz]{muhaz}}, for example, to control the smoothness of the
 nonparametric hazard estimates.  The \code{min.time} and \code{max.time}
 options to \code{\link[muhaz]{muhaz}} may sometimes need to be changed from

@@ -94,7 +94,7 @@ form.msm.newdata <- function(x, newdata=NULL, tvar="trans", trans){
 ##' @return An object of class \code{"msfit"}, in the same form as the objects
 ##' used in the \pkg{mstate} package.  The \code{\link[mstate]{msfit}} method
 ##' from \pkg{mstate} returns the equivalent cumulative intensities for Cox
-##' regression models fitted with \code{\link{coxph}}.
+##' regression models fitted with \code{\link[survival]{coxph}}.
 ##' @author C. H. Jackson \email{chris.jackson@@mrc-bsu.cam.ac.uk}
 ##' @seealso \pkg{flexsurv} provides alternative functions designed
 ##' specifically for predicting from parametric multi-state models without
@@ -317,7 +317,7 @@ state_names <- function(state, object){
 ##' \eqn{s} at time \eqn{t}, given they are in state \eqn{r} at time \eqn{0}.
 ##' 
 ##' This is computed by solving the Kolmogorov forward differential equation
-##' numerically, using the methods in the \code{\link{deSolve}} package.  The
+##' numerically, using the methods in the \pkg{deSolve} package.  The
 ##' equation is
 ##' 
 ##' \deqn{\frac{dP(t)}{dt} = P(t) Q(t)}
@@ -392,7 +392,7 @@ state_names <- function(state, object){
 ##'
 ##' @param tidy If TRUE then return the results as a tidy data frame
 ##' 
-##' @param ... Arguments passed to \code{\link{ode}} in \pkg{deSolve}.
+##' @param ... Arguments passed to \code{\link[deSolve]{ode}} in \pkg{deSolve}.
 ##' 
 ##' @return The transition probability matrix, if \code{t} is of length 1.  If \code{t} is longer, return a list of matrices, or a data frame if \code{tidy} is TRUE. 
 ##' 
@@ -502,7 +502,7 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
 ##' 
 ##' This is computed by solving a second order extension of the Kolmogorov
 ##' forward differential equation numerically, using the methods in the
-##' \code{\link{deSolve}} package.  The equation is expressed as a linear
+##' \pkg{deSolve} package.  The equation is expressed as a linear
 ##' system
 ##' 
 ##' \deqn{\frac{dT(t)}{dt} = P(t)} \deqn{\frac{dP(t)}{dt} = P(t) Q(t)}
@@ -567,7 +567,7 @@ pmatrix.fs <- function(x, trans=NULL, t=1, newdata=NULL,
 ##' 
 ##' @param cl Width of symmetric confidence intervals, relative to 1.
 ##' 
-##' @param ... Arguments passed to \code{\link{ode}} in \pkg{deSolve}.
+##' @param ... Arguments passed to \code{\link[deSolve]{ode}} in \pkg{deSolve}.
 ##' 
 ##' @return The matrix of lengths of stay \eqn{T(t)}, if \code{t} is of length
 ##' 1, or a list of matrices if \code{t} is longer.

@@ -56,7 +56,7 @@ flexsurvrtrunc(
 
   \code{"exponential"} and \code{"lognormal"} can be used as aliases for
   \code{"exp"} and \code{"lnorm"}, for compatibility with
-  \code{\link{survreg}}.
+  \code{\link[survival]{survreg}}.
 
   Alternatively, \code{dist} can be a list specifying a custom distribution.
   See section ``Custom distributions'' below for how to construct this list.
@@ -76,7 +76,7 @@ flexsurvrtrunc(
   and covariate effect parameterisations used by each built-in distribution.
 
   For the Weibull, exponential and log-normal distributions,
-  \code{\link{flexsurvreg}} simply works by calling \code{\link{survreg}} to
+  \code{\link{flexsurvreg}} simply works by calling \code{\link[survival]{survreg}} to
   obtain the maximum likelihood estimates, then calling \code{\link{optim}}
   to double-check convergence and obtain the covariance matrix for
   \code{\link{flexsurvreg}}'s preferred parameterisation.

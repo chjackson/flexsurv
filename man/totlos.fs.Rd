@@ -58,7 +58,7 @@ accuracy.}
 
 \item{cl}{Width of symmetric confidence intervals, relative to 1.}
 
-\item{...}{Arguments passed to \code{\link{ode}} in \pkg{deSolve}.}
+\item{...}{Arguments passed to \code{\link[deSolve]{ode}} in \pkg{deSolve}.}
 }
 \value{
 The matrix of lengths of stay \eqn{T(t)}, if \code{t} is of length
@@ -82,7 +82,7 @@ that time.
 \details{
 This is computed by solving a second order extension of the Kolmogorov
 forward differential equation numerically, using the methods in the
-\code{\link{deSolve}} package.  The equation is expressed as a linear
+\pkg{deSolve} package.  The equation is expressed as a linear
 system
 
 \deqn{\frac{dT(t)}{dt} = P(t)} \deqn{\frac{dP(t)}{dt} = P(t) Q(t)}

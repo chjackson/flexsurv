@@ -624,7 +624,7 @@ flexsurv.splineinits.cox <- function(t=NULL, mf, mml, aux)
 ##' 
 ##' @param formula A formula expression in conventional R linear modelling
 ##' syntax. The response must be a survival object as returned by the
-##' \code{\link{Surv}} function, and any covariates are given on the right-hand
+##' \code{\link[survival]{Surv}} function, and any covariates are given on the right-hand
 ##' side.  For example,
 ##' 
 ##' \code{Surv(time, dead) ~ age + sex}

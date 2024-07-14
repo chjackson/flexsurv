@@ -16,9 +16,9 @@
 \arguments{
 \item{x}{Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.}
 
-\item{data}{A \code{\link{data.frame}} or \code{\link{tibble}} containing the original data that was used to produce the object \code{x}.}
+\item{data}{A \code{\link{data.frame}} or \code{\link[tibble]{tibble}} containing the original data that was used to produce the object \code{x}.}
 
-\item{newdata}{A \code{\link{data.frame}} or \code{\link{tibble}} containing all the original predictors used to create \code{x}. Defaults to \code{NULL}, indicating that nothing has been passed to \code{newdata}. If \code{newdata} is specified, the \code{data} argument will be ignored.}
+\item{newdata}{A \code{\link{data.frame}} or \code{\link[tibble]{tibble}} containing all the original predictors used to create \code{x}. Defaults to \code{NULL}, indicating that nothing has been passed to \code{newdata}. If \code{newdata} is specified, the \code{data} argument will be ignored.}
 
 \item{type.predict}{Character indicating type of prediction to use. Passed to the \code{type} argument of the \code{\link{predict}} generic. Allowed arguments vary with model class, so be sure to read the \code{predict.my_class} documentation.}
 
@@ -27,7 +27,7 @@
 \item{...}{Additional arguments. Not currently used.}
 }
 \value{
-A \code{\link{tibble}} containing \code{data} or \code{newdata} and possible additional columns:
+A \code{\link[tibble]{tibble}} containing \code{data} or \code{newdata} and possible additional columns:
 \itemize{
 \item \code{.fitted} Fitted values of model
 \item \code{.se.fit} Standard errors of fitted values
@@ -38,7 +38,7 @@ A \code{\link{tibble}} containing \code{data} or \code{newdata} and possible add
 Augment accepts a model object and a dataset and adds information about each observation in the dataset. Most commonly, this includes predicted values in the \code{.fitted} column, residuals in the \code{.resid} column, and standard errors for the fitted values in a \code{.se.fit} column. New columns always begin with a . prefix to avoid overwriting columns in the original dataset.
 }
 \details{
-If neither of \code{data} or \code{newdata} are specified, then \code{model.frame(x)} will be used. It is worth noting that \code{model.frame(x)} will include a \code{\link{Surv}} object and not the original time-to-event variables used when fitting the \code{flexsurvreg} object. If the original data is desired, specify \code{data}.
+If neither of \code{data} or \code{newdata} are specified, then \code{model.frame(x)} will be used. It is worth noting that \code{model.frame(x)} will include a \code{\link[survival]{Surv}} object and not the original time-to-event variables used when fitting the \code{flexsurvreg} object. If the original data is desired, specify \code{data}.
 }
 \examples{
 fit <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "exp")

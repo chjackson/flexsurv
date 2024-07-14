@@ -12,7 +12,7 @@
 \arguments{
 \item{x}{Object of class \code{"survrtrunc"} as returned by \code{\link{survrtrunc}}.}
 
-\item{...}{Other arguments to be passed to \code{\link{plot.survfit}} or \code{\link{lines.survfit}}.}
+\item{...}{Other arguments to be passed to \code{\link[survival]{plot.survfit}} or \code{\link[survival]{lines.survfit}}.}
 }
 \description{
 \code{plot.survrtrunc} creates a new plot, while \code{lines.survrtrunc} adds lines to an exising plot.

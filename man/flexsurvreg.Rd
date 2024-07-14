@@ -30,7 +30,7 @@ flexsurvreg(
 \arguments{
 \item{formula}{A formula expression in conventional R linear modelling
   syntax. The response must be a survival object as returned by the
-  \code{\link{Surv}} function, and any covariates are given on the
+  \code{\link[survival]{Surv}} function, and any covariates are given on the
   right-hand side.  For example,
 
   \code{Surv(time, dead) ~ age + sex}
@@ -68,7 +68,7 @@ flexsurvreg(
   safer way to model covariates on ancillary parameters is through the
   \code{anc} argument to \code{\link{flexsurvreg}}.
 
-  \code{\link{survreg}} users should also note that the function
+  \code{\link[survival]{survreg}} users should also note that the function
   \code{strata()} is ignored, so that any covariates surrounded by
   \code{strata()} are applied to the location parameter.  Likewise the
   function \code{frailty()} is not handled.}
@@ -160,7 +160,7 @@ argument has been used. Default is \code{options()$na.action}.}
 
   \code{"exponential"} and \code{"lognormal"} can be used as aliases for
   \code{"exp"} and \code{"lnorm"}, for compatibility with
-  \code{\link{survreg}}.
+  \code{\link[survival]{survreg}}.
 
   Alternatively, \code{dist} can be a list specifying a custom distribution.
   See section ``Custom distributions'' below for how to construct this list.
@@ -180,7 +180,7 @@ argument has been used. Default is \code{options()$na.action}.}
   and covariate effect parameterisations used by each built-in distribution.
 
   For the Weibull, exponential and log-normal distributions,
-  \code{\link{flexsurvreg}} simply works by calling \code{\link{survreg}} to
+  \code{\link{flexsurvreg}} simply works by calling \code{\link[survival]{survreg}} to
   obtain the maximum likelihood estimates, then calling \code{\link{optim}}
   to double-check convergence and obtain the covariance matrix for
   \code{\link{flexsurvreg}}'s preferred parameterisation.
@@ -253,9 +253,9 @@ estimates, by default 0.95.}
 
   \code{integ.opts = list(rel.tol=1e-12)}}
 
-\item{sr.control}{For the models which use \code{\link{survreg}} to find the
+\item{sr.control}{For the models which use \code{\link[survival]{survreg}} to find the
 maximum likelihood estimates (Weibull, exponential, log-normal), this list
-is passed as the \code{control} argument to \code{\link{survreg}}.}
+is passed as the \code{control} argument to \code{\link[survival]{survreg}}.}
 
 \item{hessian}{Calculate the covariances and confidence intervals for the
 parameters. Defaults to \code{TRUE}.}

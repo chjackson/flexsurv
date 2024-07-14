@@ -78,7 +78,7 @@ accuracy.}
 An object of class \code{"msfit"}, in the same form as the objects
 used in the \pkg{mstate} package.  The \code{\link[mstate]{msfit}} method
 from \pkg{mstate} returns the equivalent cumulative intensities for Cox
-regression models fitted with \code{\link{coxph}}.
+regression models fitted with \code{\link[survival]{coxph}}.
 }
 \description{
 Cumulative transition-specific intensity/hazard functions for

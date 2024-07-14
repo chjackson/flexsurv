@@ -29,7 +29,7 @@ flexsurvmix(
 \arguments{
 \item{formula}{Survival model formula.  The left hand side is a \code{Surv}
   object specified as in \code{\link{flexsurvreg}}.  This may define various
-  kinds of censoring, as described in \code{\link{Surv}}. Any covariates on
+  kinds of censoring, as described in \code{\link[survival]{Surv}}. Any covariates on
   the right hand side of this formula will be placed on the location
   parameter for every component-specific distribution. Covariates on other
   parameters of the component-specific distributions may be supplied  using
@@ -191,9 +191,9 @@ supply the knot locations and modelling scale (e.g. hazard or odds).  This
 cannot be used to fix parameters of a distribution --- use
 \code{fixedpars} for that.}
 
-\item{sr.control}{For the models which use \code{\link{survreg}} to find the
+\item{sr.control}{For the models which use \code{\link[survival]{survreg}} to find the
 maximum likelihood estimates (Weibull, exponential, log-normal), this list
-is passed as the \code{control} argument to \code{\link{survreg}}.}
+is passed as the \code{control} argument to \code{\link[survival]{survreg}}.}
 
 \item{integ.opts}{List of named arguments to pass to
   \code{\link{integrate}}, if a custom density or hazard is provided without

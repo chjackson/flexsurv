@@ -26,7 +26,7 @@
 #'
 #' To transform the baseline distribution parameters to the real-value number line (the scale used for estimation), pass the character argument \code{"baseline.real"} to \code{transform}. To get time ratios or hazard ratios, pass \code{"coefs.exp"} to \code{transform}. These transformations may be done together by submitting both arguments as a character vector.
 #'
-#' @return A \code{\link{tibble}} containing the columns: \code{term}, \code{estimate}, \code{std.error}, \code{statistic}, \code{p.value}, \code{conf.low}, and \code{conf.high}, by default.
+#' @return A \code{\link[tibble]{tibble}} containing the columns: \code{term}, \code{estimate}, \code{std.error}, \code{statistic}, \code{p.value}, \code{conf.low}, and \code{conf.high}, by default.
 #'
 #' \code{statistic} and \code{p.value} are only provided for covariate effects (\code{NA} for baseline distribution parameters). These are computed as Wald-type test statistics with p-values from a standard normal distribution.
 #'
@@ -121,7 +121,7 @@ generics::tidy
 #'
 #' @param ... Not currently used.
 #'
-#' @return A one-row \code{\link{tibble}} containing columns:
+#' @return A one-row \code{\link[tibble]{tibble}} containing columns:
 #'
 #' * \code{N} Number of observations used in fitting
 #'
@@ -173,9 +173,9 @@ generics::glance
 #'
 #' @param x Output from \code{\link{flexsurvreg}} or \code{\link{flexsurvspline}}, representing a fitted survival model object.
 #'
-#' @param data A \code{\link{data.frame}} or \code{\link{tibble}} containing the original data that was used to produce the object \code{x}.
+#' @param data A \code{\link{data.frame}} or \code{\link[tibble]{tibble}} containing the original data that was used to produce the object \code{x}.
 #'
-#' @param newdata A \code{\link{data.frame}} or \code{\link{tibble}} containing all the original predictors used to create \code{x}. Defaults to \code{NULL}, indicating that nothing has been passed to \code{newdata}. If \code{newdata} is specified, the \code{data} argument will be ignored.
+#' @param newdata A \code{\link{data.frame}} or \code{\link[tibble]{tibble}} containing all the original predictors used to create \code{x}. Defaults to \code{NULL}, indicating that nothing has been passed to \code{newdata}. If \code{newdata} is specified, the \code{data} argument will be ignored.
 #'
 #' @param type.predict Character indicating type of prediction to use. Passed to the \code{type} argument of the \code{\link{predict}} generic. Allowed arguments vary with model class, so be sure to read the \code{predict.my_class} documentation.
 #'
@@ -183,9 +183,9 @@ generics::glance
 #'
 #' @param ... Additional arguments. Not currently used.
 #'
-#' @details If neither of \code{data} or \code{newdata} are specified, then \code{model.frame(x)} will be used. It is worth noting that \code{model.frame(x)} will include a \code{\link{Surv}} object and not the original time-to-event variables used when fitting the \code{flexsurvreg} object. If the original data is desired, specify \code{data}.
+#' @details If neither of \code{data} or \code{newdata} are specified, then \code{model.frame(x)} will be used. It is worth noting that \code{model.frame(x)} will include a \code{\link[survival]{Surv}} object and not the original time-to-event variables used when fitting the \code{flexsurvreg} object. If the original data is desired, specify \code{data}.
 #'
-#' @return A \code{\link{tibble}} containing \code{data} or \code{newdata} and possible additional columns:
+#' @return A \code{\link[tibble]{tibble}} containing \code{data} or \code{newdata} and possible additional columns:
 #'
 #' * \code{.fitted} Fitted values of model
 #'

@@ -12,7 +12,7 @@
 \item{...}{Not currently used.}
 }
 \value{
-A one-row \code{\link{tibble}} containing columns:
+A one-row \code{\link[tibble]{tibble}} containing columns:
 \itemize{
 \item \code{N} Number of observations used in fitting
 \item \code{events} Number of events
