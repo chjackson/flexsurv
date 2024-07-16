@@ -112,7 +112,6 @@ NULL
 dbase.survspline <- function(q, gamma, knots, scale, deriv=0, spline="rp"){
     if(!is.matrix(gamma)) gamma <- matrix(gamma, nrow=1)
     if(!is.matrix(knots)) knots <- matrix(knots, nrow=1)
-    else if (spline=="splines2ns") stop("matrix knots not supported with spline=\"splines2ns\"")
     anylength0 <- (min(length(q), nrow(gamma), nrow(knots)) == 0)
     nret <- if (anylength0) 0 else max(length(q), nrow(gamma), nrow(knots))
     q <- rep(q, length.out=nret)
@@ -316,7 +315,8 @@ hsurvspline <- function(x, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", 
 rmst_survspline = function(t, gamma, beta=0, X=0, knots=c(-10,10), scale="hazard", timescale="log", spline="rp", offset=0, start=0){
     betax_warn(beta, X, offset)
     rmst_generic(psurvspline, t, start=start,
-                 matargs = c("gamma", "knots"), scalarargs = c("scale", "timescale", "spline"), 
+                 matargs = c("gamma", "knots"),
+                 scalarargs = c("scale", "timescale", "spline"), 
                  gamma=gamma, knots=knots,
                  scale=scale, timescale=timescale, spline=spline)
 }
@@ -385,33 +385,79 @@ basis_splines2ns <- function(knots, x){
   if (!isTRUE(requireNamespace("splines2", quietly = TRUE)))
     stop("spline=\"splines2ns\" needs the splines2 package to be installed")
   if (is.matrix(knots) && nrow(knots) > 0) 
-    ## matrix knots not supported in dbase.survspline
-    ## so if this happens, it must have been replicated from a vector
-    knots <- knots[1,]
+    basis_splines2ns_matrix(knots, x)
+  else basis_splines2ns_vector(knots, x)
+}
+
+basis_splines2ns_vector <- function(knots, x){
   nk <- length(knots)
   if (nk > 0){
     iknots <- knots[-c(1,nk)]
     bknots <- knots[c(1,nk)]
     bas <- splines2::naturalSpline(x, knots = iknots, Boundary.knots=bknots,
-                                   intercept = FALSE)
-    cbind(1, bas)
+                                   intercept = FALSE) # doesn't handle matrix knots
+    bas <- cbind(1, bas)
+    colnames(bas) <- NULL
+    bas
   }
   else numeric(nk)
+}
+
+
+# Are all rows of a matrix the same as each other [ie the same as the first row]
+all_rows_same <- function(x){
+  all(apply(x, 1, function(y)(isTRUE(all.equal(y,x[1,])))))
+}
+
+basis_splines2ns_matrix <- function(knots, x){
+  stopifnot(length(x)==nrow(knots))
+  if (all_rows_same(knots)){
+    ## Only do basis computation once.
+    bas <- basis_splines2ns_vector(knots[1,], x)
+    stopifnot(length(x)==nrow(bas))
+  } else { # different basis computation needed for each row
+    bas <- matrix(NA, nrow=length(x), ncol=ncol(knots))
+    for (i in 1:nrow(knots)){
+      bas[i,] <- basis_splines2ns_vector(knots[i,], x[i])
+    }
+  }
+  bas
 }
 
 dbasis_splines2ns <- function(knots, x){
   if (!isTRUE(requireNamespace("splines2", quietly = TRUE)))
     stop("spline=\"splines2ns\" needs the splines2 package to be installed")
   if (is.matrix(knots) && nrow(knots) > 0) 
-    knots <- knots[1,]
+    dbasis_splines2ns_matrix(knots, x)
+  else dbasis_splines2ns_vector(knots, x)
+}
+
+dbasis_splines2ns_vector <- function(knots, x){
   nk <- length(knots)
   if (nk > 0){
     iknots <- knots[-c(1,nk)]
     bknots <- knots[c(1,nk)]
     bas <- splines2::naturalSpline(x, knots = iknots, Boundary.knots=bknots,
                                    intercept = FALSE, derivs=1)
-    cbind(0, bas)
+    bas <- cbind(0, bas)
+    colnames(bas) <- NULL
+    bas
   } else numeric(nk)
+}
+
+dbasis_splines2ns_matrix <- function(knots, x){
+  stopifnot(length(x)==nrow(knots))
+  if (all_rows_same(knots)){
+    ## Only do basis computation once.
+    bas <- dbasis_splines2ns_vector(knots[1,], x)
+    stopifnot(length(x)==nrow(bas))
+  } else { # different basis computation needed for each row
+    bas <- matrix(NA, nrow=length(x), ncol=ncol(knots))
+    for (i in 1:nrow(knots)){
+      bas[i,] <- dbasis_splines2ns_vector(knots[i,], x[i])
+    }
+  }
+  bas
 }
 
 basis_original <- function(knots, x){

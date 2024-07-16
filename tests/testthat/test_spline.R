@@ -247,10 +247,34 @@ test_that("subset",{
                               subset = survival::lung$age > 60) # empty factor level in subset, should be dropped since 0.7
 })
 
+test_that("spline basis function with vector or matrix knots",{
+  expect_not_equal <- function(x,y)expect_true(!isTRUE(identical(x,y)))
+  x <- c(1.5, 1.6)
+  b1 <- basis(knots=0:3, x=x)
+  knots_same <- matrix(rep(0:3,2),byrow=TRUE,nrow=2)
+  knots_diff <- matrix(c(0:3, 0:3+0.1), byrow=TRUE, nrow=2)
+  b2 <- basis(knots=knots_same, x=x)
+  expect_equal(b1, b2)
+  b3 <- basis(knots=knots_diff, x=x)
+  expect_not_equal(b1, b3)
+  
+  b1 <- basis(knots=0:3, x=x, spline="splines2ns")
+  b2 <- basis(knots=knots_same, x=x, spline="splines2ns")
+  expect_equal(b1, b2)
+  b3 <- basis(knots=knots_diff, x=x, spline="splines2ns")
+  expect_equal(b1[1,], b3[1,])
+  expect_not_equal(b1, b3)
+})
+
 test_that("splines2 orthogonal basis",{
   spl_rp <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, spline="rp")
   spl_ns <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=2, spline="splines2ns") # fits better 
   expect_equal(spl_ns$loglik, spl_rp$loglik, tol=1)
+  
+  p1 <- predict(spl_ns, type = "rmst", times = 500, newdata = tibble(age = 50))
+  p2 <- predict(spl_rp, type = "rmst", times = 500, newdata = tibble(age = 50))
+  expect_equal(p1$.pred_rmst, p2$.pred_rmst, tol=1e-01)
+  
   spl_rp <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=2, spline="rp")
   spl_ns <- flexsurvspline(Surv(recyrs, censrec) ~ group, data=bc, k=2, spline="splines2ns") # fits better 
   expect_equal(spl_rp$res["groupMedium","est"], spl_ns$res["groupMedium","est"], tol=1e-03)
