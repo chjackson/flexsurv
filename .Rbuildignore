@@ -19,8 +19,6 @@ vignettes/.+\.blg
 vignettes/flexsurv-.+\.pdf
 vignettes/.+.odg
 vignettes/pdf.Rmd
-inst/doc/flexsurv.Rnw
-inst/doc/flexsurv-examples.Rnw
 tests/extra
 tests/test_extra.R
 ^.*\.Rproj$
