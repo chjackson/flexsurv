@@ -1,3 +1,10 @@
+# Version 2.3.2 (2024-08-16)
+
+* Vignette source included to satisfy CRAN checks.
+
+* Fix of prediction with `spline="splines2ns"`.
+
+
 # Version 2.3.1 (2024-07-14)
 
 * Fix for simulating from semi-Markov models with `tcovs` option,
