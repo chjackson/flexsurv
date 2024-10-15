@@ -9,7 +9,7 @@ specified in newdata."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">flexsurv</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,6 +58,7 @@ specified in <code>newdata</code>.</p>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  se.fit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
+<span>  B <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -138,6 +139,14 @@ Default is <code>FALSE</code>.</p></dd>
 <dt id="arg-p">p<a class="anchor" aria-label="anchor" href="#arg-p"></a></dt>
 <dd><p>Vector of quantiles at which to return fitted values when
 <code>type = "quantile"</code>. Default is <code>c(0.1, 0.9)</code>.</p></dd>
+
+
+<dt id="arg-b">B<a class="anchor" aria-label="anchor" href="#arg-b"></a></dt>
+<dd><p>Number of simulations from the normal asymptotic distribution of
+the estimates used to calculate confidence intervals or standard errors.
+Decrease for greater
+speed at the expense of accuracy, or set <code>B=0</code> to turn off calculation
+of CIs and SEs.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -253,7 +262,7 @@ conventional format.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

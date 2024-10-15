@@ -9,7 +9,7 @@ distributions are available, and users may supply their own."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">flexsurv</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -346,13 +346,22 @@ control list. See <code><a href="https://rdrr.io/r/stats/optim.html" class="exte
 <dl><dt>call</dt>
 <dd><p>A copy of the function call, for use in post-processing.</p></dd>
 
-  <dt>dlist</dt>
+
+<dt>dlist</dt>
 <dd><p>List defining the survival distribution used.</p></dd>
+
 
   <dt>res</dt>
 <dd><p>Matrix of maximum likelihood estimates and confidence limits,
-  with parameters on their natural scales.</p></dd>
- <dt>res.t</dt>
+  with parameters on their natural scales.</p>
+<p>Note the standard error <code>se</code> on the natural scale is determined from the standard error
+  on the real scale (in component <code>res.t</code>) using the delta method,
+  which will be inaccurate if the estimate is not roughly normally distributed on
+  either scale.  The confidence interval on the natural scale is simply obtained by transforming
+  the limits on the real scale, which is much more reliable.</p></dd>
+
+
+<dt>res.t</dt>
 <dd><p>Matrix of maximum
   likelihood estimates and confidence limits, with parameters all
   transformed to the real line (using a log transform for all built-in
@@ -360,7 +369,10 @@ control list. See <code><a href="https://rdrr.io/r/stats/optim.html" class="exte
   <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></code>, <code><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></code>
   and <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></code> methods for <code>flexsurvreg</code> objects work on
   this scale.</p></dd>
- <dt>coefficients</dt>
+
+
+
+<dt>coefficients</dt>
 <dd><p>The transformed maximum likelihood
   estimates, as in <code>res.t</code>. Calling <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> on a
   <code>flexsurvreg</code> object simply returns this component.</p></dd>
@@ -621,7 +633,7 @@ fitted survival, hazards and cumulative hazards from models fitted by
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>
