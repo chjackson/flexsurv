@@ -388,9 +388,11 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
         for(i in cnums){
           standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] - .data[[paste0("at", atreference)]])
           if(ci == TRUE){
-            stand.pred.quant <- apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
-            stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
-            standpred <- standpred %>% bind_cols(stand.pred.quant)
+            stand.pred.quant0 <- apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+            stand.pred.quant1 <- as_tibble(t(stand.pred.quant0))
+            stand.pred.quant2 <-  stand.pred.quant1 %>% 
+              rename("contrast{i}_{atreference}_lci" := names(stand.pred.quant1)[1], "contrast{i}_{atreference}_uci" := names(stand.pred.quant1)[2])
+            standpred <- standpred %>% bind_cols(stand.pred.quant2)
           }
           if(se == TRUE){
             stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] - stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
@@ -402,9 +404,11 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
         for(i in cnums){
           standpred <- standpred %>% mutate("contrast{i}_{atreference}" := .data[[paste0("at", i)]] / .data[[paste0("at", atreference)]])
           if(ci == TRUE){
-            stand.pred.quant <- apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
-            stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% rename("contrast{i}_{atreference}_lci" := "2.5%", "contrast{i}_{atreference}_uci" := "97.5%")
-            standpred <- standpred %>% bind_cols(stand.pred.quant)
+            stand.pred.quant0 <- apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE))
+            stand.pred.quant1 <- as_tibble(t(stand.pred.quant0))
+            stand.pred.quant2 <-  stand.pred.quant1 %>% 
+              rename("contrast{i}_{atreference}_lci" := names(stand.pred.quant1)[1], "contrast{i}_{atreference}_uci" := names(stand.pred.quant1)[2])
+            standpred <- standpred %>% bind_cols(stand.pred.quant2)
           }
           if(se == TRUE){
             stand.pred.se <- tibble("contrast{i}_{atreference}_se" := apply(stand.pred.list[[i]] / stand.pred.list[[atreference]], 2, sd, na.rm=TRUE))
@@ -722,10 +726,11 @@ boot.standsurv <- function(object, B, dat, i, t, type, type2, weighted, se, ci, 
     predsum <- predsum %>% bind_cols(stand.pred.se)
   }
   if(ci == TRUE){
-    stand.pred.quant <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
-    stand.pred.quant <- as_tibble(t(stand.pred.quant)) %>% 
-      rename("at{i}_lci" := "2.5%", "at{i}_uci" := "97.5%")
-    predsum <- predsum %>% bind_cols(stand.pred.quant)
+    stand.pred.quant0 <- apply(stand.pred, 2, function(x)quantile(x, c((1-cl)/2, 1 - (1-cl)/2), na.rm=TRUE) )
+    stand.pred.quant1 <- as_tibble(t(stand.pred.quant0))
+    stand.pred.quant2 <-  stand.pred.quant1 %>% 
+      rename("at{i}_lci" := names(stand.pred.quant1)[1], "at{i}_uci" := names(stand.pred.quant1)[2])
+    predsum <- predsum %>% bind_cols(stand.pred.quant2)
   }
   
   return(list(predsum = predsum, stand.pred=stand.pred, rawsim=rawsim))
