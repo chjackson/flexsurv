@@ -69,6 +69,8 @@
 #' @param p Vector of quantiles at which to return fitted values when
 #'   \code{type = "quantile"}. Default is \code{c(0.1, 0.9)}.
 #'
+#' @inheritParams summary.flexsurvreg
+#'
 #' @param ... Not currently used.
 #'
 #' @return A \code{\link[tibble]{tibble}} with same number of rows as
@@ -124,6 +126,7 @@ predict.flexsurvreg <- function(object,
                                 conf.level = 0.95,
                                 se.fit = FALSE,
                                 p = c(0.1, 0.9),
+                                B = 1000,
                                 ...
                                 )
 {
@@ -213,7 +216,8 @@ predict.flexsurvreg <- function(object,
         se = se.fit,
         tidy = TRUE,
         na.action = na.pass,
-        cross = TRUE
+        cross = TRUE,
+        B = B
       )
     } else {
       # Avoid passing `t = times` for non-time based predictions
@@ -229,7 +233,8 @@ predict.flexsurvreg <- function(object,
         se = se.fit,
         tidy = TRUE,
         na.action = na.pass,
-        cross = TRUE
+        cross = TRUE,
+        B = B
       )
     }
 

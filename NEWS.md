@@ -1,3 +1,8 @@
+# Version ?? (??)
+
+* `B` argument added to `predict.flexsurvreg` (#197).
+
+
 # Version 2.3.2 (2024-08-16)
 
 * Vignette source included to satisfy CRAN checks.

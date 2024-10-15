@@ -414,3 +414,12 @@ test_that('predictions with missing data (spline)', {
                type = 'survival', times = c(500, 1000))
   expect_equal(nrow(p), nrow(ovarian_miss))
 })
+
+test_that('B argument', {
+  fitw <- flexsurvreg(Surv(futime, fustat) ~ age,
+                      data = ovarian, dist = "weibull")
+  set.seed(1)
+  p1 <- predict(fitw, times=100, newdata=data.frame(age=20), conf.int=TRUE, B=50)
+  p2 <- predict(fitw, times=100, newdata=data.frame(age=20), conf.int=TRUE, B=100)
+  expect_true(p1$.pred_lower != p2$.pred_lower)
+})

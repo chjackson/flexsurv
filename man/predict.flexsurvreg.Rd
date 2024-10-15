@@ -14,6 +14,7 @@
   conf.level = 0.95,
   se.fit = FALSE,
   p = c(0.1, 0.9),
+  B = 1000,
   ...
 )
 }
@@ -78,6 +79,12 @@ Default is \code{FALSE}.}
 
 \item{p}{Vector of quantiles at which to return fitted values when
 \code{type = "quantile"}. Default is \code{c(0.1, 0.9)}.}
+
+\item{B}{Number of simulations from the normal asymptotic distribution of
+the estimates used to calculate confidence intervals or standard errors.
+Decrease for greater
+speed at the expense of accuracy, or set \code{B=0} to turn off calculation
+of CIs and SEs.}
 
 \item{...}{Not currently used.}
 }
