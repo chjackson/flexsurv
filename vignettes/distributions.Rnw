@@ -110,11 +110,11 @@ S(t | \lambda, a) = \exp(- \lambda t^ a), \qquad \lambda>0, a>0
 \subsection*{Gamma}
 
 \verb+flexsurvreg(..., dist="gamma")+\\
-\code{dgamma(..., shape=a, scale=mu)}
+\code{dgamma(..., shape=a, rate=mu)}
 
 \[
   S(t | a, \mu) = 1 - \int_{0}^t 
-  \frac{x^{a-1} \exp{-(x/\mu)}}{\mu^a \Gamma(a)}
+  \frac{x^{a-1} \mu^a \exp{-(\mu x)}}{\Gamma(a)}
     dx, \qquad \mu>0, a>0
 \]
 
