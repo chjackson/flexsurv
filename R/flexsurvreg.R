@@ -671,16 +671,32 @@ compress.model.matrices <- function(mml){
 ##'
 ##' @return A list of class \code{"flexsurvreg"} containing information about
 ##'   the fitted model.  Components of interest to users may include:
-##'   \item{call}{A copy of the function call, for use in post-processing.}
-##'   \item{dlist}{List defining the survival distribution used.}
+##'
+##' \item{call}{A copy of the function call, for use in post-processing.}
+##'
+##' \item{dlist}{List defining the survival distribution used.}
+##' 
 ##'   \item{res}{Matrix of maximum likelihood estimates and confidence limits,
-##'   with parameters on their natural scales.} \item{res.t}{Matrix of maximum
+##'   with parameters on their natural scales.
+##'
+##'   Note the standard error \code{se} on the natural scale is determined from the standard error
+##'   on the real scale (in component \code{res.t}) using the delta method,
+##'   which will be inaccurate if the estimate is not roughly normally distributed on
+##'   either scale.  The confidence interval on the natural scale is simply obtained by transforming
+##'   the limits on the real scale, which is much more reliable. 
+##' }
+##'
+##' \item{res.t}{Matrix of maximum
 ##'   likelihood estimates and confidence limits, with parameters all
 ##'   transformed to the real line (using a log transform for all built-in
 ##'   models where this is necessary).  The
 ##'   \code{\link{coef}}, \code{\link{vcov}}
 ##'   and \code{\link{confint}} methods for \code{flexsurvreg} objects work on
-##'   this scale.} \item{coefficients}{The transformed maximum likelihood
+##'   this scale.
+##' }
+##'
+##'
+##' \item{coefficients}{The transformed maximum likelihood
 ##'   estimates, as in \code{res.t}. Calling \code{coef()} on a
 ##'   \code{\link{flexsurvreg}} object simply returns this component.}
 ##'   \item{loglik}{Log-likelihood. This will differ from Stata, where the sum
