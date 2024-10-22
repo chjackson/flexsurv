@@ -183,7 +183,7 @@ summary.flexsurvreg <- function(object, newdata=NULL, X=NULL, type="survival",
          nx <- attr(args, "nx")
          nt <- attr(args, "nt")
          resdf <- res[,setdiff(names(res), colnames(nd)),drop=FALSE]
-         res <- split(resdf, rep(1:nx, each=nt))
+         res <- split(resdf, rep(1:nx, each=if(cross)nt else 1))
          names(res) <- covnames_untidy
          res <- lapply(res, function(x)setNames(as.data.frame(x), names(resdf)))
          for (i in seq_along(res)) row.names(res[[i]]) <- NULL

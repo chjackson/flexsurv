@@ -198,3 +198,14 @@ test_that("newdata in summary and predict with no covariates",{
   pred <- predict(fitw, newdata=nd, type="quantile", p=c(0.1, 0.9))
   expect_equal(nrow(pred), nrow(nd))
 })
+
+test_that("Summary function: cross and tidy",{
+  fitw <- flexsurvreg(Surv(futime, fustat) ~ age, data = ovarian, dist="weibull")
+  nd <- model.frame(fitw)[1:2,]
+  s1 <- summary(fitw, newdata=nd, t=ovarian$futime[1:2], cross=FALSE, ci=FALSE)[[2]]
+  s2 <- summary(fitw, newdata=nd, t=ovarian$futime[1:2], cross=FALSE, ci=FALSE, tidy=TRUE)
+  s3 <- summary(fitw, newdata=nd, t=ovarian$futime[1:2], cross=TRUE, ci=FALSE)[[2]]
+  s4 <- summary(fitw, newdata=nd, t=ovarian$futime[1:2], cross=TRUE, ci=FALSE, tidy=TRUE)
+  expect_equal(s1$est,s2$est[s2$time==115])
+  expect_equal(s1$est,s4$est[4])
+})
