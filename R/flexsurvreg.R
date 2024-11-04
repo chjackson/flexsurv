@@ -1316,7 +1316,8 @@ nobs.flexsurvreg <- function(object, cens=TRUE, ...){
 ##' @details There is no "official" definition of what the sample size
 ##'   should be for the use of BIC in censored survival analysis.  BIC
 ##'   is based on an approximation to Bayesian model comparison using
-##'   Bayes factors and an implicit vague prior.  Informally, the
+##'   Bayes factors and an implicit vague prior with the same amount
+##'   of information as one observation "unit".  Informally, the
 ##'   sample size describes the number of "units" giving rise to a
 ##'   distinct piece of information (Kass and Raftery 1995).  However
 ##'   censored observations provide less information than observed
@@ -1325,7 +1326,7 @@ nobs.flexsurvreg <- function(object, cens=TRUE, ...){
 ##'   statistical modelling.  However if censoring is heavy, then the
 ##'   number of events may be a better represent the amount of
 ##'   information.  Following these principles, the best approximation
-##'   would be expected to be somewere in between.
+##'   would be expected to be somewhere in between.
 ##'
 ##' AIC and BIC are intended to measure different things.  Briefly,
 ##' AIC measures predictive ability, whereas BIC is expected to choose
