@@ -48,7 +48,8 @@ flexsurvrtrunc(
   \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
   scale \tab AFT \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
   AFT \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT
-  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr \code{"gamma"}
+  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr 
+  \code{"weibullPH"} \tab Weibull \tab scale \tab PH \cr \code{"gamma"}
   \tab Gamma \tab rate \tab AFT \cr \code{"exp"} \tab Exponential \tab rate
   \tab PH \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \cr
   \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \cr \code{"gompertz"}
