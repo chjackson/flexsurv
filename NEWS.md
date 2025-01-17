@@ -61,6 +61,10 @@
 
 * Fix for computing quantiles for custom distributions (#187).
 
+* Default spline knots for models with interval censoring are now based on quantiles of times that include the interval midpoints, as well as the event times.
+
+* Estimation for models with left and interval censoring now uses numeric derivatives, rather than analytic derivatives that ignore left or interval censored observations.
+
 Thank you to all who have contributed code for this version: @mikesweeting @stephematician @ndunnewind @mattwarkentin @hfrick @kkmann; or reported issues: @anddis @irtimmins @sbihorel @zou-ims @aghaynes @huftis @mafed @hezht3 @sebffischer (and anyone else who reported issues via email).
 
 
