@@ -312,8 +312,11 @@ resample_pars <- function(x){
 ##' 
 ##' @param newdata Data frame of alternative covariate values 
 ##' 
-##' @param event Event 
-##' 
+##' @param event Event
+##'
+##' @return A list with one component per parameter, that gives values of that parameter for the different covariate values
+##'
+##' @export
 get_basepars <- function(x, newdata, event){ 
   k <- event
   kpars <- (x$res$component == x$evnames[k])  & (x$res$dist == x$dists[k])

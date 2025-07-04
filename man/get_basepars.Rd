@@ -13,6 +13,9 @@ get_basepars(x, newdata, event)
 
 \item{event}{Event}
 }
+\value{
+A list with one component per parameter, that gives values of that parameter for the different covariate values
+}
 \description{
 Evaluate baseline time-to-event distribution parameters given covariate values in a flexsurvmix model
 }
