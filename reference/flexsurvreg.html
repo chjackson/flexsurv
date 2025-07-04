@@ -131,7 +131,11 @@ working environment.</p></dd>
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
 <dd><p>Optional numeric variable giving weights for each
 individual in the data.  The fitted model is then defined by
-maximising the weighted sum of the individual-specific log-likelihoods.</p></dd>
+maximising the weighted sum of the individual-specific
+log-likelihoods.  The <code>res</code> and <code>res.t</code> component of
+the model object will then also include a "robust" standard
+error defined by a sandwich estimator (see, e.g. Lin and Wei,
+JASA (1989) 84(408): 1074–1078).</p></dd>
 
 
 <dt id="arg-bhazard">bhazard<a class="anchor" aria-label="anchor" href="#arg-bhazard"></a></dt>
@@ -556,9 +560,9 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-out co"><span class="r-pr">#&gt;</span>     dist = "weibull")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimates: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        est       L95%      U95%      se      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> shape     1.108     0.674     1.822     0.281</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> scale  1225.419   690.421  2174.979   358.714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        est       L95%      U95%      se        se.robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> shape     1.108     0.674     1.822     0.281     0.208 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> scale  1225.419   690.421  2174.979   358.714   384.646 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> N = 26,  Events: 12,  Censored: 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Total time at risk: 15588</span>
@@ -612,8 +616,8 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-out co"><span class="r-pr">#&gt;</span>     dist = "exp")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimates: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       est       L95%      U95%      se      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rate  0.000770  0.000437  0.001356  0.000222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       est       L95%      U95%      se        se.robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rate  0.000770  0.000437  0.001356  0.000222  0.000229 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> N = 26,  Events: 12,  Censored: 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Total time at risk: 15588</span>
@@ -633,7 +637,7 @@ fitted survival, hazards and cumulative hazards from models fitted by
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
