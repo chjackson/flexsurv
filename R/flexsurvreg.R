@@ -463,7 +463,16 @@ compress.model.matrices <- function(mml){
 ##' 
 ##' @param weights Optional numeric variable giving weights for each
 ##'   individual in the data.  The fitted model is then defined by
-##'   maximising the weighted sum of the individual-specific log-likelihoods.
+##'   maximising the weighted sum of the individual-specific
+##'   log-likelihoods.
+##'
+##'   The \code{res} and \code{res.t} component of the model object will
+##'   then also include a "robust" standard error defined by a
+##'   sandwich estimator (see, e.g. Lin and Wei, JASA (1989) 84(408):
+##'   1074–1078), however this is only available for parametric
+##'   distributions where the derivatives of the likelhood are
+##'   available analytically (exponential, Weibull, Gompertz and the
+##'   hazard-based spline model) .
 ##'
 ##' @param bhazard Optional variable giving expected hazards for relative
 ##'   survival models.  The model is described by Nelson et al. (2007).
@@ -525,7 +534,8 @@ compress.model.matrices <- function(mml){
 ##'   \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
 ##'   scale \tab AFT \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
 ##'   AFT \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT
-##'   \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr \code{"gamma"}
+##'   \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr 
+##'   \code{"weibullPH"} \tab Weibull \tab scale \tab PH \cr \code{"gamma"}
 ##'   \tab Gamma \tab rate \tab AFT \cr \code{"exp"} \tab Exponential \tab rate
 ##'   \tab PH \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \cr
 ##'   \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \cr \code{"gompertz"}
@@ -913,7 +923,10 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
     contr.save <- lapply(mml, function(x)attr(x,"contrasts"))
 
     weights <- model.extract(m, "weights")
-    if (is.null(weights)) weights <- m$"(weights)" <- rep(1, nrow(X))
+    if (is.null(weights)) {
+      weights <- m$"(weights)" <- rep(1, nrow(X))
+      weights_supplied <- TRUE
+    } else weights_supplied <- FALSE     
     bhazard <- model.extract(m, "bhazard")
     if (is.null(bhazard)) bhazard <- rep(0, nrow(X))
     rtrunc <- model.extract(m, "rtrunc")
@@ -977,6 +990,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         dimnames(res) <- dimnames(res.t) <- list(names(inits), "est")
         ret <- list(res=res, res.t=res.t, npars=0,
                     loglik=-as.vector(minusloglik), logliki=attr(minusloglik,"indiv"))
+        cov <- cov.robust <- NULL
     }
     else {
         optpars <- inits[setdiff(1:npars, fixedpars)]
@@ -1021,20 +1035,26 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         else {
             if (hessian) 
                 warning("Optimisation has probably not converged to the maximum likelihood - Hessian is not finite. ")
-            cov <- lcl <- ucl <- se <- NA
+            cov <- cov.robust <- lcl <- ucl <- se <- NA
         }
         res <- cbind(est=inits, lcl=NA, ucl=NA, se=NA)
         res[setdiff(1:npars, fixedpars),] <- cbind(est, lcl, ucl, se)
         colnames(res) <- c("est", paste(c("L","U"), round(cl*100), "%", sep=""), "se")
+        robust_se <- weights_supplied && dfns$deriv && deriv_supported(Y) && hessian && all(is.finite(opt$hessian))
+        if (robust_se) {
+          Dminusloglik <- Dminusloglik.flexsurv(res[,"est"], Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, 
+                                                dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx)
+          score <- attr(Dminusloglik,"indiv")[,setdiff(1:npars, fixedpars),drop=FALSE]
+          cov.robust <- cov_robust(score, cov)
+          res <- cbind(res, se.robust = rep(NA, nrow(res)))
+          res[setdiff(1:npars, fixedpars),"se.robust"] <- sqrt(diag(cov.robust))
+        } else cov.robust <- NULL
         res.t <- res # results on transformed (log) scale
         for (i in 1:nbpars){ # results on natural scale
-            res[i,1:3] <- dlist$inv.transforms[[i]](res[i,1:3])
-            if (identical(body(dlist$transforms[[i]]), body(log)))
-                res[i,"se"] <- exp(res.t[i,"est"])*res.t[i,"se"]
-            else if (identical(body(dlist$transforms[[i]]), body(logh)))
-                res[i,"se"] <- dexph(res.t[i,"est"])*res.t[i,"se"]
-            else if (!identical(dlist$transforms[[i]], identity))
-                res[i,"se"] <- NA
+          res[i,1:3] <- dlist$inv.transforms[[i]](res[i,1:3])
+          res[i,"se"] <- transform_se(res.t[i,"se"], res.t[i,"est"], dlist$transforms[[i]])
+          if (robust_se)
+            res[i,"se.robust"] <- transform_se(res.t[i,"se.robust"], res.t[i,"est"], dlist$transforms[[i]])
             ## theoretically could also do logit SE(g(x) = exp(x)/(1 + exp(x))) = g'(x) SE(x);  g'(x) = exp(x)/(1 + exp(x))^2
             ## or any interval scale (dglogit) as in msm
         }
@@ -1058,10 +1078,13 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
                   N=nrow(dat$Y), events=sum(dat$Y[,"status"]==1), trisk=sum(dat$Y[,"time"]),
                   concat.formula=f2, all.formulae=forms, dfns=dfns),
              ret,
-             list(all.contrasts=contr.save,
-                  covdata = covdata)) # temporary position so cyclomort doesn't break
+             list(all.contrasts=contr.save,   # force this to be in position 18 to work around cyclomort
+                  covdata = covdata,
+                  cov.robust = cov.robust))   
     ret$BIC <- BIC.flexsurvreg(ret, cens=TRUE)
-    ret <- c(ret, check_deriv(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars))
+    ret <- c(ret, check_deriv(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard,
+                              rtrunc=rtrunc, dlist=dlist, inits=inits,
+                              dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars))
     class(ret) <- "flexsurvreg"
     ret
 }
@@ -1440,4 +1463,31 @@ droplevels_keepcontrasts <- function (x, except = NULL, exclude, ...)
         lapply(x[ix], droplevels_factor_keepcontrasts)
     else lapply(x[ix], droplevels_factor_keepcontrasts, exclude = exclude)
     x
+}
+
+## Robust sandwich covariance, used when weights supplied.
+## Lin et al.  
+## https://www.jstor.org/stable/2290085?seq=1
+## score: matrix of derivatives of log likelihood by individual
+## cov: covariance matrix of log likelihood (inverse hessian)
+cov_robust <- function(score, cov){
+  if (!is.matrix(score))
+    score <- matrix(score, ncol=1) # assuming always more than one observation
+  n <- nrow(score)
+  npar <- ncol(score)
+  s_outer <- apply(score, 1, function(x)outer(x,x))
+  s_outer <- array(s_outer, dim=c(npar^2, n))
+  sum_score_scoreT <- matrix(rowSums(s_outer), nrow=npar)
+  cov %*% sum_score_scoreT %*% cov
+}
+
+## transform_se(res.t[i,"se"], res.t[i,"est"], dlist$transforms[[i]])
+transform_se <- function(se, est, transform){
+  if (identical(body(transform), body(log)))
+    se <- exp(est)*se
+  else if (identical(body(transform), body(logh)))
+    se <- dexph(est)*se
+  else if (!identical(transform, identity))
+    se <- NA
+  se 
 }

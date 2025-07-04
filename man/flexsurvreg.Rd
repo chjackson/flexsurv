@@ -88,7 +88,11 @@ working environment.}
 
 \item{weights}{Optional numeric variable giving weights for each
 individual in the data.  The fitted model is then defined by
-maximising the weighted sum of the individual-specific log-likelihoods.}
+maximising the weighted sum of the individual-specific
+log-likelihoods.  The \code{res} and \code{res.t} component of
+the model object will then also include a "robust" standard
+error defined by a sandwich estimator (see, e.g. Lin and Wei,
+JASA (1989) 84(408): 1074–1078).}
 
 \item{bhazard}{Optional variable giving expected hazards for relative
   survival models.  The model is described by Nelson et al. (2007).
@@ -152,7 +156,8 @@ argument has been used. Default is \code{options()$na.action}.}
   \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
   scale \tab AFT \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
   AFT \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT
-  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr \code{"gamma"}
+  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr 
+  \code{"weibullPH"} \tab Weibull \tab scale \tab PH \cr \code{"gamma"}
   \tab Gamma \tab rate \tab AFT \cr \code{"exp"} \tab Exponential \tab rate
   \tab PH \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \cr
   \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \cr \code{"gompertz"}

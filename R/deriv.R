@@ -64,7 +64,9 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dli
     }
     res <- - colSums(dloglik*weights)
     ## currently wastefully calculates derivs for fixed pars then discards them
-    res[setdiff(1:npars, fixedpars)]
+    res <- res[setdiff(1:npars, fixedpars)]
+    attr(res, "indiv") <- dloglik[,setdiff(1:npars, fixedpars),drop=FALSE]
+    res
 }
 
 dderiv <- function(ddfn, ddcall, X, mx, dlist){

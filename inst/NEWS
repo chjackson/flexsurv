@@ -7,6 +7,10 @@ https://chjackson.github.io/flexsurv/news
 which is built from NEWS.md in the source root directory.
 
 
+* Robustified standard errors for weighted estimation with the
+  Weibull, Gompertz, exponential and hazard spline models.
+
+
 Version 2.2.2 (2023-01-31)
 -------------------------
 
