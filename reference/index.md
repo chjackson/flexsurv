@@ -1,0 +1,356 @@
+# Package index
+
+## Fitting survival models
+
+- [`flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  : Flexible parametric regression for time-to-event data
+- [`flexsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  : Flexible survival regression using the Royston/Parmar spline model.
+- [`flexsurvrtrunc()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvrtrunc.md)
+  : Flexible parametric models for right-truncated, uncensored data
+  defined by times of initial and final events.
+- [`survrtrunc()`](http://chjackson.github.io/flexsurv-dev/reference/survrtrunc.md)
+  : Nonparametric estimator of survival from right-truncated, uncensored
+  data
+
+## Getting results from survival models
+
+- [`summary(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md)
+  : Summaries of fitted flexible survival models
+- [`standsurv()`](http://chjackson.github.io/flexsurv-dev/reference/standsurv.md)
+  : Marginal survival and hazards of fitted flexsurvreg models
+- [`coef(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/coef.flexsurvreg.md)
+  : Extract model coefficients from fitted flexible survival models
+- [`normboot.flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/normboot.flexsurvreg.md)
+  : Simulate from the asymptotic normal distribution of parameter
+  estimates.
+- [`hr_flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/hr_flexsurvreg.md)
+  : Hazard ratio as a function of time from a parametric survival model
+- [`vcov(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/vcov.flexsurvreg.md)
+  : Variance-covariance matrix from a flexsurvreg model
+- [`simulate(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/simulate.flexsurvreg.md)
+  : Simulate censored time-to-event data from a fitted flexsurvreg model
+- [`plot(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md)
+  : Plots of fitted flexible survival models
+- [`lines(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/lines.flexsurvreg.md)
+  : Add fitted flexible survival curves to a plot
+- [`plot(`*`<standsurv>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/plot.standsurv.md)
+  : Plot standardized metrics from a fitted flexsurv model
+- [`summary(`*`<flexsurvrtrunc>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvrtrunc.md)
+  : Summarise quantities of interest from fitted flexsurvrtrunc models
+- [`plot(`*`<survrtrunc>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/plot_survtrunc.md)
+  [`lines(`*`<survrtrunc>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/plot_survtrunc.md)
+  : Plot nonparametric estimates of survival from right-truncated data.
+
+## Multi-state models based on transition-specific hazards
+
+- [`fmsm()`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md)
+  : Construct a multi-state model from a set of parametric survival
+  models
+- [`pars.fmsm()`](http://chjackson.github.io/flexsurv-dev/reference/pars.fmsm.md)
+  : Transition-specific parameters in a flexible parametric multi-state
+  model
+- [`pmatrix.fs()`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md)
+  : Transition probability matrix from a fully-parametric,
+  time-inhomogeneous Markov multi-state model
+- [`pmatrix.simfs()`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.simfs.md)
+  : Transition probability matrix from a fully-parametric, semi-Markov
+  multi-state model
+- [`totlos.fs()`](http://chjackson.github.io/flexsurv-dev/reference/totlos.fs.md)
+  : Total length of stay in particular states for a fully-parametric,
+  time-inhomogeneous Markov multi-state model
+- [`totlos.simfs()`](http://chjackson.github.io/flexsurv-dev/reference/totlos.simfs.md)
+  : Expected total length of stay in specific states, from a
+  fully-parametric, semi-Markov multi-state model
+- [`sim.fmsm()`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md)
+  : Simulate paths through a fully parametric semi-Markov multi-state
+  model
+- [`simfs_bytrans()`](http://chjackson.github.io/flexsurv-dev/reference/simfs_bytrans.md)
+  : Reformat simulated multi-state data with one row per simulated
+  transition
+- [`bootci.fmsm()`](http://chjackson.github.io/flexsurv-dev/reference/bootci.fmsm.md)
+  : Bootstrap confidence intervals for flexsurv output functions
+- [`pfinal_fmsm()`](http://chjackson.github.io/flexsurv-dev/reference/pfinal_fmsm.md)
+  : Probabilities of final states in a flexible parametric competing
+  risks model
+- [`simfinal_fmsm()`](http://chjackson.github.io/flexsurv-dev/reference/simfinal_fmsm.md)
+  : Simulate and summarise final outcomes from a flexible parametric
+  multi-state model
+- [`ajfit_fmsm()`](http://chjackson.github.io/flexsurv-dev/reference/ajfit_fmsm.md)
+  : Check the fit of Markov flexible parametric multi-state models
+  against nonparametric estimates.
+- [`msfit.flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md)
+  : Cumulative intensity function for parametric multi-state models
+
+## Competing risks and multi-state models based on mixtures
+
+- [`flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvmix.md)
+  : Flexible parametric mixture models for times to competing events
+- [`get_basepars()`](http://chjackson.github.io/flexsurv-dev/reference/get_basepars.md)
+  : Evaluate baseline time-to-event distribution parameters given
+  covariate values in a flexsurvmix model
+- [`mean_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/mean_flexsurvmix.md)
+  : Mean times to events from a flexsurvmix model
+- [`pdf_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/pdf_flexsurvmix.md)
+  : Fitted densities for times to events in a flexsurvmix model
+- [`probs_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/probs_flexsurvmix.md)
+  : Probabilities of competing events from a flexsurvmix model
+- [`p_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/p_flexsurvmix.md)
+  : Transition probabilities from a flexsurvmix model
+- [`quantile_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/quantile_flexsurvmix.md)
+  : Quantiles of time-to-event distributions in a flexsurvmix model
+- [`rmst_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/rmst_flexsurvmix.md)
+  : Restricted mean times to events from a flexsurvmix model
+- [`simt_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/simt_flexsurvmix.md)
+  : Simulate times to competing events from a mixture multi-state model
+- [`fmixmsm()`](http://chjackson.github.io/flexsurv-dev/reference/fmixmsm.md)
+  : Constructor for a mixture multi-state model based on flexsurvmix
+- [`meanfinal_fmixmsm()`](http://chjackson.github.io/flexsurv-dev/reference/meanfinal_fmixmsm.md)
+  : Mean time to final state in a mixture multi-state model
+- [`ppath_fmixmsm()`](http://chjackson.github.io/flexsurv-dev/reference/ppath_fmixmsm.md)
+  : Probability of each pathway taken through a mixture multi-state
+  model
+- [`qfinal_fmixmsm()`](http://chjackson.github.io/flexsurv-dev/reference/qfinal_fmixmsm.md)
+  : Quantiles of the distribution of the time until reaching a final
+  state in a mixture multi-state model
+- [`ajfit()`](http://chjackson.github.io/flexsurv-dev/reference/ajfit.md)
+  : Aalen-Johansen nonparametric estimates comparable to a fitted
+  flexsurvmix model
+- [`ajfit_flexsurvmix()`](http://chjackson.github.io/flexsurv-dev/reference/ajfit_flexsurvmix.md)
+  : Forms a tidy data frame for plotting the fit of parametric mixture
+  multi-state models against nonparametric estimates
+
+## Model comparison and checking
+
+- [`logLik(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/logLik.flexsurvreg.md)
+  : Log likelihood from a flexsurvreg model
+- [`AICc(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/AICc.flexsurvreg.md)
+  [`AICC(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/AICc.flexsurvreg.md)
+  : Second-order Akaike information criterion
+- [`AICc()`](http://chjackson.github.io/flexsurv-dev/reference/AICc.md)
+  [`AICC()`](http://chjackson.github.io/flexsurv-dev/reference/AICc.md)
+  : Second-order Akaike information criterion
+- [`BIC(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/BIC.flexsurvreg.md)
+  : Bayesian Information Criterion (BIC) for comparison of flexsurvreg
+  models
+- [`AIC(`*`<fmsm>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/AIC.fmsm.md)
+  : Akaike's information criterion from a flexible parametric multistate
+  model
+- [`nobs(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/nobs.flexsurvreg.md)
+  : Number of observations contributing to a fitted flexible survival
+  model
+- [`residuals(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/residuals.flexsurvreg.md)
+  : Calculate residuals for flexible survival models
+- [`coxsnell_flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/coxsnell_flexsurvreg.md)
+  : Cox-Snell residuals from a parametric survival model
+
+## Probability distributions
+
+- [`dsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  [`psurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  [`qsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  [`rsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  [`Hsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  [`hsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  [`rmst_survspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  [`mean_survspline()`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+  : Royston/Parmar spline survival distribution
+- [`mean_survspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`mean_survspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`mean_survspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`mean_survspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`mean_survspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`mean_survspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`mean_survspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`mean_survspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rmst_survspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`dsurvspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`psurvspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`qsurvspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`rsurvspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`hsurvspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline0()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline1()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline2()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline3()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline4()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline5()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline6()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  [`Hsurvspline7()`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md)
+  : Royston/Parmar spline survival distribution functions with one
+  argument per parameter
+- [`dweibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/WeibullPH.md)
+  [`pweibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/WeibullPH.md)
+  [`qweibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/WeibullPH.md)
+  [`hweibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/WeibullPH.md)
+  [`HweibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/WeibullPH.md)
+  [`rweibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/WeibullPH.md)
+  : Weibull distribution in proportional hazards parameterisation
+- [`dgengamma()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+  [`pgengamma()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+  [`Hgengamma()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+  [`hgengamma()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+  [`qgengamma()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+  [`rgengamma()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+  : Generalized gamma distribution
+- [`dgengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+  [`pgengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+  [`Hgengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+  [`hgengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+  [`qgengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+  [`rgengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+  : Generalized gamma distribution (original parameterisation)
+- [`dgenf()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+  [`pgenf()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+  [`Hgenf()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+  [`hgenf()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+  [`qgenf()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+  [`rgenf()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+  : Generalized F distribution
+- [`dgenf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md)
+  [`pgenf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md)
+  [`Hgenf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md)
+  [`hgenf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md)
+  [`qgenf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md)
+  [`rgenf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md)
+  : Generalized F distribution (original parameterisation)
+- [`dgompertz()`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md)
+  [`pgompertz()`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md)
+  [`qgompertz()`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md)
+  [`rgompertz()`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md)
+  [`hgompertz()`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md)
+  [`Hgompertz()`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md)
+  : The Gompertz distribution
+- [`dllogis()`](http://chjackson.github.io/flexsurv-dev/reference/Llogis.md)
+  [`pllogis()`](http://chjackson.github.io/flexsurv-dev/reference/Llogis.md)
+  [`qllogis()`](http://chjackson.github.io/flexsurv-dev/reference/Llogis.md)
+  [`rllogis()`](http://chjackson.github.io/flexsurv-dev/reference/Llogis.md)
+  [`hllogis()`](http://chjackson.github.io/flexsurv-dev/reference/Llogis.md)
+  [`Hllogis()`](http://chjackson.github.io/flexsurv-dev/reference/Llogis.md)
+  : The log-logistic distribution
+- [`hexp()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  [`Hexp()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  [`hgamma()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  [`Hgamma()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  [`hlnorm()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  [`Hlnorm()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  [`hweibull()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  [`Hweibull()`](http://chjackson.github.io/flexsurv-dev/reference/hazard.md)
+  : Hazard and cumulative hazard functions
+- [`mean_exp()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_exp()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_gamma()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_gamma()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_genf()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_genf()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_genf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_genf.orig()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_gengamma()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_gengamma()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_gengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_gengamma.orig()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_gompertz()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_gompertz()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_llogis()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_llogis()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_lnorm()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_lnorm()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_weibull()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_weibull()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`rmst_weibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  [`mean_weibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
+  : Mean and restricted mean survival functions
+- [`qgeneric()`](http://chjackson.github.io/flexsurv-dev/reference/qgeneric.md)
+  : Generic function to find quantiles of a distribution
+
+## Tools for using flexsurv with tidyverse
+
+- [`predict(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/predict.flexsurvreg.md)
+  : Predictions from flexible survival models
+- [`tidy(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/tidy.flexsurvreg.md)
+  : Tidy a flexsurv model object
+- [`tidy(`*`<standsurv>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/tidy.standsurv.md)
+  : Tidy a standsurv object.
+- [`augment(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/augment.flexsurvreg.md)
+  : Augment data with information from a flexsurv model object
+- [`glance(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/glance.flexsurvreg.md)
+  : Glance at a flexsurv model object
+
+## Datasets
+
+- [`bc`](http://chjackson.github.io/flexsurv-dev/reference/bc.md) :
+  Breast cancer survival data
+- [`bos`](http://chjackson.github.io/flexsurv-dev/reference/bos.md)
+  [`bosms3`](http://chjackson.github.io/flexsurv-dev/reference/bos.md)
+  [`bosms4`](http://chjackson.github.io/flexsurv-dev/reference/bos.md) :
+  Bronchiolitis obliterans syndrome after lung transplants
+
+## Miscellaneous / advanced tools
+
+- [`model.frame(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/model.frame.flexsurvreg.md)
+  [`model.matrix(`*`<flexsurvreg>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/model.frame.flexsurvreg.md)
+  :
+
+  Extract original data from `flexsurvreg` objects.
+
+- [`model.frame(`*`<flexsurvmix>`*`)`](http://chjackson.github.io/flexsurv-dev/reference/model.frame.flexsurvmix.md)
+  : Model frame from a flexsurvmix object
+
+- [`basis()`](http://chjackson.github.io/flexsurv-dev/reference/basis.md)
+  : Natural cubic spline basis
+
+- [`rmst_generic()`](http://chjackson.github.io/flexsurv-dev/reference/rmst_generic.md)
+  : Generic function to find restricted mean survival time for some
+  distribution
+
+- [`unroll.function()`](http://chjackson.github.io/flexsurv-dev/reference/unroll.function.md)
+  : Convert a function with matrix arguments to a function with vector
+  arguments.
+
+## Package overview
+
+- [`flexsurv-package`](http://chjackson.github.io/flexsurv-dev/reference/flexsurv-package.md)
+  [`flexsurv`](http://chjackson.github.io/flexsurv-dev/reference/flexsurv-package.md)
+  : flexsurv: Flexible parametric survival and multi-state models
