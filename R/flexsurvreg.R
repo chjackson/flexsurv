@@ -526,9 +526,11 @@ compress.model.matrices <- function(mml){
 ##'   identifies the location parameters, and whether covariates on these
 ##'   parameters represent a proportional hazards (PH) or accelerated failure
 ##'   time (AFT) model.  In an accelerated failure time model, the covariate
-##'   speeds up or slows down the passage of time.  So if the coefficient
-##'   (presented on the log scale) is log(2), then doubling the covariate value
-##'   would give half the expected survival time.
+##'   speeds up or slows down the passage of time.  The relation of the
+##'   reported coefficient to the "time acceleration factor" is described for
+##'   each distribution in the "Distributions reference" vignette.  Note the
+##'   interpretation of the sign of the coefficient may be different for
+##'   different distributions.
 ##'
 ##'   \tabular{llll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
 ##'   \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab

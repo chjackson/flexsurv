@@ -87,12 +87,17 @@ flexsurvreg(
 working environment.}
 
 \item{weights}{Optional numeric variable giving weights for each
-individual in the data.  The fitted model is then defined by
-maximising the weighted sum of the individual-specific
-log-likelihoods.  The \code{res} and \code{res.t} component of
-the model object will then also include a "robust" standard
-error defined by a sandwich estimator (see, e.g. Lin and Wei,
-JASA (1989) 84(408): 1074–1078).}
+  individual in the data.  The fitted model is then defined by
+  maximising the weighted sum of the individual-specific
+  log-likelihoods.
+
+  The \code{res} and \code{res.t} component of the model object will
+  then also include a "robust" standard error defined by a
+  sandwich estimator (see, e.g. Lin and Wei, JASA (1989) 84(408):
+  1074–1078), however this is only available for parametric
+  distributions where the derivatives of the likelhood are
+  available analytically (exponential, Weibull, Gompertz and the
+  hazard-based spline model) .}
 
 \item{bhazard}{Optional variable giving expected hazards for relative
   survival models.  The model is described by Nelson et al. (2007).
@@ -148,9 +153,11 @@ argument has been used. Default is \code{options()$na.action}.}
   identifies the location parameters, and whether covariates on these
   parameters represent a proportional hazards (PH) or accelerated failure
   time (AFT) model.  In an accelerated failure time model, the covariate
-  speeds up or slows down the passage of time.  So if the coefficient
-  (presented on the log scale) is log(2), then doubling the covariate value
-  would give half the expected survival time.
+  speeds up or slows down the passage of time.  The relation of the
+  reported coefficient to the "time acceleration factor" is described for
+  each distribution in the "Distributions reference" vignette.  Note the
+  interpretation of the sign of the coefficient may be different for
+  different distributions.
 
   \tabular{llll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
   \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
