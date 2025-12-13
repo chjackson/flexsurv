@@ -274,7 +274,7 @@ The link function relating the survivor function to the spline is:
 g(S(t)) =  \begin{array}{ll}
 \log(-\log(S(t))) &\verb+(scale="hazard")+ \\
 \log(S(t)^{-1} - 1)      &                  \verb+(scale="odds")+ \\
-\Phi^{-1}(S(t)) &     \verb+(scale="normal")+ \\
+-\Phi^{-1}(S(t)) &     \verb+(scale="normal")+ \\
                       \end{array}
                     \]
 
@@ -284,7 +284,9 @@ The location parameter is
 
 \[  \gamma_{0j} = z_j \bbeta \]
 
-For \verb+scale="hazard"+, the hazard ratio is $\exp(\bbeta)$.
+so that higher values of the location parameter $\gamma_0$ lead to higher hazards, or lower survival, for all three choices of link function.  For \verb+scale="hazard"+, $\exp(\bbeta)$ is the hazard ratio, and for \verb+scale="odds"+, $\exp(\bbeta)$ is an odds ratio. 
+
+                    
 
 \end{document}
 

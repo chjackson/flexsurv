@@ -9,7 +9,7 @@ distributions are available, and users may supply their own."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">flexsurv</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -130,8 +130,16 @@ working environment.</p></dd>
 
 <dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
 <dd><p>Optional numeric variable giving weights for each
-individual in the data.  The fitted model is then defined by
-maximising the weighted sum of the individual-specific log-likelihoods.</p></dd>
+  individual in the data.  The fitted model is then defined by
+  maximising the weighted sum of the individual-specific
+  log-likelihoods.</p>
+<p>The <code>res</code> and <code>res.t</code> component of the model object will
+  then also include a "robust" standard error defined by a
+  sandwich estimator (see, e.g. Lin and Wei, JASA (1989) 84(408):
+  1074–1078), however this is only available for parametric
+  distributions where the derivatives of the likelhood are
+  available analytically (exponential, Weibull, Gompertz and the
+  hazard-based spline model) .</p></dd>
 
 
 <dt id="arg-bhazard">bhazard<a class="anchor" aria-label="anchor" href="#arg-bhazard"></a></dt>
@@ -188,9 +196,11 @@ argument has been used. Default is <code>options()$na.action</code>.</p></dd>
   identifies the location parameters, and whether covariates on these
   parameters represent a proportional hazards (PH) or accelerated failure
   time (AFT) model.  In an accelerated failure time model, the covariate
-  speeds up or slows down the passage of time.  So if the coefficient
-  (presented on the log scale) is log(2), then doubling the covariate value
-  would give half the expected survival time.</p>
+  speeds up or slows down the passage of time.  The relation of the
+  reported coefficient to the "time acceleration factor" is described for
+  each distribution in the "Distributions reference" vignette.  Note the
+  interpretation of the sign of the coefficient may be different for
+  different distributions.</p>
 <p></p><table class="table table"><tr><td><code>"gengamma"</code></td><td>Generalized gamma (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"gengamma.orig"</code></td><td>Generalized gamma (original)</td><td>scale</td><td>AFT</td></tr><tr><td><code>"genf"</code></td><td>Generalized F (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"genf.orig"</code></td><td>Generalized F (original)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"weibull"</code></td><td>Weibull</td><td>scale</td><td>AFT</td></tr><tr><td><code>"weibullPH"</code></td><td>Weibull</td><td>scale</td><td>PH</td></tr><tr><td><code>"gamma"</code></td><td>Gamma</td><td>rate</td><td>AFT</td></tr><tr><td><code>"exp"</code></td><td>Exponential</td><td>rate</td><td>PH</td></tr><tr><td><code>"llogis"</code></td><td>Log-logistic</td><td>scale</td><td>AFT</td></tr><tr><td><code>"lnorm"</code></td><td>Log-normal</td><td>meanlog</td><td>AFT</td></tr><tr><td><code>"gompertz"</code></td><td>Gompertz</td><td>rate</td><td>PH</td></tr></table><p><code>"exponential"</code> and <code>"lognormal"</code> can be used as aliases for
   <code>"exp"</code> and <code>"lnorm"</code>, for compatibility with
   <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code>.</p>
@@ -556,9 +566,9 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-out co"><span class="r-pr">#&gt;</span>     dist = "weibull")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimates: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        est       L95%      U95%      se      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> shape     1.108     0.674     1.822     0.281</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> scale  1225.419   690.421  2174.979   358.714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        est       L95%      U95%      se        se.robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> shape     1.108     0.674     1.822     0.281     0.208 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> scale  1225.419   690.421  2174.979   358.714   384.646 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> N = 26,  Events: 12,  Censored: 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Total time at risk: 15588</span>
@@ -586,7 +596,6 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">fitev</span>, col<span class="op">=</span><span class="st">"purple"</span>, col.ci<span class="op">=</span><span class="st">"purple"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: eha</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>package 'eha' was built under R version 4.4.2</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: 'eha'</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from 'package:flexsurv':</span>
@@ -613,8 +622,8 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-out co"><span class="r-pr">#&gt;</span>     dist = "exp")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimates: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       est       L95%      U95%      se      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rate  0.000770  0.000437  0.001356  0.000222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       est       L95%      U95%      se        se.robust</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rate  0.000770  0.000437  0.001356  0.000222  0.000229 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> N = 26,  Events: 12,  Censored: 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Total time at risk: 15588</span>
@@ -634,7 +643,7 @@ fitted survival, hazards and cumulative hazards from models fitted by
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
