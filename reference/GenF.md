@@ -101,10 +101,10 @@ several common distributions, as described in the
 help page.
 
 The generalized F distribution includes the log-logistic distribution
-(see [`eha::dllogis`](https://rdrr.io/pkg/eha/man/Loglogistic.html)) as
-a further special case:
+(see [`eha::dllogis`](https://ehar.se/r/eha/reference/Loglogistic.html))
+as a further special case:
 
-`dgenf(x, mu=mu, sigma=sigma, Q=0, P=1) = `[`eha::dllogis`](https://rdrr.io/pkg/eha/man/Loglogistic.html)`(x, shape=sqrt(2)/sigma, scale=exp(mu))`
+`dgenf(x, mu=mu, sigma=sigma, Q=0, P=1) = `[`eha::dllogis`](https://ehar.se/r/eha/reference/Loglogistic.html)`(x, shape=sqrt(2)/sigma, scale=exp(mu))`
 
 The range of hazard trajectories available under this distribution are
 discussed in detail by Cox (2008). Jackson et al. (2010) give an

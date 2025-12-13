@@ -87,8 +87,8 @@ Covariates on \\b\\ represent time acceleration factors, or ratios of
 expected survival.
 
 The same parameterisation is also used in
-[`eha::dllogis`](https://rdrr.io/pkg/eha/man/Loglogistic.html) in the
-eha package.
+[`eha::dllogis`](https://ehar.se/r/eha/reference/Loglogistic.html) in
+the eha package.
 
 ## References
 
