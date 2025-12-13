@@ -154,7 +154,8 @@ argument has been used. Default is \code{options()$na.action}.}
   parameters represent a proportional hazards (PH) or accelerated failure
   time (AFT) model.  In an accelerated failure time model, the covariate
   speeds up or slows down the passage of time.  The relation of the
-  reported coefficient to the "time acceleration factor" is described for
+  reported coefficient to the "time acceleration factor" or hazard ratio
+  is described for
   each distribution in the "Distributions reference" vignette.  Note the
   interpretation of the sign of the coefficient may be different for
   different distributions.

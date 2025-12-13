@@ -197,7 +197,8 @@ argument has been used. Default is <code>options()$na.action</code>.</p></dd>
   parameters represent a proportional hazards (PH) or accelerated failure
   time (AFT) model.  In an accelerated failure time model, the covariate
   speeds up or slows down the passage of time.  The relation of the
-  reported coefficient to the "time acceleration factor" is described for
+  reported coefficient to the "time acceleration factor" or hazard ratio
+  is described for
   each distribution in the "Distributions reference" vignette.  Note the
   interpretation of the sign of the coefficient may be different for
   different distributions.</p>
@@ -542,7 +543,7 @@ fitted survival, hazards and cumulative hazards from models fitted by
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Compare generalized gamma fit with Weibull</span></span></span>
-<span class="r-in"><span><span class="va">fitg</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu">Surv</span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"gengamma"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitg</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"gengamma"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fitg</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, </span>
@@ -559,7 +560,7 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log-likelihood = -96.94907, df = 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> AIC = 199.8981</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">fitw</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu">Surv</span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"weibull"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitw</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"weibull"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fitw</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, </span>
@@ -595,14 +596,6 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-in"><span><span class="va">fitev</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">fitev</span>, col<span class="op">=</span><span class="st">"purple"</span>, col.ci<span class="op">=</span><span class="st">"purple"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: eha</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: 'eha'</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from 'package:flexsurv':</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     Hgompertz, Hllogis, Hlnorm, Hweibull, dgompertz, dllogis,</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     hgompertz, hllogis, hlnorm, hweibull, pgompertz, pllogis,</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>     qgompertz, qllogis, rgompertz, rllogis</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Forming integrated rmst function...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Forming integrated mean function...</span>
 <span class="r-plt img"><img src="flexsurvreg-1.png" alt="" width="700" height="433"></span>
