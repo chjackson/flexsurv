@@ -212,7 +212,7 @@ flexsurvreg(
   [`dweibull`](https://rdrr.io/r/stats/Weibull.html),
   [`dgamma`](https://rdrr.io/r/stats/GammaDist.html),
   [`dexp`](https://rdrr.io/r/stats/Exponential.html),
-  [`dlnorm`](https://ehar.se/r/eha/reference/Lognormal.html),
+  [`dlnorm`](https://rdrr.io/pkg/eha/man/Lognormal.html),
   [`dgompertz`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md),
   respectively. The functions in base R are used where available,
   otherwise, they are provided in this package.
@@ -560,8 +560,8 @@ construct a list with the following elements:
 For example, suppose we want to use an extreme value survival
 distribution. This is available in the CRAN package eha, which provides
 conventionally-defined density and probability functions called
-[`eha::dEV`](https://ehar.se/r/eha/reference/EV.html) and
-[`eha::pEV`](https://ehar.se/r/eha/reference/EV.html). See the Examples
+[`eha::dEV`](https://rdrr.io/pkg/eha/man/EV.html) and
+[`eha::pEV`](https://rdrr.io/pkg/eha/man/EV.html). See the Examples
 below for the custom list in this case, and the subsequent command to
 fit the model.
 

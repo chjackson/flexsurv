@@ -115,7 +115,7 @@ flexsurvrtrunc(
   [`dweibull`](https://rdrr.io/r/stats/Weibull.html),
   [`dgamma`](https://rdrr.io/r/stats/GammaDist.html),
   [`dexp`](https://rdrr.io/r/stats/Exponential.html),
-  [`dlnorm`](https://ehar.se/r/eha/reference/Lognormal.html),
+  [`dlnorm`](https://rdrr.io/pkg/eha/man/Lognormal.html),
   [`dgompertz`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md),
   respectively. The functions in base R are used where available,
   otherwise, they are provided in this package.

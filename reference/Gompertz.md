@@ -84,7 +84,7 @@ zero as \\x\\ increases to infinity. The more flexible implementation
 given here is consistent with `streg` in Stata.
 
 The functions
-[`eha::dgompertz`](https://ehar.se/r/eha/reference/Gompertz.html) and
+[`eha::dgompertz`](https://rdrr.io/pkg/eha/man/Gompertz.html) and
 similar available in the package eha label the parameters the other way
 round, so that what is called the `shape` there is called the `rate`
 here, and what is called `1 / scale` there is called the `shape` here.

@@ -190,9 +190,9 @@ particular:
   [`survreg`](https://rdrr.io/pkg/survival/man/survreg.html) notation.
 
   In the log-logistic model with shape `a` and scale `b` (as in
-  [`eha::dllogis`](https://ehar.se/r/eha/reference/Loglogistic.html)
-  from the eha package), `1/b^a` is equivalent to `exp(gamma0)`, and `a`
-  is equivalent to `gamma1`.
+  [`eha::dllogis`](https://rdrr.io/pkg/eha/man/Loglogistic.html) from
+  the eha package), `1/b^a` is equivalent to `exp(gamma0)`, and `a` is
+  equivalent to `gamma1`.
 
   In the log-normal model with log-scale mean `mu` and standard
   deviation `sigma`, `-mu/sigma` is equivalent to `gamma0` and `1/sigma`
