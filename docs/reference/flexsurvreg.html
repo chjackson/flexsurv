@@ -201,8 +201,10 @@ argument has been used. Default is <code>options()$na.action</code>.</p></dd>
   is described for
   each distribution in the "Distributions reference" vignette.  Note the
   interpretation of the sign of the coefficient may be different for
-  different distributions.</p>
-<p></p><table class="table table"><tr><td><code>"gengamma"</code></td><td>Generalized gamma (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"gengamma.orig"</code></td><td>Generalized gamma (original)</td><td>scale</td><td>AFT</td></tr><tr><td><code>"genf"</code></td><td>Generalized F (stable)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"genf.orig"</code></td><td>Generalized F (original)</td><td>mu</td><td>AFT</td></tr><tr><td><code>"weibull"</code></td><td>Weibull</td><td>scale</td><td>AFT</td></tr><tr><td><code>"weibullPH"</code></td><td>Weibull</td><td>scale</td><td>PH</td></tr><tr><td><code>"gamma"</code></td><td>Gamma</td><td>rate</td><td>AFT</td></tr><tr><td><code>"exp"</code></td><td>Exponential</td><td>rate</td><td>PH</td></tr><tr><td><code>"llogis"</code></td><td>Log-logistic</td><td>scale</td><td>AFT</td></tr><tr><td><code>"lnorm"</code></td><td>Log-normal</td><td>meanlog</td><td>AFT</td></tr><tr><td><code>"gompertz"</code></td><td>Gompertz</td><td>rate</td><td>PH</td></tr></table><p><code>"exponential"</code> and <code>"lognormal"</code> can be used as aliases for
+  different distributions.   The table below indicates the interpretation
+  of a higher value for the coefficient in terms of the hazard or risk of
+  the event: "higher" meaning higher risk, and "lower" meaning lower risk.</p>
+<p></p><table class="table table"><tr><td><code>"gengamma"</code></td><td>Generalized gamma (stable)</td><td>mu</td><td>AFT</td><td>lower</td></tr><tr><td><code>"gengamma.orig"</code></td><td>Generalized gamma (original)</td><td>scale</td><td>AFT</td><td>lower</td></tr><tr><td><code>"genf"</code></td><td>Generalized F (stable)</td><td>mu</td><td>AFT</td><td>lower</td></tr><tr><td><code>"genf.orig"</code></td><td>Generalized F (original)</td><td>mu</td><td>AFT</td><td>lower</td></tr><tr><td><code>"weibull"</code></td><td>Weibull</td><td>scale</td><td>AFT</td><td>lower</td></tr><tr><td><code>"weibullPH"</code></td><td>Weibull</td><td>scale</td><td>PH</td><td>higher</td></tr><tr><td><code>"gamma"</code></td><td>Gamma</td><td>rate</td><td>AFT</td><td>higher</td></tr><tr><td><code>"exp"</code></td><td>Exponential</td><td>rate</td><td>PH</td><td>higher</td></tr><tr><td><code>"llogis"</code></td><td>Log-logistic</td><td>scale</td><td>AFT</td><td>lower</td></tr><tr><td><code>"lnorm"</code></td><td>Log-normal</td><td>meanlog</td><td>AFT</td><td>lower</td></tr><tr><td><code>"gompertz"</code></td><td>Gompertz</td><td>rate</td><td>PH</td><td>higher</td></tr></table><p><code>"exponential"</code> and <code>"lognormal"</code> can be used as aliases for
   <code>"exp"</code> and <code>"lnorm"</code>, for compatibility with
   <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg</a></code>.</p>
 <p>Alternatively, <code>dist</code> can be a list specifying a custom distribution.
@@ -543,7 +545,7 @@ fitted survival, hazards and cumulative hazards from models fitted by
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Compare generalized gamma fit with Weibull</span></span></span>
-<span class="r-in"><span><span class="va">fitg</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"gengamma"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitg</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu">Surv</span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"gengamma"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fitg</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, </span>
@@ -560,7 +562,7 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-out co"><span class="r-pr">#&gt;</span> Log-likelihood = -96.94907, df = 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> AIC = 199.8981</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">fitw</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"weibull"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitw</span> <span class="op">&lt;-</span> <span class="fu">flexsurvreg</span><span class="op">(</span>formula <span class="op">=</span> <span class="fu">Surv</span><span class="op">(</span><span class="va">futime</span>, <span class="va">fustat</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">ovarian</span>, dist<span class="op">=</span><span class="st">"weibull"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fitw</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, </span>
@@ -596,6 +598,14 @@ fitted survival, hazards and cumulative hazards from models fitted by
 <span class="r-in"><span><span class="va">fitev</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">fitev</span>, col<span class="op">=</span><span class="st">"purple"</span>, col.ci<span class="op">=</span><span class="st">"purple"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: eha</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘eha’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:flexsurv’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     Hgompertz, Hllogis, Hlnorm, Hweibull, dgompertz, dllogis,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     hgompertz, hllogis, hlnorm, hweibull, pgompertz, pllogis,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     qgompertz, qllogis, rgompertz, rllogis</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Forming integrated rmst function...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Forming integrated mean function...</span>
 <span class="r-plt img"><img src="flexsurvreg-1.png" alt="" width="700" height="433"></span>
