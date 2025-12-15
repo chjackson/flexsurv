@@ -176,21 +176,24 @@ flexsurvreg(
   reported coefficient to the "time acceleration factor" or hazard ratio
   is described for each distribution in the "Distributions reference"
   vignette. Note the interpretation of the sign of the coefficient may
-  be different for different distributions.
+  be different for different distributions. The table below indicates
+  the interpretation of a higher value for the coefficient in terms of
+  the hazard or risk of the event: "higher" meaning higher risk, and
+  "lower" meaning lower risk.
 
-  |                   |                              |         |     |
-  |-------------------|------------------------------|---------|-----|
-  | `"gengamma"`      | Generalized gamma (stable)   | mu      | AFT |
-  | `"gengamma.orig"` | Generalized gamma (original) | scale   | AFT |
-  | `"genf"`          | Generalized F (stable)       | mu      | AFT |
-  | `"genf.orig"`     | Generalized F (original)     | mu      | AFT |
-  | `"weibull"`       | Weibull                      | scale   | AFT |
-  | `"weibullPH"`     | Weibull                      | scale   | PH  |
-  | `"gamma"`         | Gamma                        | rate    | AFT |
-  | `"exp"`           | Exponential                  | rate    | PH  |
-  | `"llogis"`        | Log-logistic                 | scale   | AFT |
-  | `"lnorm"`         | Log-normal                   | meanlog | AFT |
-  | `"gompertz"`      | Gompertz                     | rate    | PH  |
+  |                   |                              |         |     |        |
+  |-------------------|------------------------------|---------|-----|--------|
+  | `"gengamma"`      | Generalized gamma (stable)   | mu      | AFT | lower  |
+  | `"gengamma.orig"` | Generalized gamma (original) | scale   | AFT | lower  |
+  | `"genf"`          | Generalized F (stable)       | mu      | AFT | lower  |
+  | `"genf.orig"`     | Generalized F (original)     | mu      | AFT | lower  |
+  | `"weibull"`       | Weibull                      | scale   | AFT | lower  |
+  | `"weibullPH"`     | Weibull                      | scale   | PH  | higher |
+  | `"gamma"`         | Gamma                        | rate    | AFT | higher |
+  | `"exp"`           | Exponential                  | rate    | PH  | higher |
+  | `"llogis"`        | Log-logistic                 | scale   | AFT | lower  |
+  | `"lnorm"`         | Log-normal                   | meanlog | AFT | lower  |
+  | `"gompertz"`      | Gompertz                     | rate    | PH  | higher |
 
   `"exponential"` and `"lognormal"` can be used as aliases for `"exp"`
   and `"lnorm"`, for compatibility with
