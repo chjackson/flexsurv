@@ -158,18 +158,20 @@ argument has been used. Default is \code{options()$na.action}.}
   is described for
   each distribution in the "Distributions reference" vignette.  Note the
   interpretation of the sign of the coefficient may be different for
-  different distributions.
+  different distributions.   The table below indicates the interpretation
+  of a higher value for the coefficient in terms of the hazard or risk of
+  the event: "higher" meaning higher risk, and "lower" meaning lower risk. 
 
-  \tabular{llll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
-  \tab AFT \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
-  scale \tab AFT \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
-  AFT \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT
-  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \cr 
-  \code{"weibullPH"} \tab Weibull \tab scale \tab PH \cr \code{"gamma"}
-  \tab Gamma \tab rate \tab AFT \cr \code{"exp"} \tab Exponential \tab rate
-  \tab PH \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \cr
-  \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \cr \code{"gompertz"}
-  \tab Gompertz \tab rate \tab PH \cr }
+  \tabular{lllll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
+  \tab AFT \tab lower \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
+  scale \tab AFT \tab lower \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
+  AFT \tab lower \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT \tab lower
+  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \tab lower \cr 
+  \code{"weibullPH"} \tab Weibull \tab scale \tab PH \tab higher \cr \code{"gamma"}
+  \tab Gamma \tab rate \tab AFT \tab higher \cr \code{"exp"} \tab Exponential \tab rate
+  \tab PH \tab higher \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \tab lower \cr
+  \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \tab lower \cr \code{"gompertz"}
+  \tab Gompertz \tab rate \tab PH \tab higher \cr }
 
   \code{"exponential"} and \code{"lognormal"} can be used as aliases for
   \code{"exp"} and \code{"lnorm"}, for compatibility with
