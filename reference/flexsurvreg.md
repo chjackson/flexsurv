@@ -635,9 +635,9 @@ fitw
 #>     dist = "weibull")
 #> 
 #> Estimates: 
-#>        est       L95%      U95%      se        se.robust
-#> shape     1.108     0.674     1.822     0.281     0.208 
-#> scale  1225.419   690.421  2174.979   358.714   384.646 
+#>        est       L95%      U95%      se      
+#> shape     1.108     0.674     1.822     0.281
+#> scale  1225.419   690.421  2174.979   358.714
 #> 
 #> N = 26,  Events: 12,  Censored: 14
 #> Total time at risk: 15588
@@ -691,8 +691,8 @@ flexsurvreg(Surv(futime, fustat) ~ 1, data = ovarian, dist="exp")
 #>     dist = "exp")
 #> 
 #> Estimates: 
-#>       est       L95%      U95%      se        se.robust
-#> rate  0.000770  0.000437  0.001356  0.000222  0.000229 
+#>       est       L95%      U95%      se      
+#> rate  0.000770  0.000437  0.001356  0.000222
 #> 
 #> N = 26,  Events: 12,  Censored: 14
 #> Total time at risk: 15588

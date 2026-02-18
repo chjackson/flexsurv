@@ -215,7 +215,7 @@ kmsurvplot <- ggsurvplot(km)
 #> ℹ Please use `linewidth` instead.
 #> ℹ The deprecated feature was likely used in the ggpubr package.
 #>   Please report the issue at <https://github.com/kassambara/ggpubr/issues>.
-#> This warning is displayed once every 8 hours.
+#> This warning is displayed once per session.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
 kmsurvplot + xlab("Time from diagnosis (years)")
@@ -252,11 +252,11 @@ model.weibull.sep
 #> scale                           NA    0.02187   0.01119   0.04274   0.00748
 #> group2Medium/Poor          0.66618    1.84846   1.14534   2.55157   0.35874
 #> shape(group2Medium/Poor)   0.66618   -0.28237  -0.54219  -0.02254   0.13257
-#>                           se.robust  exp(est)  L95%      U95%    
-#> shape                      0.14443         NA        NA        NA
-#> scale                      0.00552         NA        NA        NA
-#> group2Medium/Poor          0.26623    6.35001   3.14351  12.82725
-#> shape(group2Medium/Poor)   0.09374    0.75400   0.58147   0.97771
+#>                           exp(est)  L95%      U95%    
+#> shape                           NA        NA        NA
+#> scale                           NA        NA        NA
+#> group2Medium/Poor          6.35001   3.14351  12.82725
+#> shape(group2Medium/Poor)   0.75400   0.58147   0.97771
 #> 
 #> N = 686,  Events: 299,  Censored: 387
 #> Total time at risk: 2113.425

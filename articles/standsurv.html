@@ -344,7 +344,7 @@ curves between the two prognostic groups.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">ggpubr</span> package.</span></span>
 <span><span class="co">#&gt;   Please report the issue at <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/kassambara/ggpubr/issues&gt;</span>.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
 <span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span>
 <span><span class="va">kmsurvplot</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time from diagnosis (years)"</span><span class="op">)</span></span>
@@ -381,11 +381,11 @@ allow group to affect the shape parameter.</p>
 <span><span class="co">#&gt; scale                           NA    0.02187   0.01119   0.04274   0.00748</span></span>
 <span><span class="co">#&gt; group2Medium/Poor          0.66618    1.84846   1.14534   2.55157   0.35874</span></span>
 <span><span class="co">#&gt; shape(group2Medium/Poor)   0.66618   -0.28237  -0.54219  -0.02254   0.13257</span></span>
-<span><span class="co">#&gt;                           se.robust  exp(est)  L95%      U95%    </span></span>
-<span><span class="co">#&gt; shape                      0.14443         NA        NA        NA</span></span>
-<span><span class="co">#&gt; scale                      0.00552         NA        NA        NA</span></span>
-<span><span class="co">#&gt; group2Medium/Poor          0.26623    6.35001   3.14351  12.82725</span></span>
-<span><span class="co">#&gt; shape(group2Medium/Poor)   0.09374    0.75400   0.58147   0.97771</span></span>
+<span><span class="co">#&gt;                           exp(est)  L95%      U95%    </span></span>
+<span><span class="co">#&gt; shape                           NA        NA        NA</span></span>
+<span><span class="co">#&gt; scale                           NA        NA        NA</span></span>
+<span><span class="co">#&gt; group2Medium/Poor          6.35001   3.14351  12.82725</span></span>
+<span><span class="co">#&gt; shape(group2Medium/Poor)   0.75400   0.58147   0.97771</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; N = 686,  Events: 299,  Censored: 387</span></span>
 <span><span class="co">#&gt; Total time at risk: 2113.425</span></span>
@@ -400,7 +400,7 @@ predictions in a tidy data.frame with the argument
 <code class="sourceCode R"><span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">model.weibull.sep</span>, type <span class="op">=</span> <span class="st">"survival"</span>, tidy<span class="op">=</span><span class="cn">T</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">est</span>, color <span class="op">=</span> <span class="va">group2</span><span class="op">)</span>, data<span class="op">=</span><span class="va">predictions</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_step</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">surv</span>, group<span class="op">=</span><span class="va">strata</span><span class="op">)</span>, data<span class="op">=</span><span class="va">kmsurvplot</span><span class="op">$</span><span class="va">data.survplot</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="768"></p>
 <p>The Weibull model does not appear to fit the data very well and so we
 should try other parametric distributions. However, for illustration
 purposes we shall continue using the Weibull model. We will now show
@@ -456,13 +456,13 @@ estimates can be easily produced using the <code>plot</code> function,
 which produces a <code>ggplot</code> object.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.surv</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="768"></p>
 <p>The plot can be easily further manipulated, for example by changing
 axis labels and adding further plots.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.surv</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time since diagnosis (years)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_step</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">time</span>, y<span class="op">=</span><span class="va">surv</span>, group<span class="op">=</span><span class="va">strata</span><span class="op">)</span>, data<span class="op">=</span><span class="va">kmsurvplot</span><span class="op">$</span><span class="va">data.survplot</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
 <h3 id="other-metrics-marginal-hazards-and-marginal-rmst">Other metrics: marginal hazards and marginal RMST<a class="anchor" aria-label="anchor" href="#other-metrics-marginal-hazards-and-marginal-rmst"></a>
@@ -476,7 +476,7 @@ the hazard functions for the two groups is obtained as follows:</p>
 <span>                                            at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group2 <span class="op">=</span> <span class="st">"Good"</span><span class="op">)</span>,</span>
 <span>                                                      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group2 <span class="op">=</span> <span class="st">"Medium/Poor"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.haz</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time since diagnosis (years)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="768"></p>
 <p>Whilst a plot of RMST is given by</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ss.weibull.sep.rmst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/standsurv.html">standsurv</a></span><span class="op">(</span><span class="va">model.weibull.sep</span>,</span>
@@ -484,7 +484,7 @@ the hazard functions for the two groups is obtained as follows:</p>
 <span>                                             at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group2 <span class="op">=</span> <span class="st">"Good"</span><span class="op">)</span>,</span>
 <span>                                                       <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group2 <span class="op">=</span> <span class="st">"Medium/Poor"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rmst</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time since diagnosis (years)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
 <h3 id="calculating-contrasts">Calculating contrasts<a class="anchor" aria-label="anchor" href="#calculating-contrasts"></a>
@@ -504,7 +504,7 @@ the <code>plot</code> function.</p>
 <span>                                          contrast <span class="op">=</span> <span class="st">"difference"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.3</span>, contrast<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time since diagnosis (years)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Difference in survival probabilities"</span><span class="op">)</span>  <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="768"></p>
 <p>Alternatively, we may wish to visualise the implied hazard ratio from
 fitting separate Weibull models to the two groups. In the breast cancer
 example we see that the hazard ratio (treatment effect) starts very high
@@ -519,7 +519,7 @@ the end of follow-up, compared to those with Good prognosis.</p>
 <span>                                          contrast <span class="op">=</span> <span class="st">"ratio"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.4</span>, contrast<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time since diagnosis (years)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Hazard ratio"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
 <h3 id="confidence-intervals-and-standard-errors">Confidence intervals and standard errors<a class="anchor" aria-label="anchor" href="#confidence-intervals-and-standard-errors"></a>
@@ -574,7 +574,7 @@ predict for 10 time points.</p>
 <span><span class="co">#&gt; Adding another scale for <span style="color: #00BB00;">linetype</span>, which will replace the existing scale.</span></span>
 <span><span class="co">#&gt; Warning: Removed 20 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
 <h3 id="adding-age-as-a-covariate">Adding age as a covariate<a class="anchor" aria-label="anchor" href="#adding-age-as-a-covariate"></a>
@@ -622,7 +622,7 @@ older population with mean age of 75 and standard deviation 5.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_linetype_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Study"</span> <span class="op">=</span> <span class="st">"solid"</span>, <span class="st">"Older population"</span><span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Scale for <span style="color: #00BB00;">linetype</span> is already present.</span></span>
 <span><span class="co">#&gt; Adding another scale for <span style="color: #00BB00;">linetype</span>, which will replace the existing scale.</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 <div class="section level3">
 <h3 id="calculating-expected-survival-and-hazard-in-standsurv">Calculating expected survival and hazard in
@@ -694,7 +694,7 @@ in the <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="exter
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.expected</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="768"></p>
 <p>We can see that the marginal expected survival is much higher than
 the marginal (predicted) survival for our breast cancer population. We
 can also obtain the expected hazards:</p>
@@ -714,7 +714,7 @@ can also obtain the expected hazards:</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.expectedh</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="768"></p>
 <p>The hazard plot shows that our model is predicting an increasing
 hazard over time for the cancer population, which remains significantly
 higher than the expected hazard in the general population. The
@@ -828,7 +828,7 @@ relative survival or excess hazards we would use
 <span><span class="co">#&gt; Marginal all-cause survival will be calculated</span></span>
 <span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.surv</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="768"></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># All-cause hazard</span></span>
@@ -848,7 +848,7 @@ relative survival or excess hazards we would use
 <span><span class="co">#&gt; Marginal all-cause hazard will be calculated</span></span>
 <span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.haz</span>, expected <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-20-2.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-20-2.png" class="r-plt" alt="" width="768"></p>
 <p>The marginal excess hazard is now unimodal since the cure model is
 forcing the initially increasing excess hazard to tend to zero in the
 long-term where only ‘cured’ subjects remain. The marginal all-cause
@@ -871,7 +871,7 @@ hazard tends to the expected hazard and follows it thereafter.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Calculating marginal expected survival and hazard</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ss.weibull.sep.rs.excesshaz</span><span class="op">)</span></span></code></pre></div>
-<p><img src="standsurv_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" width="768"></p>
+<p><img src="standsurv_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="" width="768"></p>
 </div>
 </div>
 <div class="section level2">
