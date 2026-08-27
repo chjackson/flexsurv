@@ -35,6 +35,7 @@ trajectory of the Exponential(1).
 ## Examples
 
 ``` r
+
   fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "gengamma")
   cs <- coxsnell_flexsurvreg(fitg)
   

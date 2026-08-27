@@ -97,10 +97,10 @@ are related as follows.
 The generalized gamma distribution simplifies to the gamma, log-normal
 and Weibull distributions with the following parameterisations:
 
-|                                    |     |                                                       |
-|------------------------------------|-----|-------------------------------------------------------|
-| `dgengamma(x, mu, sigma, Q=0)`     | `=` | `dlnorm(x, mu, sigma)`                                |
-| `dgengamma(x, mu, sigma, Q=1)`     | `=` | `dweibull(x, shape=1/sigma, scale=exp(mu))`           |
+|  |  |  |
+|----|----|----|
+| `dgengamma(x, mu, sigma, Q=0)` | `=` | `dlnorm(x, mu, sigma)` |
+| `dgengamma(x, mu, sigma, Q=1)` | `=` | `dweibull(x, shape=1/sigma, scale=exp(mu))` |
 | `dgengamma(x, mu, sigma, Q=sigma)` | `=` | `dgamma(x, shape=1/sigma^2, rate=exp(-mu) / sigma^2)` |
 
 The properties of the generalized gamma and its applications to survival

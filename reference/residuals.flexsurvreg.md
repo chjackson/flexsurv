@@ -57,6 +57,7 @@ A more fully featured utility for this is provided in the function
 ## Examples
 
 ``` r
+
 fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "gengamma")
 residuals(fitg, type="response")
 #>  [1]  -187.21560   -88.78121  -255.36822  -873.56963 -1255.83883  -541.96330

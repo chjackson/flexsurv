@@ -92,6 +92,7 @@ together by submitting both arguments as a character vector.
 ## Examples
 
 ``` r
+
 fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ age, data = ovarian, dist = "gengamma")
 tidy(fitg)
 #> # A tibble: 4 × 5

@@ -237,6 +237,7 @@ Christopher Jackson \<chris.jackson@mrc-bsu.cam.ac.uk\>
 ## Examples
 
 ``` r
+
 ## reduces to the weibull
 regscale <- 0.786; cf <- 1.82
 a <- 1/regscale; b <- exp(cf)

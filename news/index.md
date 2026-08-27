@@ -1,5 +1,30 @@
 # Changelog
 
+## Version 2.3.3 (2026-
+
+- Added `t0` arguments to `pmatrix.fs` and `totlos.fs` to allow
+  prediction of transition probabilities and total length of stay for
+  periods starting at times other than 0.
+
+- `B` argument added to `predict.flexsurvreg`
+  ([\#197](https://github.com/chjackson/flexsurv/issues/197)).
+
+- Robustified standard errors in weighted estimation for specific
+  parametric models (those with analytic likelihood derivatives:
+  exponential, Weibull, Gompertz and hazard spline)
+
+- Corrected documentation in the distributions vignette
+
+  - the gamma location parameter is `rate` not `scale`
+
+  - missing minus sign in the link function for the normal-scale spline
+
+- Corrections and clarifications for the table of models in
+  [`help(flexsurvreg)`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  explaining the meaning of the sign of the covariate effects.
+
+- Miscellaneous minor documentation improvements.
+
 ## Version 2.3.2 (2024-08-16)
 
 CRAN release: 2024-08-17

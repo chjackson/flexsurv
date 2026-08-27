@@ -16,16 +16,16 @@ die.
 death. `bosms4` uses a four-state representation: no BOS, mild BOS,
 moderate/severe BOS or death.
 
-|          |           |                                                                                                                                                                           |
-|----------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`     | (numeric) | Patient identification number                                                                                                                                             |
-| `from`   | (numeric) | Observed starting state of the transition                                                                                                                                 |
-| `to`     | (numeric) | Observed or potential ending state of the transition                                                                                                                      |
-| `Tstart` | (numeric) | Time at the start of the interval                                                                                                                                         |
-| `Tstop`  | (numeric) | Time at the end of the interval                                                                                                                                           |
-| `time`   | (numeric) | Time difference `Tstart`-`Tstop`                                                                                                                                          |
+|  |  |  |
+|----|----|----|
+| `id` | (numeric) | Patient identification number |
+| `from` | (numeric) | Observed starting state of the transition |
+| `to` | (numeric) | Observed or potential ending state of the transition |
+| `Tstart` | (numeric) | Time at the start of the interval |
+| `Tstop` | (numeric) | Time at the end of the interval |
+| `time` | (numeric) | Time difference `Tstart`-`Tstop` |
 | `status` | (numeric) | 1 if the transition to state `to` was observed, or 0 if the transition to state `to` was censored (for example, if the patient was observed to move to a competing state) |
-| `trans`  | (factor)  | Number of the transition `from`-`to` in the set of all `ntrans` allowed transitions, numbered from 1 to `ntrans`.                                                         |
+| `trans` | (factor) | Number of the transition `from`-`to` in the set of all `ntrans` allowed transitions, numbered from 1 to `ntrans`. |
 
 ## Source
 

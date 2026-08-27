@@ -153,6 +153,7 @@ Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>.
 ## Examples
 
 ``` r
+
 # BOS example in vignette, and in msfit.flexsurvreg
 bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp")
 tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
@@ -161,8 +162,8 @@ tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 # As t increases, this should converge
 totlos.simfs(bexp, t=10, trans=tmat)
 #>        1        2        3 
-#> 3.744624 2.124969 4.130406 
+#> 3.744539 2.125464 4.129996 
 totlos.simfs(bexp, t=1000, trans=tmat)
 #>          1          2          3 
-#>   4.127459   2.957657 992.914884 
+#>   4.127571   2.957678 992.914751 
 ```

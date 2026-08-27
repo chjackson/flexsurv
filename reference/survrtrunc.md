@@ -106,6 +106,7 @@ estimating distribution of time to event from right-truncated data.
 ## Examples
 
 ``` r
+
 ## simulate some event time data
 set.seed(1)
 X <- rweibull(100, 2, 10)

@@ -12,12 +12,12 @@ bc
 
 A data frame with 686 rows.
 
-|           |           |                                                                    |
-|-----------|-----------|--------------------------------------------------------------------|
-| `censrec` | (numeric) | 1=dead, 0=censored                                                 |
-| `rectime` | (numeric) | Time of death or censoring in days                                 |
-| `group`   | (numeric) | Prognostic group: `"Good"`,`"Medium"` or `"Poor"`,                 |
-|           |           | from a regression model developed by Sauerbrei and Royston (1999). |
+|  |  |  |
+|----|----|----|
+| `censrec` | (numeric) | 1=dead, 0=censored |
+| `rectime` | (numeric) | Time of death or censoring in days |
+| `group` | (numeric) | Prognostic group: `"Good"`,`"Medium"` or `"Poor"`, |
+|  |  | from a regression model developed by Sauerbrei and Royston (1999). |
 
 ## Source
 

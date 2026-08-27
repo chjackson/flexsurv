@@ -68,6 +68,7 @@ Christopher Jackson \<chris.jackson@mrc-bsu.cam.ac.uk\>
 ## Examples
 
 ``` r
+
 rmst_lnorm(500, start=250, meanlog=7.4225, sdlog = 1.1138)
 #> [1] 237.8849
 rmst_generic(plnorm, 500, start=250, meanlog=7.4225, sdlog = 1.1138)

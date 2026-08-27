@@ -610,6 +610,7 @@ Christopher Jackson \<chris.jackson@mrc-bsu.cam.ac.uk\>
 ## Examples
 
 ``` r
+
 ## Compare generalized gamma fit with Weibull
 fitg <- flexsurvreg(formula = Surv(futime, fustat) ~ 1, data = ovarian, dist="gengamma")
 fitg

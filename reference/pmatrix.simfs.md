@@ -152,6 +152,7 @@ Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>.
 ## Examples
 
 ``` r
+
 # BOS example in vignette, and in msfit.flexsurvreg
 
 bexp <- flexsurvreg(Surv(years, status) ~ trans, data=bosms3, dist="exp")
@@ -162,13 +163,13 @@ tmat <- rbind(c(NA,1,2),c(NA,NA,3),c(NA,NA,NA))
 
 pmatrix.simfs(bexp, t=5, trans=tmat)
 #>         1       2       3
-#> 1 0.29456 0.26691 0.43853
+#> 1 0.29456 0.26769 0.43775
 #> 2 0.00000 0.26781 0.73219
 #> 3 0.00000 0.00000 1.00000
 pmatrix.simfs(bexp, t=10, trans=tmat)
 #>         1       2       3
-#> 1 0.08806 0.15161 0.76033
-#> 2 0.00000 0.07006 0.92994
+#> 1 0.08806 0.15162 0.76032
+#> 2 0.00000 0.07005 0.92995
 #> 3 0.00000 0.00000 1.00000
 
 # these results should converge to those in help(pmatrix.fs), as M

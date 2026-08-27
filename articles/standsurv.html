@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Calculating standardized survival measures in flexsurv • flexsurv</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Calculating standardized survival measures in flexsurv">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">flexsurv</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,7 +102,7 @@ over the distribution of covariates in the study assuming all
 participants were assigned to arm
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Z</mi><mo>=</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">Z=z</annotation></semantics></math>
 is:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>s</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\begin{equation}
 S_s(t|Z=z) = E[S(t | Z=z, X)] = \frac{1}{N} \sum_{i=1}^{N} S(t | Z=z, X=x_i) 
 \end{equation}</annotation></semantics></math> for covariate values
 (vectors)
@@ -116,10 +116,10 @@ The standardized survival is therefore an estimate of the marginal
 survival if all study patients had been assigned to group
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>.
 Under certain assumptions, differences in marginal survival provide
-estimates of causal effects (<span class="citation">Syriopoulou,
-Rutherford, and Lambert (2021)</span>) and certain estimands such as the
-average treatment effect (ATE) can be targeted:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>T</mi><mi>E</mi><mo>=</mo><msub><mi>S</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><msub><mi>z</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><msub><mi>S</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><msub><mi>z</mi><mn>0</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex"> ATE = S_s(t|Z=z_1) - S_s(t|Z=z_0)]</annotation></semantics></math>
+estimates of causal effects (<span class="citation">Syriopoulou et al.
+(2021)</span>) and certain estimands such as the average treatment
+effect (ATE) can be targeted:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>T</mi><mi>E</mi><mo>=</mo><msub><mi>S</mi><mi>s</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><msub><mi>z</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mi>S</mi><mi>s</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><msub><mi>z</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex"> ATE = S_s(t|Z=z_1) - S_s(t|Z=z_0)]</annotation></semantics></math>
 Alternatively, an average treatment effect in the treated (ATET)
 estimand can be targeted by averaging over only patients who were in the
 intervention treatment arm
@@ -132,7 +132,7 @@ study population.</p>
 understand how the shape of the hazard changes over time. This provides
 an estimate of the marginal hazard. It can be shown (<span class="citation">Rutherford et al. (2020)</span>, Appendix I) that the
 hazard of the standardized survival can be calculated as
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">\begin{equation} 
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>s</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>h</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="prefix">|</mo><mi>Z</mi><mo>=</mo><mi>z</mi><mo>,</mo><mi>X</mi><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\begin{equation} 
 h_s(t|Z=z) = \frac{\sum_{i=1}^{N} S(t|Z=z,X=x_i)h(t|Z=z,X=x_i)}{\sum_{i=1}^{N} S(t | Z=z, X=x_i)} 
 \end{equation}</annotation></semantics></math> This is a weighted
 average of the
@@ -162,7 +162,7 @@ age, sex, calendar year and occasionally other prognostic factors
 (e.g. deprivation indices).</p>
 <p>The Ederer or “exact” method for estimating expected survival assumes
 subjects in the trial population are not censored before the end of a
-stated follow-up time <span class="citation">(Ederer, Axtell, and Cutler
+stated follow-up time <span class="citation">(Ederer et al.
 1961)</span>. The expected survival is then the survival we would expect
 to see in an age-sex matched general population if all patients are
 continuously followed-up. This is the approach used by
@@ -174,17 +174,17 @@ background mortality rates is calculated using all
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
 patients in the trial at any time point
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>S</mi><mo>*</mo></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation} 
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>S</mi><mo>*</mo></msup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\begin{equation} 
 S^*(t) = \frac{1}{N} \sum_{i=1}^N S_i^*(t) 
 \end{equation}</annotation></semantics></math> where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">S_i^*(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">S_i^*(t)</annotation></semantics></math>
 is the expected survival for the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>th
 subject at time
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
 It follows that the marginal expected hazard is a weighted average of
 the expected hazard rates:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>h</mi><mo>*</mo></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">\begin{equation} 
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>h</mi><mo>*</mo></msup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\begin{equation} 
 h^*(t) = \frac{
 \sum_{i=1}^N S_i^*(t) h_i^*(t)}{\sum_{i=1}^N S_i^*(t)} 
 \end{equation}</annotation></semantics></math></p>
@@ -206,7 +206,7 @@ for a given subject is calculated from the cumulative hazard. At a given
 follow-up time
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
 this is the sum of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>h</mi><mrow><mi>a</mi><mi>s</mi><mi>y</mi></mrow><mo>*</mo></msubsup><mo>×</mo><mrow><mtext mathvariant="normal">Number of days in state </mtext><mspace width="0.333em"></mspace></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>a</mi><mo>,</mo><mi>s</mi><mo>,</mo><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h^*_{asy} \times \textrm{Number of days in state } (a,s,y)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>h</mi><mrow><mi>a</mi><mi>s</mi><mi>y</mi></mrow><mo>*</mo></msubsup><mo>×</mo><mrow><mtext mathvariant="normal">Number of days in state </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">(</mo><mi>a</mi><mo>,</mo><mi>s</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h^*_{asy} \times \textrm{Number of days in state } (a,s,y)</annotation></semantics></math>
 in the follow-up where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>h</mi><mrow><mi>a</mi><mi>s</mi><mi>y</mi></mrow><mo>*</mo></msubsup><annotation encoding="application/x-tex">h^*_{asy}</annotation></semantics></math>
 is the expected hazard for age
@@ -241,26 +241,26 @@ to the disease-specific mortality and other cause mortality.</p>
 for individual
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
 can be partitioned into two constituent parts:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msub><mi>λ</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation} h_i(t) = h^*_i(t) + \lambda_i(t) \end{equation}</annotation></semantics></math>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mi>λ</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\begin{equation} h_i(t) = h^*_i(t) + \lambda_i(t) \end{equation}</annotation></semantics></math>
 where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_i(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h_i(t)</annotation></semantics></math>
 is the all-cause mortality rate (hazard),
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h^*_i(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h^*_i(t)</annotation></semantics></math>
 is the expected or background mortality rate and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\lambda_i(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\lambda_i(t)</annotation></semantics></math>
 is the excess mortality rate. Equivalently, the hazard rates can be
 transformed to the survival scale which gives the all-cause survival at
 time
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
 as the product of the expected survival and the relative survival:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>R</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation} S_i(t) = S^*_i(t) R_i(t) \end{equation}</annotation></semantics></math>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>R</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\begin{equation} S_i(t) = S^*_i(t) R_i(t) \end{equation}</annotation></semantics></math>
 The relative survival,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">R_i(t)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">R_i(t)</annotation></semantics></math>,
 is therefore the ratio of all-cause survival and the expected survival
 in the background population. Typically,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h_i^*(t)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>h</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">h_i^*(t)</annotation></semantics></math>
 (and hence
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">S_i^*(t)</annotation></semantics></math>)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>S</mi><mi>i</mi><mo>*</mo></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">S_i^*(t)</annotation></semantics></math>)
 are obtained from population lifetables. The expected mortality rates
 are assumed to be fixed and known and a parametric model is then used to
 estimate the relative survival (or equivalently excess hazard).</p>
@@ -340,13 +340,6 @@ curves between the two prognostic groups.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">km</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/survfit.html" class="external-link">survfit</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">recyrs</span>, <span class="va">censrec</span><span class="op">)</span><span class="op">~</span><span class="va">group2</span>, data<span class="op">=</span><span class="va">bc</span><span class="op">)</span></span>
 <span><span class="va">kmsurvplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survminer/man/ggsurvplot.html" class="external-link">ggsurvplot</a></span><span class="op">(</span><span class="va">km</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">ggpubr</span> package.</span></span>
-<span><span class="co">#&gt;   Please report the issue at <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/kassambara/ggpubr/issues&gt;</span>.</span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">This warning is displayed once per session.</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">generated.</span></span></span>
 <span><span class="va">kmsurvplot</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Time from diagnosis (years)"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
 </div>
@@ -888,18 +881,17 @@ background mortality rates is also supported.</p>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-ederer_relative_1961" class="csl-entry">
 Ederer, F., L. M. Axtell, and S. J. Cutler. 1961. <span>“The Relative
 Survival Rate: A Statistical Methodology.”</span> <em>National Cancer
 Institute Monograph</em> 6 (September): 101–21.
 </div>
 <div id="ref-rutherford_nice_2020" class="csl-entry">
-Rutherford, Mark J, Paul C Lambert, Michael J Sweeting, Becky
-Pennington, Michael J Crowther, Keith R Abrams, and Nicholas R. Latimer.
-2020. <span>“<span>NICE</span> <span>DSU</span> <span>Technical</span>
+Rutherford, Mark J, Paul C Lambert, Michael J Sweeting, et al. 2020.
+<em><span>NICE</span> <span>DSU</span> <span>Technical</span>
 <span>Support</span> <span>Document</span> 21: <span>Flexible</span>
-Methods for Survival Analysis.”</span>
+Methods for Survival Analysis</em>.
 </div>
 <div id="ref-syriopoulou_inverse_2021" class="csl-entry">
 Syriopoulou, Elisavet, Mark J. Rutherford, and Paul C. Lambert. 2021.
@@ -908,8 +900,8 @@ in the Relative Survival Framework.”</span> <em>Statistics in
 Medicine</em> 40 (27): 6069–92. <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.9171" class="external-link">https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.9171</a>.
 </div>
 <div id="ref-therneau_1999" class="csl-entry">
-Therneau, Terry M. 1999. <span>“A Package for Survival Analysis in
-<span>S</span>.”</span> <a href="https://www.mayo.edu/research/documents/tr53pdf/doc-10027379" class="external-link">https://www.mayo.edu/research/documents/tr53pdf/doc-10027379</a>.
+Therneau, Terry M. 1999. <em>A Package for Survival Analysis in
+<span>S</span></em>. <a href="https://www.mayo.edu/research/documents/tr53pdf/doc-10027379" class="external-link">https://www.mayo.edu/research/documents/tr53pdf/doc-10027379</a>.
 </div>
 </div>
 </div>
@@ -925,7 +917,7 @@ Therneau, Terry M. 1999. <span>“A Package for Survival Analysis in
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

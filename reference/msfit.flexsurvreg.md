@@ -140,6 +140,7 @@ C. H. Jackson <chris.jackson@mrc-bsu.cam.ac.uk>
 ## Examples
 
 ``` r
+
 ## 3 state illness-death model for bronchiolitis obliterans
 ## Compare clock-reset / semi-Markov multi-state models
 

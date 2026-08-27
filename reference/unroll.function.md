@@ -85,6 +85,7 @@ Christopher Jackson \<chris.jackson@mrc-bsu.cam.ac.uk\>
 ## Examples
 
 ``` r
+
 fn <- unroll.function(ncol, x=1:3)
 fn(1:3, 1:3, 1:3) # equivalent to...
 #> [1] 3

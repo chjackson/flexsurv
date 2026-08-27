@@ -77,11 +77,11 @@ The original generalized gamma distribution simplifies to the gamma,
 exponential and Weibull distributions with the following
 parameterisations:
 
-|                                          |     |                                                                         |
-|------------------------------------------|-----|-------------------------------------------------------------------------|
-| `dgengamma.orig(x, shape, scale, k=1)`   | `=` | [`dweibull`](https://rdrr.io/r/stats/Weibull.html)`(x, shape, scale)`   |
-| `dgengamma.orig(x, shape=1, scale, k)`   | `=` | [`dgamma`](https://rdrr.io/r/stats/GammaDist.html)`(x, shape=k, scale)` |
-| `dgengamma.orig(x, shape=1, scale, k=1)` | `=` | [`dexp`](https://rdrr.io/r/stats/Exponential.html)`(x, rate=1/scale)`   |
+|  |  |  |
+|----|----|----|
+| `dgengamma.orig(x, shape, scale, k=1)` | `=` | [`dweibull`](https://rdrr.io/r/stats/Weibull.html)`(x, shape, scale)` |
+| `dgengamma.orig(x, shape=1, scale, k)` | `=` | [`dgamma`](https://rdrr.io/r/stats/GammaDist.html)`(x, shape=k, scale)` |
+| `dgengamma.orig(x, shape=1, scale, k=1)` | `=` | [`dexp`](https://rdrr.io/r/stats/Exponential.html)`(x, rate=1/scale)` |
 
 Also as k tends to infinity, it tends to the log normal (as in
 [`dlnorm`](https://rdrr.io/r/stats/Lognormal.html)) with the following

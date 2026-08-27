@@ -15,27 +15,33 @@ obtained by setting covariates to their mean values (both can be
 obtained using `summary.flexsurvreg`), but it may be more useful to
 obtain the marginal survival for each treatment group. Regression
 standardization achieves this by fitting a regression model including
-the treatment group $Z$, covariates $X$ and possible interactions
-between $X$ and $Z$. The standardized survival can be estimated by
+the treatment group $`Z`$, covariates $`X`$ and possible interactions
+between $`X`$ and $`Z`$. The standardized survival can be estimated by
 obtaining predictions for every individual in the study under each fixed
 treatment arm and averaging these individual-specific estimates. The
 marginal survival over the distribution of covariates in the study
-assuming all participants were assigned to arm $Z = z$ is:
-$$S_{s}\left( t|Z = z \right) = E\left\lbrack S\left( t|Z = z,X \right) \right\rbrack = \frac{1}{N}\sum\limits_{i = 1}^{N}S\left( t|Z = z,X = x_{i} \right)$$
-for covariate values (vectors) $x_{1},...,x_{N}$. Here standarization is
-done over all $N$ patients in the study and provides a counterfactual
-marginal estimate when setting $Z = z$. The standardized survival is
+assuming all participants were assigned to arm $`Z=z`$ is:
+``` math
+\begin{equation}
+S_s(t|Z=z) = E[S(t | Z=z, X)] = \frac{1}{N} \sum_{i=1}^{N} S(t | Z=z, X=x_i) 
+\end{equation}
+```
+for covariate values (vectors) $`x_1,...,x_{N}`$. Here standarization is
+done over all $`N`$ patients in the study and provides a counterfactual
+marginal estimate when setting $`Z=z`$. The standardized survival is
 therefore an estimate of the marginal survival if all study patients had
-been assigned to group $z$. Under certain assumptions, differences in
-marginal survival provide estimates of causal effects (Syriopoulou,
-Rutherford, and Lambert (2021)) and certain estimands such as the
-average treatment effect (ATE) can be targeted:
-$$ATE = S_{s}\left( t|Z = z_{1} \right) - S_{s}\left( t|Z = z_{0} \right)\rbrack$$
+been assigned to group $`z`$. Under certain assumptions, differences in
+marginal survival provide estimates of causal effects (Syriopoulou et
+al. (2021)) and certain estimands such as the average treatment effect
+(ATE) can be targeted:
+``` math
+ ATE = S_s(t|Z=z_1) - S_s(t|Z=z_0)]
+```
 Alternatively, an average treatment effect in the treated (ATET)
 estimand can be targeted by averaging over only patients who were in the
-intervention treatment arm $Z = z_{1}$. Standardization estimates can
-also be obtained for other target populations of interest. For example
-it may be important to predict survival in an external population with
+intervention treatment arm $`Z=z_1`$. Standardization estimates can also
+be obtained for other target populations of interest. For example it may
+be important to predict survival in an external population with
 different characteristics to the study population.
 
 The hazard function for the standardized survival can be obtained to
@@ -43,10 +49,14 @@ understand how the shape of the hazard changes over time. This provides
 an estimate of the marginal hazard. It can be shown (Rutherford et al.
 (2020), Appendix I) that the hazard of the standardized survival can be
 calculated as
-$$h_{s}\left( t|Z = z \right) = \frac{\sum\limits_{i = 1}^{N}S\left( t|Z = z,X = x_{i} \right)h\left( t|Z = z,X = x_{i} \right)}{\sum\limits_{i = 1}^{N}S\left( t|Z = z,X = x_{i} \right)}$$
-This is a weighted average of the $N$ individual hazard functions,
-weighted by the probability of survival at time $t$. Patients who are
-unlikely to have survived to $t$ will contribute less weight to this
+``` math
+\begin{equation} 
+h_s(t|Z=z) = \frac{\sum_{i=1}^{N} S(t|Z=z,X=x_i)h(t|Z=z,X=x_i)}{\sum_{i=1}^{N} S(t | Z=z, X=x_i)} 
+\end{equation}
+```
+This is a weighted average of the $`N`$ individual hazard functions,
+weighted by the probability of survival at time $`t`$. Patients who are
+unlikely to have survived to $`t`$ will contribute less weight to this
 hazard function.
 
 ### Calculating marginal expected survival and hazard
@@ -68,34 +78,43 @@ age, sex, calendar year and occasionally other prognostic factors
 
 The Ederer or “exact” method for estimating expected survival assumes
 subjects in the trial population are not censored before the end of a
-stated follow-up time (Ederer, Axtell, and Cutler 1961). The expected
-survival is then the survival we would expect to see in an age-sex
-matched general population if all patients are continuously followed-up.
-This is the approach used by `standsurv` to calculate expected survival
-and is the “most appropriate when doing forcasting, sample size
-calculations or other predictions of the ‘future’ where censoring is not
-an issue” (Therneau 1999).
+stated follow-up time (Ederer et al. 1961). The expected survival is
+then the survival we would expect to see in an age-sex matched general
+population if all patients are continuously followed-up. This is the
+approach used by `standsurv` to calculate expected survival and is the
+“most appropriate when doing forcasting, sample size calculations or
+other predictions of the ‘future’ where censoring is not an issue”
+(Therneau 1999).
 
 Based on the exact method, the marginal expected survival using
-background mortality rates is calculated using all $N$ patients in the
-trial at any time point $t$:
+background mortality rates is calculated using all $`N`$ patients in the
+trial at any time point $`t`$:
 
-$$S^{*}(t) = \frac{1}{N}\sum\limits_{i = 1}^{N}S_{i}^{*}(t)$$ where
-$S_{i}^{*}(t)$ is the expected survival for the $i$th subject at time
-$t$. It follows that the marginal expected hazard is a weighted average
-of the expected hazard rates:
-$$h^{*}(t) = \frac{\sum\limits_{i = 1}^{N}S_{i}^{*}(t)h_{i}^{*}(t)}{\sum\limits_{i = 1}^{N}S_{i}^{*}(t)}$$
+``` math
+\begin{equation} 
+S^*(t) = \frac{1}{N} \sum_{i=1}^N S_i^*(t) 
+\end{equation}
+```
+where $`S_i^*(t)`$ is the expected survival for the $`i`$th subject at
+time $`t`$. It follows that the marginal expected hazard is a weighted
+average of the expected hazard rates:
+``` math
+\begin{equation} 
+h^*(t) = \frac{
+\sum_{i=1}^N S_i^*(t) h_i^*(t)}{\sum_{i=1}^N S_i^*(t)} 
+\end{equation}
+```
 
-The expected survival for the $i$th subject at follow-up time $t$ is
+The expected survival for the $`i`$th subject at follow-up time $`t`$ is
 calculated based on matching to the general population hazard rates. If
 lifetables are utilised these often provide mortality rates by sex
-($s$), age ($a$) and calendar year ($y$), in yearly or 5-yearly
-categories. In practice the expected survival at time $t$ for a given
+($`s`$), age ($`a`$) and calendar year ($`y`$), in yearly or 5-yearly
+categories. In practice the expected survival at time $`t`$ for a given
 subject is calculated from the cumulative hazard. At a given follow-up
-time $t$ this is the sum of
-$h_{asy}^{*} \times {\text{Number of days in state}\mspace{6mu}}(a,s,y)$
-in the follow-up where $h_{asy}^{*}$ is the expected hazard for age $a$,
-sex $s$, year $y$. This requires follow-up time for each individual in
+time $`t`$ this is the sum of
+$`h^*_{asy} \times \textrm{Number of days in state } (a,s,y)`$ in the
+follow-up where $`h^*_{asy}`$ is the expected hazard for age $`a`$, sex
+$`s`$, year $`y`$. This requires follow-up time for each individual in
 the study dataset to be split by multiple timescales (e.g. age and year)
 into time epochs, which can be visualised as a Lexis diagram. Each epoch
 can then be matched to a corresponding expected mortality rate.
@@ -117,21 +136,25 @@ Alternatively, if cause of death information is available and reliable,
 a separate cause-specific model can be fitted to the disease-specific
 mortality and other cause mortality.
 
-The all-cause mortality rate at time $t$ for individual $i$ can be
+The all-cause mortality rate at time $`t`$ for individual $`i`$ can be
 partitioned into two constituent parts:
-$$h_{i}(t) = h_{i}^{*}(t) + \lambda_{i}(t)$$ where $h_{i}(t)$ is the
-all-cause mortality rate (hazard), $h_{i}^{*}(t)$ is the expected or
-background mortality rate and $\lambda_{i}(t)$ is the excess mortality
-rate. Equivalently, the hazard rates can be transformed to the survival
-scale which gives the all-cause survival at time $t$ as the product of
-the expected survival and the relative survival:
-$$S_{i}(t) = S_{i}^{*}(t)R_{i}(t)$$ The relative survival, $R_{i}(t)$,
-is therefore the ratio of all-cause survival and the expected survival
-in the background population. Typically, $h_{i}^{*}(t)$ (and hence
-$S_{i}^{*}(t)$) are obtained from population lifetables. The expected
-mortality rates are assumed to be fixed and known and a parametric model
-is then used to estimate the relative survival (or equivalently excess
-hazard).
+``` math
+\begin{equation} h_i(t) = h^*_i(t) + \lambda_i(t) \end{equation}
+```
+where $`h_i(t)`$ is the all-cause mortality rate (hazard), $`h^*_i(t)`$
+is the expected or background mortality rate and $`\lambda_i(t)`$ is the
+excess mortality rate. Equivalently, the hazard rates can be transformed
+to the survival scale which gives the all-cause survival at time $`t`$
+as the product of the expected survival and the relative survival:
+``` math
+\begin{equation} S_i(t) = S^*_i(t) R_i(t) \end{equation}
+```
+The relative survival, $`R_i(t)`$, is therefore the ratio of all-cause
+survival and the expected survival in the background population.
+Typically, $`h_i^*(t)`$ (and hence $`S_i^*(t)`$) are obtained from
+population lifetables. The expected mortality rates are assumed to be
+fixed and known and a parametric model is then used to estimate the
+relative survival (or equivalently excess hazard).
 
 ## `standsurv`
 
@@ -172,6 +195,7 @@ with a standard deviation of 5. We load this dataset and create these
 additional variables.
 
 ``` r
+
 library(flexsurv)
 library(flexsurvcure)
 library(ggplot2)
@@ -180,6 +204,7 @@ library(survminer)
 ```
 
 ``` r
+
 data(bc)
 set.seed(236236)
 ## Age at diagnosis is correlated with survival time. A longer survival time 
@@ -209,15 +234,9 @@ A plot of the Kaplan-Meier shows a clear separation in the survival
 curves between the two prognostic groups.
 
 ``` r
+
 km <- survfit(Surv(recyrs, censrec)~group2, data=bc)
 kmsurvplot <- ggsurvplot(km) 
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the ggpubr package.
-#>   Please report the issue at <https://github.com/kassambara/ggpubr/issues>.
-#> This warning is displayed once per session.
-#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-#> generated.
 kmsurvplot + xlab("Time from diagnosis (years)")
 #> NULL
 ```
@@ -238,6 +257,7 @@ Weibull distribution whilst we use the `anc` argument in `flexsurvreg`
 to additionally allow group to affect the shape parameter.
 
 ``` r
+
 model.weibull.sep <- flexsurvreg(Surv(recyrs, censrec)~group2, 
                                  anc = list(shape = ~ group2), 
                                  data=bc, dist="weibullPH")
@@ -270,6 +290,7 @@ using the `summary` function and storing these predictions in a tidy
 data.frame with the argument `tidy=T`.
 
 ``` r
+
 predictions <- summary(model.weibull.sep, type = "survival", tidy=T)
 ggplot() + geom_line(aes(x=time, y=est, color = group2), data=predictions) + 
   geom_step(aes(x=time, y=surv, group=strata), data=kmsurvplot$data.survplot)
@@ -304,6 +325,7 @@ named `at1` up to `atn` for the n scenarios specified in the `at`
 argument.
 
 ``` r
+
 ss.weibull.sep.surv <- standsurv(model.weibull.sep,
                                              type = "survival",
                                              at = list(list(group2 = "Good"),
@@ -331,6 +353,7 @@ function. A plot of the marginal estimates can be easily produced using
 the `plot` function, which produces a `ggplot` object.
 
 ``` r
+
 plot(ss.weibull.sep.surv)
 ```
 
@@ -340,6 +363,7 @@ The plot can be easily further manipulated, for example by changing axis
 labels and adding further plots.
 
 ``` r
+
 plot(ss.weibull.sep.surv) + xlab("Time since diagnosis (years)") +
   geom_step(aes(x=time, y=surv, group=strata), data=kmsurvplot$data.survplot)
 ```
@@ -353,6 +377,7 @@ restricted mean survival time (RMST). For example a plot of the hazard
 functions for the two groups is obtained as follows:
 
 ``` r
+
 ss.weibull.sep.haz <- standsurv(model.weibull.sep,
                                             type = "hazard",
                                             at = list(list(group2 = "Good"),
@@ -365,6 +390,7 @@ plot(ss.weibull.sep.haz) + xlab("Time since diagnosis (years)")
 Whilst a plot of RMST is given by
 
 ``` r
+
 ss.weibull.sep.rmst <- standsurv(model.weibull.sep,
                                              type = "rmst",
                                              at = list(list(group2 = "Good"),
@@ -384,6 +410,7 @@ argument, and a plot of the contrast can be obtained using
 `contrast = TRUE` argument in the `plot` function.
 
 ``` r
+
 ss.weibull.sep.3 <- standsurv(model.weibull.sep,
                                           type = "survival",
                                                  at = list(list(group2 = "Good"),
@@ -403,6 +430,7 @@ start with a high elevated risk but have a continued excess risk up to
 the end of follow-up, compared to those with Good prognosis.
 
 ``` r
+
 ss.weibull.sep.4 <- standsurv(model.weibull.sep,
                                           type = "hazard",
                                                  at = list(list(group2 = "Good"),
@@ -438,6 +466,7 @@ delta method. For computational efficiency here we only predict for 10
 time points.
 
 ``` r
+
 ss.weibull.sep.boot <- standsurv(model.weibull.sep,
                                           type = "survival",
                                                  at = list(list(group2 = "Good"),
@@ -484,6 +513,7 @@ age-distribution of our study population and secondly standardized to an
 older population with mean age of 75 and standard deviation 5.
 
 ``` r
+
 model.weibull.age.sep <- flexsurvreg(Surv(recyrs, censrec)~group2 + age, 
                                  anc = list(shape = ~ group2 + age), 
                                  data=bc, dist="weibullPH")
@@ -534,6 +564,7 @@ for combinations of the stratification factors. A summary of the
 `survexp.us` object shows that the time-scale is in days.
 
 ``` r
+
 summary(survexp.us)
 #>  Rate table with 3 dimensions:
 #>  age ranges from 0 to 39812.25; with 110 categories
@@ -573,6 +604,7 @@ by using the argument `expected = TRUE` in the
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) function.
 
 ``` r
+
 ss.weibull.sep.expected <- standsurv(model.weibull.sep,
                                                  type = "survival",
                                                  at = list(list(group2 = "Good"),
@@ -597,6 +629,7 @@ marginal (predicted) survival for our breast cancer population. We can
 also obtain the expected hazards:
 
 ``` r
+
 ss.weibull.sep.expectedh <- standsurv(model.weibull.sep,
                                                  type = "hazard",
                                                  at = list(list(group2 = "Good"),
@@ -658,6 +691,7 @@ person-year as this is the timescale used in the flexsurv regression
 model.
 
 ``` r
+
 ## reshape US lifetable to be a tidy data.frame, and convert rates to per person-year as flexsurv regression is in years
 survexp.us.df <- as.data.frame.table(survexp.us, responseName = "exprate") %>%
   mutate(exprate = 365.25 * exprate)
@@ -715,6 +749,7 @@ would use `type = "relsurvival"` and `type = "excesshazard"`,
 respectively.
 
 ``` r
+
 ## All-cause survival
 ss.weibull.sep.rs.surv <- standsurv(model.weibull.sep.rs,
                                                  type = "survival",
@@ -737,6 +772,7 @@ plot(ss.weibull.sep.rs.surv, expected = T)
 ![](standsurv_files/figure-html/unnamed-chunk-20-1.png)
 
 ``` r
+
 
 # All-cause hazard
 ss.weibull.sep.rs.haz <- standsurv(model.weibull.sep.rs,
@@ -767,6 +803,7 @@ hazard tends to the expected hazard and follows it thereafter.
 A plot of the excess hazard confirms this.
 
 ``` r
+
 # Excess hazard
 ss.weibull.sep.rs.excesshaz <- standsurv(model.weibull.sep.rs,
                                                  type = "excesshazard",
@@ -803,15 +840,14 @@ Ederer, F., L. M. Axtell, and S. J. Cutler. 1961. “The Relative Survival
 Rate: A Statistical Methodology.” *National Cancer Institute Monograph*
 6 (September): 101–21.
 
-Rutherford, Mark J, Paul C Lambert, Michael J Sweeting, Becky
-Pennington, Michael J Crowther, Keith R Abrams, and Nicholas R. Latimer.
-2020. “NICE DSU Technical Support Document 21: Flexible Methods for
-Survival Analysis.”
+Rutherford, Mark J, Paul C Lambert, Michael J Sweeting, et al. 2020.
+*NICE DSU Technical Support Document 21: Flexible Methods for Survival
+Analysis*.
 
 Syriopoulou, Elisavet, Mark J. Rutherford, and Paul C. Lambert. 2021.
 “Inverse Probability Weighting and Doubly Robust Standardization in the
 Relative Survival Framework.” *Statistics in Medicine* 40 (27): 6069–92.
 <https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.9171>.
 
-Therneau, Terry M. 1999. “A Package for Survival Analysis in S.”
+Therneau, Terry M. 1999. *A Package for Survival Analysis in S*.
 <https://www.mayo.edu/research/documents/tr53pdf/doc-10027379>.

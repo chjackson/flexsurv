@@ -297,6 +297,7 @@ Christopher Jackson \<chris.jackson@mrc-bsu.cam.ac.uk\>
 ## Examples
 
 ``` r
+
 ## Best-fitting model to breast cancer data from Royston and Parmar (2002)
 ## One internal knot (2 df) and cumulative odds scale
 

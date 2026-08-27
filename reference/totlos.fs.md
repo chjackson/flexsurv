@@ -13,6 +13,7 @@ totlos.fs(
   x,
   trans = NULL,
   t = 1,
+  t0 = 0,
   newdata = NULL,
   ci = FALSE,
   tvar = "trans",
@@ -46,7 +47,14 @@ totlos.fs(
 
 - t:
 
-  Time or vector of times to predict up to. Must be finite.
+  Time or vector of times to predict up to. Must be finite, and greater
+  than `t0`.
+
+- t0:
+
+  Time to predict from, default 0. The expected length of stay is
+  computed over the interval `(t0, t)`, but conditional on the state
+  occupied at time 0 (as in `totlos.msm`), not at time `t0`.
 
 - newdata:
 
@@ -119,6 +127,12 @@ probability matrix for time \\t\\, and \\Q(t)\\ is the transition hazard
 or intensity as a function of \\t\\. The initial conditions are \\T(0) =
 0\\ and \\P(0) = I\\.
 
+If `t0` is supplied, the length of stay is computed over the interval
+from `t0` to `t` as \\T(t) - T(t_0)\\. Note that \\P(t)\\ here is always
+the transition probability from time 0, so the result is conditional on
+the state occupied at time 0, not at time `t0`. This matches the
+behaviour of `totlos.msm` with its `fromt` argument.
+
 Note that the package msm has a similar method `totlos.msm`. `totlos.fs`
 should give the same results as `totlos.msm` when both of these
 conditions hold:
@@ -155,6 +169,7 @@ Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>.
 ## Examples
 
 ``` r
+
 # BOS example in vignette, and in msfit.flexsurvreg
 bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans,
                     data=bosms3, dist="exp")

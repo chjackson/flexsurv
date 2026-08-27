@@ -98,8 +98,11 @@ summary(
   `"quantile"` for quantiles of the survival time distribution.
 
   `"link"` for the fitted value of the location parameter (i.e. the
-  "linear predictor" but on the natural scale of the parameter, not on
-  the log scale)
+  "linear predictor" but on the natural scale of the parameter, not a
+  transformed scale). For example, positive location parameters (like
+  `rate` in the exponential) are not log transformed and remain
+  positive, while unrestricted location parameters (like `meanlog` for
+  the log normal) remain unrestricted.
 
   Ignored if `"fn"` is specified.
 

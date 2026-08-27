@@ -4,7 +4,8 @@ The transition probability matrix for time-inhomogeneous Markov
 multi-state models fitted to time-to-event data with
 [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
 This has \\r,s\\ entry giving the probability that an individual is in
-state \\s\\ at time \\t\\, given they are in state \\r\\ at time \\0\\.
+state \\s\\ at time \\t\\, given they are in state \\r\\ at time
+\\t_0\\.
 
 ## Usage
 
@@ -13,6 +14,7 @@ pmatrix.fs(
   x,
   trans = NULL,
   t = 1,
+  t0 = 0,
   newdata = NULL,
   condstates = NULL,
   ci = FALSE,
@@ -49,6 +51,10 @@ pmatrix.fs(
 - t:
 
   Time or vector of times to predict state occupancy probabilities for.
+
+- t0:
+
+  Starting time for the prediction, defaulting to 0.
 
 - newdata:
 
@@ -169,6 +175,7 @@ Christopher Jackson <chris.jackson@mrc-bsu.cam.ac.uk>.
 ## Examples
 
 ``` r
+
 # BOS example in vignette, and in msfit.flexsurvreg
 bexp <- flexsurvreg(Surv(Tstart, Tstop, status) ~ trans,
                     data=bosms3, dist="exp")
