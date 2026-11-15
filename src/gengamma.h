@@ -40,17 +40,31 @@ namespace {
 	  return R_NegInf;
 	}
 	
-	/*
-	  this function relies on interesting levels of cancellation if
-	  Q is small or x is small
-	*/
-	
 	if (Q!=0) {
 	  const double y = std::log(x);
 	  const double w = (y - mu) / sigma;
 	  const double abs_q = std::abs(Q);
-	  const double qi = 1/(Q * Q);
 	  const double qw = Q * w;
+          if (abs_q < 0.05 && std::isfinite(w)) {
+            // The next log-density correction, -Q^10/1260, has magnitude < 8e-17.
+            const double q2 = Q * Q;
+            double deviance;
+            if (std::abs(qw) < 0.5) {
+              // Taylor terms through order 16 avoid cancellation for |qw| < 0.5.
+              double term = 0.5, sum = term;
+              for (int k = 3; k <= 16; ++k) {
+                term *= qw / k;
+                sum += term;
+              }
+              deviance = w * w * sum;
+            } else {
+              deviance = (std::expm1(qw) - qw) / q2;
+            }
+            // Stirling expansion of lgamma(Q^-2).
+            return -std::log(sigma) - std::log(x) - M_LN_SQRT_2PI
+              - deviance - q2 / 12 + q2 * q2 * q2 / 360;
+          }
+          const double qi = 1/(Q * Q);
 	  return -std::log(sigma*x) +
 	    std::log(abs_q) * (1 - 2 * qi) +
 	    qi * (qw - std::exp(qw)) - R::lgammafn(qi);
