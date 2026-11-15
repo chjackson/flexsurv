@@ -559,7 +559,7 @@ standsurv.fn.achazard <- function(t, object, newdata, i, weighted, tr.fun, expsu
   if(weighted){
     pred$weights <- rep(newdata$`(weights)`, each=length(t))
     predsum <- pred %>% group_by(levels.fct, time) %>% 
-      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh*.data$eh, .data$rs*.data$es * .data$weights))) %>%
+      summarise("at{i}" := tr.fun(weighted.mean(.data$excessh + .data$eh, .data$rs*.data$es * .data$weights))) %>%
       ungroup() %>% select(-levels.fct)
   } else {
     predsum <- pred %>% group_by(levels.fct, time) %>% 
