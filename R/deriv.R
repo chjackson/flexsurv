@@ -59,7 +59,8 @@ Dminusloglik.flexsurv <- function(optpars, Y, X=0, weights, bhazard, rtrunc, dli
         offseti <- 1 / (1 + bhazard[dead] / haz)
         ## Note d/dx log(x) = 1/x ddx
         dscense <- dderiv(dfns$DLS, ddcall, X[dead,,drop=FALSE], mx, dlist)
-        doff <- - offseti*bhazard[dead] * (dloglik[dead,]  -  dscense)/ haz
+        # Restore the density score before differentiating the hazard.
+        doff <- - offseti*bhazard[dead] * (dloglik[dead,] + dstrunc[dead,] - dscense)/ haz
         dloglik[dead,] <- dloglik[dead,] + doff
     }
     res <- - colSums(dloglik*weights)
