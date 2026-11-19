@@ -1,17 +1,45 @@
 
-# Version 2.3.3 (2026-
+# Version 2.4.0 (2026-11-??)
 
-* Added `t0` arguments to `pmatrix.fs` and `totlos.fs` to allow
+## New features
+
+* Utility `custom_pexp()` to enable a piecewise-constant hazard
+  model with any time cuts to be used as a custom distribution in 
+  `flexsurvreg()`.
+
+* Added `t0` arguments to `pmatrix.fs()` and `totlos.fs()` to allow
   prediction of transition probabilities and total length of stay for
   periods starting at times other than 0.
 
-* `B` argument added to `predict.flexsurvreg` (#197).
+* `B` argument added to `predict.flexsurvreg()` (#197).
 
 * Robustified standard errors in weighted estimation for specific
   parametric models (those with analytic likelihood derivatives:
   exponential, Weibull, Gompertz and hazard spline)
 
-* Corrected documentation in the distributions vignette 
+## Bug fixes and refinements
+
+* `dgengamma` now more robust near the log-normal special case (issue
+  #221, PR #222)
+
+* Corrected likelihood derivatives for right-truncated `flexsurvreg`
+  models, which improves convergence (issue #219, PR #220).
+
+* Bug fix for models with both background hazard (`bhazard`) and
+  delayed entry (issue #223, PR #224).
+  
+* Bug fix for `summary(type=hazard)` when conditioning on survival to
+  `start` (#225, #226).
+
+* In `standsurv`, corrections to bootstrap standard errors for
+  contrasts (#227, #228), behaviour with ancillary covariates (#229,
+  #230) and weighted standardisation with all-cause hazard
+  (#231, #232).
+
+
+## Documentation improvements
+
+* Corrected documentation in the distributions vignette: 
 
     - the gamma location parameter is `rate` not `scale`
 	
@@ -23,6 +51,10 @@
   covariate effects.
   
 * Miscellaneous minor documentation improvements.
+
+
+
+
 
 
 # Version 2.3.2 (2024-08-16)

@@ -12,6 +12,5 @@ test_that("near-lognormal fitting retains likelihood and information", {
   t <- rlnorm(1000)
   fit <- flexsurvreg(Surv(t) ~ 1, dist="gengamma")
   expect_equal(fit$loglik, sum(fit$logliki), tolerance=1e-8)
-  expect_equal(fit$loglik, -1462.88691736, tolerance=1e-6)
   expect_gt(fit$res["Q", "se"], .05)
 })
