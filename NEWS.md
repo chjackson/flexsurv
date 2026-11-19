@@ -1,5 +1,5 @@
 
-# Version 2.4.0 (2026-11-??)
+# Version 2.4.0 (2026-11-19)
 
 ## New features
 
@@ -11,11 +11,11 @@
   prediction of transition probabilities and total length of stay for
   periods starting at times other than 0.
 
-* `B` argument added to `predict.flexsurvreg()` (#197).
-
 * Robustified standard errors in weighted estimation for specific
   parametric models (those with analytic likelihood derivatives:
   exponential, Weibull, Gompertz and hazard spline)
+
+* `B` argument added to `predict.flexsurvreg()` (#197).
 
 ## Bug fixes and refinements
 

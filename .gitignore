@@ -25,3 +25,4 @@ inst/doc
 *.gcda
 *.gcno
 *.gcov
+/docs/
