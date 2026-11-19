@@ -35,75 +35,7 @@ flexsurvrtrunc(
 
 \item{method}{If \code{"joint"} then the "joint-conditional" method is used.  If \code{"final"} then the "conditional-on-final" method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).}
 
-\item{dist}{Typically, one of the strings in the first column of the
-  following table, identifying a built-in distribution.  This table also
-  identifies the location parameters, and whether covariates on these
-  parameters represent a proportional hazards (PH) or accelerated failure
-  time (AFT) model.  In an accelerated failure time model, the covariate
-  speeds up or slows down the passage of time.  The relation of the
-  reported coefficient to the "time acceleration factor" or hazard ratio
-  is described for
-  each distribution in the "Distributions reference" vignette.  Note the
-  interpretation of the sign of the coefficient may be different for
-  different distributions.   The table below indicates the interpretation
-  of a higher value for the coefficient in terms of the hazard or risk of
-  the event: "higher" meaning higher risk, and "lower" meaning lower risk. 
-
-  \tabular{lllll}{ \code{"gengamma"} \tab Generalized gamma (stable) \tab mu
-  \tab AFT \tab lower \cr \code{"gengamma.orig"} \tab Generalized gamma (original) \tab
-  scale \tab AFT \tab lower \cr \code{"genf"} \tab Generalized F (stable) \tab mu \tab
-  AFT \tab lower \cr \code{"genf.orig"} \tab Generalized F (original) \tab mu \tab AFT \tab lower
-  \cr \code{"weibull"} \tab Weibull \tab scale \tab AFT \tab lower \cr 
-  \code{"weibullPH"} \tab Weibull \tab scale \tab PH \tab higher \cr \code{"gamma"}
-  \tab Gamma \tab rate \tab AFT \tab higher \cr \code{"exp"} \tab Exponential \tab rate
-  \tab PH \tab higher \cr \code{"llogis"} \tab Log-logistic \tab scale \tab AFT \tab lower \cr
-  \code{"lnorm"} \tab Log-normal \tab meanlog \tab AFT \tab lower \cr \code{"gompertz"}
-  \tab Gompertz \tab rate \tab PH \tab higher \cr }
-
-  \code{"exponential"} and \code{"lognormal"} can be used as aliases for
-  \code{"exp"} and \code{"lnorm"}, for compatibility with
-  \code{\link[survival]{survreg}}.
-
-  Alternatively, \code{dist} can be a list specifying a custom distribution.
-  See section ``Custom distributions'' below for how to construct this list.
-
-  Very flexible spline-based distributions can also be fitted with
-  \code{\link{flexsurvspline}}.
-
-  The parameterisations of the built-in distributions used here are the same
-  as in their built-in distribution functions: \code{\link{dgengamma}},
-  \code{\link{dgengamma.orig}}, \code{\link{dgenf}},
-  \code{\link{dgenf.orig}}, \code{\link{dweibull}}, \code{\link{dgamma}},
-  \code{\link{dexp}}, \code{\link{dlnorm}}, \code{\link{dgompertz}},
-  respectively.  The functions in base R are used where available,
-  otherwise, they are provided in this package.
-
-  A package vignette "Distributions reference" lists the survivor functions
-  and covariate effect parameterisations used by each built-in distribution.
-
-  For the Weibull, exponential and log-normal distributions,
-  \code{\link{flexsurvreg}} simply works by calling \code{\link[survival]{survreg}} to
-  obtain the maximum likelihood estimates, then calling \code{\link{optim}}
-  to double-check convergence and obtain the covariance matrix for
-  \code{\link{flexsurvreg}}'s preferred parameterisation.
-
-  The Weibull parameterisation is different from that in
-  \code{\link[survival]{survreg}}, instead it is consistent with
-  \code{\link{dweibull}}.  The \code{"scale"} reported by
-  \code{\link[survival]{survreg}} is equivalent to \code{1/shape} as defined
-  by \code{\link{dweibull}} and hence \code{\link{flexsurvreg}}.  The first
-  coefficient \code{(Intercept)} reported by \code{\link[survival]{survreg}}
-  is equivalent to \code{log(scale)} in \code{\link{dweibull}} and
-  \code{\link{flexsurvreg}}.
-
-  Similarly in the exponential distribution, the rate, rather than the mean,
-  is modelled on covariates.
-
-  The object \code{flexsurv.dists} lists the names of the built-in
-  distributions, their parameters, location parameter, functions used to
-  transform the parameter ranges to and from the real line, and the
-  functions used to generate initial values of each parameter for
-  estimation.}
+\item{dist}{Parametric distribution family, see \code{\link{\flexsurvreg}}.  Note that covariates are not supported in \code{flexsurvrtrunc}.}
 
 \item{theta}{Initial value (or fixed value) for the exponential growth rate \code{theta}. Defaults to 1.}
 
@@ -142,7 +74,7 @@ estimates, by default 0.95.}
 This function estimates the distribution of the time between an initial and final event, in situations where individuals are only observed if they have experienced both events before a certain time, thus they are right-truncated at this time.   The time of the initial event provides information about the time from initial to final event, given the truncated observation scheme, and initial events are assumed to occur with an exponential growth rate.
 }
 \details{
-Covariates are not currently supported.
+Covariates are not supported.
 
 Note that \code{\link{flexsurvreg}}, with an \code{rtrunc} argument, can fit models for a similar kind of data, but those models ignore the information provided by the time of the initial event.
 

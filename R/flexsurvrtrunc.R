@@ -2,7 +2,7 @@
 ##'
 ##' This function estimates the distribution of the time between an initial and final event, in situations where individuals are only observed if they have experienced both events before a certain time, thus they are right-truncated at this time.   The time of the initial event provides information about the time from initial to final event, given the truncated observation scheme, and initial events are assumed to occur with an exponential growth rate.
 ##'
-##' Covariates are not currently supported.
+##' Covariates are not supported.
 ##'
 ##' Note that \code{\link{flexsurvreg}}, with an \code{rtrunc} argument, can fit models for a similar kind of data, but those models ignore the information provided by the time of the initial event.
 ##'
@@ -20,6 +20,8 @@
 ##' @param data Data frame containing \code{t}, \code{rtrunc} and \code{tinit}.
 ##'
 ##' @param method If \code{"joint"} then the "joint-conditional" method is used.  If \code{"final"} then the "conditional-on-final" method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).
+##'
+##' @param dist Parametric distribution family, see \code{\link{\flexsurvreg}}.  Note that covariates are not supported in \code{flexsurvrtrunc}.
 ##'
 ##' @param theta Initial value (or fixed value) for the exponential growth rate \code{theta}. Defaults to 1.
 ##'
@@ -95,9 +97,9 @@ flexsurvrtrunc <- function(t, tinit, rtrunc, tmax, data=NULL, method="joint", di
     if (is.null(inits)){
         if (is.null(theta)) theta <- 1
 
-        ## FIXME for aux arguments.  pop out a function for this 
-        ## what is this for.  to fit a survreg weibull and use their heiurisitic
-        ## shdnt be a problem, just build the formula up 
+        ## todo pop out a function for this 
+        ## in aid of fitting a survreg weibull and use their heuristic
+        ## shouldn't be a problem, just build the formula up 
         build_inits_aux <- function() {
             list(forms = list(Surv(tdelay) ~ 1),
                  control = list(),
