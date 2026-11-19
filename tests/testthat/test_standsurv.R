@@ -382,3 +382,33 @@ test_that('t ordering', {
   expect_true(all(ss5$at1 <= ss5$at1_uci))
 
 })
+
+test_that("bootstrap contrasts preserve shared parameter draws", {
+  d <- data.frame(time=c((1:50)/10, (1:50)/20), x=rep(0:1, each=50))
+  fit <- flexsurvreg(Surv(time) ~ x, data=d, dist="exp")
+  B <- 200
+  ss <- suppressMessages(standsurv(fit, t=2,
+      at=list(list(x=0), list(x=.25)), contrast="difference",
+      boot=TRUE, B=B, seed=11, ci=TRUE, se=TRUE))
+  set.seed(11)
+  sim <- normboot.flexsurvreg(fit, B=B, newdata=data.frame(x=c(0, .25)))
+  difference <- exp(-2*sim[[2]][,"rate"]) - exp(-2*sim[[1]][,"rate"])
+  expect_equal(ss$contrast2_1_se, sd(difference))
+  expect_equal(c(ss$contrast2_1_lci, ss$contrast2_1_uci),
+               unname(quantile(difference, c(.025, .975))))
+})
+
+test_that("standardization includes ancillary-only covariates", {
+  d <- data.frame(time=1:4, age=c(0, 0, 1, 1))
+  fit <- flexsurvreg(Surv(time) ~ 1, anc=list(shape=~age),
+                    data=d, dist="weibull", inits=c(1, 1, log(4)),
+                    fixedpars=TRUE)
+  nd <- data.frame(age=0:1)
+  expected <- mean(pweibull(.5, shape=c(1, 4), scale=1, lower.tail=FALSE))
+  ss <- standsurv(fit, newdata=nd, t=.5)
+  reversed <- standsurv(fit, newdata=nd[2:1,,drop=FALSE], t=.5)
+  expect_equal(ss$at1, expected)
+  expect_equal(reversed$at1, expected)
+})
+
+
