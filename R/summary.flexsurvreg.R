@@ -360,7 +360,7 @@ summary_fns <- function(x, type){
              ret = x$dfns$q(qu_from_start,...)
            },
            "hazard" = function(t,start,...) {
-               ret <- x$dfns$h(t,...) * (1 - x$dfns$p(start,...))
+               ret <- x$dfns$h(t,...)
                ret[t<start] <- 0
                ret
            },
