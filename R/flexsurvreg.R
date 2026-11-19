@@ -1003,8 +1003,8 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         if (is.null(optim.args$method)){
             optim.args$method <- "BFGS"
         }
-        gr <- if (dfns$deriv && deriv_supported(Y)) Dminusloglik.flexsurv else NULL
-        has_analytic_hessian <- dfns$hessian && !isTRUE(hess.control$numeric) && deriv_supported(Y)
+        gr <- if (dfns$deriv && deriv_supported(Y, rtrunc)) Dminusloglik.flexsurv else NULL
+        has_analytic_hessian <- dfns$hessian && !isTRUE(hess.control$numeric) && deriv_supported(Y, rtrunc)
         optim.args <- c(optim.args,
                         list(par=optpars,
                              fn=logLikFactory(Y=Y, X=X,
@@ -1045,7 +1045,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         res <- cbind(est=inits, lcl=NA, ucl=NA, se=NA)
         res[setdiff(1:npars, fixedpars),] <- cbind(est, lcl, ucl, se)
         colnames(res) <- c("est", paste(c("L","U"), round(cl*100), "%", sep=""), "se")
-        robust_se <- weights_supplied && dfns$deriv && deriv_supported(Y) && hessian && all(is.finite(opt$hessian))
+        robust_se <- weights_supplied && dfns$deriv && deriv_supported(Y, rtrunc) && hessian && all(is.finite(opt$hessian))
         if (robust_se) {
           Dminusloglik <- Dminusloglik.flexsurv(res[,"est"], Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, 
                                                 dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx)
@@ -1095,7 +1095,7 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
 }
 
 check_deriv <- function(optpars, Y, X, weights, bhazard, rtrunc, dlist, inits, dfns, aux, mx, fixedpars){
-  if (isTRUE(getOption("flexsurv.test.analytic.derivatives")) && deriv_supported(Y)){
+  if (isTRUE(getOption("flexsurv.test.analytic.derivatives")) && deriv_supported(Y, rtrunc)){
     if (is.logical(fixedpars) && fixedpars==TRUE) { optpars <- inits; fixedpars=FALSE }
     if (dfns$deriv)
       deriv.test <- deriv_test(optpars=optpars, Y=Y, X=X, weights=weights, bhazard=bhazard, rtrunc=rtrunc, dlist=dlist, inits=inits, dfns=dfns, aux=aux, mx=mx, fixedpars=fixedpars)
@@ -1445,10 +1445,10 @@ UseMethod("AICc")
 ##' @export
 AICC <- AICc
 
-deriv_supported <- function(Y){
+deriv_supported <- function(Y, rtrunc=Inf){
   event <- Y[,"status"] == 1
   left_cens <- is.finite(Y[!event, "time2"])
-  !any(left_cens)
+  !any(left_cens) && !any(is.finite(rtrunc))
 }
 
 
