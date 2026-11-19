@@ -324,6 +324,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
   
   ## Loop over at()
   stand.pred.list <- dat.list <- list()
+  rawsim <- NULL
   for(i in 1:length(at)){
     dat <- data
     covs <- at[[i]]
@@ -351,7 +352,6 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
       if(boot == TRUE){
         if(i==1)
           message("Calculating bootstrap standard errors / confidence intervals")      
-        rawsim <- NULL
         bootresults <- boot.standsurv(object, B, dat, i, t, type, type2, weighted, 
                                       se, ci, cl, rawsim, predsum, expsurv,
                                       rmap=substitute(rmap), ratetable=ratetable, scale.ratetable=scale.ratetable,
