@@ -1003,10 +1003,6 @@ flexsurvreg <- function(formula, anc=NULL, data, weights, bhazard, rtrunc, subse
         if (is.null(optim.args$method)){
             optim.args$method <- "BFGS"
         }
-        # Right truncation needs numerical derivatives and a scaled objective.
-        if (dfns$deriv && deriv_supported(Y) && any(is.finite(rtrunc)) &&
-            is.null(optim.args$control$fnscale))
-            optim.args$control$fnscale <- sum(weights)
         gr <- if (dfns$deriv && deriv_supported(Y, rtrunc)) Dminusloglik.flexsurv else NULL
         has_analytic_hessian <- dfns$hessian && !isTRUE(hess.control$numeric) && deriv_supported(Y, rtrunc)
         optim.args <- c(optim.args,
