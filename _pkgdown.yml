@@ -80,6 +80,7 @@ reference:
   - Hexp
   - mean_exp
   - rmst_exp
+  - custom_pexp
   - qgeneric
 - title: Tools for using flexsurv with tidyverse
 - contents:
