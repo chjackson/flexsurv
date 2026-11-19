@@ -21,7 +21,7 @@
 ##'
 ##' @param method If \code{"joint"} then the "joint-conditional" method is used.  If \code{"final"} then the "conditional-on-final" method is used.   The "conditional-on-initial" method can be implemented by using \code{\link{flexsurvreg}} with a \code{rtrunc} argument.  These methods are all described in Seaman et al. (2020).
 ##'
-##' @param dist Parametric distribution family, see \code{\link{\flexsurvreg}}.  Note that covariates are not supported in \code{flexsurvrtrunc}.
+##' @param dist Parametric distribution family, see \code{\link{flexsurvreg}}.  Note that covariates are not supported in \code{flexsurvrtrunc}.
 ##'
 ##' @param theta Initial value (or fixed value) for the exponential growth rate \code{theta}. Defaults to 1.
 ##'
