@@ -209,3 +209,15 @@ test_that("Summary function: cross and tidy",{
   expect_equal(s1$est,s2$est[s2$time==115])
   expect_equal(s1$est,s4$est[4])
 })
+
+test_that("summary with start and type=\"hazard\": hazard should not be changed by conditioning", {
+  d <- data.frame(time=rep(1:3, 2), x=rep(0:1, each=3))
+  fit <- flexsurvreg(Surv(time) ~ x, data=d, dist="exp",
+                    inits=c(0.2, log(2)), fixedpars=TRUE)
+  h <- summary(fit, newdata=list(x=0), type="hazard",
+               t=c(4, 5, 10), start=5, ci=FALSE)[[1]]$est
+  expect_equal(h, c(0, 0.2, 0.2))
+  hr <- hr_flexsurvreg(fit, newdata=data.frame(x=0:1),
+                      t=10, start=5, ci=FALSE)
+  expect_equal(hr$est, 2)
+})
