@@ -333,7 +333,7 @@ standsurv <- function(object, newdata = NULL, at = list(list()), atreference = 1
     ## to standardize over, so just use 1 row of data
     ## do not use this shortcut for type2 = "acsurvival", type2 = "achazard", type = "acrmst"
     ## or type = "acquantile" as we require individual expected survivals for these methods
-    allcovs <- all.vars(formula(x)[-2])
+    allcovs <- all.vars(x$concat.formula[-2])
     if(all(allcovs %in% covnames) & !weighted & !(type2 %in% c("acsurvival", "achazard", "acrmst", "acquantile"))){
       dat <- dat[1,,drop=F]
     }
