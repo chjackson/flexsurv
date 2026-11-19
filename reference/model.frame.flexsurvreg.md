@@ -17,7 +17,7 @@ model.matrix(object, par = NULL, ...)
 - formula:
 
   A fitted model object, as returned by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - ...:
 
@@ -26,7 +26,7 @@ model.matrix(object, par = NULL, ...)
 - object:
 
   A fitted model object, as returned by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - par:
 
@@ -49,7 +49,7 @@ argument (see above).
 
 ## See also
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
 [`model.frame`](https://rdrr.io/r/stats/model.frame.html),
 [`model.matrix`](https://rdrr.io/r/stats/model.matrix.html).
 

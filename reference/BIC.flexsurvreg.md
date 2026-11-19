@@ -15,9 +15,9 @@ BIC(object, cens = TRUE, ...)
 - object:
 
   Fitted model returned by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   (or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)).
 
 - cens:
 
@@ -72,5 +72,5 @@ Statistical Society: Series B (Methodological), 39(1), 44-47.
 
 [`BIC`](https://rdrr.io/r/stats/AIC.html),
 [`AIC`](https://rdrr.io/r/stats/AIC.html),
-[`AICC.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/AICc.flexsurvreg.md),
-[`nobs.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/nobs.flexsurvreg.md)
+[`AICC.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/AICc.flexsurvreg.md),
+[`nobs.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/nobs.flexsurvreg.md)

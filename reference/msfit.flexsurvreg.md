@@ -24,9 +24,9 @@ msfit.flexsurvreg(
 - object:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
   The model should have been fitted to data consisting of one row for
@@ -40,7 +40,7 @@ msfit.flexsurvreg(
   it is usually included in model formulae as `strata(trans)`, but note
   that the `strata` function does not do anything in flexsurv. The
   formula supplied to
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   should be precise about which parameters are assumed to vary with the
   transition type.
 
@@ -123,13 +123,13 @@ with complicated derivatives." The American Statistician 67(2):76-81
 flexsurv provides alternative functions designed specifically for
 predicting from parametric multi-state models without calling mstate.
 These include
-[`pmatrix.fs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md)
+[`pmatrix.fs`](https://chjackson.github.io/flexsurv/reference/pmatrix.fs.md)
 and
-[`pmatrix.simfs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.simfs.md)
+[`pmatrix.simfs`](https://chjackson.github.io/flexsurv/reference/pmatrix.simfs.md)
 for the transition probability matrix, and
-[`totlos.fs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.fs.md)
+[`totlos.fs`](https://chjackson.github.io/flexsurv/reference/totlos.fs.md)
 and
-[`totlos.simfs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.simfs.md)
+[`totlos.simfs`](https://chjackson.github.io/flexsurv/reference/totlos.simfs.md)
 for expected total lengths of stay in states. These are generally more
 efficient than going via mstate.
 

@@ -6,7 +6,7 @@ model, and extensible to user-defined distributions.
 
 ## Details
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 fits parametric models for time-to-event (survival) data. Data may be
 right-censored, and/or left-censored, and/or left-truncated. Several
 built-in parametric distributions are available. Any user-defined
@@ -19,7 +19,7 @@ distribution, log-transformed to the real line if necessary. This
 typically defines an accelerated failure time or proportional hazards
 model, depending on the distribution and parameter.
 
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
 fits the flexible survival model of Royston and Parmar (2002) in which
 the log cumulative hazard is modelled as a natural cubic spline function
 of log time. Covariates can be included on any of the spline parameters,
@@ -29,35 +29,35 @@ parameterisations are available.
 
 Output from the models can be presented as survivor, cumulative hazard
 and hazard functions
-([`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md)).
+([`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md)).
 These can be plotted against nonparametric estimates
-([`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md))
+([`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md))
 to assess goodness-of-fit. Any other user-defined function of the
 parameters may be summarised in the same way.
 
 Multi-state models for time-to-event data can also be fitted with the
 same functions. Predictions from those models can then be made using the
 functions
-[`pmatrix.fs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md),
-[`pmatrix.simfs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.simfs.md),
-[`totlos.fs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.fs.md),
-[`totlos.simfs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.simfs.md),
+[`pmatrix.fs`](https://chjackson.github.io/flexsurv/reference/pmatrix.fs.md),
+[`pmatrix.simfs`](https://chjackson.github.io/flexsurv/reference/pmatrix.simfs.md),
+[`totlos.fs`](https://chjackson.github.io/flexsurv/reference/totlos.fs.md),
+[`totlos.simfs`](https://chjackson.github.io/flexsurv/reference/totlos.simfs.md),
 or
-[`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md),
+[`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md),
 or alternatively by
-[`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md)
+[`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md)
 followed by `mssample` or `probtrans` from the package mstate.
 
 Distribution (“dpqr”) functions for the generalized gamma and F
 distributions are given in
-[`GenGamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),
-[`GenF`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+[`GenGamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md),
+[`GenF`](https://chjackson.github.io/flexsurv/reference/GenF.md)
 (preferred parameterisations) and
-[`GenGamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md),
-[`GenF.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md)
+[`GenGamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md),
+[`GenF.orig`](https://chjackson.github.io/flexsurv/reference/GenF.orig.md)
 (original parameterisations). `flexsurv` also includes the standard
 Gompertz distribution with unrestricted shape parameter, see
-[`Gompertz`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md).
+[`Gompertz`](https://chjackson.github.io/flexsurv/reference/Gompertz.md).
 
 ## User guide
 

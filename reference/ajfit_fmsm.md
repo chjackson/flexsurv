@@ -19,7 +19,7 @@ ajfit_fmsm(x, maxt = NULL, newdata = NULL)
 - x:
 
   Object returned by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md)
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md)
   representing a flexible parametric multi-state model. This must be
   Markov, rather than semi-Markov, and no check is performed for this.
   Note that all "competing risks" style models, with just one source

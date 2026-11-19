@@ -36,14 +36,14 @@ rmst_generic(pdist, t, start = 0, matargs = NULL, scalarargs = NULL, ...)
   parameters of the distribution. Empty by default. When vectorised,
   these will become matrices. This is used for the arguments `gamma` and
   `knots` in
-  [`psurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md).
+  [`psurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md).
 
 - scalarargs:
 
   Character vector naming scalar arguments of the distribution function
   that cannot be vectorised. This is used, for example, for the
   arguments `scale` and `timescale` in
-  [`psurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md).
+  [`psurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md).
 
 - ...:
 

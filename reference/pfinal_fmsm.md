@@ -2,7 +2,7 @@
 
 This requires the model to be Markov, and is not valid for semi-Markov
 models, as it works by wrapping
-[`pmatrix.fs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md)
+[`pmatrix.fs`](https://chjackson.github.io/flexsurv/reference/pmatrix.fs.md)
 to calculate the transition probability over a very large time. As it
 also works on a `fmsm` object formed from transition-specific
 time-to-event models, it therefore only works on competing risks models,
@@ -24,10 +24,10 @@ pfinal_fmsm(x, newdata = NULL, fromstate, maxt = 1e+05, B = 0, cores = NULL)
 - x:
 
   Object returned by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md),
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md),
   representing a multi-state model formed from transition-specific
   time-to-event models fitted by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - newdata:
 

@@ -13,9 +13,9 @@ fmsm(..., trans)
 - ...:
 
   Objects returned by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
   representing fitted survival models.
 
 - trans:

@@ -29,21 +29,21 @@ totlos.fs(
 - x:
 
   A model fitted with
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md)
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md)
   for the required form of the model and the data. Additionally, this
   must be a Markov / clock-forward model, but can be time-inhomogeneous.
   See the package vignette for further explanation.
 
   `x` can also be a list of models, with one component for each
   permitted transition, as illustrated in
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - trans:
 
   Matrix indicating allowed transitions. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - t:
 
@@ -60,7 +60,7 @@ totlos.fs(
 
   A data frame specifying the values of covariates in the fitted model,
   other than the transition number. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - ci:
 
@@ -153,14 +153,14 @@ unknown, which makes flexible models difficult.
 This function is only valid for Markov ("clock-forward") multi-state
 models, though no warning or error is currently given if the model is
 not Markov. See
-[`totlos.simfs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.simfs.md)
+[`totlos.simfs`](https://chjackson.github.io/flexsurv/reference/totlos.simfs.md)
 for the equivalent for semi-Markov ("clock-reset") models.
 
 ## See also
 
-[`totlos.simfs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.simfs.md),
-[`pmatrix.fs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md),
-[`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+[`totlos.simfs`](https://chjackson.github.io/flexsurv/reference/totlos.simfs.md),
+[`pmatrix.fs`](https://chjackson.github.io/flexsurv/reference/pmatrix.fs.md),
+[`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 ## Author
 

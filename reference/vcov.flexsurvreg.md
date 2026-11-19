@@ -14,7 +14,7 @@ vcov(object, ...)
 - object:
 
   A fitted model object of class
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
   e.g. as returned by `flexsurvreg` or `flexsurvspline`.
 
 - ...:

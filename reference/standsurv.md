@@ -42,9 +42,9 @@ standsurv(
 - object:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
 - newdata:
@@ -198,7 +198,7 @@ are named `contrast{k}_{j}` for the comparison of the kth versus the jth
 In addition tidy long-format data.frames are returned in the attributes
 `standsurv_at` and `standsurv_contrast`. These can be passed to `ggplot`
 for plotting purposes (see
-[`plot.standsurv`](http://chjackson.github.io/flexsurv-dev/reference/plot.standsurv.md)).
+[`plot.standsurv`](https://chjackson.github.io/flexsurv/reference/plot.standsurv.md)).
 
 ## Details
 

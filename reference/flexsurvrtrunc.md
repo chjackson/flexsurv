@@ -64,14 +64,14 @@ flexsurvrtrunc(
   If `"joint"` then the "joint-conditional" method is used. If `"final"`
   then the "conditional-on-final" method is used. The
   "conditional-on-initial" method can be implemented by using
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   with a `rtrunc` argument. These methods are all described in Seaman et
   al. (2020).
 
 - dist:
 
   Parametric distribution family, see
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   Note that covariates are not supported in `flexsurvrtrunc`.
 
 - theta:
@@ -89,7 +89,7 @@ flexsurvrtrunc(
 
   Initial values for the parameters of the parametric survival
   distributon. If not supplied, a heuristic is used. as is done in
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - fixedpars:
 
@@ -138,14 +138,14 @@ flexsurvrtrunc(
 Covariates are not supported.
 
 Note that
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
 with an `rtrunc` argument, can fit models for a similar kind of data,
 but those models ignore the information provided by the time of the
 initial event.
 
 A nonparametric estimator of survival under right-truncation is also
 provided in
-[`survrtrunc`](http://chjackson.github.io/flexsurv-dev/reference/survrtrunc.md).
+[`survrtrunc`](https://chjackson.github.io/flexsurv/reference/survrtrunc.md).
 See Seaman et al. (2020) for a full comparison of the alternative
 models.
 
@@ -157,8 +157,8 @@ Review of Methods
 
 ## See also
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
-[`survrtrunc`](http://chjackson.github.io/flexsurv-dev/reference/survrtrunc.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
+[`survrtrunc`](https://chjackson.github.io/flexsurv/reference/survrtrunc.md).
 
 ## Examples
 

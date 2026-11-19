@@ -3,6 +3,6 @@
 ### All vignettes
 
 - [flexsurv PDF
-  vignettes](http://chjackson.github.io/flexsurv-dev/articles/pdf.md):
+  vignettes](https://chjackson.github.io/flexsurv/articles/pdf.md):
 - [Calculating standardized survival measures in
-  flexsurv](http://chjackson.github.io/flexsurv-dev/articles/standsurv.md):
+  flexsurv](https://chjackson.github.io/flexsurv/articles/standsurv.md):

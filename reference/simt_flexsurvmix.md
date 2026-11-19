@@ -13,7 +13,7 @@ simt_flexsurvmix(x, newdata = NULL, n)
 - x:
 
   Fitted model object returned from
-  [`flexsurvmix`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvmix.md).
+  [`flexsurvmix`](https://chjackson.github.io/flexsurv/reference/flexsurvmix.md).
 
 - newdata:
 

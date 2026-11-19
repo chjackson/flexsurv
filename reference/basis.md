@@ -42,7 +42,7 @@ packages.
 ## Details
 
 The exact formula for the basis is given in
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 ## References
 
@@ -56,7 +56,7 @@ splines2. Journal of Data Science, 19(3), 498-517.
 
 ## See also
 
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 ## Author
 

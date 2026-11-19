@@ -2,7 +2,7 @@
 
 The expected total time spent in each state for semi-Markov multi-state
 models fitted to time-to-event data with
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 This is defined by the integral of the transition probability matrix,
 though this is not analytically possible and is computed by simulation.
 
@@ -31,9 +31,9 @@ totlos.simfs(
 - x:
 
   A model fitted with
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md)
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md)
   for the required form of the model and the data. Additionally this
   should be semi-Markov, so that the time variable represents the time
   since the last transition. In other words the response should be of
@@ -41,19 +41,19 @@ totlos.simfs(
   explanation.
 
   `x` can also be a list of
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   models, with one component for each permitted transition, as
   illustrated in
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
   This can be constructed by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md).
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md).
 
 - trans:
 
   Matrix indicating allowed transitions. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
   This is not required if `x` is a list constructed by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md).
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md).
 
 - t:
 
@@ -67,7 +67,7 @@ totlos.simfs(
 
   A data frame specifying the values of covariates in the fitted model,
   other than the transition number. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - ci:
 
@@ -87,7 +87,7 @@ totlos.simfs(
 - tcovs:
 
   Predictable time-dependent covariates such as age, see
-  [`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md).
+  [`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md).
 
 - group:
 
@@ -127,10 +127,10 @@ requested.
 
 This is computed by simulating a large number of individuals `M` using
 the maximum likelihood estimates of the fitted model and the function
-[`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md).
+[`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md).
 Therefore this requires a random sampling function for the parametric
 survival model to be available: see the "Details" section of
-[`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md).
+[`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md).
 This will be available for all built-in distributions, though users may
 need to write this for custom models.
 
@@ -138,13 +138,13 @@ Note the random sampling method for `flexsurvspline` models is currently
 very inefficient, so that looping over `M` will be very slow.
 
 The equivalent function for time-inhomogeneous Markov models is
-[`totlos.fs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.fs.md).
+[`totlos.fs`](https://chjackson.github.io/flexsurv/reference/totlos.fs.md).
 Note neither of these functions give errors or warnings if used with the
 wrong type of model, but the results will be invalid.
 
 ## See also
 
-[`pmatrix.simfs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.simfs.md),[`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md),[`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+[`pmatrix.simfs`](https://chjackson.github.io/flexsurv/reference/pmatrix.simfs.md),[`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md),[`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 ## Author
 

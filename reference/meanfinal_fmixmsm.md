@@ -15,10 +15,10 @@ meanfinal_fmixmsm(x, newdata = NULL, final = FALSE, B = NULL)
 - x:
 
   Object returned by
-  [`fmixmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmixmsm.md),
+  [`fmixmsm`](https://chjackson.github.io/flexsurv/reference/fmixmsm.md),
   representing a multi-state model built from piecing together mixture
   models fitted by
-  [`flexsurvmix`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvmix.md).
+  [`flexsurvmix`](https://chjackson.github.io/flexsurv/reference/flexsurvmix.md).
 
 - newdata:
 

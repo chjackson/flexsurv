@@ -70,7 +70,7 @@ extreme values or quick to compute.
 
 ## See also
 
-[`dexp`](https://rdrr.io/r/stats/Exponential.html),[`dweibull`](https://rdrr.io/r/stats/Weibull.html),[`dgamma`](https://rdrr.io/r/stats/GammaDist.html),[`dlnorm`](https://ehar.se/r/eha/reference/Lognormal.html),[`dgompertz`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md),[`dgengamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),[`dgenf`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
+[`dexp`](https://rdrr.io/r/stats/Exponential.html),[`dweibull`](https://rdrr.io/r/stats/Weibull.html),[`dgamma`](https://rdrr.io/r/stats/GammaDist.html),[`dlnorm`](https://ehar.se/r/eha/reference/Lognormal.html),[`dgompertz`](https://chjackson.github.io/flexsurv/reference/Gompertz.md),[`dgengamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md),[`dgenf`](https://chjackson.github.io/flexsurv/reference/GenF.md)
 
 ## Author
 

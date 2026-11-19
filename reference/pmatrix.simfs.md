@@ -2,7 +2,7 @@
 
 The transition probability matrix for semi-Markov multi-state models
 fitted to time-to-event data with
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 This has \\r,s\\ entry giving the probability that an individual is in
 state \\s\\ at time \\t\\, given they are in state \\r\\ at time \\0\\.
 
@@ -30,9 +30,9 @@ pmatrix.simfs(
 - x:
 
   A model fitted with
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md)
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md)
   for the required form of the model and the data. Additionally this
   should be semi-Markov, so that the time variable represents the time
   since the last transition. In other words the response should be of
@@ -40,19 +40,19 @@ pmatrix.simfs(
   explanation.
 
   `x` can also be a list of
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   models, with one component for each permitted transition, as
   illustrated in
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
   This can be constructed by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md).
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md).
 
 - trans:
 
   Matrix indicating allowed transitions. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
   This is not required if `x` is a list constructed by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md).
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md).
 
 - t:
 
@@ -63,7 +63,7 @@ pmatrix.simfs(
 
   A data frame specifying the values of covariates in the fitted model,
   other than the transition number. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - ci:
 
@@ -83,7 +83,7 @@ pmatrix.simfs(
 - tcovs:
 
   Predictable time-dependent covariates such as age, see
-  [`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md).
+  [`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md).
 
 - M:
 
@@ -123,10 +123,10 @@ limits. These are formatted for printing but may be extracted using
 
 This is computed by simulating a large number of individuals `M` using
 the maximum likelihood estimates of the fitted model and the function
-[`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md).
+[`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md).
 Therefore this requires a random sampling function for the parametric
 survival model to be available: see the "Details" section of
-[`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md).
+[`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md).
 This will be available for all built-in distributions, though users may
 need to write this for custom models.
 
@@ -134,7 +134,7 @@ Note the random sampling method for `flexsurvspline` models is currently
 very inefficient, so that looping over the `M` individuals will be very
 slow.
 
-[`pmatrix.fs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md)
+[`pmatrix.fs`](https://chjackson.github.io/flexsurv/reference/pmatrix.fs.md)
 is a more efficient method based on solving the Kolmogorov forward
 equation numerically, which requires the multi-state model to be Markov.
 No error or warning is given if running `pmatrix.simfs` with a Markov
@@ -142,8 +142,8 @@ model, but this is still invalid.
 
 ## See also
 
-[`pmatrix.fs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md),[`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md),[`totlos.simfs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.simfs.md),
-[`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+[`pmatrix.fs`](https://chjackson.github.io/flexsurv/reference/pmatrix.fs.md),[`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md),[`totlos.simfs`](https://chjackson.github.io/flexsurv/reference/totlos.simfs.md),
+[`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 ## Author
 

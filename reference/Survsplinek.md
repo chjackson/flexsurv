@@ -5,7 +5,7 @@ cumulative hazard, mean and restricted mean functions for the
 Royston/Parmar spline model, with one argument per parameter. For the
 equivalent functions with all parameters collected together in a single
 argument, see
-[`Survspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md).
+[`Survspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md).
 
 ## Usage
 
@@ -921,18 +921,18 @@ Hsurvspline7(
   gamma8:
 
   Parameters describing the baseline spline function, as described in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 - knots:
 
   Locations of knots on the axis of log time, supplied in increasing
   order. Unlike in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   these include the two boundary knots. If there are no additional
   knots, the boundary locations are not used. If there are one or more
   additional knots, the boundary knots should be at or beyond the
   minimum and maximum values of the log times. In
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
   these are exactly at the minimum and maximum values.
 
   This may in principle be supplied as a matrix, in the same way as for
@@ -941,7 +941,7 @@ Hsurvspline7(
 - scale:
 
   `"hazard"`, `"odds"`, or `"normal"`, as described in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
   With the default of no knots in addition to the boundaries, this model
   reduces to the Weibull, log-logistic and log-normal respectively. The
   scale must be common to all times.
@@ -949,7 +949,7 @@ Hsurvspline7(
 - timescale:
 
   `"log"` or `"identity"` as described in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 - spline:
 

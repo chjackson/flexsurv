@@ -14,7 +14,7 @@ AIC(object, ..., k = 2)
 - object:
 
   Object returned by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md)
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md)
   representing a multistate model.
 
 - ...:

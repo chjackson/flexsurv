@@ -2,7 +2,7 @@
 
 Produce a matrix of alternative parameter estimates under sampling
 uncertainty, at covariate values supplied by the user. Used by
-[`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md)
+[`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md)
 for obtaining confidence intervals around functions of parameters.
 
 ## Usage
@@ -25,9 +25,9 @@ normboot.flexsurvreg(
 - x:
 
   A fitted model from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   (or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)).
 
 - B:
 
@@ -90,7 +90,7 @@ with complicated derivatives." The American Statistician (in press).
 
 ## See also
 
-[`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md)
+[`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md)
 
 ## Author
 

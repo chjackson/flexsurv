@@ -27,9 +27,9 @@ predict(
 - object:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
 - newdata:
@@ -136,16 +136,16 @@ will be identical. Rows are added for each value of `times` or `p`
 requested.
 
 This function is a wrapper around
-[`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md),
+[`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md),
 designed to help flexsurv to integrate with the "tidymodels" ecosystem,
 in particular the censored package.
-[`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md)
+[`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md)
 returns the same results but in a more conventional format.
 
 ## See also
 
-[`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md),
-[`residuals.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/residuals.flexsurvreg.md)
+[`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md),
+[`residuals.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/residuals.flexsurvreg.md)
 
 ## Author
 

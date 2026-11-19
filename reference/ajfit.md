@@ -6,7 +6,7 @@ the observed data. State 1 represents not having experienced any of the
 competing events, while state 2 and any further states correspond to
 having experienced each of the competing events respectively. These
 estimates can be compared with the fitted probabilities returned by
-[`p_flexsurvmix`](http://chjackson.github.io/flexsurv-dev/reference/p_flexsurvmix.md)
+[`p_flexsurvmix`](https://chjackson.github.io/flexsurv/reference/p_flexsurvmix.md)
 to check the fit of a `flexsurvmix` model.
 
 ## Usage
@@ -20,7 +20,7 @@ ajfit(x, newdata = NULL, tidy = TRUE)
 - x:
 
   Fitted model returned by
-  [`flexsurvmix`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvmix.md).
+  [`flexsurvmix`](https://chjackson.github.io/flexsurv/reference/flexsurvmix.md).
 
 - newdata:
 

@@ -2,7 +2,7 @@
 
 Simulate changes of state and transition times from a semi-Markov
 multi-state model fitted using
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 ## Usage
 
@@ -25,13 +25,13 @@ sim.fmsm(
 - x:
 
   A model fitted with
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md)
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md)
   for the required form of the model and the data.
 
   Alternatively `x` can be a list of fitted
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   model objects. The `i`th element of this list is the model
   corresponding to the `i`th transition in `trans`. This is a more
   efficient way to fit a multi-state model, but only valid if the
@@ -40,7 +40,7 @@ sim.fmsm(
 - trans:
 
   Matrix indicating allowed transitions. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - t:
 
@@ -51,7 +51,7 @@ sim.fmsm(
 
   A data frame specifying the values of covariates in the fitted model,
   other than the transition number. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - start:
 
@@ -80,7 +80,7 @@ sim.fmsm(
 
   If `TRUE` then the simulated data are returned as a tidy data frame
   with one row per simulated transition. See
-  [`simfs_bytrans`](http://chjackson.github.io/flexsurv-dev/reference/simfs_bytrans.md)
+  [`simfs_bytrans`](https://chjackson.github.io/flexsurv/reference/simfs_bytrans.md)
   for a function to rearrange the data into this format if it was
   simulated in non-tidy format. Currently this includes only event
   times, and excludes any times of censoring that are reported when
@@ -112,7 +112,7 @@ Weibull models. If `x` was fitted using a custom distribution, called
 `dist` say, then there must be a function called (something like)
 `rdist` either in the working environment, or supplied through the
 `dfns` argument to
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 This must be in the same format as standard R functions such as
 [`rweibull`](https://rdrr.io/r/stats/Weibull.html), with first argument
 `n`, and remaining arguments giving the parameters of the distribution.
@@ -125,7 +125,7 @@ models has currently not been implemented.
 
 ## See also
 
-[`pmatrix.simfs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.simfs.md),[`totlos.simfs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.simfs.md)
+[`pmatrix.simfs`](https://chjackson.github.io/flexsurv/reference/pmatrix.simfs.md),[`totlos.simfs`](https://chjackson.github.io/flexsurv/reference/totlos.simfs.md)
 
 ## Author
 

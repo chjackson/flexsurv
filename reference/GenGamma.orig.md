@@ -92,16 +92,16 @@ parameters (Lawless, 1980):
 For more stable behaviour as the distribution tends to the log-normal,
 an alternative parameterisation was developed by Prentice (1974). This
 is given in
-[`dgengamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),
+[`dgengamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md),
 and is now preferred for statistical modelling. It is also more
 flexible, including a further new class of distributions with negative
 shape `k`.
 
 The generalized F distribution
-[`GenF.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md),
+[`GenF.orig`](https://chjackson.github.io/flexsurv/reference/GenF.orig.md),
 and its similar alternative parameterisation
-[`GenF`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md),
-extend the generalized gamma to four parameters.
+[`GenF`](https://chjackson.github.io/flexsurv/reference/GenF.md), extend
+the generalized gamma to four parameters.
 
 ## References
 
@@ -116,9 +116,9 @@ distributions. Technometrics 22(3):409-419.
 
 ## See also
 
-[`GenGamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),
-[`GenF.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md),
-[`GenF`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md),
+[`GenGamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md),
+[`GenF.orig`](https://chjackson.github.io/flexsurv/reference/GenF.orig.md),
+[`GenF`](https://chjackson.github.io/flexsurv/reference/GenF.md),
 [`Lognormal`](https://rdrr.io/r/stats/Lognormal.html),
 [`GammaDist`](https://rdrr.io/r/stats/GammaDist.html),
 [`Weibull`](https://rdrr.io/r/stats/Weibull.html).

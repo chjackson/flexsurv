@@ -3,9 +3,9 @@
 This function extracts quantities of interest from the untruncated
 version of a model with individual-specific right truncation points
 fitted by
-[`flexsurvrtrunc`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvrtrunc.md).
+[`flexsurvrtrunc`](https://chjackson.github.io/flexsurv/reference/flexsurvrtrunc.md).
 Note that covariates are currently not supported by
-[`flexsurvrtrunc`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvrtrunc.md).
+[`flexsurvrtrunc`](https://chjackson.github.io/flexsurv/reference/flexsurvrtrunc.md).
 
 ## Usage
 
@@ -30,9 +30,9 @@ summary(
 - object:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
 - type:

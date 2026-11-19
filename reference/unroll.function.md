@@ -44,13 +44,13 @@ The new function, with vector arguments.
 ## Usage in flexsurv
 
 This is used by
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
 to allow spline models, which have an arbitrary number of parameters, to
 be fitted using
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 The “custom distributions” facility of
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 expects the user-supplied probability density and distribution functions
 to have one explicitly named argument for each scalar parameter, and
 given R vectorisation, each of those arguments could be supplied as a
@@ -58,9 +58,9 @@ vector of alternative parameter values.
 
 However, spline models have a varying number of scalar parameters,
 determined by the number of knots in the spline.
-[`dsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+[`dsurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md)
 and
-[`psurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+[`psurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md)
 have an argument called `gamma`. This can be supplied as a matrix, with
 number of columns `n` determined by the number of knots (plus 2), and
 rows referring to alternative parameter values. The following statements
@@ -76,7 +76,7 @@ to convert these into functions with arguments `gamma0`,
 
 ## See also
 
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 
 ## Author
 

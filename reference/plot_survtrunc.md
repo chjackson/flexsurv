@@ -18,7 +18,7 @@ lines(x, ...)
 - x:
 
   Object of class `"survrtrunc"` as returned by
-  [`survrtrunc`](http://chjackson.github.io/flexsurv-dev/reference/survrtrunc.md).
+  [`survrtrunc`](https://chjackson.github.io/flexsurv/reference/survrtrunc.md).
 
 - ...:
 

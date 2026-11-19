@@ -23,7 +23,7 @@ simulate(
 - object:
 
   Object returned by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - nsim:
 

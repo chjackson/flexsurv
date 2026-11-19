@@ -2,7 +2,7 @@
 
 Generic function for the second-order Akaike information criterion. The
 only current implementation of this in flexsurv is in
-[`AICc.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/AICc.flexsurvreg.md),
+[`AICc.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/AICc.flexsurvreg.md),
 see there for more details.
 
 ## Usage

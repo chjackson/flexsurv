@@ -1,9 +1,9 @@
 # Calculate residuals for flexible survival models
 
 Calculates residuals for
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 or
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
 model fits.
 
 ## Usage
@@ -18,9 +18,9 @@ residuals(object, type = "response", ...)
 - object:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
 - type:
@@ -42,17 +42,17 @@ Numeric vector with the same length as `nobs(object)`.
 Residuals of `type = "response"` are calculated as the naive difference
 between the observed survival and the covariate-specific predicted mean
 survival from
-[`predict.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/predict.flexsurvreg.md),
+[`predict.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/predict.flexsurvreg.md),
 ignoring whether the event time is observed or censored.
 
 `type="coxsnell"` returns the Cox-Snell residual, defined as the
 estimated cumulative hazard at each data point. To check the fit of the
 A more fully featured utility for this is provided in the function
-[`coxsnell_flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/coxsnell_flexsurvreg.md).
+[`coxsnell_flexsurvreg`](https://chjackson.github.io/flexsurv/reference/coxsnell_flexsurvreg.md).
 
 ## See also
 
-[`predict.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/predict.flexsurvreg.md)
+[`predict.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/predict.flexsurvreg.md)
 
 ## Examples
 

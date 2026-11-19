@@ -16,7 +16,7 @@ quantile_flexsurvmix(x, newdata = NULL, B = NULL, probs = c(0.025, 0.5, 0.975))
 - x:
 
   Fitted model object returned from
-  [`flexsurvmix`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvmix.md).
+  [`flexsurvmix`](https://chjackson.github.io/flexsurv/reference/flexsurvmix.md).
 
 - newdata:
 

@@ -1,29 +1,29 @@
 # Changelog
 
-## Version 2.4.0 (2026-11-??)
+## Version 2.4.0 (2026-11-19)
 
 ### New features
 
 - Utility
-  [`custom_pexp()`](http://chjackson.github.io/flexsurv-dev/reference/custom_pexp.md)
+  [`custom_pexp()`](https://chjackson.github.io/flexsurv/reference/custom_pexp.md)
   to enable a piecewise-constant hazard model with any time cuts to be
   used as a custom distribution in
-  [`flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg()`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - Added `t0` arguments to
-  [`pmatrix.fs()`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.fs.md)
+  [`pmatrix.fs()`](https://chjackson.github.io/flexsurv/reference/pmatrix.fs.md)
   and
-  [`totlos.fs()`](http://chjackson.github.io/flexsurv-dev/reference/totlos.fs.md)
+  [`totlos.fs()`](https://chjackson.github.io/flexsurv/reference/totlos.fs.md)
   to allow prediction of transition probabilities and total length of
   stay for periods starting at times other than 0.
-
-- `B` argument added to
-  [`predict.flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/predict.flexsurvreg.md)
-  ([\#197](https://github.com/chjackson/flexsurv/issues/197)).
 
 - Robustified standard errors in weighted estimation for specific
   parametric models (those with analytic likelihood derivatives:
   exponential, Weibull, Gompertz and hazard spline)
+
+- `B` argument added to
+  [`predict.flexsurvreg()`](https://chjackson.github.io/flexsurv/reference/predict.flexsurvreg.md)
+  ([\#197](https://github.com/chjackson/flexsurv/issues/197)).
 
 ### Bug fixes and refinements
 
@@ -64,7 +64,7 @@
   - missing minus sign in the link function for the normal-scale spline
 
 - Corrections and clarifications for the table of models in
-  [`help(flexsurvreg)`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`help(flexsurvreg)`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   explaining the meaning of the sign of the covariate effects.
 
 - Miscellaneous minor documentation improvements.
@@ -83,7 +83,7 @@ CRAN release: 2024-08-17
   was not completing for some model configurations.
 
 - Fix for
-  [`simulate.flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/simulate.flexsurvreg.md)
+  [`simulate.flexsurvreg()`](https://chjackson.github.io/flexsurv/reference/simulate.flexsurvreg.md)
   with vector `start` argument
   ([\#192](https://github.com/chjackson/flexsurv/issues/192)).
 
@@ -103,7 +103,7 @@ CRAN release: 2024-04-21
 
 - New argument `spline="splines2ns"` can now be specified to use an
   orthogonal spline basis in
-  [`flexsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline()`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 - Weighted likelihood for relative survival models now implemented
   consistently with other models, as a weighted sum of individual
@@ -172,9 +172,9 @@ CRAN release: 2023-02-01
 CRAN release: 2022-12-22
 
 - New `simulate.flexsurvreg` method to simulate data from a fitted
-  [`flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg()`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  [`flexsurvspline()`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
   model. Thanks to Mark Clements for help with this.
 
 - Fix of bug for [`summary()`](https://rdrr.io/r/base/summary.html)
@@ -193,9 +193,9 @@ CRAN release: 2022-06-17
 
 - New function `hr_flexsurvreg` to compute the hazard ratio from a
   fitted
-  [`flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg()`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  [`flexsurvspline()`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
   model as a function of time, with confidence intervals.
 
 - `summary.flexsurvreg` has been rewritten to make it cleaner and

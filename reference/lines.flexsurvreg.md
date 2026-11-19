@@ -1,7 +1,7 @@
 # Add fitted flexible survival curves to a plot
 
 Add fitted survival (or hazard or cumulative hazard) curves from a
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 model fit to an existing plot.
 
 ## Usage
@@ -33,26 +33,26 @@ lines(
 - x:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
   representing a fitted survival model object.
 
 - newdata:
 
   Covariate values to produce fitted curves for, as a data frame, as
   described in
-  [`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md).
+  [`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md).
 
 - X:
 
   Covariate values to produce fitted curves for, as a matrix, as
   described in
-  [`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md).
+  [`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md).
 
 - type:
 
   `"survival"` for survival, `"cumhaz"` for cumulative hazard, or
   `"hazard"` for hazard, as in
-  [`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md).
+  [`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md).
 
 - t:
 
@@ -70,7 +70,7 @@ lines(
 
   Number of simulations controlling accuracy of confidence intervals, as
   used in
-  [`summary`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md).
+  [`summary`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md).
 
 - cl:
 
@@ -111,11 +111,11 @@ lines(
 ## Details
 
 Equivalent to
-[`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md)`(...,add=TRUE)`.
+[`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md)`(...,add=TRUE)`.
 
 ## See also
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 
 ## Author
 

@@ -85,16 +85,16 @@ As \\s_2 \rightarrow \infty\\, the distribution of \\x\\ tends towards
 an original generalized gamma distribution with the following
 parameters:
 
-[`dgengamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)`(x, shape=1/sigma, scale=exp(mu) / s1^sigma, k=s1)`
+[`dgengamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md)`(x, shape=1/sigma, scale=exp(mu) / s1^sigma, k=s1)`
 
 See
-[`GenGamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+[`GenGamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md)
 for how this includes several other common distributions as special
 cases.
 
 The alternative parameterisation of the generalized F distribution,
 originating from Prentice (1975) and given in this package as
-[`GenF`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md), is
+[`GenF`](https://chjackson.github.io/flexsurv/reference/GenF.md), is
 preferred for statistical modelling, since it is more stable as \\s_1\\
 tends to infinity, and includes a further new class of distributions
 with negative first shape parameter. The original is provided here for
@@ -107,9 +107,9 @@ Biometrika 62(3):607-614.
 
 ## See also
 
-[`GenF`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md),
-[`GenGamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md),
-[`GenGamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+[`GenF`](https://chjackson.github.io/flexsurv/reference/GenF.md),
+[`GenGamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md),
+[`GenGamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md)
 
 ## Author
 

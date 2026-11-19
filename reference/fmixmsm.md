@@ -13,13 +13,13 @@ fmixmsm(...)
 - ...:
 
   Named arguments. Each argument should be a fitted model as returned by
-  [`flexsurvmix`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvmix.md).
+  [`flexsurvmix`](https://chjackson.github.io/flexsurv/reference/flexsurvmix.md).
   The name of each argument names the starting state for that model.
 
 ## Value
 
 A list of
-[`flexsurvmix`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvmix.md)
+[`flexsurvmix`](https://chjackson.github.io/flexsurv/reference/flexsurvmix.md)
 objects, with the following attribute(s):
 
 `pathways` A list of all potential pathways until absorption, for models

@@ -24,10 +24,10 @@ simfinal_fmsm(
 - x:
 
   Object returned by
-  [`fmsm`](http://chjackson.github.io/flexsurv-dev/reference/fmsm.md),
+  [`fmsm`](https://chjackson.github.io/flexsurv/reference/fmsm.md),
   representing a multi-state model formed from transition-specific
   time-to-event models fitted by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - newdata:
 
@@ -42,7 +42,7 @@ simfinal_fmsm(
 - t:
 
   Maximum time to simulate to, passed to
-  [`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md),
+  [`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md),
   so that the summaries are taken from the subset of individuals in the
   simulated data who are in the absorbing state at this time.
 

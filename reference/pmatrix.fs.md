@@ -2,7 +2,7 @@
 
 The transition probability matrix for time-inhomogeneous Markov
 multi-state models fitted to time-to-event data with
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 This has \\r,s\\ entry giving the probability that an individual is in
 state \\s\\ at time \\t\\, given they are in state \\r\\ at time
 \\t_0\\.
@@ -32,21 +32,21 @@ pmatrix.fs(
 - x:
 
   A model fitted with
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md)
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md)
   for the required form of the model and the data. Additionally, this
   must be a Markov / clock-forward model, but can be time-inhomogeneous.
   See the package vignette for further explanation.
 
   `x` can also be a list of models, with one component for each
   permitted transition, as illustrated in
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - trans:
 
   Matrix indicating allowed transitions. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - t:
 
@@ -60,7 +60,7 @@ pmatrix.fs(
 
   A data frame specifying the values of covariates in the fitted model,
   other than the transition number. See
-  [`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+  [`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 - condstates:
 
@@ -159,14 +159,14 @@ unknown, which makes flexible models difficult.
 This function is only valid for Markov ("clock-forward") multi-state
 models, though no warning or error is currently given if the model is
 not Markov. See
-[`pmatrix.simfs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.simfs.md)
+[`pmatrix.simfs`](https://chjackson.github.io/flexsurv/reference/pmatrix.simfs.md)
 for the equivalent for semi-Markov ("clock-reset") models.
 
 ## See also
 
-[`pmatrix.simfs`](http://chjackson.github.io/flexsurv-dev/reference/pmatrix.simfs.md),
-[`totlos.fs`](http://chjackson.github.io/flexsurv-dev/reference/totlos.fs.md),
-[`msfit.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/msfit.flexsurvreg.md).
+[`pmatrix.simfs`](https://chjackson.github.io/flexsurv/reference/pmatrix.simfs.md),
+[`totlos.fs`](https://chjackson.github.io/flexsurv/reference/totlos.fs.md),
+[`msfit.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/msfit.flexsurvreg.md).
 
 ## Author
 

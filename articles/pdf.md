@@ -9,13 +9,13 @@
     ## Warning in system("pdflatex flexsurv-examples.tex"): error in running command
 
 [flexsurv user
-guide](http://chjackson.github.io/flexsurv-dev/articles/flexsurv.pdf)
+guide](https://chjackson.github.io/flexsurv/articles/flexsurv.pdf)
 
 [Multi-state modelling with
-flexsurv](http://chjackson.github.io/flexsurv-dev/articles/multistate.pdf)
+flexsurv](https://chjackson.github.io/flexsurv/articles/multistate.pdf)
 
 [Distributions reference
-manual](http://chjackson.github.io/flexsurv-dev/articles/distributions.pdf)
+manual](https://chjackson.github.io/flexsurv/articles/distributions.pdf)
 
 [flexsurv supplementary
-examples](http://chjackson.github.io/flexsurv-dev/articles/flexsurv-examples.pdf)
+examples](https://chjackson.github.io/flexsurv/articles/flexsurv-examples.pdf)

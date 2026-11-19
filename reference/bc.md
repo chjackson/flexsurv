@@ -24,7 +24,7 @@ A data frame with 686 rows.
 German Breast Cancer Study Group, 1984-1989. Used as a reference dataset
 for the spline-based survival model of Royston and Parmar (2002),
 implemented here in
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 Originally provided with the `stpm` (Royston 2001, 2004) and `stpm2`
 (Lambert 2009, 2010) Stata modules.
 
@@ -42,4 +42,4 @@ polynomials. Journal of the Royal Statistical Society, Series A
 
 ## See also
 
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)

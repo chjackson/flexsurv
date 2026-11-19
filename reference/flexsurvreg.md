@@ -204,19 +204,19 @@ flexsurvreg(
   list.
 
   Very flexible spline-based distributions can also be fitted with
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
   The parameterisations of the built-in distributions used here are the
   same as in their built-in distribution functions:
-  [`dgengamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),
-  [`dgengamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md),
-  [`dgenf`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md),
-  [`dgenf.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md),
+  [`dgengamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md),
+  [`dgengamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md),
+  [`dgenf`](https://chjackson.github.io/flexsurv/reference/GenF.md),
+  [`dgenf.orig`](https://chjackson.github.io/flexsurv/reference/GenF.orig.md),
   [`dweibull`](https://rdrr.io/r/stats/Weibull.html),
   [`dgamma`](https://rdrr.io/r/stats/GammaDist.html),
   [`dexp`](https://rdrr.io/r/stats/Exponential.html),
   [`dlnorm`](https://ehar.se/r/eha/reference/Lognormal.html),
-  [`dgompertz`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md),
+  [`dgompertz`](https://chjackson.github.io/flexsurv/reference/Gompertz.md),
   respectively. The functions in base R are used where available,
   otherwise, they are provided in this package.
 
@@ -277,7 +277,7 @@ flexsurvreg(
   `inits`. For example, in a stable generalized Gamma model with two
   covariates, to fix the third of three generalized gamma parameters
   (the shape `Q`, see the help for
-  [`GenGamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md))
+  [`GenGamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md))
   and the second covariate, specify `fixedpars = c(3, 5)`
 
 - dfns:
@@ -300,7 +300,7 @@ flexsurvreg(
 
   A named list of other arguments to pass to custom distribution
   functions. This is used, for example, by
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
   to supply the knot locations and modelling scale (e.g. hazard or
   odds). This cannot be used to fix parameters of a distribution — use
   `fixedpars` for that.
@@ -449,9 +449,9 @@ model. Components of interest to users may include:
 
   Data used in the model fit. To extract this in the standard R formats,
   use use
-  [`model.frame.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/model.frame.flexsurvreg.md)
+  [`model.frame.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/model.frame.flexsurvreg.md)
   or
-  [`model.matrix.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/model.frame.flexsurvreg.md).
+  [`model.matrix.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/model.frame.flexsurvreg.md).
 
 ## Details
 
@@ -592,16 +592,16 @@ coronary heart disease. Statistics in medicine, 26(30), 5486-5498.
 
 ## See also
 
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
 for flexible survival modelling using the spline model of Royston and
 Parmar.
 
-[`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md)
+[`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md)
 and
-[`lines.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/lines.flexsurvreg.md)
+[`lines.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/lines.flexsurvreg.md)
 to plot fitted survival, hazards and cumulative hazards from models
 fitted by `flexsurvreg` and
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 ## Author
 

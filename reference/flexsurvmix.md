@@ -37,7 +37,7 @@ flexsurvmix(
 
   Survival model formula. The left hand side is a `Surv` object
   specified as in
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   This may define various kinds of censoring, as described in
   [`Surv`](https://rdrr.io/pkg/survival/man/Surv.html). Any covariates
   on the right hand side of this formula will be placed on the location
@@ -98,7 +98,7 @@ flexsurvmix(
 
   Vector specifying the parametric distribution to use for each
   component. The same distributions are supported as in
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - pformula:
 
@@ -158,7 +158,7 @@ flexsurvmix(
   contains the initial values for the parameters of the
   component-specific model, as would be supplied as the `inits` argument
   of
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
   By default, a heuristic is used to obtain initial values, which
   depends on the parametric distribution being used, but is usually
   based on the empirical mean and/or variance of the survival times.
@@ -170,7 +170,7 @@ flexsurvmix(
   mixing probabilities, time-to-event parameters by mixing component.
   Within mixing components, time-to-event parameters are ordered in the
   same way as in
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
   If `fixedpars=TRUE` then all parameters will be fixed and the function
   simply calculates the log-likelihood at the initial values.
@@ -182,7 +182,7 @@ flexsurvmix(
   List of lists of user-defined distribution functions, one for each
   mixture component. Each list component is specified as the `dfns`
   argument of
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 - method:
 
@@ -228,7 +228,7 @@ flexsurvmix(
 
   A named list of other arguments to pass to custom distribution
   functions. This is used, for example, by
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
   to supply the knot locations and modelling scale (e.g. hazard or
   odds). This cannot be used to fix parameters of a distribution — use
   `fixedpars` for that.
@@ -286,7 +286,7 @@ flexsurvmix(
   Optional arguments to the general-purpose optimisation routine
   [`optim`](https://rdrr.io/r/stats/optim.html). For example, the BFGS
   optimisation algorithm is the default in
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
   but this can be changed, for example to `method="Nelder-Mead"` which
   can be more robust to poor initial values. If the optimisation fails
   to converge, consider normalising the problem using, for example,
@@ -316,7 +316,7 @@ The `flexsurvmix` function fits a mixture model to data consisting of a
 single time to an event for each individual, and an indicator for what
 type of event occurs for that individual. The time to event may be
 observed or censored, just as in
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
 and the type of event may be known or unknown. In a typical application,
 where we follow up a set of individuals until they experience an event
 or a maximum follow-up time is reached, the event type is known if the
@@ -325,7 +325,7 @@ the time is right-censored.
 
 The model is fitted by maximum likelihood, either directly or by using
 an expectation-maximisation (EM) algorithm, by wrapping
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 to compute the likelihood or to implement the E and M steps.
 
 Some worked examples are given in the package vignette about multi-state

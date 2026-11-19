@@ -5,7 +5,7 @@ cumulative hazard, mean and restricted mean functions for the
 Royston/Parmar spline model. These functions have all parameters of the
 distribution collected together in a single argument `gamma`. For the
 equivalent functions with one argument per parameter, see
-[`Survsplinek`](http://chjackson.github.io/flexsurv-dev/reference/Survsplinek.md).
+[`Survsplinek`](https://chjackson.github.io/flexsurv/reference/Survsplinek.md).
 
 ## Usage
 
@@ -121,7 +121,7 @@ mean_survspline(
 - gamma:
 
   Parameters describing the baseline spline function, as described in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
   This may be supplied as a vector with number of elements equal to the
   length of `knots`, in which case the parameters are common to all
   times. Alternatively a matrix may be supplied, with rows corresponding
@@ -141,12 +141,12 @@ mean_survspline(
 
   Locations of knots on the axis of log time, supplied in increasing
   order. Unlike in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   these include the two boundary knots. If there are no additional
   knots, the boundary locations are not used. If there are one or more
   additional knots, the boundary knots should be at or beyond the
   minimum and maximum values of the log times. In
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
   these are exactly at the minimum and maximum values.
 
   This may in principle be supplied as a matrix, in the same way as for
@@ -155,7 +155,7 @@ mean_survspline(
 - scale:
 
   `"hazard"`, `"odds"`, or `"normal"`, as described in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
   With the default of no knots in addition to the boundaries, this model
   reduces to the Weibull, log-logistic and log-normal respectively. The
   scale must be common to all times.
@@ -163,7 +163,7 @@ mean_survspline(
 - timescale:
 
   `"log"` or `"identity"` as described in
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 - spline:
 
@@ -205,11 +205,11 @@ mean_survspline(
 `dsurvspline` gives the density, `psurvspline` gives the distribution
 function, `hsurvspline` gives the hazard and `Hsurvspline` gives the
 cumulative hazard, as described in
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 `qsurvspline` gives the quantile function, which is computed by crude
 numerical inversion (using
-[`qgeneric`](http://chjackson.github.io/flexsurv-dev/reference/qgeneric.md)).
+[`qgeneric`](https://chjackson.github.io/flexsurv/reference/qgeneric.md)).
 
 `rsurvspline` generates random survival times by using `qsurvspline` on
 a sample of uniform random numbers. Due to the numerical root-finding
@@ -228,7 +228,7 @@ splines2. Journal of Data Science, 19(3), 498-517.
 
 ## See also
 
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 ## Author
 

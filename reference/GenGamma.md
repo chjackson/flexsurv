@@ -83,11 +83,11 @@ This parameterisation is preferred to the original parameterisation of
 the generalized gamma by Stacy (1962) since it is more numerically
 stable near to \\Q=0\\ (the log-normal distribution), and allows
 \\Q\<=0\\. The original is available in this package as
-[`dgengamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md),
+[`dgengamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md),
 for the sake of completion and compatibility with other software - this
 is implicitly restricted to `Q`\>0 (or `k`\>0 in the original notation).
 The parameters of `dgengamma` and
-[`dgengamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md)
+[`dgengamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md)
 are related as follows.
 
 `dgengamma.orig(x, shape=shape, scale=scale, k=k) = `
@@ -107,8 +107,8 @@ The properties of the generalized gamma and its applications to survival
 analysis are discussed in detail by Cox (2007).
 
 The generalized F distribution
-[`GenF`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md)
-extends the generalized gamma to four parameters.
+[`GenF`](https://chjackson.github.io/flexsurv/reference/GenF.md) extends
+the generalized gamma to four parameters.
 
 ## References
 
@@ -130,8 +130,8 @@ of Mathematical Statistics 33:1187-92
 
 ## See also
 
-[`GenGamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md),
-[`GenF`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md),
+[`GenGamma.orig`](https://chjackson.github.io/flexsurv/reference/GenGamma.orig.md),
+[`GenF`](https://chjackson.github.io/flexsurv/reference/GenF.md),
 [`Lognormal`](https://rdrr.io/r/stats/Lognormal.html),
 [`GammaDist`](https://rdrr.io/r/stats/GammaDist.html),
 [`Weibull`](https://rdrr.io/r/stats/Weibull.html).

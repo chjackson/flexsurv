@@ -41,23 +41,23 @@ plot(
 - x:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
 - newdata:
 
   Data frame containing covariate values to produce fitted values for.
   See
-  [`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md).
+  [`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md).
 
   If there are only factor covariates in the model, then Kaplan-Meier
   (or nonparametric hazard...) curves are plotted for all distinct
   groups, and by default, fitted curves are also plotted for these
   groups. To plot Kaplan-Meier and fitted curves for only a subset of
   groups, use `plot(survfit())` followed by
-  [`lines.flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/lines.flexsurvreg.md).
+  [`lines.flexsurvreg()`](https://chjackson.github.io/flexsurv/reference/lines.flexsurvreg.md).
 
   If there are any continuous covariates, then a single population
   Kaplan-Meier curve is drawn. By default, a single fitted curve is
@@ -68,7 +68,7 @@ plot(
 - X:
 
   Alternative way to supply covariate values, as a model matrix. See
-  [`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md).
+  [`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md).
   `newdata` is an easier way.
 
 - type:
@@ -103,12 +103,12 @@ plot(
 - t:
 
   Vector of times to plot fitted values for, see
-  [`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md).
+  [`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md).
 
 - start:
 
   Left-truncation points, see
-  [`summary.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md).
+  [`summary.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md).
 
 - est:
 
@@ -124,7 +124,7 @@ plot(
 
   Number of simulations controlling accuracy of confidence intervals, as
   used in
-  [`summary`](http://chjackson.github.io/flexsurv-dev/reference/summary.flexsurvreg.md).
+  [`summary`](https://chjackson.github.io/flexsurv/reference/summary.flexsurvreg.md).
   Decrease for greater speed at the expense of accuracy, or set `B=0` to
   turn off calculation of CIs.
 
@@ -203,7 +203,7 @@ not for the hazard estimates.
 
 ## See also
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 
 ## Author
 

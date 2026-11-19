@@ -14,7 +14,7 @@ simfs_bytrans(simfs)
 - simfs:
 
   Output from
-  [`sim.fmsm`](http://chjackson.github.io/flexsurv-dev/reference/sim.fmsm.md)
+  [`sim.fmsm`](https://chjackson.github.io/flexsurv/reference/sim.fmsm.md)
   representing simulated histories from a multi-state model.
 
 ## Value

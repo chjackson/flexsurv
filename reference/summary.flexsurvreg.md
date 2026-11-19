@@ -2,9 +2,9 @@
 
 Return fitted survival, cumulative hazard or hazard at a series of times
 from a fitted
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 or
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
 model.
 
 ## Usage
@@ -36,9 +36,9 @@ summary(
 - object:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
 - newdata:
@@ -208,7 +208,7 @@ contains a matrix with the exact values of contrasts (dummy covariates)
 defining each summary.
 
 The
-[`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md)
+[`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md)
 function can be used to quickly plot these model-based summaries against
 empirical summaries such as Kaplan-Meier curves, to diagnose model fit.
 
@@ -228,8 +228,8 @@ with complicated derivatives." The American Statistician (in press).
 
 ## See also
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 ## Author
 

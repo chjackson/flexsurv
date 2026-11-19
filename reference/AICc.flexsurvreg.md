@@ -23,15 +23,15 @@ AICC(object, cens = TRUE, ...)
 - object:
 
   Fitted model returned by
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   (or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)).
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)).
 
 - cens:
 
   Include censored observations in the sample size term (`n`) used in
   this calculation. See
-  [`BIC.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/BIC.flexsurvreg.md)
+  [`BIC.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/BIC.flexsurvreg.md)
   for a discussion of the issues with defining the sample size.
 
 - ...:
@@ -56,5 +56,5 @@ Springer: New York.
 
 [`BIC`](https://rdrr.io/r/stats/AIC.html),
 [`AIC`](https://rdrr.io/r/stats/AIC.html),
-[`BIC.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/BIC.flexsurvreg.md),
-[`nobs.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/nobs.flexsurvreg.md)
+[`BIC.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/BIC.flexsurvreg.md),
+[`nobs.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/nobs.flexsurvreg.md)

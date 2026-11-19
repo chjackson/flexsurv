@@ -42,7 +42,7 @@ flexsurvspline(
 
   Time-varying covariate effects can be specified using the method
   described in
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   for placing covariates on ancillary parameters. The ancillary
   parameters here are named `gamma1`, ..., `gammar` where `r` is the
   number of knots `k` plus one (the “degrees of freedom” as defined by
@@ -80,7 +80,7 @@ flexsurvspline(
 - rtrunc:
 
   Optional variable giving individual right-truncation times (see
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)).
   Note that these models can suffer from weakly identifiable parameters
   and badly-behaved likelihood functions, and it is advised to compare
   convergence for different initial values by supplying different
@@ -146,15 +146,15 @@ flexsurvspline(
 - ...:
 
   Any other arguments to be passed to or through
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
   for example, `anc`, `inits`, `fixedpars`, `weights`, `subset`,
   `na.action`, and any options to control optimisation. See
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 ## Value
 
 A list of class `"flexsurvreg"` with the same elements as described in
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
 and including extra components describing the spline model. See in
 particular:
 
@@ -185,7 +185,7 @@ particular:
   In the Weibull model, for example, `gamma0,gamma1` are
   `-shape*log(scale), shape` respectively in
   [`dweibull`](https://rdrr.io/r/stats/Weibull.html) or
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   notation, or (`-Intercept/scale`, `1/scale`) in
   [`survreg`](https://rdrr.io/pkg/survival/man/survreg.html) notation.
 
@@ -208,12 +208,12 @@ particular:
 ## Details
 
 This function works as a wrapper around
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 by dynamically constructing a custom distribution using
-[`dsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md),
-[`psurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md)
+[`dsurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md),
+[`psurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md)
 and
-[`unroll.function`](http://chjackson.github.io/flexsurv-dev/reference/unroll.function.md).
+[`unroll.function`](https://chjackson.github.io/flexsurv/reference/unroll.function.md).
 
 In the spline-based survival model of Royston and Parmar (2002), a
 transformation \\g(S(t,z))\\ of the survival function is modelled as a
@@ -280,15 +280,15 @@ doi:10.18637/jss.v070.i08
 
 ## See also
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
 for flexible survival modelling using general parametric distributions.
 
-[`plot.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/plot.flexsurvreg.md)
+[`plot.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/plot.flexsurvreg.md)
 and
-[`lines.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/lines.flexsurvreg.md)
+[`lines.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/lines.flexsurvreg.md)
 to plot fitted survival, hazards and cumulative hazards from models
 fitted by `flexsurvspline` and
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md).
 
 ## Author
 

@@ -14,16 +14,16 @@ nobs(object, cens = TRUE, ...)
 - object:
 
   Output from
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
+  [`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md)
   or
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md),
+  [`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md),
   representing a fitted survival model object.
 
 - cens:
 
   Include censored observations in the number. `TRUE` by default. If
   `FALSE` then the number of observed events is returned. See
-  [`BIC.flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/BIC.flexsurvreg.md)
+  [`BIC.flexsurvreg`](https://chjackson.github.io/flexsurv/reference/BIC.flexsurvreg.md)
   for a discussion of the issues with defining the sample size for
   censored data.
 
@@ -34,8 +34,8 @@ nobs(object, cens = TRUE, ...)
 ## Value
 
 This returns the `mod$N` component of the fitted model object `mod`. See
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md)
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md)
 for full documentation of all components.
 
 ## Details
@@ -49,8 +49,8 @@ returns the sum of the weights.
 
 ## See also
 
-[`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
-[`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
+[`flexsurvreg`](https://chjackson.github.io/flexsurv/reference/flexsurvreg.md),
+[`flexsurvspline`](https://chjackson.github.io/flexsurv/reference/flexsurvspline.md).
 
 ## Author
 

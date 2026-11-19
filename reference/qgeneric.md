@@ -30,14 +30,14 @@ qgeneric(pdist, p, matargs = NULL, scalarargs = NULL, ...)
   parameters of the distribution. Empty by default. When vectorised,
   these will become matrices. This is used for the arguments `gamma` and
   `knots` in
-  [`qsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md).
+  [`qsurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md).
 
 - scalarargs:
 
   Character vector naming scalar arguments of the distribution function
   that cannot be vectorised. This is used for the arguments `scale` and
   `timescale` in
-  [`qsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/Survspline.md).
+  [`qsurvspline`](https://chjackson.github.io/flexsurv/reference/Survspline.md).
 
 - ...:
 

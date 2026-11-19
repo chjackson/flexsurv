@@ -86,18 +86,18 @@ Define \\\delta = (Q^2 + 2P)^{1/2}\\, and \\w = (\log(x) - \mu)\delta
 \frac{\delta (s_1/s_2)^{s_1} e^{s_1 w}}{\sigma x (1 + s_1 e^w/s_2) ^
 {(s_1 + s_2)} B(s_1, s_2)} \$\$ The original parameterisation is
 available in this package as
-[`dgenf.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md),
+[`dgenf.orig`](https://chjackson.github.io/flexsurv/reference/GenF.orig.md),
 for the sake of completion / compatibility. With the above definitions,
 
 `dgenf(x, mu=mu, sigma=sigma, Q=Q, P=P) = dgenf.orig(x, mu=mu, sigma=sigma/delta, s1=s1, s2=s2)`
 
 The generalized F distribution with `P=0` is equivalent to the
 generalized gamma distribution
-[`dgengamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),
+[`dgengamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md),
 so that `dgenf(x, mu, sigma, Q, P=0)` equals
 `dgengamma(x, mu, sigma, Q)`. The generalized gamma reduces further to
 several common distributions, as described in the
-[`GenGamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+[`GenGamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md)
 help page.
 
 The generalized F distribution includes the log-logistic distribution
@@ -133,8 +133,8 @@ improve prediction. International Journal of Biostatistics 6(1):Article
 
 ## See also
 
-[`GenF.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md),
-[`GenGamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md)
+[`GenF.orig`](https://chjackson.github.io/flexsurv/reference/GenF.orig.md),
+[`GenGamma`](https://chjackson.github.io/flexsurv/reference/GenGamma.md)
 
 ## Author
 
