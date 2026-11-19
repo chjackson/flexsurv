@@ -357,6 +357,8 @@ devtools::install_github('chjackson/flexsurv-dev')
   [`rmst_weibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
   [`mean_weibullPH()`](http://chjackson.github.io/flexsurv-dev/reference/means.md)
   : Mean and restricted mean survival functions
+- [`custom_pexp()`](http://chjackson.github.io/flexsurv-dev/reference/custom_pexp.md)
+  : Piecewise exponential distribution for use with flexsurvreg()
 - [`qgeneric()`](http://chjackson.github.io/flexsurv-dev/reference/qgeneric.md)
   : Generic function to find quantiles of a distribution
 

@@ -4,8 +4,10 @@
 
 ### New features
 
-- Utility `custom_pexp()` to enable a piecewise-constant hazard model
-  with any time cuts to be used as a custom distribution in
+- Utility
+  [`custom_pexp()`](http://chjackson.github.io/flexsurv-dev/reference/custom_pexp.md)
+  to enable a piecewise-constant hazard model with any time cuts to be
+  used as a custom distribution in
   [`flexsurvreg()`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
 
 - Added `t0` arguments to

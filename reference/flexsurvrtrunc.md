@@ -70,95 +70,9 @@ flexsurvrtrunc(
 
 - dist:
 
-  Typically, one of the strings in the first column of the following
-  table, identifying a built-in distribution. This table also identifies
-  the location parameters, and whether covariates on these parameters
-  represent a proportional hazards (PH) or accelerated failure time
-  (AFT) model. In an accelerated failure time model, the covariate
-  speeds up or slows down the passage of time. The relation of the
-  reported coefficient to the "time acceleration factor" or hazard ratio
-  is described for each distribution in the "Distributions reference"
-  vignette. Note the interpretation of the sign of the coefficient may
-  be different for different distributions. The table below indicates
-  the interpretation of a higher value for the coefficient in terms of
-  the hazard or risk of the event: "higher" meaning higher risk, and
-  "lower" meaning lower risk.
-
-  |                   |                              |         |     |        |
-  |-------------------|------------------------------|---------|-----|--------|
-  | `"gengamma"`      | Generalized gamma (stable)   | mu      | AFT | lower  |
-  | `"gengamma.orig"` | Generalized gamma (original) | scale   | AFT | lower  |
-  | `"genf"`          | Generalized F (stable)       | mu      | AFT | lower  |
-  | `"genf.orig"`     | Generalized F (original)     | mu      | AFT | lower  |
-  | `"weibull"`       | Weibull                      | scale   | AFT | lower  |
-  | `"weibullPH"`     | Weibull                      | scale   | PH  | higher |
-  | `"gamma"`         | Gamma                        | rate    | AFT | higher |
-  | `"exp"`           | Exponential                  | rate    | PH  | higher |
-  | `"llogis"`        | Log-logistic                 | scale   | AFT | lower  |
-  | `"lnorm"`         | Log-normal                   | meanlog | AFT | lower  |
-  | `"gompertz"`      | Gompertz                     | rate    | PH  | higher |
-
-  `"exponential"` and `"lognormal"` can be used as aliases for `"exp"`
-  and `"lnorm"`, for compatibility with
-  [`survreg`](https://rdrr.io/pkg/survival/man/survreg.html).
-
-  Alternatively, `dist` can be a list specifying a custom distribution.
-  See section “Custom distributions” below for how to construct this
-  list.
-
-  Very flexible spline-based distributions can also be fitted with
-  [`flexsurvspline`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvspline.md).
-
-  The parameterisations of the built-in distributions used here are the
-  same as in their built-in distribution functions:
-  [`dgengamma`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),
-  [`dgengamma.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.orig.md),
-  [`dgenf`](http://chjackson.github.io/flexsurv-dev/reference/GenF.md),
-  [`dgenf.orig`](http://chjackson.github.io/flexsurv-dev/reference/GenF.orig.md),
-  [`dweibull`](https://rdrr.io/r/stats/Weibull.html),
-  [`dgamma`](https://rdrr.io/r/stats/GammaDist.html),
-  [`dexp`](https://rdrr.io/r/stats/Exponential.html),
-  [`dlnorm`](https://ehar.se/r/eha/reference/Lognormal.html),
-  [`dgompertz`](http://chjackson.github.io/flexsurv-dev/reference/Gompertz.md),
-  respectively. The functions in base R are used where available,
-  otherwise, they are provided in this package.
-
-  A package vignette "Distributions reference" lists the survivor
-  functions and covariate effect parameterisations used by each built-in
-  distribution.
-
-  For the Weibull, exponential and log-normal distributions,
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)
-  simply works by calling
-  [`survreg`](https://rdrr.io/pkg/survival/man/survreg.html) to obtain
-  the maximum likelihood estimates, then calling
-  [`optim`](https://rdrr.io/r/stats/optim.html) to double-check
-  convergence and obtain the covariance matrix for
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md)'s
-  preferred parameterisation.
-
-  The Weibull parameterisation is different from that in
-  [`survreg`](https://rdrr.io/pkg/survival/man/survreg.html), instead it
-  is consistent with [`dweibull`](https://rdrr.io/r/stats/Weibull.html).
-  The `"scale"` reported by
-  [`survreg`](https://rdrr.io/pkg/survival/man/survreg.html) is
-  equivalent to `1/shape` as defined by
-  [`dweibull`](https://rdrr.io/r/stats/Weibull.html) and hence
+  Parametric distribution family, see
   [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
-  The first coefficient `(Intercept)` reported by
-  [`survreg`](https://rdrr.io/pkg/survival/man/survreg.html) is
-  equivalent to `log(scale)` in
-  [`dweibull`](https://rdrr.io/r/stats/Weibull.html) and
-  [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md).
-
-  Similarly in the exponential distribution, the rate, rather than the
-  mean, is modelled on covariates.
-
-  The object `flexsurv.dists` lists the names of the built-in
-  distributions, their parameters, location parameter, functions used to
-  transform the parameter ranges to and from the real line, and the
-  functions used to generate initial values of each parameter for
-  estimation.
+  Note that covariates are not supported in `flexsurvrtrunc`.
 
 - theta:
 
@@ -221,7 +135,7 @@ flexsurvrtrunc(
 
 ## Details
 
-Covariates are not currently supported.
+Covariates are not supported.
 
 Note that
 [`flexsurvreg`](http://chjackson.github.io/flexsurv-dev/reference/flexsurvreg.md),
