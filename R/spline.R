@@ -533,7 +533,9 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
         logH <- log((1 - surv)/surv)
     else if (aux$scale=="normal")
         logH <- qnorm(1 - surv)
-    x <- tsfn(Y[inc,"time"], aux$timescale)
+    ## For counting-process data the Cox curve and knots use exit times.
+    time_col <- if (attr(Y, "type") == "counting") "stop" else "time"
+    x <- tsfn(Y[inc,time_col], aux$timescale)
     b <- if (!is.null(aux$knots)) basis(aux$knots, x, spline=aux$spline) else cbind(1, x)
     
     ## Regress empirical logH on covariates and spline basis to obtain

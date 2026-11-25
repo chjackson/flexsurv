@@ -155,6 +155,17 @@ test_that("Spline models with left-truncation",{
 #    if(interactive()) lines(spl, col="blue") # truncated model fits much better
 })
 
+test_that("spline initialization uses attained age with delayed entry", {
+    dat <- transform(survival::pbc, start=age, stop=age + time/365.25)
+    form <- Surv(start, stop, status == 2) ~ sex
+    initial <- flexsurvspline(form, data=dat, k=4, fixedpars=TRUE)
+    expect_true(is.finite(initial$loglik))
+    fit <- flexsurvspline(form, data=dat, k=4)
+    reference <- flexsurvspline(form, data=dat, k=0)
+    expect_equal(fit$opt$convergence, 0L)
+    expect_gt(fit$loglik, reference$loglik)
+})
+
 test_that("Spline models with weighting",{
     wt <- rep(1, nrow(bc)); wt[1:30] <- 2
     spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc, k=0, weights=wt)
