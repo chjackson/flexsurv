@@ -166,30 +166,76 @@ DLSweibullPH <- function(t, shape, scale){
 }
 
 ## Gompertz (note this is derivative wrt shape and log rate)
+## For u = shape * t, the derivatives of log S(t) = -rate * t * (exp(u) - 1) / u
+## involve g0(u) = (exp(u) - 1) / u, g1(u) = (u * exp(u) - exp(u) + 1) / u^2,
+## and g2(u) = ((u^2 - 2 * u + 2) * exp(u) - 2) / u^3.
+## Evaluating via Maclaurin series for |u| < 0.25 avoids 0/0 at shape = 0 and
+## catastrophic cancellation for small |shape * t|.
+gompertz_g0 <- function(u) {
+    res <- numeric(length(u))
+    small <- abs(u) < 0.25
+    if (any(small)) {
+        us <- u[small]
+        val <- 1
+        for (k in 16:1) val <- 1 + us * val / (k + 1)
+        res[small] <- val
+    }
+    if (any(!small)) {
+        ul <- u[!small]
+        res[!small] <- expm1(ul) / ul
+    }
+    res
+}
+
+gompertz_g1 <- function(u) {
+    res <- numeric(length(u))
+    small <- abs(u) < 0.25
+    if (any(small)) {
+        us <- u[small]
+        val <- rep(0, length(us))
+        for (k in 16:0) val <- (k + 1) / factorial(k + 2) + us * val
+        res[small] <- val
+    }
+    if (any(!small)) {
+        ul <- u[!small]
+        eu <- expm1(ul)
+        res[!small] <- (ul * (eu + 1) - eu) / (ul * ul)
+    }
+    res
+}
+
+gompertz_g2 <- function(u) {
+    res <- numeric(length(u))
+    small <- abs(u) < 0.25
+    if (any(small)) {
+        us <- u[small]
+        val <- rep(0, length(us))
+        for (k in 16:0) val <- (k + 1) * (k + 2) / factorial(k + 3) + us * val
+        res[small] <- val
+    }
+    if (any(!small)) {
+        ul <- u[!small]
+        eu <- expm1(ul)
+        res[!small] <- ((ul * ul - 2 * ul + 2) * eu + ul * (ul - 2)) / (ul * ul * ul)
+    }
+    res
+}
 
 DLdgompertz <- function(t, shape, rate){
     res <- matrix(nrow=length(t), ncol=2)
     colnames(res) <- c("shape","rate")
-    res[shape==0,"shape"] <- 0
-    res[shape==0,"rate"] <- 1 - rate[shape==0] * t[shape==0]
-    sn0 <- (shape!=0)
-    t <- t[sn0]; rate <- rate[sn0]; shape <- shape[sn0]
-    est <- exp(shape*t)
-    res[sn0,"shape"] <- t + -rate/shape*(1/shape*(1 - est) + t*est)
-    res[sn0,"rate"] <- 1 + rate/shape*(1 - est)
+    u <- shape * t
+    res[,"shape"] <- t - rate * t * t * gompertz_g1(u)
+    res[,"rate"] <- 1 - rate * t * gompertz_g0(u)
     res
 }
 
 DLSgompertz <- function(t, shape, rate){
     res <- matrix(nrow=length(t), ncol=2)
     colnames(res) <- c("shape","rate")
-    res[shape==0,"shape"] <- 0
-    res[shape==0,"rate"] <- - rate[shape==0] * t[shape==0]
-    sn0 <- (shape!=0)
-    t <- t[sn0]; rate <- rate[sn0]; shape <- shape[sn0]
-    est <- exp(shape*t)
-    res[sn0,"shape"] <- -rate/shape*(1/shape*(1 - est) + t*est)
-    res[sn0,"rate"] <- rate/shape*(1 - est)
+    u <- shape * t
+    res[,"shape"] <- -rate * t * t * gompertz_g1(u)
+    res[,"rate"] <- -rate * t * gompertz_g0(u)
     res
 }
 

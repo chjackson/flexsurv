@@ -77,16 +77,10 @@ D2Ldgompertz <- function(t, shape, rate){
   res <- array(dim=c(length(t), 2, 2))
   parnames <- c("shape","rate")
   dimnames(res) <- list(NULL, parnames, parnames)
-  res[shape==0,"shape","shape"] <- 0
-  res[shape==0,"rate","rate"] <- - rate[shape==0]*t[shape==0]
-  res[shape==0,"shape","rate"] <- res[shape==0,"rate","shape"] <-  0
-  est <- exp(shape*t)
-  sn0 <- (shape!=0)
-  t <- t[sn0]; rate <- rate[sn0]; shape <- shape[sn0]
-  res[sn0,"shape","shape"] <-  2*rate/shape^3*(1 - est) + 2*rate/shape^2*t*est - rate/shape*t^2*est
-  res[sn0,"rate","rate"] <- rate/shape*(1 - est)
-  res[sn0,"shape","rate"] <- res[sn0,"rate","shape"] <-
-    -rate/shape*(1/shape*(1 - est) + t*est)
+  u <- shape * t
+  res[,"shape","shape"] <- -rate * t^3 * gompertz_g2(u)
+  res[,"rate","rate"] <- -rate * t * gompertz_g0(u)
+  res[,"shape","rate"] <- res[,"rate","shape"] <- -rate * t^2 * gompertz_g1(u)
   res
 }
 
@@ -94,16 +88,10 @@ D2LSgompertz <- function(t, shape, rate){
   res <- array(dim=c(length(t), 2, 2))
   parnames <- c("shape","rate")
   dimnames(res) <- list(NULL, parnames, parnames)
-  res[shape==0,"shape","shape"] <- 0
-  res[shape==0,"rate","rate"] <- -rate[shape==0]*t[shape==0]
-  res[shape==0,"shape","rate"] <- res[shape==0,"rate","shape"] <-  0
-  est <- exp(shape*t)
-  sn0 <- (shape!=0)
-  t <- t[sn0]; rate <- rate[sn0]; shape <- shape[sn0]
-  res[sn0,"shape","shape"] <- 2*rate/shape^3*(1 - est) + 2*rate/shape^2*t*est - rate/shape*t^2*est
-  res[sn0,"rate","rate"] <- rate/shape*(1 - est)
-  res[sn0,"shape","rate"] <- res[sn0,"rate","shape"] <- 
-    -rate/shape*(1/shape*(1 - est) + t*est)
+  u <- shape * t
+  res[,"shape","shape"] <- -rate * t^3 * gompertz_g2(u)
+  res[,"rate","rate"] <- -rate * t * gompertz_g0(u)
+  res[,"shape","rate"] <- res[,"rate","shape"] <- -rate * t^2 * gompertz_g1(u)
   res
 }
 
