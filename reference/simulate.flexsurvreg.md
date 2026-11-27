@@ -100,11 +100,11 @@ simulate(fit, seed=1002, newdata=nd, start=500)
 #> 1  993.9562       1
 #> 2 2750.1742       1
 simulate(fit2, nsim=3, seed=1002, newdata=nd)
-#>     time_1   time_2    time_3 event_1 event_2 event_3
-#> 1 457.8966 3564.307  943.0164       1       1       1
-#> 2 419.5862  731.334 9729.0033       1       1       1
+#>     time_1    time_2    time_3 event_1 event_2 event_3
+#> 1 457.6902 3572.6408  940.9247       1       1       1
+#> 2 419.6671  730.8466 9809.1225       1       1       1
 simulate(fit2, nsim=3, seed=1002, newdata=nd, start=c(500,1000))
 #>     time_1   time_2    time_3 event_1 event_2 event_3
-#> 1 2081.447 9364.557  4008.034       1       1       1
-#> 2 2872.484 5393.244 24816.827       1       1       1
+#> 1 2086.490 9427.872  4025.076       1       1       1
+#> 2 2883.272 5425.512 25098.581       1       1       1
 ```
