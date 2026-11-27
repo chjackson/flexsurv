@@ -501,14 +501,17 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
     Y[,"status"] <- ifelse(Y[,"status"]==1, 1, 0)
     X <- mml[[1]][,-1,drop=FALSE]
    
-    ## Use only uncensored observations, unless < 5 of those, in which
-    ## case use all (coxph doesn't work if all censored). Impute as
-    ## alternative?
+    ## Fit the Cox model to all observations, so that the risk sets are
+    ## correct (in particular with left-truncated / counting-process data).
+    ## Then regress the empirical log cumulative hazard on the spline basis
+    ## using only the uncensored observations, unless < 5 of those, in
+    ## which case use all.
+    ok <- Y[,"start"] < Y[,"stop"]
     dead <- Y[,"status"]==1
     inc <- if (sum(dead) >= 5) dead else rep(TRUE, nrow(Y))
-    inc <- inc & Y[,"start"] < Y[,"stop"]
-   
-    ## Estimate empirical cumulative hazard for each observation 
+    inc <- inc & ok
+
+    ## Estimate empirical cumulative hazard for each observation
     formdat <- as.data.frame(cbind(Y, X, weights=model.extract(mf, "weights")))
     names(formdat)[1:ncol(Y)] <- colnames(Y)
     form <- c("Surv(start, stop, status) ~")
@@ -517,23 +520,27 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
         form <- paste(form, paste(paste0("X", 1:ncol(X)), collapse=" + "))
     }
     else form <- paste(form, "1")
-    formdat <- formdat[inc,]
-    cox <- coxph(as.formula(form), weights=weights, data=formdat)
-    
+    cox <- coxph(as.formula(form), weights=weights, data=formdat[ok,])
+
     if (ncol(X)>0){
         newdata <- as.data.frame(matrix(rep(0, ncol(X)), nrow=1))
         names(newdata) <- paste0("X", 1:ncol(X))
         surv <- survfit(cox, newdata=newdata)
-    } else surv <- survfit(cox)
+        beta <- coef(cox)
+        beta[is.na(beta)] <- 0
+        lp <- as.numeric(X[inc,,drop=FALSE] %*% beta)
+    } else {
+        surv <- survfit(cox)
+        lp <- 0
+    }
     surv <- surv$surv[match(Y[inc,"stop"], surv$time)]
-    surv <- surv^exp(cox$linear.predictors)
+    surv <- surv^exp(lp)
     if (aux$scale=="hazard")
         logH <- log(-log(surv))
     else if (aux$scale=="odds")
         logH <- log((1 - surv)/surv)
     else if (aux$scale=="normal")
         logH <- qnorm(1 - surv)
-    ## For counting-process data the Cox curve and knots use exit times.
     time_col <- if (attr(Y, "type") == "counting") "stop" else "time"
     x <- tsfn(Y[inc,time_col], aux$timescale)
     b <- if (!is.null(aux$knots)) basis(aux$knots, x, spline=aux$spline) else cbind(1, x)
@@ -543,10 +550,15 @@ flexsurv.splineinits <- function(t=NULL, mf, mml, aux)
     ## Constrain initial spline function to be increasing, using
     ## quadratic programming
     Xq <- cbind(b, X[inc,,drop=FALSE])
+    ## Points at which the monotonicity constraint is imposed: the
+    ## observed x, with the smallest and largest of those that are used
+    ## in the regression pushed slightly outwards
     kx <- x
-    kr <- diff(range(x))
-    kx[1] <- x[1] - 0.01*kr
-    kx[length(kx)] <- x[length(kx)] + 0.01*kr
+    xfin <- ifelse(is.finite(logH), x, NA)
+    imin <- which.min(xfin); imax <- which.max(xfin)
+    kr <- x[imax] - x[imin]
+    kx[imin] <- x[imin] - 0.01*kr
+    kx[imax] <- x[imax] + 0.01*kr
     db <- if (!is.null(aux$knots)) dbasis(aux$knots, kx, spline=aux$spline) else cbind(0, kx)
     dXq <- cbind(db, matrix(0, nrow=nrow(db), ncol=ncol(X)))
     nints <- length(mml)-1

@@ -146,7 +146,7 @@ test_that("Spline models with time-varying covariate effects",{
 test_that("Spline models with left-truncation",{
     bc2 <- bc[bc$recyrs>2,]
     (spl <- flexsurvspline(Surv(recyrs, censrec) ~ 1, data=bc2, k=0, fixedpars=TRUE))
-    expect_equal(spl$loglik, -951.4567686517325, tol=1e-06)
+    expect_equal(spl$loglik, -441.5324797210262, tol=1e-06)
     expect_equal(spl$loglik, sum(spl$logliki), tol=1e-06)
     (spl <- flexsurvspline(Surv(rep(0, nrow(bc2)), recyrs, censrec) ~ 1, data=bc2, k=0))
     expect_equal(spl$loglik, -432.9048860461514, tol=1e-06)
